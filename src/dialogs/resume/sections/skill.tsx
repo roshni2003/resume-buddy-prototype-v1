@@ -212,7 +212,6 @@ function SkillForm() {
 			</div>
 
 			<div className={cn("flex items-end", isNameInvalid && "items-center")}>
-				...
 				<FormField
 					control={form.control}
 					name={"icon"}
