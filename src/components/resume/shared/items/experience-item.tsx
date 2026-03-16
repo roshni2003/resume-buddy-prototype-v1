@@ -88,7 +88,7 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 		) {
 			return (
 				<div
-					className="section-item-description"
+					className="section-item-description tiptap-content"
 					// biome-ignore lint/security/noDangerouslySetInnerHtml: This content is managed by Tiptap and sanitized before display
 					dangerouslySetInnerHTML={{ __html: text }}
 				/>
@@ -172,7 +172,7 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 				suppressContentEditableWarning
 				onInput={handleDescriptionChange}
 				onClick={handleContentEditableLinkClick}
-				className="cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+				className="tiptap-content cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
 			>
 				{renderDescription()}
 			</div>

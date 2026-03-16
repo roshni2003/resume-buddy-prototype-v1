@@ -86,7 +86,7 @@ export function VolunteerItem({ className, ...item }: VolunteerItemProps) {
 				onBlur={handleDescriptionChange}
 				onClick={handleContentEditableLinkClick}
 				className={cn(
-					"section-item-description volunteer-item-description cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
+					"section-item-description volunteer-item-description tiptap-content cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
 					!stripHtml(item.description) && "hidden",
 				)}
 			/>
