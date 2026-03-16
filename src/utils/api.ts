@@ -35,6 +35,7 @@ export interface ResumeSummary {
 	tags: string[];
 	isPublic: boolean;
 	isLocked: boolean;
+	hasPassword?: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 	data: ResumeData;
@@ -57,9 +58,19 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => ({
 // ----- API -----
 
 export const api = {
-	// 1. GET: /resumes/user?sort=name
-	fetchResumes: async (sort: string = "name") => {
-		const resumes = await request<ResumeSummary[]>(`/resumes/user?sort=${sort}`);
+	// 1. GET: /resumes/user
+	fetchResumes: async (options: { tags?: string[]; sort?: string } = {}) => {
+		const searchParams = new URLSearchParams();
+		if (options.tags?.length) {
+			for (const tag of options.tags) {
+				searchParams.append("tags", tag);
+			}
+		}
+		if (options.sort) {
+			searchParams.append("sort", options.sort);
+		}
+		const queryString = searchParams.toString();
+		const resumes = await request<ResumeSummary[]>(`/resumes/user${queryString ? `?${queryString}` : ""}`);
 		return resumes.map(mapResume);
 	},
 

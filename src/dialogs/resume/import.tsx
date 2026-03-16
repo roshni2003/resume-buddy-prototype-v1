@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { DownloadSimpleIcon, FileIcon, UploadSimpleIcon } from "@phosphor-icons/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -74,18 +74,14 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 	const isAIEnabled = !!apiKey && !!model;
 
 	const closeDialog = useDialogStore((state) => state.closeDialog);
-
 	const prevTypeRef = useRef<string>("");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const queryClient = useQueryClient();
 
 	const { mutateAsync: createResume } = useMutation({
-		mutationFn: (data: { name: string; slug: string; data?: ResumeData }) => api.createResume(data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["resumes"] });
-		},
+		mutationFn: (data: Parameters<typeof api.createResume>[0]) => api.createResume(data),
 	});
+	// orpc still needed for ai parsing
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),

@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ColorPicker } from "@/components/input/color-picker";
-import { useResumeStore } from "@/components/resume/store/resume";
+import { type ResumeStore, useResumeStore } from "@/components/resume/store/resume";
 import { FontFamilyCombobox, FontWeightCombobox, getNextWeight } from "@/components/typography/combobox";
 import {
 	AlertDialog,
@@ -51,7 +51,7 @@ export function BuilderTopTray() {
 	const openDialog = useDialogStore((state) => state.openDialog);
 	const params = useParams({ from: "/builder/$resumeId" });
 	const { data: resume } = useQuery({
-		queryKey: ["resume", params.resumeId],
+		queryKey: ["resumes", params.resumeId],
 		queryFn: () => api.fetchResume(params.resumeId),
 	});
 
@@ -61,13 +61,13 @@ export function BuilderTopTray() {
 
 	const { mutateAsync: runFinalReview } = useMutation(orpc.ai.finalReview.mutationOptions());
 
-	const isReviewing = useResumeStore((state) => state.isReviewing);
-	const setReviewing = useResumeStore((state) => state.setReviewing);
-	const setReviewResult = useResumeStore((state) => state.setReviewResult);
-	const setShowReviewDrawer = useResumeStore((state) => state.setShowReviewDrawer);
-	const reviewResult = useResumeStore((state) => state.reviewResult);
-	const reviewAttempts = useResumeStore((state) => state.reviewAttempts);
-	const incrementReviewAttempts = useResumeStore((state) => state.incrementReviewAttempts);
+	const setShowReviewDrawer = useResumeStore((state: ResumeStore) => state.setShowReviewDrawer);
+	const setReviewing = useResumeStore((state: ResumeStore) => state.setReviewing);
+	const setReviewResult = useResumeStore((state: ResumeStore) => state.setReviewResult);
+	const isReviewing = useResumeStore((state: ResumeStore) => state.isReviewing);
+	const reviewResult = useResumeStore((state: ResumeStore) => state.reviewResult);
+	const reviewAttempts = useResumeStore((state: ResumeStore) => state.reviewAttempts);
+	const incrementReviewAttempts = useResumeStore((state: ResumeStore) => state.incrementReviewAttempts);
 
 	const [reviewStartTime, setReviewStartTime] = useState<number>(0);
 	const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -391,8 +391,8 @@ export function BuilderTopTray() {
 }
 
 function ColorsPopoverContent() {
-	const colors = useResumeStore((state) => state.resume.data.metadata.design.colors);
-	const updateResumeData = useResumeStore((state) => state.updateResumeData);
+	const colors = useResumeStore((state: ResumeStore) => state.resume!.data.metadata.design.colors);
+	const updateResumeData = useResumeStore((state: ResumeStore) => state.updateResumeData);
 
 	const setColor = (key: "primary" | "text" | "background", value: string) => {
 		updateResumeData((draft) => {
@@ -448,8 +448,8 @@ function ColorsPopoverContent() {
 }
 
 function TypographyPopoverContent() {
-	const typography = useResumeStore((state) => state.resume.data.metadata.typography);
-	const updateResumeData = useResumeStore((state) => state.updateResumeData);
+	const typography = useResumeStore((state: ResumeStore) => state.resume!.data.metadata.typography);
+	const updateResumeData = useResumeStore((state: ResumeStore) => state.updateResumeData);
 
 	const updateBody = (data: Partial<typeof typography.body>) => {
 		updateResumeData((draft) => {
@@ -483,14 +483,15 @@ function TypographyPopoverContent() {
 						<Trans>Font Weight</Trans>
 					</p>
 					<FontWeightCombobox
-						buttonProps={{ className: "w-full" }}
-						fontFamily={typography.body.fontFamily}
-						value={typography.body.fontWeights}
-						onValueChange={(value: string[]) =>
-							updateBody({
-								fontWeights: value as ("100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900")[],
-							})
-						}
+						variant="ghost"
+						value={useResumeStore((state: ResumeStore) => state.resume?.data.metadata.typography.font.family)}
+						weight={useResumeStore((state: ResumeStore) => state.resume?.data.metadata.typography.font.weight)}
+						onValueChange={(weight) => {
+							useResumeStore.setState((state: any) => {
+								if (!state.resume) return;
+								state.resume.data.metadata.typography.font.weight = weight;
+							});
+						}}
 					/>
 				</div>
 			</div>
@@ -511,6 +512,15 @@ function TypographyPopoverContent() {
 								const parsed = Number(e.target.value);
 								if (Number.isNaN(parsed)) return;
 								updateBody({ fontSize: parsed });
+							}}
+						/>
+						<ColorPicker
+							value={useResumeStore((state: ResumeStore) => state.resume?.data.metadata.typography.font.color)}
+							onValueChange={(color) => {
+								useResumeStore.setState((state: any) => {
+									if (!state.resume) return;
+									state.resume.data.metadata.typography.font.color = color;
+								});
 							}}
 						/>
 						<InputGroupAddon align="inline-end">

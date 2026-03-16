@@ -6,12 +6,13 @@ import { current } from "immer";
 import { toast } from "sonner";
 import type { TemporalState } from "zundo";
 import { temporal } from "zundo";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { create } from "zustand/react";
 import { useStoreWithEqualityFn } from "zustand/traditional";
-import { orpc, type RouterOutput } from "@/integrations/orpc/client";
+import type { RouterOutput } from "@/integrations/orpc/client";
 import type { ResumeData } from "@/schema/resume/data";
+import { api } from "@/utils/api";
 
 type Resume = Pick<RouterOutput["resume"]["getByIdForPrinter"], "id" | "name" | "slug" | "tags" | "data" | "isLocked">;
 
@@ -60,14 +61,11 @@ type ResumeStoreActions = {
 
 type ResumeStore = ResumeStoreState & ResumeStoreActions;
 
-const controller = new AbortController();
-const signal = controller.signal;
-
 const _syncResume = (resume: Resume) => {
-	orpc.resume.update.call({ id: resume.id, data: resume.data }, { signal });
+	api.updateResume(resume.id, { data: resume.data });
 };
 
-const syncResume = debounce(_syncResume, 500, { signal });
+const syncResume = debounce(_syncResume, 500);
 
 let errorToastId: string | number | undefined;
 

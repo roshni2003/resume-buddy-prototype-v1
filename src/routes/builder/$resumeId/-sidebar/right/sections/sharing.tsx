@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ORPCError } from "@orpc/client";
 import { ClipboardIcon, LockSimpleIcon, LockSimpleOpenIcon } from "@phosphor-icons/react";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -23,18 +23,31 @@ export function SharingSectionBuilder() {
 	const confirm = useConfirm();
 	const [_, copyToClipboard] = useCopyToClipboard();
 	const { data: session } = authClient.useSession();
+	const queryClient = useQueryClient();
 	const params = useParams({ from: "/builder/$resumeId" });
 
-	const queryClient = useQueryClient();
 	const { mutateAsync: updateResume } = useMutation({
-		mutationFn: ({ id, isPublic }: { id: string; isPublic: boolean }) => api.updateResume(id, { isPublic }),
+		mutationFn: ({ id, ...data }: { id: string; isPublic: boolean }) => api.updateResume(id, data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["resumes"] });
+			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
 		},
 	});
-	const { mutateAsync: setPassword } = useMutation(orpc.resume.setPassword.mutationOptions());
-	const { mutateAsync: removePassword } = useMutation(orpc.resume.removePassword.mutationOptions());
-	const { data: resume } = useSuspenseQuery(orpc.resume.getById.queryOptions({ input: { id: params.resumeId } }));
+	const { mutateAsync: setPassword } = useMutation({
+		mutationFn: (args: { id: string; password: string }) => orpc.resume.setPassword.call(args),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
+		},
+	});
+	const { mutateAsync: removePassword } = useMutation({
+		mutationFn: (args: { id: string }) => orpc.resume.removePassword.call(args),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
+		},
+	});
+	const { data: resume } = useSuspenseQuery({
+		queryKey: ["resumes", params.resumeId],
+		queryFn: () => api.fetchResume(params.resumeId),
+	});
 
 	const publicUrl = useMemo(() => {
 		if (!session) return "";

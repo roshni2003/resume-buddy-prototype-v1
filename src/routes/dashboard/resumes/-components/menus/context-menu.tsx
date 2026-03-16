@@ -20,18 +20,17 @@ import {
 } from "@/components/ui/context-menu";
 import { useDialogStore } from "@/dialogs/store";
 import { useConfirm } from "@/hooks/use-confirm";
-import type { RouterOutput } from "@/integrations/orpc/client";
+import type { ResumeSummary } from "@/utils/api";
 import { api } from "@/utils/api";
 
 type Props = {
-	resume: RouterOutput["resume"]["list"][number];
+	resume: ResumeSummary;
 	children: React.ReactNode;
 };
 
 export function ResumeContextMenu({ resume, children }: Props) {
 	const confirm = useConfirm();
 	const { openDialog } = useDialogStore();
-
 	const queryClient = useQueryClient();
 	const { mutate: deleteResume } = useMutation({
 		mutationFn: (id: string) => api.deleteResume(id),
@@ -40,7 +39,7 @@ export function ResumeContextMenu({ resume, children }: Props) {
 		},
 	});
 	const { mutate: setLockedResume } = useMutation({
-		mutationFn: ({ id, isLocked }: { id: string; isLocked: boolean }) => api.updateResume(id, { isLocked }),
+		mutationFn: ({ id, ...data }: { id: string; isLocked: boolean }) => api.updateResume(id, data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["resumes"] });
 		},

@@ -35,7 +35,7 @@ export const Route = createFileRoute("/builder/$resumeId")({
 		const [layout, resume] = await Promise.all([
 			getBuilderLayoutServerFn(),
 			context.queryClient.ensureQueryData({
-				queryKey: ["resume", params.resumeId],
+				queryKey: ["resumes", params.resumeId],
 				queryFn: () => api.fetchResume(params.resumeId),
 			}),
 		]);
@@ -52,7 +52,7 @@ function RouteComponent() {
 
 	const { resumeId } = Route.useParams();
 	const { data: resume } = useSuspenseQuery({
-		queryKey: ["resume", resumeId],
+		queryKey: ["resumes", resumeId],
 		queryFn: () => api.fetchResume(resumeId),
 	});
 

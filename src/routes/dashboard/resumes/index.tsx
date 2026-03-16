@@ -38,24 +38,24 @@ function RouteComponent() {
 	const { openDialog } = useDialogStore();
 
 	const { data: resumes } = useQuery({
-		queryKey: ["resumes", sort],
-		queryFn: () => api.fetchResumes(sort),
+		queryKey: ["resumes", { tags, sort }],
+		queryFn: () => api.fetchResumes({ tags, sort }),
 	});
 
 	const { data: statistics } = useQuery({
 		queryKey: ["statistics"],
-		queryFn: () => api.fetchStatistics(),
+		queryFn: api.fetchStatistics,
 	});
-
-	const filteredResumes = useMemo(() => {
-		if (!resumes) return [];
-		if (!tags || tags.length === 0) return resumes;
-		return resumes.filter((r) => tags.every((tag) => r.tags.includes(tag)));
-	}, [resumes, tags]);
 
 	const allTags = useMemo(() => {
 		if (!resumes) return [];
-		return [...new Set(resumes.flatMap((r) => r.tags))];
+		const tags = new Set<string>();
+		for (const resume of resumes) {
+			for (const tag of resume.tags) {
+				tags.add(tag);
+			}
+		}
+		return Array.from(tags);
 	}, [resumes]);
 
 	// Auto-open create resume dialog when user has no resumes (first time setup)
@@ -109,9 +109,7 @@ function RouteComponent() {
 							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Total Resumes</Trans>
 							</p>
-							<p className="font-bold text-emerald-600 text-xl sm:text-2xl">
-								{statistics?.totalResumes ?? resumes?.length ?? 0}
-							</p>
+							<p className="font-bold text-emerald-600 text-xl sm:text-2xl">{statistics?.totalResumes ?? 0}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,7 +242,7 @@ function RouteComponent() {
 				/>
 			</div>
 
-			<GridView resumes={filteredResumes ?? []} />
+			<GridView resumes={resumes ?? []} />
 		</div>
 	);
 }

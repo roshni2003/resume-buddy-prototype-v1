@@ -13,19 +13,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useDialogStore } from "@/dialogs/store";
 import { useConfirm } from "@/hooks/use-confirm";
-import type { RouterOutput } from "@/integrations/orpc/client";
+import type { ResumeSummary } from "@/utils/api";
 import { api } from "@/utils/api";
 
 type Props = Omit<React.ComponentProps<typeof DropdownMenuContent>, "children"> & {
-	resume: RouterOutput["resume"]["list"][number];
+	resume: ResumeSummary;
 	children: React.ReactNode;
 };
 
 export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
 	const confirm = useConfirm();
 	const { openDialog } = useDialogStore();
-
 	const queryClient = useQueryClient();
+
 	const { mutate: deleteResume } = useMutation({
 		mutationFn: (id: string) => api.deleteResume(id),
 		onSuccess: () => {

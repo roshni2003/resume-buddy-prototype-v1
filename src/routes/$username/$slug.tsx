@@ -1,30 +1,26 @@
 import { Trans } from "@lingui/react/macro";
 import { DownloadSimpleIcon } from "@phosphor-icons/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useCallback, useEffect } from "react";
-import { LoadingScreen } from "@/components/layout/loading-screen";
+import { useCallback } from "react";
 import { ResumePreview } from "@/components/resume/preview";
-import { useResumeStore } from "@/components/resume/store/resume";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { orpc } from "@/integrations/orpc/client";
 import { api } from "@/utils/api";
 import { downloadFromUrl } from "@/utils/file";
 import { cn } from "@/utils/style";
 
 export const Route = createFileRoute("/$username/$slug")({
-	component: RouteComponent,
-	loader: async ({ context, params: { username, slug } }) => {
+	component: PublicResumePage,
+	loader: async ({ params: { username, slug } }) => {
 		try {
 			// Ignore .well-known requests
 			if (username === ".well-known") throw notFound();
 
-			const resumes = await context.queryClient.ensureQueryData({
-				queryKey: ["resumes"],
-				queryFn: () => api.fetchResumes(),
-			});
+			const resumes = await api.fetchResumes();
+			const resume = resumes.find((resume) => resume.slug === slug);
 
-			const resume = resumes.find((r) => r.slug === slug);
 			if (!resume) throw notFound();
 
 			return { resume };
@@ -33,38 +29,29 @@ export const Route = createFileRoute("/$username/$slug")({
 		}
 	},
 	head: ({ loaderData }) => ({
-		meta: [{ title: loaderData ? `${loaderData.resume.name} - Zoe Resume Builder` : "Zoe Resume Builder" }],
+		meta: [
+			{
+				title:
+					loaderData && "resume" in loaderData && loaderData.resume
+						? `${loaderData.resume.name} - Zoe Resume Builder`
+						: "Zoe Resume Builder",
+			},
+		],
 	}),
 	// Authentication and password-protected resumes are not supported in this build.
 });
-function RouteComponent() {
-	const { slug } = Route.useParams();
-	const isReady = useResumeStore((state) => state.isReady);
-	const initialize = useResumeStore((state) => state.initialize);
+function PublicResumePage() {
+	const { resume } = Route.useLoaderData();
 
-	const { data: resumes } = useQuery({
-		queryKey: ["resumes"],
-		queryFn: () => api.fetchResumes(),
-	});
-
-	const resume = resumes?.find((r) => r.slug === slug);
 	const { mutateAsync: printResumeAsPDF, isPending: isPrinting } = useMutation(
 		orpc.printer.printResumeAsPDF.mutationOptions(),
 	);
-
-	useEffect(() => {
-		if (!resume) return;
-		initialize(resume);
-		return () => initialize(null);
-	}, [resume, initialize]);
 
 	const handleDownload = useCallback(async () => {
 		if (!resume) return;
 		const { url } = await printResumeAsPDF({ id: resume.id });
 		downloadFromUrl(url, `resume-${resume.name}.pdf`);
 	}, [resume, printResumeAsPDF]);
-
-	if (!isReady) return <LoadingScreen />;
 
 	return (
 		<>

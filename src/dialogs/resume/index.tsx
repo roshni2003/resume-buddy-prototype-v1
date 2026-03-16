@@ -111,18 +111,10 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 	const [showPhotoOptions, setShowPhotoOptions] = useState(false);
 
 	const { mutate: createResume, isPending } = useMutation({
-		mutationFn: (data: { name: string; slug: string; tags: string[]; withSampleData?: boolean }) =>
-			api.createResume(data).then((res) => res.id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["resumes"] });
-		},
+		mutationFn: (data: Parameters<typeof api.createResume>[0]) => api.createResume(data),
 	});
-	const { mutateAsync: updateResume } = useMutation({
-		mutationFn: ({ id, data }: { id: string; data: import("@/schema/resume/data").ResumeData }) =>
-			api.updateResume(id, { data }),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["resumes"] });
-		},
+	const { mutateAsync: updateResumeData } = useMutation({
+		mutationFn: api.updateResume,
 	});
 
 	const basicDetailsForm = useForm<BasicDetailsFormValues>({
@@ -204,7 +196,10 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 			onSuccess: async (resumeId) => {
 				// After creating the resume, update it with the selected template and basic details
 				try {
-					const createdResume = await api.fetchResume(resumeId);
+					const createdResume = await queryClient.fetchQuery({
+						queryKey: ["resumes", resumeId],
+						queryFn: () => api.fetchResume(resumeId),
+					});
 
 					// Build profiles array for LinkedIn, GitHub, Website
 					const profiles = [];
@@ -267,7 +262,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						},
 					};
 
-					await updateResume({ id: resumeId, data: updatedData });
+					await updateResumeData({ id: resumeId, data: updatedData });
 
 					toast.success(t`Your resume has been created successfully.`, { id: toastId });
 					closeDialog();
@@ -621,11 +616,10 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 
 export function UpdateResumeDialog({ data }: DialogProps<"resume.update">) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);
-
 	const queryClient = useQueryClient();
+
 	const { mutate: updateResume, isPending } = useMutation({
-		mutationFn: ({ id, name, slug, tags }: { id: string; name: string; slug: string; tags: string[] }) =>
-			api.updateResume(id, { name, slug, tags }),
+		mutationFn: api.updateResume,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["resumes"] });
 		},
@@ -699,11 +693,10 @@ export function UpdateResumeDialog({ data }: DialogProps<"resume.update">) {
 export function DuplicateResumeDialog({ data }: DialogProps<"resume.duplicate">) {
 	const navigate = useNavigate();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
-
 	const queryClient = useQueryClient();
+
 	const { mutate: duplicateResume, isPending } = useMutation({
-		mutationFn: ({ id, name, slug, tags }: { id: string; name: string; slug: string; tags: string[] }) =>
-			api.duplicateResume(id, { name, slug, tags }).then((res) => res.id),
+		mutationFn: (values: Parameters<typeof api.duplicateResume>[1]) => api.duplicateResume(data.id, values),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["resumes"] });
 		},
