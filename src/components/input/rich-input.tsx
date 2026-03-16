@@ -372,7 +372,7 @@ export function TiptapContent({ content, className, ...props }: TiptapContentPro
 		<div
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
 			dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-			className={cn(styles.tiptap_content, className)}
+			className={cn("tiptap-content", className)}
 			{...props}
 		/>
 	);
