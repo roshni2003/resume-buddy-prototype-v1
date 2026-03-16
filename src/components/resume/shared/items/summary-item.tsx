@@ -46,7 +46,7 @@ export function SummaryItem({ className, ...item }: SummaryItemProps) {
 		<div
 			ref={contentRef}
 			className={cn(
-				"summary-item cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
+				"summary-item tiptap-content cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
 				className,
 			)}
 			contentEditable
