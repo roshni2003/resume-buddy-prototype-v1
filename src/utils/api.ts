@@ -48,11 +48,15 @@ export interface ResumeStatistics {
 
 // ----- Helpers -----
 
-const mapResume = (resume: ResumeSummary): ResumeSummary => ({
-	...resume,
-	createdAt: new Date(resume.createdAt),
-	updatedAt: new Date(resume.updatedAt),
-});
+const mapResume = (resume: ResumeSummary): ResumeSummary => {
+	// Preserve tags and convert date fields to Date objects
+	return {
+		...resume,
+		tags: resume.tags ?? [],
+		createdAt: new Date(resume.createdAt),
+		updatedAt: new Date(resume.updatedAt),
+	};
+};
 
 // ----- API -----
 
