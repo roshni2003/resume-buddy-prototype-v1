@@ -21,9 +21,9 @@ export const CometCard = ({
 	children,
 }: Props) => {
 	const ref = useRef<HTMLDivElement>(null);
-	
+
 	// Check if device is mobile (screen width < 640px, Tailwind's sm breakpoint)
-	const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+	const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
 	const x = useMotionValue(0);
 	const y = useMotionValue(0);
@@ -71,7 +71,13 @@ export const CometCard = ({
 				ref={ref}
 				initial={{ scale: 1, z: 0 }}
 				className="relative rounded-md"
-				style={{ rotateX, rotateY, translateX, translateY }}
+				style={{
+					rotateX,
+					rotateY,
+					translateX,
+					translateY,
+					transformStyle: "preserve-3d",
+				}}
 				whileHover={isMobile ? {} : { z: 50, scale: scaleFactor, transition: { duration: 0.2 } }}
 				onMouseMove={handleMouseMove}
 				onMouseLeave={handleMouseLeave}
