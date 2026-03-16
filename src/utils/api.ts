@@ -50,12 +50,12 @@ export interface ResumeStatistics {
 // ----- Helpers -----
 
 const mapResume = (resume: ResumeSummary): Omit<ResumeSummary, "tags"> => {
-	const { tags, ...rest } = resume; // Exclude the 'tags' key
-	return {
-		...rest,
-		createdAt: new Date(resume.createdAt),
-		updatedAt: new Date(resume.updatedAt),
-	};
+       return {
+	       ...resume,
+	       tags: Array.isArray(resume.tags) ? resume.tags : [],
+	       createdAt: new Date(resume.createdAt),
+	       updatedAt: new Date(resume.updatedAt),
+       };
 };
 
 // ----- API -----

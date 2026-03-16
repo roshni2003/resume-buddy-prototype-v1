@@ -47,7 +47,10 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 	return (
 		<div className="relative">
 			<Link to="/builder/$resumeId" params={{ resumeId: resume.id }} className="cursor-default">
-				<BaseCard title={resume.name} description={t`Last updated on ${updatedAt}`} tags={resume.tags}>
+		       <BaseCard
+			       title={resume.name}
+			       description={t`Last updated on ${updatedAt}`}
+		       >
 					<div
 						ref={containerRef}
 						className="absolute inset-x-0 top-0 bottom-[80px] overflow-hidden bg-white sm:bottom-[88px]"
