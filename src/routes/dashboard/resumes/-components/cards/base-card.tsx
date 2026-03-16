@@ -25,18 +25,6 @@ export function BaseCard({ title, description, tags, className, children, ...pro
 				<div className="absolute inset-x-0 bottom-0 w-full border-gray-200 border-t bg-gradient-to-t from-white via-white to-transparent p-3 antialiased sm:p-4">
 					<h3 className="mb-1 truncate font-semibold text-base text-gray-900 sm:mb-1.5 sm:text-lg">{title}</h3>
 					<p className="truncate text-gray-600 text-xs sm:text-sm">{description}</p>
-
-					<div className={cn("mt-2 hidden flex-wrap items-center gap-1.5 sm:mt-3", tags && tags.length > 0 && "flex")}>
-						{tags?.map((tag) => (
-							<Badge
-								key={tag}
-								variant="secondary"
-								className="rounded-md bg-emerald-50 px-2 py-0.5 text-emerald-700 text-xs"
-							>
-								{tag}
-							</Badge>
-						))}
-					</div>
 				</div>
 			</div>
 		</CometCard>
