@@ -48,11 +48,10 @@ export interface ResumeStatistics {
 
 // ----- Helpers -----
 
-const mapResume = (resume: ResumeSummary): ResumeSummary => {
-	// Preserve tags and convert date fields to Date objects
+const mapResume = (resume: ResumeSummary): Omit<ResumeSummary, "tags"> => {
+	const { tags, ...rest } = resume; // Exclude the 'tags' key
 	return {
-		...resume,
-		tags: resume.tags ?? [],
+		...rest,
 		createdAt: new Date(resume.createdAt),
 		updatedAt: new Date(resume.updatedAt),
 	};
