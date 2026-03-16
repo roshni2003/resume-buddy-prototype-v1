@@ -51,7 +51,7 @@ function RouteComponent() {
 		if (!resumes) return [];
 		const tags = new Set<string>();
 		for (const resume of resumes) {
-			for (const tag of resume.tags) {
+			for (const tag of resume.tags || []) {
 				tags.add(tag);
 			}
 		}
