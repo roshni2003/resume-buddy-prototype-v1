@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import type { TemporalState } from "zundo";
 import { temporal } from "zundo";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { useStoreWithEqualityFn } from "zustand/traditional";
 import type { RouterOutput } from "@/integrations/orpc/client";
@@ -93,6 +93,14 @@ export const useResumeStore = create<ResumeStore>()(
 							state.resume = null as unknown as Resume;
 							state.isReady = false;
 							return;
+						}
+
+						// Hydrate dates if they are strings (common after SSR serialization)
+						if (resume.createdAt && typeof resume.createdAt === "string") {
+							resume.createdAt = new Date(resume.createdAt);
+						}
+						if (resume.updatedAt && typeof resume.updatedAt === "string") {
+							resume.updatedAt = new Date(resume.updatedAt);
 						}
 
 						const isDifferentResume = state.resume && state.resume.id !== resume.id;
@@ -257,6 +265,17 @@ export const useResumeStore = create<ResumeStore>()(
 			})),
 			{
 				name: "resume-store", // ✅ belongs to persist
+				storage: createJSONStorage(() => {
+					// Disable persistence in iframes to avoid cross-preview interference
+					if (typeof window !== "undefined" && window.self !== window.top) {
+						return {
+							getItem: () => null,
+							setItem: () => {},
+							removeItem: () => {},
+						};
+					}
+					return localStorage;
+				}),
 				partialize: (state) => ({
 					resume: state.resume,
 					summaryAIRoundsUsed: state.summaryAIRoundsUsed,
