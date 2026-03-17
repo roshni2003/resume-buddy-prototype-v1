@@ -68,7 +68,6 @@ function RouteComponent() {
 	useEffect(() => {
 		if (!resume) return;
 		initialize(resume);
-		// Note: We don't clear on unmount (initialize(null)) to avoid interference
 		// between multiple preview iframes sharing the same persisted store.
 	}, [resume, initialize]);
 
