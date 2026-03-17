@@ -1,6 +1,6 @@
 import type { ResumeData } from "@/schema/resume/data";
 
-const VITE_AI_BASE_URL_DEV = "https://api.resume-builder.zuvy.org/api/openapi";
+const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
 const AUTH_TOKEN = import.meta.env.VITE_AUTH_TOKEN as string;
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
