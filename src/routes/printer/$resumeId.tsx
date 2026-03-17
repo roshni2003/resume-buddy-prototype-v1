@@ -88,7 +88,6 @@ function RouteComponent() {
 		initialize(resume);
 	}, [resume, initialize]);
 
-	// Signal to Puppeteer that the page is fully loaded and ready for PDF generation
 	useEffect(() => {
 		if (isReady) {
 			document.body.setAttribute("data-wf-loaded", "true");
