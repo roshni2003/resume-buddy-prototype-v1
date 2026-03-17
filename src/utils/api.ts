@@ -1,10 +1,10 @@
 import type { ResumeData } from "@/schema/resume/data";
 
-const BASE_URL = "https://api.resume-builder.zuvy.org/api/openapi";
+const VITE_AI_BASE_URL_DEV = "https://api.resume-builder.zuvy.org/api/openapi";
 const AUTH_TOKEN = import.meta.env.VITE_AUTH_TOKEN as string;
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-	const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
+	const url = path.startsWith("http") ? path : `${VITE_AI_BASE_URL_DEV}${path}`;
 	const response = await fetch(url, {
 		...options,
 		headers: {
