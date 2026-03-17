@@ -5,112 +5,92 @@ import { z } from "zod";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { ResumePreview } from "@/components/resume/preview";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { api } from "@/utils/api";
+import { getORPCClient } from "@/integrations/orpc/client";
 import { env } from "@/utils/env";
 import { verifyPrinterToken } from "@/utils/printer-token";
 
 const searchSchema = z.object({
-	token: z.string().catch(""),
+token: z.string().catch(""),
 });
 
 export const Route = createFileRoute("/printer/$resumeId")({
-	component: RouteComponent,
-	validateSearch: zodValidator(searchSchema),
-	head: ({ loaderData }) => {
-		if (loaderData?.token === "preview") {
-			return {
-				styles: [
-					{
-						children:
-							"html, body { background-color: white !important; color-scheme: light !important; } .dark { background-color: white !important; }",
-					},
-				],
-			};
-		}
-	},
-	beforeLoad: async ({ params, search }) => {
-		if (env.VITE_FLAG_DEBUG_PRINTER) return;
+component: RouteComponent,
+validateSearch: zodValidator(searchSchema),
+head: ({ loaderData }) => {
+if (loaderData?.token === "preview") {
+return {
+styles: [
+{
+children:
+"html, body { background-color: white !important; color-scheme: light !important; } .dark { background-color: white !important; }",
+},
+],
+};
+}
+},
+beforeLoad: async ({ params, search }) => {
+if (env.VITE_FLAG_DEBUG_PRINTER) return;
 
-		// Allow preview token for dashboard cards
-		if (search?.token === "preview") return;
+// Allow preview token for dashboard cards
+if (search?.token === "preview") return;
 
-		try {
-			// Verify the token and ensure it matches the resume ID
-			const tokenResumeId = verifyPrinterToken(search?.token || "");
-			if (tokenResumeId !== params.resumeId) throw new Error();
-		} catch {
-			// Invalid or missing token - throw error to be caught by error handler
-			throw redirect({ to: "/", search: {}, throw: true });
-		}
-	},
-	loader: async ({ params, search }) => {
-		const resume = await api.fetchResume(params.resumeId);
+try {
+// Verify the token and ensure it matches the resume ID
+const tokenResumeId = verifyPrinterToken(search?.token || "");
+if (tokenResumeId !== params.resumeId) throw new Error();
+} catch {
+// Invalid or missing token - throw error to be caught by error handler
+throw redirect({ to: "/", search: {}, throw: true });
+}
+},
+loader: async ({ params, search }) => {
+if (search?.token === "preview") {
+const { api } = await import("@/utils/api");
+const previewResume = await api.fetchResume(params.resumeId);
+return { resume: previewResume, token: search?.token };
+}
 
-	       const client = getORPCClient();
-	       const resume = await client.resume.getByIdForPrinter({ id: params.resumeId });
-	       return { resume, token: search?.token };
-	},
+const client = getORPCClient();
+const resume = await client.resume.getByIdForPrinter({ id: params.resumeId });
+return { resume, token: search?.token };
+},
 });
 
 const routeApi = getRouteApi("/printer/$resumeId");
 
 function RouteComponent() {
-	const { resume, token } = routeApi.useLoaderData();
-	const { token: searchToken } = routeApi.useSearch();
+const { resume, token } = routeApi.useLoaderData();
+const { token: searchToken } = routeApi.useSearch();
 
-	const isReady = useResumeStore((state) => state.isReady);
-	const initialize = useResumeStore((state) => state.initialize);
+const isReady = useResumeStore((state) => state.isReady);
+const initialize = useResumeStore((state) => state.initialize);
 
-	// Report any runtime errors to parent for debugging
-	useEffect(() => {
-		const handleError = (error: any) => {
-			console.error("[Printer Error]", error);
-			window.parent.postMessage(
-				{
-					type: "PRINTER_ERROR",
-					message: error?.message || String(error),
-					resumeId: resume?.id,
-				},
-				"*",
-			);
-		};
-		window.addEventListener("error", handleError);
-		window.addEventListener("unhandledrejection", handleError);
-		return () => {
-			window.removeEventListener("error", handleError);
-			window.removeEventListener("unhandledrejection", handleError);
-		};
-	}, [resume?.id]);
+useEffect(() => {
+if (!resume) return;
+initialize(resume);
+}, [resume, initialize]);
 
-	useEffect(() => {
-		if (!resume) return;
-		console.log(`[Printer] Initializing resume: ${resume.id}`);
-		initialize(resume);
-	}, [resume, initialize]);
+useEffect(() => {
+if (isReady) {
+document.body.setAttribute("data-wf-loaded", "true");
+} else {
+document.body.removeAttribute("data-wf-loaded");
+}
+}, [isReady]);
 
-	useEffect(() => {
-		if (isReady) {
-			document.body.setAttribute("data-wf-loaded", "true");
-		} else {
-			document.body.removeAttribute("data-wf-loaded");
-		}
-	}, [isReady]);
+// Signal to parent window (dashboard card) that the resume is ready
+useEffect(() => {
+if (isReady && (token === "preview" || searchToken === "preview")) {
+window.parent.postMessage({ type: "RESUME_READY", resumeId: resume?.id }, "*");
+}
+}, [isReady, token, searchToken, resume?.id]);
 
-	// Signal to parent window (dashboard card) that the resume is ready
-	useEffect(() => {
-		console.log(`[Printer] check status: isReady=${isReady}, resumeId=${resume?.id}`);
-		if (isReady && (token === "preview" || searchToken === "preview")) {
-			console.log(`[Printer] Sending RESUME_READY for ${resume?.id}`);
-			window.parent.postMessage({ type: "RESUME_READY", resumeId: resume?.id }, "*");
-		}
-	}, [isReady, token, searchToken, resume?.id]);
+if (!isReady) {
+if (token === "preview" || searchToken === "preview") {
+return <div className="fixed inset-0 bg-white" />;
+}
+return <LoadingScreen />;
+}
 
-	if (!isReady) {
-		if (token === "preview" || searchToken === "preview") {
-			return <div className="fixed inset-0 bg-white" />;
-		}
-		return <LoadingScreen />;
-	}
-
-	return <ResumePreview pageClassName="print:w-full!" />;
+return <ResumePreview pageClassName="print:w-full!" />;
 }
