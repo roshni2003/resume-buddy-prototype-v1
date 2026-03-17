@@ -3,7 +3,6 @@ import { and, arrayContains, asc, desc, eq, sql } from "drizzle-orm";
 import { get } from "es-toolkit/compat";
 import { match } from "ts-pattern";
 import { schema } from "@/integrations/drizzle";
-import { db } from "@/integrations/drizzle/client";
 import type { ResumeData } from "@/schema/resume/data";
 import { defaultResumeData } from "@/schema/resume/data";
 import { env } from "@/utils/env";
@@ -13,9 +12,22 @@ import { generateId } from "@/utils/string";
 import { hasResumeAccess } from "../helpers/resume-access";
 import { getStorageService } from "./storage";
 
+// Lazy load db to avoid initialization errors
+function getDb() {
+	if (!env.DATABASE_URL) {
+		throw new ORPCError("SERVICE_UNAVAILABLE", { message: "Database not available" });
+	}
+	try {
+		const { db } = require("@/integrations/drizzle/client");
+		return db;
+	} catch {
+		throw new ORPCError("SERVICE_UNAVAILABLE", { message: "Database not available" });
+	}
+}
+
 const tags = {
 	list: async (input: { userId: string }): Promise<string[]> => {
-		const result = await db
+		const result = await getDb()
 			.select({ tags: schema.resume.tags })
 			.from(schema.resume)
 			.where(eq(schema.resume.userId, input.userId));
@@ -29,7 +41,7 @@ const tags = {
 
 const statistics = {
 	getById: async (input: { id: string; userId: string }) => {
-		const [statistics] = await db
+		const [statistics] = await getDb()
 			.select({
 				isPublic: schema.resume.isPublic,
 				views: schema.resumeStatistics.views,
@@ -56,7 +68,7 @@ const statistics = {
 		const lastViewedAt = input.views ? sql`now()` : undefined;
 		const lastDownloadedAt = input.downloads ? sql`now()` : undefined;
 
-		await db
+		await getDb()
 			.insert(schema.resumeStatistics)
 			.values({
 				resumeId: input.id,
@@ -82,7 +94,7 @@ export const resumeService = {
 	statistics,
 
 	list: async (input: { userId: string; tags: string[]; sort: "lastUpdatedAt" | "createdAt" | "name" }) => {
-		return await db
+		return await getDb()
 			.select({
 				id: schema.resume.id,
 				name: schema.resume.name,
@@ -112,7 +124,7 @@ export const resumeService = {
 	},
 
 	getById: async (input: { id: string; userId: string }) => {
-		const [resume] = await db
+		const [resume] = await getDb()
 			.select({
 				id: schema.resume.id,
 				name: schema.resume.name,
@@ -132,7 +144,7 @@ export const resumeService = {
 	},
 
 	getByIdForPrinter: async (input: { id: string }) => {
-		const [resume] = await db
+		const [resume] = await getDb()
 			.select({
 				id: schema.resume.id,
 				name: schema.resume.name,
@@ -166,7 +178,7 @@ export const resumeService = {
 	},
 
 	getBySlug: async (input: { username: string; slug: string; currentUserId?: string }) => {
-		const [resume] = await db
+		const [resume] = await getDb()
 			.select({
 				id: schema.resume.id,
 				name: schema.resume.name,
@@ -240,7 +252,7 @@ export const resumeService = {
 		input.data.metadata.page.locale = input.locale;
 
 		try {
-			await db.insert(schema.resume).values({
+			await getDb().insert(schema.resume).values({
 				id,
 				name: input.name,
 				slug: input.slug,
@@ -270,7 +282,7 @@ export const resumeService = {
 		data?: ResumeData;
 		isPublic?: boolean;
 	}): Promise<void> => {
-		const [resume] = await db
+		const [resume] = await getDb()
 			.select({ isLocked: schema.resume.isLocked })
 			.from(schema.resume)
 			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
@@ -286,7 +298,7 @@ export const resumeService = {
 		};
 
 		try {
-			await db
+			await getDb()
 				.update(schema.resume)
 				.set(updateData)
 				.where(
@@ -306,7 +318,7 @@ export const resumeService = {
 	},
 
 	setLocked: async (input: { id: string; userId: string; isLocked: boolean }): Promise<void> => {
-		await db
+		await getDb()
 			.update(schema.resume)
 			.set({ isLocked: input.isLocked })
 			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
@@ -315,14 +327,14 @@ export const resumeService = {
 	setPassword: async (input: { id: string; userId: string; password: string }): Promise<void> => {
 		const hashedPassword = await hashPassword(input.password);
 
-		await db
+		await getDb()
 			.update(schema.resume)
 			.set({ password: hashedPassword })
 			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
 	},
 
 	removePassword: async (input: { id: string; userId: string }): Promise<void> => {
-		await db
+		await getDb()
 			.update(schema.resume)
 			.set({ password: null })
 			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
@@ -331,7 +343,7 @@ export const resumeService = {
 	delete: async (input: { id: string; userId: string }): Promise<void> => {
 		const storageService = getStorageService();
 
-		const deleteResumePromise = db
+		const deleteResumePromise = getDb()
 			.delete(schema.resume)
 			.where(
 				and(eq(schema.resume.id, input.id), eq(schema.resume.isLocked, false), eq(schema.resume.userId, input.userId)),

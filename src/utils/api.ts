@@ -55,10 +55,26 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 		tags: resume.tags ?? [],
 		createdAt: new Date(resume.createdAt),
 		updatedAt: new Date(resume.updatedAt),
+		data: {
+			...resume.data,
+			sections: {
+				...resume.data.sections,
+				experience: {
+					...resume.data.sections.experience,
+					items: (resume.data.sections.experience?.items || []).map((item: Record<string, unknown>) => {
+						return {
+							...item,
+							startDate: typeof item.startDate === "string" ? item.startDate : "",
+							endDate: typeof item.endDate === "string" ? item.endDate : "",
+							currentlyWorkingHere: typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false,
+						};
+					}),
+				},
+			},
+		},
 	};
-};
-
-// ----- API -----
+	return mappedResume as ResumeSummary;
+};// ----- API -----
 
 export const api = {
 	// 1. GET: /resumes/user

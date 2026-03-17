@@ -24,7 +24,6 @@ import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { authClient } from "@/integrations/auth/client";
-import type { Template } from "@/schema/templates";
 import { api } from "@/utils/api";
 import { generateRandomName, slugify } from "@/utils/string";
 import { type DialogProps, useDialogStore } from "../store";
@@ -103,7 +102,6 @@ type BasicDetailsFormValues = z.infer<typeof basicDetailsSchema>;
 export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 	const navigate = useNavigate();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
-	const queryClient = useQueryClient();
 	const [currentStep, setCurrentStep] = useState<1 | 2>(1);
 	const [selectedTemplate, setSelectedTemplate] = useState<string>("ditto");
 	const [basicDetails, setBasicDetails] = useState<BasicDetailsFormValues | null>(null);
@@ -112,9 +110,6 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 
 	const { mutate: createResume, isPending } = useMutation({
 		mutationFn: (data: Parameters<typeof api.createResume>[0]) => api.createResume(data),
-	});
-	const { mutateAsync: updateResumeData } = useMutation({
-		mutationFn: api.updateResume,
 	});
 
 	const basicDetailsForm = useForm<BasicDetailsFormValues>({
@@ -193,13 +188,15 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 		};
 
 		createResume(resumeData, {
-			onSuccess: async (resumeId) => {
-				// After creating the resume, update it with the selected template and basic details
+			onSuccess: async (response) => {
+				const resumeId = response.id;
+				
+				// Wait a moment for the API to process the resume creation
+				await new Promise(resolve => setTimeout(resolve, 500));
+				
 				try {
-					const createdResume = await queryClient.fetchQuery({
-						queryKey: ["resumes", resumeId],
-						queryFn: () => api.fetchResume(resumeId),
-					});
+					// Fetch the created resume to get the full data structure
+					const createdResume = await api.fetchResume(resumeId);
 
 					// Build profiles array for LinkedIn, GitHub, Website
 					const profiles = [];
@@ -210,7 +207,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							network: "LinkedIn",
 							username: "",
 							icon: "linkedin",
-							website: { url: basicDetails.linkedinUrl, label: "LinkedIn" },
+							url: basicDetails.linkedinUrl,
 						});
 					}
 					if (basicDetails.githubUrl) {
@@ -220,7 +217,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							network: "GitHub",
 							username: "",
 							icon: "github",
-							website: { url: basicDetails.githubUrl, label: "GitHub" },
+							url: basicDetails.githubUrl,
 						});
 					}
 					if (basicDetails.websiteUrl) {
@@ -230,7 +227,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							network: "Website",
 							username: "",
 							icon: "link",
-							website: { url: basicDetails.websiteUrl, label: "Website" },
+							url: basicDetails.websiteUrl,
 						});
 					}
 
@@ -239,11 +236,11 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						...createdResume.data,
 						metadata: {
 							...createdResume.data.metadata,
-							template: selectedTemplate as Template, // Set the selected template
+							template: selectedTemplate,
 						},
 						picture: {
 							...createdResume.data.picture,
-							url: profilePhoto || createdResume.data.picture.url,
+							url: profilePhoto || "",
 						},
 						basics: {
 							...createdResume.data.basics,
@@ -262,14 +259,20 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						},
 					};
 
-					await updateResumeData({ id: resumeId, data: updatedData });
+					// Update the resume with the new data
+					await api.updateResume(resumeId, { data: updatedData });
 
 					toast.success(t`Your resume has been created successfully.`, { id: toastId });
 					closeDialog();
-					// Navigate to builder to start editing the resume
+					
+					// Navigate to builder
 					navigate({ to: "/builder/$resumeId", params: { resumeId } });
-				} catch {
-					toast.error(t`Failed to apply template and basic details.`, { id: toastId });
+				} catch (error) {
+					console.error("Failed to populate resume:", error);
+					// Still navigate to editor even if update fails
+					toast.success(t`Your resume has been created. You can fill in the details in the editor.`, { id: toastId });
+					closeDialog();
+					navigate({ to: "/builder/$resumeId", params: { resumeId } });
 				}
 			},
 			onError: (error) => {
@@ -725,7 +728,8 @@ export function DuplicateResumeDialog({ data }: DialogProps<"resume.duplicate">)
 		const toastId = toast.loading(t`Duplicating your resume...`);
 
 		duplicateResume(values, {
-			onSuccess: async (resumeId) => {
+			onSuccess: async (response) => {
+				const resumeId = response.id;
 				toast.success(t`Your resume has been duplicated successfully.`, { id: toastId });
 				closeDialog();
 

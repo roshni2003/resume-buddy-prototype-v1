@@ -46,7 +46,9 @@ export const Route = createFileRoute("/printer/$resumeId")({
 	loader: async ({ params, search }) => {
 		const resume = await api.fetchResume(params.resumeId);
 
-		return { resume, token: search?.token };
+	       const client = getORPCClient();
+	       const resume = await client.resume.getByIdForPrinter({ id: params.resumeId });
+	       return { resume, token: search?.token };
 	},
 });
 

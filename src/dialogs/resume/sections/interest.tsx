@@ -198,7 +198,6 @@ function InterestForm() {
 			</div>
 
 			<div className={cn("col-span-full flex items-end", isNameInvalid && "items-center")}>
-				...
 				<FormField
 					control={form.control}
 					name={"icon"}

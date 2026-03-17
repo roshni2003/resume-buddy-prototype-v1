@@ -1,8 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { sql } from "drizzle-orm";
-import { db } from "@/integrations/drizzle/client";
 import { printerService } from "@/integrations/orpc/services/printer";
 import { getStorageService } from "@/integrations/orpc/services/storage";
+import { env } from "@/utils/env";
+
+// Lazy load db to avoid initialization errors
+function getDb() {
+	if (!env.DATABASE_URL) {
+		return null;
+	}
+	try {
+		const { db } = require("@/integrations/drizzle/client");
+		return db;
+	} catch {
+		return null;
+	}
+}
 
 function isUnhealthy(check: unknown): boolean {
 	return (
@@ -42,6 +55,13 @@ async function handler() {
 
 async function checkDatabase() {
 	try {
+		const db = getDb();
+		if (!db) {
+			return {
+				status: "unhealthy",
+				error: "DATABASE_URL not configured",
+			};
+		}
 		await db.execute(sql`SELECT 1`);
 		return { status: "healthy" };
 	} catch (error) {

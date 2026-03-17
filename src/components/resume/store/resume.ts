@@ -62,7 +62,27 @@ type ResumeStoreActions = {
 type ResumeStore = ResumeStoreState & ResumeStoreActions;
 
 const _syncResume = (resume: Resume) => {
-	api.updateResume(resume.id, { data: resume.data });
+	// Deep clone the data to avoid mutating the original
+	const dataToSync = JSON.parse(JSON.stringify(resume.data));
+	
+	// Ensure all date fields are properly serialized
+	if (dataToSync.sections?.experience?.items) {
+		dataToSync.sections.experience.items = dataToSync.sections.experience.items.map((item: Record<string, unknown>) => ({
+			...item,
+			startDate: item.startDate || "",
+			endDate: item.endDate || "",
+		}));
+	}
+	
+	if (dataToSync.sections?.education?.items) {
+		dataToSync.sections.education.items = dataToSync.sections.education.items.map((item: Record<string, unknown>) => ({
+			...item,
+			startDate: item.startDate || "",
+			endDate: item.endDate || "",
+		}));
+	}
+	
+	api.updateResume(resume.id, { data: dataToSync });
 };
 
 const syncResume = debounce(_syncResume, 500);
@@ -277,7 +297,9 @@ export const useResumeStore = create<ResumeStore>()(
 					return localStorage;
 				}),
 				partialize: (state) => ({
-					resume: state.resume,
+					// Don't persist resume data — always fetched fresh from API on page load.
+					// Persisting it caused stale localStorage to overwrite fresh API data,
+					// which stripped startDate/endDate/currentlyWorkingHere after refresh.
 					summaryAIRoundsUsed: state.summaryAIRoundsUsed,
 					experienceAIRoundsUsed: state.experienceAIRoundsUsed,
 					projectAIRoundsUsed: state.projectAIRoundsUsed,

@@ -13,6 +13,9 @@ declare global {
 }
 
 function getPool() {
+	if (!env.DATABASE_URL) {
+		return null;
+	}
 	if (!globalThis.__pool) {
 		globalThis.__pool = new Pool({ connectionString: env.DATABASE_URL });
 	}
@@ -21,6 +24,9 @@ function getPool() {
 
 function makeDrizzleClient() {
 	const pool = getPool();
+	if (!pool) {
+		throw new Error("DATABASE_URL is not set. Database functionality is not available.");
+	}
 	return drizzle({ client: pool, schema });
 }
 
