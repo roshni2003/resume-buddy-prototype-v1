@@ -2,7 +2,20 @@ import fs from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { count } from "drizzle-orm";
 import { schema } from "@/integrations/drizzle";
-import { db } from "@/integrations/drizzle/client";
+import { env } from "@/utils/env";
+
+// Lazy load db to avoid initialization errors
+function getDb() {
+	if (!env.DATABASE_URL) {
+		return null;
+	}
+	try {
+		const { db } = require("@/integrations/drizzle/client");
+		return db;
+	} catch {
+		return null;
+	}
+}
 
 const CACHE_DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours
 const GITHUB_API_URL = "https://api.github.com/repos/amruthpillai/reactive-resume";
@@ -61,6 +74,9 @@ const getCachedCount = async (
 };
 
 const getCountFromDatabase = async (table: typeof schema.user | typeof schema.resume): Promise<number | null> => {
+	const db = getDb();
+	if (!db) return null;
+	
 	const [result] = await db.select({ count: count() }).from(table);
 	return result.count;
 };

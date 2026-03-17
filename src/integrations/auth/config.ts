@@ -8,12 +8,27 @@ import { apiKey, type GenericOAuthConfig, genericOAuth, twoFactor } from "better
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { and, eq, or } from "drizzle-orm";
-import { db } from "@/integrations/drizzle/client";
 import { env } from "@/utils/env";
 import { hashPassword, verifyPassword } from "@/utils/password";
 import { generateId, toUsername } from "@/utils/string";
 import { schema } from "../drizzle";
 import { sendEmail } from "../email/service";
+
+// Create a function to get database conditionally
+function getDatabase() {
+	if (!env.DATABASE_URL) {
+		// Return null when DATABASE_URL is not available
+		return null;
+	}
+	try {
+		// Dynamically import to avoid initialization errors
+		const { db } = require("@/integrations/drizzle/client");
+		return db;
+	} catch (error) {
+		console.warn("⚠️  Failed to initialize database:", error);
+		return null;
+	}
+}
 
 function isCustomOAuthProviderEnabled() {
 	const hasDiscovery = Boolean(env.OAUTH_DISCOVERY_URL);
@@ -63,11 +78,24 @@ const getAuthConfig = () => {
 		} satisfies GenericOAuthConfig);
 	}
 
+	const db = getDatabase();
+	
+	if (!db) {
+		// Return a minimal auth config when database is not available
+		console.warn("⚠️  Database not configured. Authentication will not work properly.");
+		return betterAuth({
+			appName: "Reactive Resume",
+			baseURL: env.APP_URL,
+			secret: env.AUTH_SECRET || "fallback-secret-for-no-backend",
+			telemetry: { enabled: false },
+		});
+	}
+
 	return betterAuth({
 		appName: "Reactive Resume",
 
 		baseURL: env.APP_URL,
-		secret: env.AUTH_SECRET,
+		secret: env.AUTH_SECRET || "fallback-secret-for-no-backend",
 
 		database: drizzleAdapter(db, { schema, provider: "pg" }),
 

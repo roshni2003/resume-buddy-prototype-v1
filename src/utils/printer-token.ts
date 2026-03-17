@@ -9,6 +9,9 @@ const PRINTER_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
  * Token format: base64(resumeId:timestamp).signature
  */
 export const generatePrinterToken = createIsomorphicFn().server((resumeId: string) => {
+	if (!env.AUTH_SECRET) {
+		throw new Error("AUTH_SECRET is not configured. Printer functionality is not available.");
+	}
 	const timestamp = Date.now();
 	const payload = `${resumeId}:${timestamp}`;
 	const payloadBase64 = Buffer.from(payload).toString("base64url");
@@ -24,6 +27,9 @@ export const generatePrinterToken = createIsomorphicFn().server((resumeId: strin
  * Throws an error if the token is invalid or expired.
  */
 export const verifyPrinterToken = createIsomorphicFn().server((token: string) => {
+	if (!env.AUTH_SECRET) {
+		throw new Error("AUTH_SECRET is not configured. Printer functionality is not available.");
+	}
 	const parts = token.split(".");
 	if (parts.length !== 2) throw new Error("Invalid token format");
 

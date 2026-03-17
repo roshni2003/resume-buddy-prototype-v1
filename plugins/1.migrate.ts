@@ -9,7 +9,9 @@ async function migrateDatabase() {
 	const connectionString = process.env.DATABASE_URL;
 
 	if (!connectionString) {
-		throw new Error("DATABASE_URL is not set");
+		console.warn("⚠️  DATABASE_URL is not set. Skipping database migrations.");
+		console.warn("⚠️  Database functionality will not be available.");
+		return;
 	}
 
 	const pool = new Pool({ connectionString });
