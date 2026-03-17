@@ -5,7 +5,7 @@ import { z } from "zod";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { ResumePreview } from "@/components/resume/preview";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { getORPCClient } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { env } from "@/utils/env";
 import { verifyPrinterToken } from "@/utils/printer-token";
 
@@ -44,11 +44,7 @@ export const Route = createFileRoute("/printer/$resumeId")({
 		}
 	},
 	loader: async ({ params, search }) => {
-	       if (search?.token === "preview") {
-		       const { api } = await import("@/utils/api");
-		       const resume = await api.fetchResume(params.resumeId);
-		       return { resume, token: search?.token };
-	       }
+		const resume = await api.fetchResume(params.resumeId);
 
 	       const client = getORPCClient();
 	       const resume = await client.resume.getByIdForPrinter({ id: params.resumeId });
@@ -65,11 +61,31 @@ function RouteComponent() {
 	const isReady = useResumeStore((state) => state.isReady);
 	const initialize = useResumeStore((state) => state.initialize);
 
+	// Report any runtime errors to parent for debugging
+	useEffect(() => {
+		const handleError = (error: any) => {
+			console.error("[Printer Error]", error);
+			window.parent.postMessage(
+				{
+					type: "PRINTER_ERROR",
+					message: error?.message || String(error),
+					resumeId: resume?.id,
+				},
+				"*",
+			);
+		};
+		window.addEventListener("error", handleError);
+		window.addEventListener("unhandledrejection", handleError);
+		return () => {
+			window.removeEventListener("error", handleError);
+			window.removeEventListener("unhandledrejection", handleError);
+		};
+	}, [resume?.id]);
+
 	useEffect(() => {
 		if (!resume) return;
+		console.log(`[Printer] Initializing resume: ${resume.id}`);
 		initialize(resume);
-		// Note: We don't clear on unmount (initialize(null)) to avoid interference
-		// between multiple preview iframes sharing the same persisted store.
 	}, [resume, initialize]);
 
 	// Signal to Puppeteer that the page is fully loaded and ready for PDF generation
@@ -83,7 +99,9 @@ function RouteComponent() {
 
 	// Signal to parent window (dashboard card) that the resume is ready
 	useEffect(() => {
+		console.log(`[Printer] check status: isReady=${isReady}, resumeId=${resume?.id}`);
 		if (isReady && (token === "preview" || searchToken === "preview")) {
+			console.log(`[Printer] Sending RESUME_READY for ${resume?.id}`);
 			window.parent.postMessage({ type: "RESUME_READY", resumeId: resume?.id }, "*");
 		}
 	}, [isReady, token, searchToken, resume?.id]);
