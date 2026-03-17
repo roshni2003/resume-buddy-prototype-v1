@@ -50,9 +50,9 @@ export interface ResumeStatistics {
 // ----- Helpers -----
 
 const mapResume = (resume: ResumeSummary): ResumeSummary => {
-	const mappedResume = {
+	return {
 		...resume,
-		tags: Array.isArray(resume.tags) ? resume.tags : [],
+		tags: resume.tags ?? [],
 		createdAt: new Date(resume.createdAt),
 		updatedAt: new Date(resume.updatedAt),
 		data: {

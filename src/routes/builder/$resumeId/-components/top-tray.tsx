@@ -449,6 +449,7 @@ function ColorsPopoverContent() {
 
 function TypographyPopoverContent() {
 	const typography = useResumeStore((state: ResumeStore) => state.resume!.data.metadata.typography);
+	const colors = useResumeStore((state: ResumeStore) => state.resume!.data.metadata.design.colors);
 	const updateResumeData = useResumeStore((state: ResumeStore) => state.updateResumeData);
 
 	const updateBody = (data: Partial<typeof typography.body>) => {
@@ -483,14 +484,11 @@ function TypographyPopoverContent() {
 						<Trans>Font Weight</Trans>
 					</p>
 					<FontWeightCombobox
-						variant="ghost"
-						value={useResumeStore((state: ResumeStore) => state.resume?.data.metadata.typography.font.family)}
-						weight={useResumeStore((state: ResumeStore) => state.resume?.data.metadata.typography.font.weight)}
-						onValueChange={(weight) => {
-							useResumeStore.setState((state: any) => {
-								if (!state.resume) return;
-								state.resume.data.metadata.typography.font.weight = weight;
-							});
+						buttonProps={{ variant: "ghost", className: "w-full" }}
+						fontFamily={typography.body.fontFamily}
+						value={typography.body.fontWeights}
+						onValueChange={(weights) => {
+							updateBody({ fontWeights: weights });
 						}}
 					/>
 				</div>
@@ -515,11 +513,10 @@ function TypographyPopoverContent() {
 							}}
 						/>
 						<ColorPicker
-							value={useResumeStore((state: ResumeStore) => state.resume?.data.metadata.typography.font.color)}
+							value={colors.text}
 							onValueChange={(color) => {
-								useResumeStore.setState((state: any) => {
-									if (!state.resume) return;
-									state.resume.data.metadata.typography.font.color = color;
+								updateResumeData((draft) => {
+									draft.metadata.design.colors.text = color;
 								});
 							}}
 						/>
