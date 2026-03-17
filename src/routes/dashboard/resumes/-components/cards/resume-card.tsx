@@ -1,7 +1,8 @@
 import { t } from "@lingui/core/macro";
-import { useLingui } from "@lingui/react";
 import { CircleNotchIcon, LockSimpleIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useResizeObserver } from "usehooks-ts";
@@ -10,21 +11,21 @@ import { cn } from "@/utils/style";
 import { ResumeDropdownMenu } from "../menus/dropdown-menu";
 import { BaseCard } from "./base-card";
 
+dayjs.extend(relativeTime);
+
 type ResumeCardProps = {
 	resume: RouterOutput["resume"]["list"][number];
 };
 
 export function ResumeCard({ resume }: ResumeCardProps) {
-	const { i18n } = useLingui();
-
 	const containerRef = useRef<HTMLDivElement>(null);
 	const { width: containerWidth = 0 } = useResizeObserver({
 		ref: containerRef as React.RefObject<HTMLElement>,
 	});
 
 	const updatedAt = useMemo(() => {
-		return Intl.DateTimeFormat(i18n.locale, { dateStyle: "long", timeStyle: "short" }).format(resume.updatedAt);
-	}, [i18n.locale, resume.updatedAt]);
+		return dayjs(resume.updatedAt).fromNow();
+	}, [resume.updatedAt]);
 
 	const scale = useMemo(() => {
 		if (containerWidth === 0) return 0;
@@ -47,10 +48,7 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 	return (
 		<div className="relative">
 			<Link to="/builder/$resumeId" params={{ resumeId: resume.id }} className="cursor-default">
-		       <BaseCard
-			       title={resume.name}
-			       description={t`Last updated on ${updatedAt}`}
-		       >
+				<BaseCard title={resume.name} description={t`Last updated on ${updatedAt}`}>
 					<div
 						ref={containerRef}
 						className="absolute inset-x-0 top-0 bottom-[80px] overflow-hidden bg-white sm:bottom-[88px]"
