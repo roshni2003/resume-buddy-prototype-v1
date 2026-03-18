@@ -26,7 +26,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	return response.json();
 }
 
-// ----- Types -----
 
 export interface ResumeSummary {
 	id: string;
