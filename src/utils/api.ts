@@ -74,7 +74,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 		},
 	};
 	return mappedResume as ResumeSummary;
-};// ----- API -----
+};
 
 export const api = {
 	// 1. GET: /resumes/user
