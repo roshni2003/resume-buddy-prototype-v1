@@ -50,18 +50,23 @@ export interface ResumeStatistics {
 // ----- Helpers -----
 
 const mapResume = (resume: ResumeSummary): ResumeSummary => {
+	const sections = resume.data?.sections ?? {};
+	const experience = sections.experience ?? { items: [] };
+
 	return {
 		...resume,
 		tags: resume.tags ?? [],
+		isPublic: resume.isPublic ?? false,
+		isLocked: resume.isLocked ?? false,
 		createdAt: new Date(resume.createdAt),
 		updatedAt: new Date(resume.updatedAt),
 		data: {
 			...resume.data,
 			sections: {
-				...resume.data.sections,
+				...sections,
 				experience: {
-					...resume.data.sections.experience,
-					items: (resume.data.sections.experience?.items || []).map((item: Record<string, unknown>) => {
+					...experience,
+					items: (experience.items || []).map((item: Record<string, unknown>) => {
 						return {
 							...item,
 							startDate: typeof item.startDate === "string" ? item.startDate : "",
@@ -73,7 +78,6 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 			},
 		},
 	};
-	return mappedResume as ResumeSummary;
 };// ----- API -----
 
 export const api = {

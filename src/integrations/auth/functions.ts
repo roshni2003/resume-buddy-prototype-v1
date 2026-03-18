@@ -6,11 +6,19 @@ import type { AuthSession } from "./types";
 
 export const getSession = createIsomorphicFn()
 	.client(async (): Promise<AuthSession | null> => {
-		const { data, error } = await authClient.getSession();
-		if (error) return null;
-		return data;
+		try {
+			const { data, error } = await authClient.getSession();
+			if (error) return null;
+			return data;
+		} catch {
+			return null;
+		}
 	})
 	.server(async (): Promise<AuthSession | null> => {
-		const result = await auth.api.getSession({ headers: getRequestHeaders() });
-		return result as AuthSession | null;
+		try {
+			const result = await auth.api.getSession({ headers: getRequestHeaders() });
+			return result as AuthSession | null;
+		} catch {
+			return null;
+		}
 	});
