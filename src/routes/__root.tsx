@@ -92,8 +92,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 		const [theme, locale, session, flags] = await Promise.all([
 			getTheme(),
 			getLocale(),
-			getSession(),
-			client.flags.get(),
+			getSession().catch(() => null),
+			client.flags.get().catch(() => ({ disableSignups: false, disableEmailAuth: false })),
 		]);
 
 		return { theme, locale, session, flags };

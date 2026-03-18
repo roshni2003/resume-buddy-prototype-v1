@@ -77,16 +77,11 @@ function RouteComponent() {
 		];
 	}, [i18n]);
 
-	const lastUpdatedResume = useMemo(() => {
-		if (!resumes || resumes.length === 0) return null;
-		const sorted = [...resumes].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
-		return sorted[0];
-	}, [resumes]);
-
 	const lastUpdateText = useMemo(() => {
-		if (!lastUpdatedResume) return "Never";
+		if (!statistics?.lastUpdated) return "Never";
 		const now = new Date();
-		const diff = now.getTime() - lastUpdatedResume.updatedAt.getTime();
+		const last = new Date(statistics.lastUpdated);
+		const diff = now.getTime() - last.getTime();
 		const minutes = Math.floor(diff / 60000);
 		const hours = Math.floor(diff / 3600000);
 		const days = Math.floor(diff / 86400000);
@@ -95,7 +90,7 @@ function RouteComponent() {
 		if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
 		if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
 		return `${days} day${days > 1 ? "s" : ""} ago`;
-	}, [lastUpdatedResume]);
+	}, [statistics]);
 
 	return (
 		<div className="space-y-6">

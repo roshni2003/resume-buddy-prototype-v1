@@ -70,7 +70,7 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 	const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
 	const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
 	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
-	const baseURL = import.meta.env.VITE_AI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta";
+	const baseURL = import.meta.env.VITE_AI_BASE_URL;
 	const isAIEnabled = !!apiKey && !!model;
 
 	const closeDialog = useDialogStore((state) => state.closeDialog);

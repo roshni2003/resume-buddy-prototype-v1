@@ -24,7 +24,7 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 	});
 
 	const updatedAt = useMemo(() => {
-		return dayjs(resume.updatedAt).fromNow();
+		return dayjs(resume.updatedAt).format("YYYY-MM-DD HH:mm:ss");
 	}, [resume.updatedAt]);
 
 	const scale = useMemo(() => {
