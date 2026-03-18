@@ -1,5 +1,4 @@
 import { CometCard } from "@/components/animation/comet-card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/utils/style";
 
 type BaseCardProps = React.ComponentProps<"div"> & {
