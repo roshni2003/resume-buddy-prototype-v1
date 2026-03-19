@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { SortAscendingIcon, TagIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useEffect, useMemo } from "react";
@@ -36,6 +36,13 @@ function RouteComponent() {
 	const { tags, sort } = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { openDialog } = useDialogStore();
+	const queryClient = useQueryClient();
+
+	// Invalidate statistics when component mounts to ensure fresh data
+	useEffect(() => {
+		queryClient.invalidateQueries({ queryKey: ["statistics"] });
+		queryClient.invalidateQueries({ queryKey: ["resumes"] });
+	}, [queryClient]);
 
 	const { data: resumes } = useQuery({
 		queryKey: ["resumes", { tags, sort }],
