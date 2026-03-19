@@ -8,6 +8,20 @@ import { SectionBase } from "../shared/section-base";
 import { SectionAddItemButton } from "../shared/section-item";
 import { SortableSectionItem } from "../shared/sortable-section-item";
 
+// Function to format date as 'Sep/2026'
+function formatExperienceDate(dateString: string | undefined): string {
+	if (!dateString) return "";
+	
+	try {
+		const date = new Date(dateString);
+		const month = date.toLocaleString('en-US', { month: 'short' });
+		const year = date.getFullYear();
+		return `${month}/${year}`;
+	} catch {
+		return dateString;
+	}
+}
+
 export function ExperienceSectionBuilder() {
 	const section = useResumeStore((state) => state.resume.data.sections.experience);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
@@ -74,7 +88,7 @@ export function ExperienceSectionBuilder() {
 							title={item.position || "New Position"}
 							subtitle={[
 								item.company,
-								`${item.startDate || ""} - ${item.endDate || (item.currentlyWorkingHere ? "Present" : "")}`.trim(),
+								`${formatExperienceDate(item.startDate)} - ${item.endDate ? formatExperienceDate(item.endDate) : item.currentlyWorkingHere ? "Present" : ""}`.trim(),
 							]
 								.filter(Boolean)
 								.join(" • ")}

@@ -7,6 +7,20 @@ import { handleContentEditableLinkClick } from "@/utils/resume/event";
 import { cn } from "@/utils/style";
 import { PageLink } from "../page-link";
 
+// Function to format date as 'Sep/2026'
+function formatExperienceDate(dateString: string | undefined): string {
+	if (!dateString) return "";
+	
+	try {
+		const date = new Date(dateString);
+		const month = date.toLocaleString('en-US', { month: 'short' });
+		const year = date.getFullYear();
+		return `${month}/${year}`;
+	} catch {
+		return dateString;
+	}
+}
+
 type ExperienceItemProps = z.infer<typeof experienceItemSchema> & {
 	className?: string;
 };
@@ -158,9 +172,9 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 						{item.position}
 					</span>
 					<span className="section-item-metadata experience-item-period shrink-0 text-end">
-						{item.startDate}
+						{formatExperienceDate(item.startDate)}
 						{item.startDate && " - "}
-						{item.currentlyWorkingHere ? "Present" : item.endDate}
+						{item.currentlyWorkingHere ? "Present" : formatExperienceDate(item.endDate)}
 					</span>
 				</div>
 			</div>
