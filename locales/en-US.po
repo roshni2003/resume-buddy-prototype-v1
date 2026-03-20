@@ -14,6 +14,32 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/components/command-palette/pages/navigation.tsx
+msgid "go-to"
+msgstr "go-to"
+
+#. js-lingui-explicit-id
+#: src/components/command-palette/pages/navigation.tsx
+msgid "home"
+msgstr "home"
+
+#. js-lingui-explicit-id
+#: src/components/command-palette/pages/navigation.tsx
+msgid "resumes"
+msgstr "resumes"
+
+#. js-lingui-explicit-id
+#: src/components/command-palette/pages/navigation.tsx
+#: src/components/command-palette/pages/navigation.tsx
+msgid "settings"
+msgstr "settings"
+
+#. js-lingui-explicit-id
+#: src/components/command-palette/pages/navigation.tsx
+msgid "profile"
+msgstr "profile"
+
+#. js-lingui-explicit-id
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Last Updated"
 msgstr "Last Updated"
@@ -28,69 +54,28 @@ msgstr "Created"
 msgid "Name"
 msgstr "Name"
 
-#: src/routes/_home/-sections/hero.tsx
-msgid "(opens in new tab)"
-msgstr "(opens in new tab)"
-
 #. placeholder {0}: section.items.length
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "{0, plural, one {# item} other {# items}}"
 msgstr "{0, plural, one {# item} other {# items}}"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "{column, plural, one {# Column} other {# Columns}}"
 msgstr "{column, plural, one {# Column} other {# Columns}}"
 
-#: src/routes/_home/-sections/hero.tsx
-msgid "<0>Finally,</0><1>A free and open-source resume builder</1>"
-msgstr "<0>Finally,</0><1>A free and open-source resume builder</1>"
-
-#: src/routes/_home/-sections/faq.tsx
-msgctxt "Every word needs to be wrapped in a tag"
-msgid "<0>Frequently</0><1>Asked</1><2>Questions</2>"
-msgstr "<0>Frequently</0><1>Asked</1><2>Questions</2>"
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "<0>Thank you for using Reactive Resume! This app is a labor of love, created mostly in my spare time, with wonderful support from open-source contributors around the world.</0><1>If Reactive Resume has been helpful to you, and you'd like to help keep it free and open for everyone, please consider making a donation. Every little bit is appreciated!</1>"
-msgstr "<0>Thank you for using Reactive Resume! This app is a labor of love, created mostly in my spare time, with wonderful support from open-source contributors around the world.</0><1>If Reactive Resume has been helpful to you, and you'd like to help keep it free and open for everyone, please consider making a donation. Every little bit is appreciated!</1>"
-
-#: src/dialogs/api-key/create.tsx
-msgid "1 month"
-msgstr "1 month"
-
-#: src/dialogs/api-key/create.tsx
-msgid "1 year"
-msgstr "1 year"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "12+ Templates"
-msgstr "12+ Templates"
-
-#: src/dialogs/api-key/create.tsx
-msgid "3 months"
-msgstr "3 months"
-
-#: src/dialogs/api-key/create.tsx
-msgid "6 months"
-msgstr "6 months"
+#: src/dialogs/resume/sections/experience.tsx
+#: src/dialogs/resume/sections/project.tsx
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "✓ You've used both AI suggestions. Edit the text to get new suggestions."
+msgstr "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "A confirmation link has been sent to your current email address. Please check your inbox to confirm the change."
 msgstr "A confirmation link has been sent to your current email address. Please check your inbox to confirm the change."
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "A free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
-msgstr "A free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "A link to your resume has been copied to clipboard."
 msgstr "A link to your resume has been copied to clipboard."
-
-#: src/routes/_home/-sections/testimonials.tsx
-msgid "A lot of people have written to me over the years to share their experiences with Reactive Resume and how it has helped them, and I never get tired of reading them. If you have a story to share, let me know by sending me an email at <0>{email}</0>."
-msgstr "A lot of people have written to me over the years to share their experiences with Reactive Resume and how it has helped them, and I never get tired of reading them. If you have a story to share, let me know by sending me an email at <0>{email}</0>."
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "A new verification link has been sent to your email address. Please check your inbox to verify your account."
@@ -108,14 +93,6 @@ msgstr "A resume with this slug already exists."
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "A4"
 msgstr "A4"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Absolutely! You can export your resume to PDF with a single click. The exported PDF maintains all your formatting and styling perfectly."
-msgstr "Absolutely! You can export your resume to PDF with a single click. The exported PDF maintains all your formatting and styling perfectly."
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Access your resumes and data programmatically using the API."
-msgstr "Access your resumes and data programmatically using the API."
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
@@ -158,10 +135,6 @@ msgstr "Add a new item"
 msgid "Add a new language"
 msgstr "Add a new language"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/profiles.tsx
-msgid "Add a new profile"
-msgstr "Add a new profile"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Add a new project"
 msgstr "Add a new project"
@@ -182,34 +155,9 @@ msgstr "Add a new skill"
 msgid "Add a new volunteer experience"
 msgstr "Add a new volunteer experience"
 
-#: src/components/input/rich-input.tsx
-msgid "Add Column After"
-msgstr "Add Column After"
-
-#: src/components/input/rich-input.tsx
-msgid "Add Column Before"
-msgstr "Add Column Before"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
 msgstr "Add Page"
-
-#: src/components/input/rich-input.tsx
-msgid "Add Row After"
-msgstr "Add Row After"
-
-#: src/components/input/rich-input.tsx
-msgid "Add Row Before"
-msgstr "Add Row Before"
-
-#. placeholder {0}: passkey.createdAt.toLocaleDateString()
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Added on {0}"
-msgstr "Added on {0}"
-
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Adding your passkey..."
-msgstr "Adding your passkey..."
 
 #: src/utils/locale.ts
 msgid "Afrikaans"
@@ -220,6 +168,20 @@ msgstr "Afrikaans"
 msgid "AI"
 msgstr "AI"
 
+#: src/components/ui/ai-generate-button.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file."
+msgstr "AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file."
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "AI is reviewing your resume..."
+msgstr "AI is reviewing your resume..."
+
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "AI-powered resume analysis"
+msgstr "AI-powered resume analysis"
+
 #: src/utils/locale.ts
 msgid "Albanian"
 msgstr "Albanian"
@@ -227,10 +189,6 @@ msgstr "Albanian"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Allow Public Access"
 msgstr "Allow Public Access"
-
-#: src/routes/auth/register.tsx
-msgid "Already have an account? <0><1>Sign in now <2/></1></0>"
-msgstr "Already have an account? <0><1>Sign in now <2/></1></0>"
 
 #: src/utils/locale.ts
 msgid "Amharic"
@@ -245,10 +203,6 @@ msgstr "An error occurred while loading the page."
 msgid "An unknown error occurred while importing your resume."
 msgstr "An unknown error occurred while importing your resume."
 
-#: src/routes/_home/-sections/features.tsx
-msgid "And many more..."
-msgstr "And many more..."
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Anyone visiting the resume's public URL must enter this password to access it."
 msgstr "Anyone visiting the resume's public URL must enter this password to access it."
@@ -261,32 +215,9 @@ msgstr "Anyone who has the resume's public URL will be able to view and download
 msgid "Anyone with the link can view and download the resume."
 msgstr "Anyone with the link can view and download the resume."
 
-#: src/routes/_home/-sections/features.tsx
-msgid "API Access"
-msgstr "API Access"
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "API Key"
-msgstr "API Key"
-
-#: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "API Keys"
-msgstr "API Keys"
-
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "API Reference"
-msgstr "API Reference"
-
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "App"
 msgstr "App"
-
-#: src/routes/_home/-sections/statistics.tsx
-msgid "Application Statistics"
-msgstr "Application Statistics"
 
 #: src/utils/locale.ts
 msgid "Arabic"
@@ -296,27 +227,12 @@ msgstr "Arabic"
 msgid "Are you sure you want to close this dialog?"
 msgstr "Are you sure you want to close this dialog?"
 
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "Are you sure you want to delete this API key?"
-msgstr "Are you sure you want to delete this API key?"
-
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Are you sure you want to delete this passkey?"
-msgstr "Are you sure you want to delete this passkey?"
-
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Are you sure you want to delete this resume?"
 msgstr "Are you sure you want to delete this resume?"
 
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "Are you sure you want to delete your account?"
-msgstr "Are you sure you want to delete your account?"
-
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Are you sure you want to lock this resume?"
 msgstr "Are you sure you want to lock this resume?"
 
@@ -328,27 +244,9 @@ msgstr "Are you sure you want to remove password protection?"
 msgid "Area of Study"
 msgstr "Area of Study"
 
-#: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Artificial Intelligence"
-msgstr "Artificial Intelligence"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Aspect Ratio"
 msgstr "Aspect Ratio"
-
-#: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/settings/authentication/index.tsx
-msgid "Authentication"
-msgstr "Authentication"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Available in multiple languages. If you would like to contribute, check out Crowdin."
-msgstr "Available in multiple languages. If you would like to contribute, check out Crowdin."
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -363,29 +261,14 @@ msgstr "Awards"
 msgid "Azerbaijani"
 msgstr "Azerbaijani"
 
-#: src/routes/auth/verify-2fa.tsx
-msgid "Back to Login"
-msgstr "Back to Login"
-
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Background Color"
 msgstr "Background Color"
 
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Backup codes copied to clipboard."
-msgstr "Backup codes copied to clipboard."
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Base URL (Optional)"
-msgstr "Base URL (Optional)"
-
 #: src/utils/resume/section.tsx
 msgid "Basics"
 msgstr "Basics"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Beautiful templates to choose from, with more on the way."
-msgstr "Beautiful templates to choose from, with more on the way."
 
 #: src/utils/locale.ts
 msgid "Bengali"
@@ -399,6 +282,10 @@ msgstr "Body"
 #: src/components/input/rich-input.tsx
 msgid "Bold"
 msgstr "Bold"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Border Color"
+msgstr "Border Color"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Border Radius"
@@ -416,25 +303,10 @@ msgstr "Builder Command Palette"
 msgid "Bulgarian"
 msgstr "Bulgarian"
 
-#: src/components/input/rich-input.tsx
-msgid "Bullet List"
-msgstr "Bullet List"
-
 #: src/components/ui/copyright.tsx
-#: src/routes/_home/-sections/features.tsx
-#: src/routes/_home/-sections/prefooter.tsx
 msgid "By the community, for the community."
 msgstr "By the community, for the community."
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "Can I customize the templates?"
-msgstr "Can I customize the templates?"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Can I export my resume to PDF?"
-msgstr "Can I export my resume to PDF?"
-
-#: src/dialogs/auth/enable-two-factor.tsx
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
@@ -463,12 +335,11 @@ msgstr "Can I export my resume to PDF?"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/dialogs/resume/sections/summary.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-#: src/routes/dashboard/settings/api-keys.tsx
-#: src/routes/dashboard/settings/danger-zone.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
 msgstr "Cancel"
@@ -477,45 +348,13 @@ msgstr "Cancel"
 msgid "Catalan"
 msgstr "Catalan"
 
-#: src/components/input/rich-input.tsx
-msgid "Center Align"
-msgstr "Center Align"
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Center view"
-msgstr "Center view"
-
 #: src/utils/resume/section.tsx
 msgid "Certifications"
 msgstr "Certifications"
 
-#: src/routes/_home/-sections/header.tsx
-msgid "Change language"
-msgstr "Change language"
-
-#: src/components/command-palette/pages/preferences/index.tsx
-msgid "Change language to..."
-msgstr "Change language to..."
-
-#: src/components/command-palette/pages/preferences/index.tsx
-msgid "Change theme to..."
-msgstr "Change theme to..."
-
 #: src/dialogs/resume/index.tsx
 msgid "Changed your mind? Rename your resume to something more descriptive."
 msgstr "Changed your mind? Rename your resume to something more descriptive."
-
-#: src/routes/_home/-sections/footer.tsx
-msgid "Changelog"
-msgstr "Changelog"
-
-#: src/routes/auth/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Check your email for a link to reset your password."
-
-#: src/routes/auth/register.tsx
-msgid "Check your email for a link to verify your account."
-msgstr "Check your email for a link to verify your account."
 
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
@@ -529,6 +368,10 @@ msgstr "Chinese (Traditional)"
 msgid "Circle"
 msgstr "Circle"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Circle (100pt)"
+msgstr "Circle (100pt)"
+
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
 msgstr "Clear selection"
@@ -537,49 +380,41 @@ msgstr "Clear selection"
 msgid "Click here to select a file to import"
 msgstr "Click here to select a file to import"
 
-#: src/components/input/rich-input.tsx
-msgid "Code Block"
-msgstr "Code Block"
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Close Review"
+msgstr "Close Review"
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Colors"
+msgstr "Colors"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Columns"
 msgstr "Columns"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Community"
-msgstr "Community"
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Coming Soon!"
+msgstr "Coming Soon!"
 
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Company"
 msgstr "Company"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Completely free, forever, no hidden costs."
-msgstr "Completely free, forever, no hidden costs."
-
-#: src/dialogs/api-key/create.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-#: src/routes/dashboard/settings/danger-zone.tsx
 msgid "Confirm"
 msgstr "Confirm"
 
-#: src/routes/dashboard/settings/authentication/-components/social-provider.tsx
-msgid "Connect"
-msgstr "Connect"
-
 #: src/dialogs/resume/sections/cover-letter.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/dialogs/resume/sections/summary.tsx
 msgid "Content"
 msgstr "Content"
 
-#: src/dialogs/auth/enable-two-factor.tsx
-#: src/dialogs/auth/enable-two-factor.tsx
-#: src/dialogs/auth/enable-two-factor.tsx
-#: src/routes/auth/register.tsx
-msgid "Continue"
-msgstr "Continue"
+#: src/components/ui/ai-generate-button.tsx
+msgid "Content generated successfully!"
+msgstr "Content generated successfully!"
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -590,36 +425,10 @@ msgstr "Continue where you left off"
 msgid "Continue where you left off by importing an existing resume you created using Reactive Resume or any another resume builder. Supported formats include PDF, Microsoft Word, as well as JSON files from Reactive Resume."
 msgstr "Continue where you left off by importing an existing resume you created using Reactive Resume or any another resume builder. Supported formats include PDF, Microsoft Word, as well as JSON files from Reactive Resume."
 
-#: src/routes/_home/-sections/donate.tsx
-msgid "Contributions fund bug fixes, security updates, and continuous improvements to keep the app running smoothly."
-msgstr "Contributions fund bug fixes, security updates, and continuous improvements to keep the app running smoothly."
-
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Copy"
-msgstr "Copy"
-
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Copy and store these backup codes in case you lose your device."
-msgstr "Copy and store these backup codes in case you lose your device."
-
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Copy Backup Codes"
-msgstr "Copy Backup Codes"
-
-#: src/dialogs/api-key/create.tsx
-msgid "Copy this secret key and use it in your applications to access your data."
-msgstr "Copy this secret key and use it in your applications to access your data."
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Copy URL"
-msgstr "Copy URL"
-
 #: src/utils/resume/section.tsx
 msgid "Cover Letter"
 msgstr "Cover Letter"
 
-#: src/dialogs/api-key/create.tsx
-#: src/dialogs/resume/index.tsx
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/cover-letter.tsx
@@ -634,18 +443,10 @@ msgstr "Cover Letter"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/dialogs/resume/sections/summary.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Create"
 msgstr "Create"
-
-#: src/routes/auth/register.tsx
-msgid "Create a new account"
-msgstr "Create a new account"
-
-#: src/dialogs/api-key/create.tsx
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "Create a new API key"
-msgstr "Create a new API key"
 
 #: src/dialogs/resume/sections/award.tsx
 msgid "Create a new award"
@@ -696,7 +497,6 @@ msgid "Create a new reference"
 msgstr "Create a new reference"
 
 #: src/components/command-palette/pages/resumes.tsx
-#: src/dialogs/resume/index.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
@@ -705,6 +505,10 @@ msgstr "Create a new resume"
 #: src/dialogs/resume/sections/skill.tsx
 msgid "Create a new skill"
 msgstr "Create a new skill"
+
+#: src/dialogs/resume/sections/summary.tsx
+msgid "Create a new summary"
+msgstr "Create a new summary"
 
 #: src/dialogs/resume/sections/summary-item.tsx
 msgid "Create a new summary item"
@@ -715,27 +519,22 @@ msgid "Create a new volunteer experience"
 msgstr "Create a new volunteer experience"
 
 #: src/dialogs/resume/index.tsx
-msgid "Create a Sample Resume"
-msgstr "Create a Sample Resume"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Create as many resumes as you want, without limits."
-msgstr "Create as many resumes as you want, without limits."
-
-#: src/dialogs/api-key/create.tsx
-msgid "Creating your API key..."
-msgstr "Creating your API key..."
-
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Creating your resume..."
 msgstr "Creating your resume..."
 
-#: src/dialogs/auth/change-password.tsx
-msgid "Current Password"
-msgstr "Current Password"
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Critical Issues"
+msgstr "Critical Issues"
 
-#: src/routes/_home/-sections/features.tsx
+#: src/dialogs/resume/sections/education.tsx
+msgid "Currently studying here"
+msgstr "Currently studying here"
+
+#: src/dialogs/resume/sections/experience.tsx
+msgid "Currently working here"
+msgstr "Currently working here"
+
 #: src/utils/resume/section.tsx
 msgid "Custom CSS"
 msgstr "Custom CSS"
@@ -748,13 +547,6 @@ msgstr "Custom Sections"
 msgid "Czech"
 msgstr "Czech"
 
-#: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "Danger Zone"
-msgstr "Danger Zone"
-
 #: src/utils/locale.ts
 msgid "Danish"
 msgstr "Danish"
@@ -763,14 +555,6 @@ msgstr "Danish"
 #: src/utils/theme.ts
 msgid "Dark"
 msgstr "Dark"
-
-#: src/components/command-palette/pages/preferences/theme.tsx
-msgid "Dark theme"
-msgstr "Dark theme"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Data Security"
-msgstr "Data Security"
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
@@ -782,48 +566,18 @@ msgstr "Date"
 msgid "Degree"
 msgstr "Degree"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
-#: src/routes/dashboard/settings/api-keys.tsx
 msgid "Delete"
 msgstr "Delete"
-
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "Delete Account"
-msgstr "Delete Account"
-
-#: src/components/input/rich-input.tsx
-msgid "Delete Column"
-msgstr "Delete Column"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Delete Page"
 msgstr "Delete Page"
 
-#: src/components/input/rich-input.tsx
-msgid "Delete Row"
-msgstr "Delete Row"
-
-#: src/components/input/rich-input.tsx
-msgid "Delete Table"
-msgstr "Delete Table"
-
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "Deleting your account..."
-msgstr "Deleting your account..."
-
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "Deleting your API key..."
-msgstr "Deleting your API key..."
-
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Deleting your passkey..."
-msgstr "Deleting your passkey..."
-
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Deleting your resume..."
@@ -832,7 +586,6 @@ msgstr "Deleting your resume..."
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
@@ -844,64 +597,27 @@ msgstr "Description"
 msgid "Design"
 msgstr "Design"
 
-#: src/dialogs/auth/disable-two-factor.tsx
-#: src/routes/dashboard/settings/authentication/-components/two-factor.tsx
-msgid "Disable 2FA"
-msgstr "Disable 2FA"
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Detailed Checks"
+msgstr "Detailed Checks"
 
-#: src/dialogs/auth/disable-two-factor.tsx
-msgid "Disable Two-Factor Authentication"
-msgstr "Disable Two-Factor Authentication"
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Disabled"
-msgstr "Disabled"
-
-#: src/dialogs/auth/disable-two-factor.tsx
-msgid "Disabling two-factor authentication..."
-msgstr "Disabling two-factor authentication..."
-
-#: src/routes/dashboard/settings/authentication/-components/social-provider.tsx
-msgid "Disconnect"
-msgstr "Disconnect"
-
-#: src/routes/_home/-sections/footer.tsx
-msgid "Discord"
-msgstr "Discord"
-
-#: src/routes/_home/-sections/footer.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Documentation"
-msgstr "Documentation"
-
-#: src/routes/auth/login.tsx
-msgid "Don't have an account? <0><1>Create one now <2/></1></0>"
-msgstr "Don't have an account? <0><1>Create one now <2/></1></0>"
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Donate to Reactive Resume"
-msgstr "Donate to Reactive Resume"
-
-#: src/dialogs/auth/enable-two-factor.tsx
 #: src/routes/$username/$slug.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "Download"
 msgstr "Download"
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
-msgid "Download a copy of your resume in JSON format. Use this file for backup or to import your resume into other applications, including AI assistants."
-msgstr "Download a copy of your resume in JSON format. Use this file for backup or to import your resume into other applications, including AI assistants."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download a copy of your resume in PDF format. Use this file for printing or to easily share your resume with recruiters."
 msgstr "Download a copy of your resume in PDF format. Use this file for printing or to easily share your resume with recruiters."
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Download JSON"
-msgstr "Download JSON"
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "Download PDF"
 msgstr "Download PDF"
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Download Word"
+msgstr "Download Word"
 
 #: src/routes/$username/$slug.tsx
 msgid "Downloading..."
@@ -916,9 +632,9 @@ msgid "Drag and drop sections here to move them between columns"
 msgstr "Drag and drop sections here to move them between columns"
 
 #: src/dialogs/resume/index.tsx
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Duplicate"
@@ -944,13 +660,14 @@ msgstr "Dutch"
 msgid "Education"
 msgstr "Education"
 
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "em"
+msgstr "em"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Email"
 msgstr "Email"
 
-#: src/routes/auth/forgot-password.tsx
-#: src/routes/auth/login.tsx
-#: src/routes/auth/register.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Email Address"
 msgstr "Email Address"
@@ -960,127 +677,69 @@ msgctxt "Turn On/Apply Custom CSS"
 msgid "Enable"
 msgstr "Enable"
 
-#: src/routes/dashboard/settings/authentication/-components/two-factor.tsx
-msgid "Enable 2FA"
-msgstr "Enable 2FA"
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Enable AI Features"
-msgstr "Enable AI Features"
-
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Enable Two-Factor Authentication"
-msgstr "Enable Two-Factor Authentication"
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Enabled"
-msgstr "Enabled"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Enabling password protection..."
 msgstr "Enabling password protection..."
 
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Enabling two-factor authentication..."
-msgstr "Enabling two-factor authentication..."
+#: src/dialogs/resume/sections/experience.tsx
+msgid "End Date"
+msgstr "End Date"
 
 #: src/utils/locale.ts
 msgid "English"
 msgstr "English"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Enhance the security of your account with additional layers of protection."
-msgstr "Enhance the security of your account with additional layers of protection."
-
-#: src/routes/auth/verify-2fa-backup.tsx
-msgid "Enter one of your saved backup codes to access your account"
-msgstr "Enter one of your saved backup codes to access your account"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Enter the URL to link to"
 msgstr "Enter the URL to link to"
-
-#: src/routes/auth/verify-2fa.tsx
-msgid "Enter the verification code from your authenticator app"
-msgstr "Enter the verification code from your authenticator app"
-
-#: src/dialogs/auth/change-password.tsx
-msgid "Enter your current password and a new password to update your account."
-msgstr "Enter your current password and a new password to update your account."
-
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Enter your password to confirm setting up two-factor authentication. When enabled, you'll need to enter a code from your authenticator app every time you log in."
-msgstr "Enter your password to confirm setting up two-factor authentication. When enabled, you'll need to enter a code from your authenticator app every time you log in."
-
-#: src/dialogs/auth/disable-two-factor.tsx
-msgid "Enter your password to disable two-factor authentication. Your account will be less secure without 2FA enabled."
-msgstr "Enter your password to disable two-factor authentication. Your account will be less secure without 2FA enabled."
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Every contribution, big or small, makes a huge difference to the project.<0/>Thank you for your support!"
-msgstr "Every contribution, big or small, makes a huge difference to the project.<0/>Thank you for your support!"
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Everything entered here is stored locally on your browser. Your data is only sent to the server when making a request to the AI provider, and is never stored or logged on our servers."
-msgstr "Everything entered here is stored locally on your browser. Your data is only sent to the server when making a request to the AI provider, and is never stored or logged on our servers."
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Everything you need to create, customize, and share professional resumes. Built with privacy in mind, powered by open source, and completely free forever."
-msgstr "Everything you need to create, customize, and share professional resumes. Built with privacy in mind, powered by open source, and completely free forever."
-
-#: src/components/input/rich-input.tsx
-msgid "Exit Fullscreen"
-msgstr "Exit Fullscreen"
 
 #: src/utils/resume/section.tsx
 msgid "Experience"
 msgstr "Experience"
 
-#: src/dialogs/api-key/create.tsx
-msgid "Expires in"
-msgstr "Expires in"
-
-#. placeholder {0}: key.expiresAt?.toLocaleDateString()
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "Expires on {0}"
-msgstr "Expires on {0}"
-
-#: src/routes/_home/-sections/templates.tsx
-msgid "Explore our diverse selection of templates, each designed to fit different styles, professions, and personalities. Reactive Resume currently offers 12 templates, with more on the way."
-msgstr "Explore our diverse selection of templates, each designed to fit different styles, professions, and personalities. Reactive Resume currently offers 12 templates, with more on the way."
-
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "Explore the API documentation to learn how to integrate Reactive Resume with your applications. Find detailed endpoints, request examples, and authentication methods."
-msgstr "Explore the API documentation to learn how to integrate Reactive Resume with your applications. Find detailed endpoints, request examples, and authentication methods."
-
 #: src/utils/resume/section.tsx
 msgid "Export"
 msgstr "Export"
 
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Failed to setup two-factor authentication."
-msgstr "Failed to setup two-factor authentication."
+#: src/components/ui/review-drawer-fixed.tsx
+msgid "Failed to fix issues automatically"
+msgstr "Failed to fix issues automatically"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Features"
-msgstr "Features"
+#: src/components/ui/ai-generate-button.tsx
+msgid "Failed to generate content"
+msgstr "Failed to generate content"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Filter by"
 msgstr "Filter by"
 
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Final Review"
+msgstr "Final Review"
+
 #: src/utils/locale.ts
 msgid "Finnish"
 msgstr "Finnish"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Flexibility"
-msgstr "Flexibility"
+#: src/components/ui/review-drawer-fixed.tsx
+msgid "Fix Issues Automatically"
+msgstr "Fix Issues Automatically"
+
+#: src/components/ui/review-drawer-fixed.tsx
+msgid "Fixing issues automatically..."
+msgstr "Fixing issues automatically..."
+
+#: src/components/ui/review-drawer-fixed.tsx
+msgid "Fixing Issues..."
+msgstr "Fixing Issues..."
 
 #: src/dialogs/resume/sections/language.tsx
 msgid "Fluency"
 msgstr "Fluency"
 
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgid "Font Family"
@@ -1091,6 +750,7 @@ msgstr "Font Family"
 msgid "Font Size"
 msgstr "Font Size"
 
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgid "Font Weight"
 msgstr "Font Weight"
@@ -1099,34 +759,18 @@ msgstr "Font Weight"
 msgid "Font Weights"
 msgstr "Font Weights"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "For a secure and distraction-free experience."
-msgstr "For a secure and distraction-free experience."
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Fonts"
+msgstr "Fonts"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, information regarding which companies you sent this resume to or the links to the job descriptions can be noted down here."
 msgstr "For example, information regarding which companies you sent this resume to or the links to the job descriptions can be noted down here."
 
-#: src/dialogs/api-key/create.tsx
-msgid "For security reasons, this key will only be displayed once."
-msgstr "For security reasons, this key will only be displayed once."
-
-#: src/routes/auth/login.tsx
-msgid "Forgot Password?"
-msgstr "Forgot Password?"
-
-#: src/routes/auth/forgot-password.tsx
-msgid "Forgot your password?"
-msgstr "Forgot your password?"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgctxt "Page Format (A4, Letter or Free-Form)"
 msgid "Format"
 msgstr "Format"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Free"
-msgstr "Free"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Free-Form"
@@ -1140,79 +784,48 @@ msgstr "French"
 msgid "Full Width"
 msgstr "Full Width"
 
-#: src/components/input/rich-input.tsx
-msgid "Fullscreen"
-msgstr "Fullscreen"
-
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "Generate a random name"
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Generated content is too short. Please try again."
+msgstr "Generated content is too short. Please try again."
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Generating first suggestion..."
+msgstr "Generating first suggestion..."
+
+#. placeholder {0}: roundsUsed + 1
+#: src/components/ui/ai-generate-button.tsx
+msgid "Generating refinement (Round {0}/{maxRounds})..."
+msgstr "Generating refinement (Round {0}/{maxRounds})..."
 
 #: src/utils/locale.ts
 msgid "German"
 msgstr "German"
 
-#: src/routes/_home/-sections/hero.tsx
-msgid "Get Started"
-msgstr "Get Started"
-
 #: src/components/layout/not-found-screen.tsx
-#: src/routes/auth/verify-2fa-backup.tsx
 msgid "Go Back"
 msgstr "Go Back"
-
-#: src/routes/_home/-sections/header.tsx
-msgid "Go to dashboard"
-msgstr "Go to dashboard"
-
-#: src/components/command-palette/pages/navigation.tsx
-msgid "Go to..."
-msgstr "Go to..."
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Grade"
 msgstr "Grade"
 
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Grammar & Tense"
+msgstr "Grammar & Tense"
+
 #: src/utils/locale.ts
 msgid "Greek"
 msgstr "Greek"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Grid"
-msgstr "Grid"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Grow the Team"
-msgstr "Grow the Team"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "Heading"
-
-#: src/components/input/rich-input.tsx
-msgid "Heading 1"
-msgstr "Heading 1"
-
-#: src/components/input/rich-input.tsx
-msgid "Heading 2"
-msgstr "Heading 2"
-
-#: src/components/input/rich-input.tsx
-msgid "Heading 3"
-msgstr "Heading 3"
-
-#: src/components/input/rich-input.tsx
-msgid "Heading 4"
-msgstr "Heading 4"
-
-#: src/components/input/rich-input.tsx
-msgid "Heading 5"
-msgstr "Heading 5"
-
-#: src/components/input/rich-input.tsx
-msgid "Heading 6"
-msgstr "Heading 6"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Headline"
@@ -1222,21 +835,9 @@ msgstr "Headline"
 msgid "Hebrew"
 msgstr "Hebrew"
 
-#: src/routes/_home/-sections/donate.tsx
-msgid "Help me bring more experienced contributors on board, reducing the burden on a single maintainer and accelerating development."
-msgstr "Help me bring more experienced contributors on board, reducing the burden on a single maintainer and accelerating development."
-
-#: src/routes/dashboard/settings/preferences.tsx
-msgid "Help translate the app to your language"
-msgstr "Help translate the app to your language"
-
 #: src/dialogs/resume/template/gallery.tsx
 msgid "Here's a range of resume templates for different professions and personalities. Whether you prefer modern or classic, bold or simple, there is a design to match you. Look through the options below and choose a template that fits your style."
 msgstr "Here's a range of resume templates for different professions and personalities. Whether you prefer modern or classic, bold or simple, there is a design to match you. Look through the options below and choose a template that fits your style."
-
-#: src/dialogs/api-key/create.tsx
-msgid "Here's your new API key"
-msgstr "Here's your new API key"
 
 #: src/components/level/combobox.tsx
 #: src/dialogs/resume/sections/language.tsx
@@ -1247,6 +848,7 @@ msgstr "Hidden"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 msgid "Hide"
 msgstr "Hide"
 
@@ -1254,39 +856,34 @@ msgstr "Hide"
 msgid "Hide all icons on the resume"
 msgstr "Hide all icons on the resume"
 
-#: src/components/input/rich-input.tsx
-msgid "Highlight"
-msgstr "Highlight"
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "Highlight 2-3 key skills or achievements"
+msgstr "Highlight 2-3 key skills or achievements"
 
 #: src/utils/locale.ts
 msgid "Hindi"
 msgstr "Hindi"
 
 #: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "Home"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "How do I share my resume?"
-msgstr "How do I share my resume?"
-
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "How do I use the API?"
-msgstr "How do I use the API?"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "How is my data protected?"
-msgstr "How is my data protected?"
 
 #: src/utils/locale.ts
 msgid "Hungarian"
 msgstr "Hungarian"
 
+#: src/components/input/rich-input.tsx
+msgid "Hyperlink"
+msgstr "Hyperlink"
+
 #: src/components/level/combobox.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Icon"
 msgstr "Icon"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Image size should be less than 10MB"
+msgstr "Image size should be less than 10MB"
 
 #: src/dialogs/resume/import.tsx
 msgid "Import"
@@ -1297,6 +894,11 @@ msgstr "Import"
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Import an existing resume"
 msgstr "Import an existing resume"
+
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Important Issues"
+msgstr "Important Issues"
 
 #: src/dialogs/resume/import.tsx
 msgid "Importing your resume..."
@@ -1311,32 +913,16 @@ msgid "Indonesian"
 msgstr "Indonesian"
 
 #: src/utils/resume/section.tsx
-msgid "Information"
-msgstr "Information"
-
-#: src/components/input/rich-input.tsx
-msgid "Inline Code"
-msgstr "Inline Code"
-
-#: src/components/input/rich-input.tsx
-msgid "Insert Table"
-msgstr "Insert Table"
-
-#: src/utils/resume/section.tsx
 msgid "Interests"
 msgstr "Interests"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Is Reactive Resume available in multiple languages?"
-msgstr "Is Reactive Resume available in multiple languages?"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Is Reactive Resume really free?"
-msgstr "Is Reactive Resume really free?"
 
 #: src/dialogs/resume/sections/certification.tsx
 msgid "Issuer"
 msgstr "Issuer"
+
+#: src/components/ui/review-drawer-fixed.tsx
+msgid "Issues fixed successfully!"
+msgstr "Issues fixed successfully!"
 
 #: src/utils/locale.ts
 msgid "Italian"
@@ -1350,13 +936,13 @@ msgstr "Italic"
 msgid "Japanese"
 msgstr "Japanese"
 
-#: src/components/input/rich-input.tsx
-msgid "Justify Align"
-msgstr "Justify Align"
-
 #: src/utils/locale.ts
 msgid "Kannada"
 msgstr "Kannada"
+
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "Keep it concise and relevant"
+msgstr "Keep it concise and relevant"
 
 #: src/dialogs/resume/sections/interest.tsx
 #: src/dialogs/resume/sections/skill.tsx
@@ -1379,11 +965,8 @@ msgstr "Label"
 msgid "Landscape"
 msgstr "Landscape"
 
-#: src/components/command-palette/pages/preferences/language.tsx
 #: src/components/user/dropdown-menu.tsx
 #: src/dialogs/resume/sections/language.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
-#: src/routes/dashboard/settings/preferences.tsx
 msgid "Language"
 msgstr "Language"
 
@@ -1395,6 +978,10 @@ msgstr "Languages"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "Last downloaded on {0}"
 msgstr "Last downloaded on {0}"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Last Update"
+msgstr "Last Update"
 
 #: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -1414,10 +1001,6 @@ msgstr "Latvian"
 msgid "Layout"
 msgstr "Layout"
 
-#: src/routes/_home/-sections/hero.tsx
-msgid "Learn More"
-msgstr "Learn More"
-
 #: src/components/resume/preview.tsx
 msgid "Learn more about how to fit content on a page"
 msgstr "Learn more about how to fit content on a page"
@@ -1429,10 +1012,6 @@ msgstr "Leave"
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Leave empty to reset the title to the original."
 msgstr "Leave empty to reset the title to the original."
-
-#: src/components/input/rich-input.tsx
-msgid "Left Align"
-msgstr "Left Align"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Letter"
@@ -1457,22 +1036,16 @@ msgstr "Licensed under <0>MIT</0>."
 msgid "Light"
 msgstr "Light"
 
-#: src/components/command-palette/pages/preferences/theme.tsx
-msgid "Light theme"
-msgstr "Light theme"
-
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgid "Line Height"
 msgstr "Line Height"
 
-#: src/routes/dashboard/settings/authentication/-components/hooks.tsx
-msgid "Linking your {providerName} account..."
-msgstr "Linking your {providerName} account..."
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "List"
-msgstr "List"
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Link Status"
+msgstr "Link Status"
 
 #: src/utils/locale.ts
 msgid "Lithuanian"
@@ -1493,9 +1066,7 @@ msgstr "Loading..."
 msgid "Location"
 msgstr "Location"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Lock"
 msgstr "Lock"
 
@@ -1503,21 +1074,13 @@ msgstr "Lock"
 msgid "Logout"
 msgstr "Logout"
 
-#: src/routes/_home/-sections/donate.tsx
-msgid "Long-term Sustainability"
-msgstr "Long-term Sustainability"
-
-#: src/routes/auth/verify-2fa.tsx
-msgid "Lost access to your authenticator?"
-msgstr "Lost access to your authenticator?"
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Looking for improvements in layout, spacing, and content."
+msgstr "Looking for improvements in layout, spacing, and content."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Main"
 msgstr "Main"
-
-#: src/routes/_home/-sections/header.tsx
-msgid "Main navigation"
-msgstr "Main navigation"
 
 #: src/utils/locale.ts
 msgid "Malay"
@@ -1539,25 +1102,19 @@ msgstr "Margin (Horizontal)"
 msgid "Margin (Vertical)"
 msgstr "Margin (Vertical)"
 
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Model"
-msgstr "Model"
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "Mention what makes you unique"
+msgstr "Mention what makes you unique"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "Move to"
 msgstr "Move to"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Multilingual"
-msgstr "Multilingual"
-
-#: src/dialogs/api-key/create.tsx
 #: src/dialogs/resume/index.tsx
 #: src/dialogs/resume/sections/interest.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
-#: src/routes/auth/register.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
@@ -1571,30 +1128,13 @@ msgstr "Nepali"
 msgid "Network"
 msgstr "Network"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "New features are constantly being added and improved, so be sure to check back often."
-msgstr "New features are constantly being added and improved, so be sure to check back often."
-
-#: src/components/input/rich-input.tsx
-msgid "New Line"
-msgstr "New Line"
-
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Page"
 msgstr "New Page"
 
-#: src/dialogs/auth/change-password.tsx
-#: src/routes/auth/reset-password.tsx
-msgid "New Password"
-msgstr "New Password"
-
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Section"
 msgstr "New Section"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "No Advertising, No Tracking"
-msgstr "No Advertising, No Tracking"
 
 #: src/components/ui/combobox.tsx
 #: src/components/ui/multiple-combobox.tsx
@@ -1613,46 +1153,17 @@ msgstr "Notes"
 msgid "Odia"
 msgstr "Odia"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "One-Click Sign-In"
-msgstr "One-Click Sign-In"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Ongoing Maintenance"
-msgstr "Ongoing Maintenance"
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "One attempt left only!"
+msgstr "One attempt left only!"
 
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Open"
 msgstr "Open"
-
-#: src/routes/auth/forgot-password.tsx
-msgid "Open Email Client"
-msgstr "Open Email Client"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Open Source"
-msgstr "Open Source"
-
-#: src/routes/_home/-sections/donate.tsx
-#: src/routes/_home/-sections/donate.tsx
-#: src/routes/_home/-sections/footer.tsx
-#: src/routes/_home/-sections/footer.tsx
-msgid "opens in new tab"
-msgstr "opens in new tab"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Optionally, set a password so that only people with the password can view your resume through the link."
 msgstr "Optionally, set a password so that only people with the password can view your resume through the link."
-
-#: src/routes/auth/-components/social-auth.tsx
-msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
-msgid "or continue with"
-msgstr "or continue with"
-
-#: src/components/input/rich-input.tsx
-msgid "Ordered List"
-msgstr "Ordered List"
 
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Organization"
@@ -1672,34 +1183,9 @@ msgstr "Page {0}"
 msgid "Page {pageNumber} of {totalNumberOfPages}"
 msgstr "Page {pageNumber} of {totalNumberOfPages}"
 
-#: src/components/input/rich-input.tsx
-msgid "Paragraph"
-msgstr "Paragraph"
-
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Passkeys"
-msgstr "Passkeys"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Passkeys & 2FA"
-msgstr "Passkeys & 2FA"
-
-#: src/dialogs/auth/disable-two-factor.tsx
-#: src/dialogs/auth/enable-two-factor.tsx
-#: src/routes/auth/login.tsx
-#: src/routes/auth/register.tsx
-#: src/routes/auth/resume-password.tsx
-#: src/routes/dashboard/settings/authentication/-components/password.tsx
-msgid "Password"
-msgstr "Password"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Password cannot be empty."
 msgstr "Password cannot be empty."
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Password Protection"
-msgstr "Password Protection"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Password protection has been disabled."
@@ -1710,7 +1196,6 @@ msgid "Password protection has been enabled."
 msgstr "Password protection has been enabled."
 
 #: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Period"
@@ -1720,35 +1205,69 @@ msgstr "Period"
 msgid "Persian"
 msgstr "Persian"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Personalize your resume with any colors, fonts or designs, and make it your own."
-msgstr "Personalize your resume with any colors, fonts or designs, and make it your own."
-
 #: src/dialogs/resume/sections/reference.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Phone"
 msgstr "Phone"
 
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Photo Verdict"
+msgstr "Photo Verdict"
+
 #: src/utils/resume/section.tsx
 msgid "Picture"
 msgstr "Picture"
 
-#: src/routes/auth/reset-password.tsx
-msgid "Please enter a new password for your account"
-msgstr "Please enter a new password for your account"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Picture Customization"
+msgstr "Picture Customization"
 
-#: src/routes/auth/resume-password.tsx
-msgid "Please enter the password shared with you by the owner of the resume to continue."
-msgstr "Please enter the password shared with you by the owner of the resume to continue."
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Picture removed"
+msgstr "Picture removed"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Picture uploaded successfully!"
+msgstr "Picture uploaded successfully!"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Picture URL"
+msgstr "Picture URL"
 
 #: src/components/input/rich-input.tsx
-msgid "Please enter the URL you want to link to:"
-msgstr "Please enter the URL you want to link to:"
+msgid "Please enter the URL:"
+msgstr "Please enter the URL:"
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Please select a valid image file (PNG, JPG, WEBP, etc.)"
+msgstr "Please select a valid image file (PNG, JPG, WEBP, etc.)"
+
+#: src/components/ui/review-drawer-fixed.tsx
+msgid "Please try fixing issues manually or contact support."
+msgstr "Please try fixing issues manually or contact support."
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Please wait for the current generation to complete."
+msgstr "Please wait for the current generation to complete."
+
+#. placeholder {0}: format.toUpperCase()
+#: src/routes/builder/$resumeId/-components/section-dialogs.tsx
+msgid "Please wait while your {0} is being generated..."
+msgstr "Please wait while your {0} is being generated..."
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Please wait while your DOCX is being generated..."
+msgstr "Please wait while your DOCX is being generated..."
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Please wait while your PDF is being generated..."
 msgstr "Please wait while your PDF is being generated..."
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Please write at least 5 words before asking Zoe."
+msgstr "Please write at least 5 words before asking Zoe."
 
 #: src/utils/locale.ts
 msgid "Polish"
@@ -1771,18 +1290,11 @@ msgstr "Portuguese (Portugal)"
 msgid "Position"
 msgstr "Position"
 
-#: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/preferences/index.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/settings/preferences.tsx
-msgid "Preferences"
-msgstr "Preferences"
-
 #: src/components/input/chip-input.tsx
 msgid "Press <0>{RETURN_KEY}</0> or <1>{COMMA_KEY}</1> to add or save the current keyword."
 msgstr "Press <0>{RETURN_KEY}</0> or <1>{COMMA_KEY}</1> to add or save the current keyword."
 
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Primary Color"
 msgstr "Primary Color"
@@ -1792,11 +1304,14 @@ msgid "Proficiency"
 msgstr "Proficiency"
 
 #: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Profile"
 msgstr "Profile"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Profile Picture"
+msgstr "Profile Picture"
 
 #: src/utils/resume/section.tsx
 msgid "Profiles"
@@ -1814,14 +1329,6 @@ msgstr "Projects"
 msgid "Protect your resume from unauthorized access with a password"
 msgstr "Protect your resume from unauthorized access with a password"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Protect your resume with a password, and let only people with the password view it."
-msgstr "Protect your resume with a password, and let only people with the password view it."
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Provider"
-msgstr "Provider"
-
 #: src/utils/resume/section.tsx
 msgid "Publications"
 msgstr "Publications"
@@ -1830,29 +1337,9 @@ msgstr "Publications"
 msgid "Publisher"
 msgstr "Publisher"
 
-#: src/routes/_home/-sections/header.tsx
-msgid "Reactive Resume - Go to homepage"
-msgstr "Reactive Resume - Go to homepage"
-
-#: src/routes/_home/-sections/prefooter.tsx
-msgid "Reactive Resume continues to grow thanks to its vibrant community. This project owes its progress to numerous individuals who've dedicated their time and skills to make it better. We celebrate the coders who've enhanced its features on GitHub, the linguists whose translations on Crowdin have made it accessible to a broader audience, and the people who've donated to support its continued development."
-msgstr "Reactive Resume continues to grow thanks to its vibrant community. This project owes its progress to numerous individuals who've dedicated their time and skills to make it better. We celebrate the coders who've enhanced its features on GitHub, the linguists whose translations on Crowdin have made it accessible to a broader audience, and the people who've donated to support its continued development."
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Reactive Resume is a free and open-source project, built with love and maintained by me and a community of contributors. Your donations help keep the lights on and the code flowing."
-msgstr "Reactive Resume is a free and open-source project, built with love and maintained by me and a community of contributors. Your donations help keep the lights on and the code flowing."
-
-#: src/routes/_home/-sections/hero.tsx
-msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
-msgstr "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
-
-#: src/routes/_home/-sections/product-hunt-banner.tsx
-msgid "Reactive Resume is launching on Product Hunt today, head over to show some love!"
-msgstr "Reactive Resume is launching on Product Hunt today, head over to show some love!"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Reactive Resume is open-source, privacy-focused, and completely free. Unlike other resume builders, it doesn't show ads, track your data, or limit your features behind a paywall."
-msgstr "Reactive Resume is open-source, privacy-focused, and completely free. Unlike other resume builders, it doesn't show ads, track your data, or limit your features behind a paywall."
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "px"
+msgstr "px"
 
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Recipient"
@@ -1867,7 +1354,6 @@ msgid "Rectangle (Full Width)"
 msgstr "Rectangle (Full Width)"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
-msgctxt "'Ctrl' may be replaced with the locale-specific equivalent (e.g. 'Strg' for QWERTZ layouts)."
 msgid "Redo (Ctrl+Y)"
 msgstr "Redo (Ctrl+Y)"
 
@@ -1878,14 +1364,6 @@ msgstr "References"
 #: src/components/layout/error-screen.tsx
 msgid "Refresh"
 msgstr "Refresh"
-
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Register New Device"
-msgstr "Register New Device"
-
-#: src/routes/auth/forgot-password.tsx
-msgid "Remember your password? <0><1>Sign in now <2/></1></0>"
-msgstr "Remember your password? <0><1>Sign in now <2/></1></0>"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
@@ -1899,14 +1377,6 @@ msgstr "Removing password protection..."
 msgid "Rename"
 msgstr "Rename"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Report a Bug"
-msgstr "Report a Bug"
-
-#: src/routes/_home/-sections/footer.tsx
-msgid "Report an issue"
-msgstr "Report an issue"
-
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
 msgstr "Resend verification email"
@@ -1919,36 +1389,35 @@ msgstr "Resending verification email..."
 msgid "Reset"
 msgstr "Reset"
 
-#: src/routes/auth/reset-password.tsx
-msgid "Reset Password"
-msgstr "Reset Password"
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Resume Colours"
+msgstr "Resume Colours"
 
-#: src/routes/auth/reset-password.tsx
-msgid "Reset your password"
-msgstr "Reset your password"
-
-#: src/routes/auth/reset-password.tsx
-msgid "Resetting your password..."
-msgstr "Resetting your password..."
-
-#: src/routes/_home/-sections/footer.tsx
-msgid "Resources"
-msgstr "Resources"
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Resume Score"
+msgstr "Resume Score"
 
 #: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
 #: src/components/command-palette/pages/resumes.tsx
 #: src/components/command-palette/pages/resumes.tsx
 #: src/components/command-palette/pages/resumes.tsx
-#: src/routes/_home/-sections/statistics.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/resumes/index.tsx
+#: src/routes/dashboard/route.tsx
 msgid "Resumes"
 msgstr "Resumes"
 
-#: src/components/input/rich-input.tsx
-msgid "Right Align"
-msgstr "Right Align"
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Review complete!"
+msgstr "Review complete!"
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Review failed. Please try again."
+msgstr "Review failed. Please try again."
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Review limit reached. Resets at 12 AM."
+msgstr "Review limit reached. Resets at 12 AM."
 
 #: src/utils/locale.ts
 msgid "Romanian"
@@ -1957,6 +1426,10 @@ msgstr "Romanian"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Rotation"
 msgstr "Rotation"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Rounded (10pt)"
+msgstr "Rounded (10pt)"
 
 #: src/utils/locale.ts
 msgid "Russian"
@@ -1982,13 +1455,15 @@ msgstr "Russian"
 msgid "Save Changes"
 msgstr "Save Changes"
 
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Scan the QR code below with your preferred authenticator app. You can also copy the secret below and paste it into your app."
-msgstr "Scan the QR code below with your preferred authenticator app. You can also copy the secret below and paste it into your app."
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "School"
+
+#. placeholder {0}: result.overall_score
+#. placeholder {1}: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Score: {0}/100 - {1}"
+msgstr "Score: {0}/100 - {1}"
 
 #: src/components/input/icon-picker.tsx
 #: src/components/input/icon-picker.tsx
@@ -2004,10 +1479,6 @@ msgstr "Search for..."
 msgid "Search..."
 msgstr "Search..."
 
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Secret copied to clipboard."
-msgstr "Secret copied to clipboard."
-
 #: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
 msgstr "Section Type"
@@ -2017,54 +1488,27 @@ msgstr "Section Type"
 msgid "Select..."
 msgstr "Select..."
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Self-Host with Docker"
-msgstr "Self-Host with Docker"
-
-#: src/routes/auth/forgot-password.tsx
-msgid "Send Password Reset Email"
-msgstr "Send Password Reset Email"
-
-#: src/routes/auth/forgot-password.tsx
-msgid "Sending password reset email..."
-msgstr "Sending password reset email..."
-
-#: src/components/input/rich-input.tsx
-msgid "Separator"
-msgstr "Separator"
-
 #: src/utils/locale.ts
 msgid "Serbian"
 msgstr "Serbian"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-#: src/routes/dashboard/settings/authentication/-components/password.tsx
 msgid "Set Password"
 msgstr "Set Password"
 
-#: src/components/command-palette/pages/navigation.tsx
-#: src/components/command-palette/pages/navigation.tsx
 #: src/components/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "Settings"
 
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Setup Authenticator App"
-msgstr "Setup Authenticator App"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Shadow Color"
+msgstr "Shadow Color"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Shadow Width"
 msgstr "Shadow Width"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Share your resume with a public URL, and let others view it."
-msgstr "Share your resume with a public URL, and let others view it."
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Shareable Links"
-msgstr "Shareable Links"
 
 #: src/utils/resume/section.tsx
 msgid "Sharing"
@@ -2073,13 +1517,12 @@ msgstr "Sharing"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 msgid "Show"
 msgstr "Show"
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
@@ -2096,36 +1539,9 @@ msgstr "Sidebar"
 msgid "Sidebar Width"
 msgstr "Sidebar Width"
 
-#: src/routes/auth/login.tsx
-msgid "Sign in"
-msgstr "Sign in"
-
-#: src/routes/auth/login.tsx
-msgid "Sign in to your account"
-msgstr "Sign in to your account"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Sign in with GitHub, Google or a custom OAuth provider."
-msgstr "Sign in with GitHub, Google or a custom OAuth provider."
-
-#: src/routes/auth/register.tsx
-msgid "Sign up"
-msgstr "Sign up"
-
-#: src/routes/auth/-components/social-auth.tsx
-#: src/routes/auth/-components/social-auth.tsx
-#: src/routes/auth/-components/social-auth.tsx
-#: src/routes/auth/login.tsx
-msgid "Signing in..."
-msgstr "Signing in..."
-
 #: src/components/user/dropdown-menu.tsx
 msgid "Signing out..."
 msgstr "Signing out..."
-
-#: src/routes/auth/register.tsx
-msgid "Signing up..."
-msgstr "Signing up..."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column with a magenta left border accent; compact and efficient for entry-level or internship applications."
@@ -2143,6 +1559,7 @@ msgstr "Single-column with a sidebar and clean grid layout; versatile for any pr
 msgid "Single-column; polished and serious for senior or enterprise-level positions."
 msgstr "Single-column; polished and serious for senior or enterprise-level positions."
 
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Size"
 msgstr "Size"
@@ -2150,10 +1567,6 @@ msgstr "Size"
 #: src/utils/resume/section.tsx
 msgid "Skills"
 msgstr "Skills"
-
-#: src/routes/_home/route.tsx
-msgid "Skip to main content"
-msgstr "Skip to main content"
 
 #: src/utils/locale.ts
 msgid "Slovak"
@@ -2173,11 +1586,6 @@ msgstr "Something went wrong. Please try again."
 msgid "Sort by"
 msgstr "Sort by"
 
-#: src/routes/_home/-sections/footer.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Source Code"
-msgstr "Source Code"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Spacing (Horizontal)"
 msgstr "Spacing (Horizontal)"
@@ -2190,18 +1598,14 @@ msgstr "Spacing (Vertical)"
 msgid "Spanish"
 msgstr "Spanish"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Sponsors"
-msgstr "Sponsors"
-
-#: src/routes/_home/-sections/footer.tsx
-msgid "Sponsorships"
-msgstr "Sponsorships"
-
 #: src/components/level/combobox.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Square"
 msgstr "Square"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Square (0pt)"
+msgstr "Square (0pt)"
 
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
@@ -2212,42 +1616,44 @@ msgstr "Star us on GitHub (opens in new tab)"
 msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
 msgstr "Star us on GitHub, currently {0} stars (opens in new tab)"
 
-#: src/dialogs/resume/index.tsx
-msgid "Start building your resume by giving it a name."
-msgstr "Start building your resume by giving it a name."
-
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
 msgstr "Start building your resume from scratch"
 
-#: src/utils/resume/section.tsx
-msgid "Statistics"
-msgstr "Statistics"
+#: src/dialogs/resume/sections/experience.tsx
+msgid "Start Date"
+msgstr "Start Date"
+
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "Start with your job title and years of experience"
+msgstr "Start with your job title and years of experience"
 
 #: src/hooks/use-form-blocker.tsx
 msgid "Stay"
 msgstr "Stay"
 
-#: src/components/input/rich-input.tsx
-msgid "Strike"
-msgstr "Strike"
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Still analyzing your resume..."
+msgstr "Still analyzing your resume..."
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Subreddit"
-msgstr "Subreddit"
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Strengths"
+msgstr "Strengths"
+
+#: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
+msgid "Suggestions"
+msgstr "Suggestions"
 
 #: src/utils/resume/section.tsx
 msgid "Summary"
 msgstr "Summary"
 
-#: src/routes/_home/-sections/donate.tsx
-msgid "Support Reactive Resume"
-msgstr "Support Reactive Resume"
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Support the app by doing what you can!"
-msgstr "Support the app by doing what you can!"
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "Summary Writing Tips"
+msgstr "Summary Writing Tips"
 
 #: src/utils/locale.ts
 msgid "Swedish"
@@ -2260,10 +1666,6 @@ msgstr "Switch to dark theme"
 #: src/components/theme/toggle-button.tsx
 msgid "Switch to light theme"
 msgstr "Switch to light theme"
-
-#: src/components/input/rich-input.tsx
-msgid "Table"
-msgstr "Table"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags"
@@ -2281,26 +1683,15 @@ msgstr "Tamil"
 msgid "Telugu"
 msgstr "Telugu"
 
-#: src/utils/resume/section.tsx
-msgid "Template"
-msgstr "Template"
-
 #: src/dialogs/resume/template/gallery.tsx
 msgid "Template Gallery"
 msgstr "Template Gallery"
 
-#: src/routes/_home/-sections/templates.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "Templates"
 msgstr "Templates"
 
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Test Connection"
-msgstr "Test Connection"
-
-#: src/routes/_home/-sections/testimonials.tsx
-msgid "Testimonials"
-msgstr "Testimonials"
-
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
 msgstr "Text Color"
@@ -2308,14 +1699,6 @@ msgstr "Text Color"
 #: src/utils/locale.ts
 msgid "Thai"
 msgstr "Thai"
-
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "The API key has been deleted successfully."
-msgstr "The API key has been deleted successfully."
-
-#: src/routes/dashboard/settings/api-keys.tsx
-msgid "The API key will no longer be able to access your data after deletion. This action cannot be undone."
-msgstr "The API key will no longer be able to access your data after deletion. This action cannot be undone."
 
 #: src/components/command-palette/index.tsx
 msgid "The command you're looking for doesn't exist."
@@ -2325,42 +1708,36 @@ msgstr "The command you're looking for doesn't exist."
 msgid "The content is too tall for this page, this may cause undesirable results when exporting to PDF."
 msgstr "The content is too tall for this page, this may cause undesirable results when exporting to PDF."
 
-#: src/routes/auth/resume-password.tsx
-msgid "The password you entered is incorrect"
-msgstr "The password you entered is incorrect"
-
-#: src/routes/auth/resume-password.tsx
-msgid "The resume you are trying to access is password protected"
-msgstr "The resume you are trying to access is password protected"
-
 #: src/components/input/rich-input.tsx
 msgid "The URL you entered is not valid."
 msgstr "The URL you entered is not valid."
 
-#: src/components/command-palette/pages/preferences/theme.tsx
 #: src/components/user/dropdown-menu.tsx
-#: src/routes/dashboard/settings/preferences.tsx
 msgid "Theme"
 msgstr "Theme"
 
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Then, enter the 6 digit code that the app provides to continue."
-msgstr "Then, enter the 6 digit code that the app provides to continue."
+#. placeholder {0}: format.toUpperCase()
+#: src/routes/builder/$resumeId/-components/section-dialogs.tsx
+msgid "There was a problem while generating the {0}, please try again in some time."
+msgstr "There was a problem while generating the {0}, please try again in some time."
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "There was a problem while generating the DOCX, please try again in some time."
+msgstr "There was a problem while generating the DOCX, please try again in some time."
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "There was a problem while generating the PDF, please try again in some time."
 msgstr "There was a problem while generating the PDF, please try again in some time."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "There was an error analyzing your resume. Please check your AI configuration."
+msgstr "There was an error analyzing your resume. Please check your AI configuration."
+
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "This action cannot be undone."
 msgstr "This action cannot be undone."
-
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "This action cannot be undone. All your data will be permanently deleted."
-msgstr "This action cannot be undone. All your data will be permanently deleted."
 
 #: src/dialogs/resume/import.tsx
 #: src/dialogs/resume/import.tsx
@@ -2371,14 +1748,24 @@ msgstr "This feature requires AI Integration to be enabled. Please enable it in 
 msgid "This is a URL-friendly name for your resume."
 msgstr "This is a URL-friendly name for your resume."
 
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "This is taking a bit longer than expected, please wait..."
+msgstr "This is taking a bit longer than expected, please wait..."
+
 #: src/dialogs/resume/import.tsx
 msgid "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
 msgstr "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/builder/$resumeId/-components/section-dialogs.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "This may take a while depending on the server capacity. Please do not close the window or refresh the page."
 msgstr "This may take a while depending on the server capacity. Please do not close the window or refresh the page."
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "This month"
+msgstr "This month"
 
 #: src/components/resume/store/resume.ts
 msgid "This resume is locked and cannot be updated."
@@ -2387,22 +1774,6 @@ msgstr "This resume is locked and cannot be updated."
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
 msgstr "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
-
-#: src/routes/auth/register.tsx
-msgid "This step is optional, but recommended."
-msgstr "This step is optional, but recommended."
-
-#: src/dialogs/api-key/create.tsx
-msgid "This will generate a new API key to access the Reactive Resume API to allow machines to interact with your resume data."
-msgstr "This will generate a new API key to access the Reactive Resume API to allow machines to interact with your resume data."
-
-#: src/routes/_home/-sections/hero.tsx
-msgid "Timelapse demonstration of building a resume with Reactive Resume"
-msgstr "Timelapse demonstration of building a resume with Reactive Resume"
-
-#: src/dialogs/api-key/create.tsx
-msgid "Tip: Give your API key a name, corresponding to the purpose of the key, to help you identify it later."
-msgstr "Tip: Give your API key a name, corresponding to the purpose of the key, to help you identify it later."
 
 #: src/dialogs/resume/index.tsx
 msgid "Tip: You can name the resume referring to the position you are applying for."
@@ -2415,18 +1786,21 @@ msgstr "Tip: You can name the resume referring to the position you are applying 
 msgid "Title"
 msgstr "Title"
 
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "To delete your account, you need to enter the confirmation text and click the button below."
-msgstr "To delete your account, you need to enter the confirmation text and click the button below."
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Total Downloads"
+msgstr "Total Downloads"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Total Resumes"
+msgstr "Total Resumes"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Total Submissions"
+msgstr "Total Submissions"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "Track your resume's views and downloads"
 msgstr "Track your resume's views and downloads"
-
-#: src/routes/_home/-sections/footer.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Translations"
-msgstr "Translations"
 
 #: src/utils/locale.ts
 msgid "Turkish"
@@ -2472,27 +1846,10 @@ msgstr "Two-column, minimal and text-dense with no decorative elements; perfect 
 msgid "Two-column, minimal with light gray sidebar and subtle icons; professional and understated for legal, finance, or executive roles."
 msgstr "Two-column, minimal with light gray sidebar and subtle icons; professional and understated for legal, finance, or executive roles."
 
-#: src/routes/auth/verify-2fa.tsx
-#: src/routes/dashboard/settings/authentication/-components/two-factor.tsx
-msgid "Two-Factor Authentication"
-msgstr "Two-Factor Authentication"
-
-#: src/dialogs/auth/disable-two-factor.tsx
-msgid "Two-factor authentication has been disabled successfully."
-msgstr "Two-factor authentication has been disabled successfully."
-
-#: src/dialogs/auth/enable-two-factor.tsx
-msgid "Two-factor authentication has been setup successfully."
-msgstr "Two-factor authentication has been setup successfully."
-
 #: src/dialogs/resume/import.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Type"
 msgstr "Type"
-
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "Type \"{CONFIRMATION_TEXT}\" to confirm"
-msgstr "Type \"{CONFIRMATION_TEXT}\" to confirm"
 
 #: src/components/command-palette/index.tsx
 msgid "Type a command or search..."
@@ -2501,6 +1858,10 @@ msgstr "Type a command or search..."
 #: src/utils/resume/section.tsx
 msgid "Typography"
 msgstr "Typography"
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "Typography Settings"
+msgstr "Typography Settings"
 
 #: src/utils/locale.ts
 msgid "Ukrainian"
@@ -2511,22 +1872,10 @@ msgid "Underline"
 msgstr "Underline"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
-msgctxt "'Ctrl' may be replaced with the locale-specific equivalent (e.g. 'Strg' for QWERTZ layouts)."
 msgid "Undo (Ctrl+Z)"
 msgstr "Undo (Ctrl+Z)"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Unlimited Resumes"
-msgstr "Unlimited Resumes"
-
-#: src/routes/dashboard/settings/authentication/-components/hooks.tsx
-msgid "Unlinking your {providerName} account..."
-msgstr "Unlinking your {providerName} account..."
-
-#: src/routes/auth/resume-password.tsx
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Unlock"
 msgstr "Unlock"
 
@@ -2534,9 +1883,9 @@ msgstr "Unlock"
 msgid "Unverified"
 msgstr "Unverified"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
@@ -2602,44 +1951,18 @@ msgstr "Update an existing summary item"
 msgid "Update an existing volunteer experience"
 msgstr "Update an existing volunteer experience"
 
-#: src/dialogs/auth/change-password.tsx
-#: src/routes/dashboard/settings/authentication/-components/password.tsx
-msgid "Update Password"
-msgstr "Update Password"
-
 #: src/dialogs/resume/index.tsx
 msgid "Update Resume"
 msgstr "Update Resume"
-
-#: src/dialogs/auth/change-password.tsx
-msgid "Update your password"
-msgstr "Update your password"
-
-#: src/dialogs/auth/change-password.tsx
-msgid "Updating your password..."
-msgstr "Updating your password..."
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
 msgstr "Updating your resume..."
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Uploading picture..."
-msgstr "Uploading picture..."
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "URL"
-msgstr "URL"
-
 #: src/dialogs/resume/sections/profile.tsx
-#: src/routes/auth/register.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Username"
 msgstr "Username"
-
-#: src/routes/_home/-sections/statistics.tsx
-msgid "Users"
-msgstr "Users"
 
 #: src/utils/locale.ts
 msgid "Uzbek"
@@ -2653,35 +1976,13 @@ msgstr "Valid URLs must start with http:// or https://."
 msgid "Verified"
 msgstr "Verified"
 
-#: src/routes/auth/verify-2fa-backup.tsx
-#: src/routes/auth/verify-2fa.tsx
-msgid "Verify"
-msgstr "Verify"
-
-#: src/routes/auth/verify-2fa-backup.tsx
-msgid "Verify with a Backup Code"
-msgstr "Verify with a Backup Code"
-
-#: src/routes/auth/verify-2fa-backup.tsx
-msgid "Verifying backup code..."
-msgstr "Verifying backup code..."
-
-#: src/dialogs/auth/enable-two-factor.tsx
-#: src/routes/auth/verify-2fa.tsx
-msgid "Verifying code..."
-msgstr "Verifying code..."
-
-#: src/routes/auth/resume-password.tsx
-msgid "Verifying password..."
-msgstr "Verifying password..."
-
-#: src/routes/auth/register.tsx
-msgid "Verifying your email is required when resetting your password."
-msgstr "Verifying your email is required when resetting your password."
-
 #: src/utils/locale.ts
 msgid "Vietnamese"
 msgstr "Vietnamese"
+
+#: src/routes/builder/$resumeId/-components/top-tray.tsx
+msgid "View Review"
+msgstr "View Review"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "Views"
@@ -2693,8 +1994,6 @@ msgstr "Volunteer"
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
@@ -2704,120 +2003,59 @@ msgstr "Volunteer"
 msgid "Website"
 msgstr "Website"
 
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "What do you want to call this passkey?"
-msgstr "What do you want to call this passkey?"
-
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
 msgstr "What do you want to rename this section to?"
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "What makes Reactive Resume different from other resume builders?"
-msgstr "What makes Reactive Resume different from other resume builders?"
-
-#: src/routes/_home/-sections/hero.tsx
-msgid "What's new in the latest version?"
-msgstr "What's new in the latest version?"
-
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "When locked, the resume cannot be updated or deleted."
 msgstr "When locked, the resume cannot be updated or deleted."
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Write your own CSS (or use an AI to generate it for you) to customize your resume to the fullest."
-msgstr "Write your own CSS (or use an AI to generate it for you) to customize your resume to the fullest."
+#: src/dialogs/resume/sections/experience.tsx
+#: src/dialogs/resume/sections/project.tsx
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "Write at least 5 words to enable Ask Zoe"
+msgstr "Write at least 5 words to enable Ask Zoe"
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes, Reactive Resume is available in multiple languages. You can choose your preferred language in the settings page, or using the language switcher in the top right corner. If you don't see your language, or you would like to improve the existing translations, you can <0>contribute to the translations on Crowdin<1> (opens in new tab)</1></0>."
-msgstr "Yes, Reactive Resume is available in multiple languages. You can choose your preferred language in the settings page, or using the language switcher in the top right corner. If you don't see your language, or you would like to improve the existing translations, you can <0>contribute to the translations on Crowdin<1> (opens in new tab)</1></0>."
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes! Every template is fully customizable. You can change colors, fonts, spacing, and even write custom CSS for complete control over your resume's appearance."
-msgstr "Yes! Every template is fully customizable. You can change colors, fonts, spacing, and even write custom CSS for complete control over your resume's appearance."
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes! Reactive Resume is completely free to use, with no hidden costs, premium tiers, or subscription fees. It's open-source and will always remain free."
-msgstr "Yes! Reactive Resume is completely free to use, with no hidden costs, premium tiers, or subscription fees. It's open-source and will always remain free."
-
-#: src/routes/_home/-sections/features.tsx
-msgid "You also have the option to deploy on your own servers using the Docker image."
-msgstr "You also have the option to deploy on your own servers using the Docker image."
-
-#: src/routes/auth/login.tsx
-msgid "You can also use your username to login."
-msgstr "You can also use your username to login."
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "You can share your resume via a unique public URL, protect it with a password, or download it as a PDF to share directly. The choice is yours!"
-msgstr "You can share your resume via a unique public URL, protect it with a password, or download it as a PDF to share directly. The choice is yours!"
-
-#. placeholder {0}: passkey.name ?? "(WebAuthn Device)"
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "You cannot use the passkey \"{0}\" anymore to sign in after deletion. This action cannot be undone."
-msgstr "You cannot use the passkey \"{0}\" anymore to sign in after deletion. This action cannot be undone."
+#: src/dialogs/resume/sections/experience.tsx
+#: src/dialogs/resume/sections/project.tsx
+#: src/dialogs/resume/sections/summary-item.tsx
+msgid "You have 1 more AI suggestion left for this text."
+msgstr "You have 1 more AI suggestion left for this text."
 
 #: src/hooks/use-form-blocker.tsx
 msgid "You have unsaved changes that will be lost."
 msgstr "You have unsaved changes that will be lost."
 
-#: src/routes/auth/forgot-password.tsx
-#: src/routes/auth/register.tsx
-msgid "You've got mail!"
-msgstr "You've got mail!"
+#: src/components/ui/ai-generate-button.tsx
+msgid "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
+msgstr "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
 
-#: src/routes/dashboard/settings/danger-zone.tsx
-msgid "Your account has been deleted successfully."
-msgstr "Your account has been deleted successfully."
-
-#: src/dialogs/api-key/create.tsx
-msgid "Your API key has been copied to the clipboard."
-msgstr "Your API key has been copied to the clipboard."
+#. placeholder {0}: format.toUpperCase()
+#: src/routes/builder/$resumeId/-components/section-dialogs.tsx
+msgid "Your {0} has been downloaded successfully!"
+msgstr "Your {0} has been downloaded successfully!"
 
 #: src/routes/builder/$resumeId/index.tsx
 msgid "Your changes are saved automatically."
 msgstr "Your changes are saved automatically."
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Your data is secure, and never shared or sold to anyone."
-msgstr "Your data is secure, and never shared or sold to anyone."
-
-#: src/routes/dashboard/settings/ai.tsx
-msgid "Your data is stored locally"
-msgstr "Your data is stored locally"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Your data is stored securely and is never shared with third parties. You can also self-host Reactive Resume on your own servers for complete control over your data."
-msgstr "Your data is stored securely and is never shared with third parties. You can also self-host Reactive Resume on your own servers for complete control over your data."
-
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Your passkey has been added successfully."
-msgstr "Your passkey has been added successfully."
-
-#: src/routes/dashboard/settings/authentication/-components/passkeys.tsx
-msgid "Your passkey has been deleted successfully."
-msgstr "Your passkey has been deleted successfully."
-
-#: src/routes/auth/reset-password.tsx
-msgid "Your password has been reset successfully. You can now sign in with your new password."
-msgstr "Your password has been reset successfully. You can now sign in with your new password."
-
-#: src/dialogs/auth/change-password.tsx
-msgid "Your password has been updated successfully."
-msgstr "Your password has been updated successfully."
-
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Your profile has been updated successfully."
 msgstr "Your profile has been updated successfully."
 
-#: src/dialogs/resume/index.tsx
+#: src/components/ui/review-drawer-fixed.tsx
+msgid "Your resume has been automatically improved. Review the changes."
+msgstr "Your resume has been automatically improved. Review the changes."
+
 #: src/dialogs/resume/index.tsx
 msgid "Your resume has been created successfully."
 msgstr "Your resume has been created successfully."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/dialogs/resume/index.tsx
+msgid "Your resume has been created. You can fill in the details in the editor."
+msgstr "Your resume has been created. You can fill in the details in the editor."
+
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Your resume has been deleted successfully."
@@ -2838,18 +2076,6 @@ msgstr "Your resume has been updated successfully."
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Your resume's public link is currently protected by a password. Share the password only with people you trust."
 msgstr "Your resume's public link is currently protected by a password. Share the password only with people you trust."
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Your support ensures the project remains free and accessible for everyone, now and in the future."
-msgstr "Your support ensures the project remains free and accessible for everyone, now and in the future."
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Zoom in"
-msgstr "Zoom in"
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Zoom out"
-msgstr "Zoom out"
 
 #: src/utils/locale.ts
 msgid "Zulu"
