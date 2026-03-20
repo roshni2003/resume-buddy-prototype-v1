@@ -18,7 +18,6 @@ export const env = createEnv({
 	server: {
 		// Server
 		TZ: z.string().default("Etc/UTC"),
-		APP_URL: z.url({ protocol: /https?/ }),
 
 		// Database
 		DATABASE_URL: z.url({ protocol: /postgres(ql)?/ }).optional(),
