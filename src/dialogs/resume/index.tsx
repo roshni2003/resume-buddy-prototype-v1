@@ -303,18 +303,16 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 					</div>
 				</div>
 
-				{/* Header with Zoe */}
-				<div className="mb-6 flex items-start gap-4 border-gray-100 border-b pb-6">
-					<div className="shrink-0">
-						<img src="/src/dialogs/resume/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full" />
-					</div>
-					<div>
-						<h2 className="mb-1 font-bold text-emerald-900 text-xl">Let's build your resume</h2>
-						<p className="text-gray-600">I'm Zoe, your AI assistant for Resume Builder. Start with your basics.</p>
-					</div>
+			{/* Header with Zoe */}
+			<div className="mb-6 flex items-start gap-4 border-gray-100 border-b pb-6">
+				<div className="shrink-0">
+					<img src="/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full" />
 				</div>
-
-				<Form {...basicDetailsForm}>
+				<div>
+					<h2 className="mb-1 font-bold text-emerald-900 text-xl">Let's build your resume</h2>
+					<p className="text-gray-600">I'm Zoe, your AI assistant for Resume Builder. Start with your basics.</p>
+				</div>
+			</div>				<Form {...basicDetailsForm}>
 					<form onSubmit={basicDetailsForm.handleSubmit(onBasicDetailsSubmit)} className="space-y-6">
 						{/* Profile Photo Upload */}
 						<div className="flex items-start gap-6">
@@ -582,17 +580,15 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 				</div>
 			</div>
 
-			{/* Header */}
-			<div className="mb-8 text-center">
-				<div className="mb-4 flex items-center justify-center gap-2">
-					<img src="/src/dialogs/resume/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full" />
-					<span className="font-medium text-gray-600 text-sm">Zoe AI - Resume Builder Assistant</span>
-				</div>
-				<h1 className="mb-2 font-bold text-3xl text-emerald-900">Choose Your Template</h1>
-				<p className="text-gray-600">Pick a design that matches your style. You can always change it later.</p>
+		{/* Header */}
+		<div className="mb-8 text-center">
+			<div className="mb-4 flex items-center justify-center gap-2">
+				<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full" />
+				<span className="font-medium text-gray-600 text-sm">Zoe AI - Resume Builder Assistant</span>
 			</div>
-
-			{/* Templates Grid */}
+			<h1 className="mb-2 font-bold text-3xl text-emerald-900">Choose Your Template</h1>
+			<p className="text-gray-600">Pick a design that matches your style. You can always change it later.</p>
+		</div>			{/* Templates Grid */}
 			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{Object.entries(templates).map(([key, template]) => (
 					<TemplateCard
