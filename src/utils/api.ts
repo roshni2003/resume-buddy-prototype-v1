@@ -26,7 +26,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	return response.json();
 }
 
-
 export interface ResumeSummary {
 	id: string;
 	name: string;
@@ -65,19 +64,19 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 				...sections,
 				experience: {
 					...experience,
-					items: (experience.items || []).map((item: Record<string, unknown>) => {
+					items: (experience.items || []).map((item: Record<string, any>) => {
 						return {
 							...item,
 							startDate: typeof item.startDate === "string" ? item.startDate : "",
 							endDate: typeof item.endDate === "string" ? item.endDate : "",
 							currentlyWorkingHere: typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false,
 						};
-					}),
+					}) as any[],
 				},
 			},
 		},
 	};
-};// ----- API -----
+}; // ----- API -----
 
 export const api = {
 	// 1. GET: /resumes/user
@@ -136,6 +135,53 @@ export const api = {
 			body: JSON.stringify(overrides),
 		}),
 
-	// 7. GET: /resumes/statistics
+	// 7. GET: /resumes/statistics (Dashboard summary)
 	fetchStatistics: () => request<ResumeStatistics>("/resumes/statistics"),
+
+	// 7a. GET: /resume/statistics/{id} (Individual resume statistics)
+	fetchResumeStatistics: async (id: string) => {
+		try {
+			const stats = await request<any>(`/resume/statistics/${id}`);
+			return {
+				...stats,
+				lastViewedAt: stats.lastViewedAt ? new Date(stats.lastViewedAt) : null,
+				lastDownloadedAt: stats.lastDownloadedAt ? new Date(stats.lastDownloadedAt) : null,
+			};
+		} catch (error) {
+			console.warn(`Failed to fetch statistics for resume ${id}, returning mock data.`, error);
+			return {
+				isPublic: false,
+				views: 0,
+				downloads: 0,
+				lastViewedAt: null,
+				lastDownloadedAt: null,
+			};
+		}
+	},
+
+	// 8. POST: /resumes/{id}/set-password
+	setPassword: (id: string, password: string) =>
+		request<void>(`/resumes/${id}/set-password`, {
+			method: "POST",
+			body: JSON.stringify({ password }),
+		}),
+
+	// 9. POST: /resumes/{id}/remove-password
+	removePassword: (id: string) =>
+		request<void>(`/resumes/${id}/remove-password`, {
+			method: "POST",
+		}),
+
+	// 10. POST: /resumes/{id}/set-locked
+	setLocked: (id: string, isLocked: boolean) =>
+		request<void>(`/resumes/${id}/set-locked`, {
+			method: "POST",
+			body: JSON.stringify({ isLocked }),
+		}),
+
+	// 11. GET: /resumes/{id}/export
+	exportResume: (id: string, format: "pdf" | "docx", _data?: ResumeData) =>
+		request<{ url: string }>(`/resumes/${id}/export?format=${format}`, {
+			method: "GET",
+		}),
 };

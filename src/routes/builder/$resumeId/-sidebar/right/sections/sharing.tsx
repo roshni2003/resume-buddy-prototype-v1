@@ -14,7 +14,6 @@ import { Switch } from "@/components/ui/switch";
 import { useConfirm } from "@/hooks/use-confirm";
 import { usePrompt } from "@/hooks/use-prompt";
 import { authClient } from "@/integrations/auth/client";
-import { orpc } from "@/integrations/orpc/client";
 import { api } from "@/utils/api";
 import { SectionBase } from "../shared/section-base";
 
@@ -33,13 +32,13 @@ export function SharingSectionBuilder() {
 		},
 	});
 	const { mutateAsync: setPassword } = useMutation({
-		mutationFn: (args: { id: string; password: string }) => orpc.resume.setPassword.call(args),
+		mutationFn: (args: { id: string; password: string }) => api.setPassword(args.id, args.password),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
 		},
 	});
 	const { mutateAsync: removePassword } = useMutation({
-		mutationFn: (args: { id: string }) => orpc.resume.removePassword.call(args),
+		mutationFn: (args: { id: string }) => api.removePassword(args.id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
 		},
@@ -92,7 +91,7 @@ export function SharingSectionBuilder() {
 			await setPassword({ id: resume.id, password });
 			toast.success(t`Password protection has been enabled.`, { id: toastId });
 		} catch (error) {
-			const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
+			const message = error instanceof Error ? error.message : t`Something went wrong. Please try again.`;
 			toast.error(message, { id: toastId });
 		}
 	}, [prompt, resume.id, setPassword]);
@@ -113,7 +112,7 @@ export function SharingSectionBuilder() {
 			await removePassword({ id: resume.id });
 			toast.success(t`Password protection has been disabled.`, { id: toastId });
 		} catch (error) {
-			const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
+			const message = error instanceof Error ? error.message : t`Something went wrong. Please try again.`;
 			toast.error(message, { id: toastId });
 		}
 	}, [confirm, resume.id, resume.hasPassword, removePassword]);

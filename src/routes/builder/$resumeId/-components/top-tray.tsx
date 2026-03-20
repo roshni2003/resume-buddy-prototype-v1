@@ -13,6 +13,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import type { WritableDraft } from "immer";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ColorPicker } from "@/components/input/color-picker";
@@ -42,6 +43,7 @@ import { ReviewDrawer } from "@/components/ui/review-drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDialogStore } from "@/dialogs/store";
 import { orpc } from "@/integrations/orpc/client";
+import type { ResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 import { downloadFromUrl, generateFilename } from "@/utils/file";
 import { cn } from "@/utils/style";
@@ -55,9 +57,9 @@ export function BuilderTopTray() {
 		queryFn: () => api.fetchResume(params.resumeId),
 	});
 
-	const { mutateAsync: printResumeAsPDF, isPending: isPrinting } = useMutation(
-		orpc.printer.printResumeAsPDF.mutationOptions(),
-	);
+	const { mutateAsync: exportResume, isPending: isPrinting } = useMutation({
+		mutationFn: (data: { id: string; format: "pdf" | "docx" }) => api.exportResume(data.id, data.format),
+	});
 
 	const { mutateAsync: runFinalReview } = useMutation(orpc.ai.finalReview.mutationOptions());
 
@@ -181,7 +183,7 @@ export function BuilderTopTray() {
 		});
 
 		try {
-			const { url } = await printResumeAsPDF({ id: resume.id });
+			const { url } = await exportResume({ id: resume.id, format: "pdf" });
 			downloadFromUrl(url, filename);
 		} catch {
 			toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
@@ -191,7 +193,20 @@ export function BuilderTopTray() {
 	};
 
 	const onDownloadDocx = async () => {
-		toast.error(t`Word download is not yet implemented on the backend.`);
+		if (!resume?.id) return;
+		const filename = generateFilename(resume.data.basics.name, "docx");
+		const toastId = toast.loading(t`Please wait while your DOCX is being generated...`, {
+			description: t`This may take a while depending on the server capacity. Please do not close the window or refresh the page.`,
+		});
+
+		try {
+			const { url } = await exportResume({ id: resume.id, format: "docx" });
+			downloadFromUrl(url, filename);
+		} catch {
+			toast.error(t`There was a problem while generating the DOCX, please try again in some time.`);
+		} finally {
+			toast.dismiss(toastId);
+		}
 	};
 
 	return (
@@ -395,7 +410,7 @@ function ColorsPopoverContent() {
 	const updateResumeData = useResumeStore((state: ResumeStore) => state.updateResumeData);
 
 	const setColor = (key: "primary" | "text" | "background", value: string) => {
-		updateResumeData((draft) => {
+		updateResumeData((draft: WritableDraft<ResumeData>) => {
 			draft.metadata.design.colors[key] = value;
 		});
 	};
@@ -453,7 +468,7 @@ function TypographyPopoverContent() {
 	const updateResumeData = useResumeStore((state: ResumeStore) => state.updateResumeData);
 
 	const updateBody = (data: Partial<typeof typography.body>) => {
-		updateResumeData((draft) => {
+		updateResumeData((draft: WritableDraft<ResumeData>) => {
 			draft.metadata.typography.body = { ...draft.metadata.typography.body, ...data };
 		});
 	};
@@ -488,7 +503,9 @@ function TypographyPopoverContent() {
 						fontFamily={typography.body.fontFamily}
 						value={typography.body.fontWeights}
 						onValueChange={(weights) => {
-							updateBody({ fontWeights: weights });
+							updateBody({
+								fontWeights: weights as ("100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900")[],
+							});
 						}}
 					/>
 				</div>
@@ -515,7 +532,7 @@ function TypographyPopoverContent() {
 						<ColorPicker
 							value={colors.text}
 							onValueChange={(color) => {
-								updateResumeData((draft) => {
+								updateResumeData((draft: WritableDraft<ResumeData>) => {
 									draft.metadata.design.colors.text = color;
 								});
 							}}

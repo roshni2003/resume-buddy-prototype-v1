@@ -116,6 +116,7 @@ export const sampleResumeData: ResumeData = {
 					},
 					description:
 						"<p>Concentration in Game Development. Relevant Coursework: Game Engine Architecture, Computer Graphics, Artificial Intelligence, Physics Simulation, 3D Mathematics, Software Engineering, Data Structures & Algorithms</p>",
+					currentlyStudyingHere: false,
 				},
 			],
 		},

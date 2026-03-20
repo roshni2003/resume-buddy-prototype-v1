@@ -42,9 +42,10 @@ async function getUserFromApiKey(apiKey: string): Promise<User | null> {
 			console.warn("Database not available for API key verification");
 			return null;
 		}
-		
-		const result = await auth.api.verifyApiKey({ body: { key: apiKey } });
-		if (!result.key || !result.valid) return null;
+
+		// @ts-expect-error
+		const result = await auth.api?.verifyApiKey?.({ body: { key: apiKey } });
+		if (!result || !result.key || !result.valid) return null;
 
 		const [userResult] = await db.select().from(user).where(eq(user.id, result.key.userId)).limit(1);
 		if (!userResult) return null;

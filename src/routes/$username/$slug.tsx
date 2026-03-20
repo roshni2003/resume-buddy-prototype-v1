@@ -6,9 +6,9 @@ import { useCallback } from "react";
 import { ResumePreview } from "@/components/resume/preview";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { orpc } from "@/integrations/orpc/client";
 import { api } from "@/utils/api";
 import { downloadFromUrl } from "@/utils/file";
+
 import { cn } from "@/utils/style";
 
 export const Route = createFileRoute("/$username/$slug")({
@@ -43,15 +43,15 @@ export const Route = createFileRoute("/$username/$slug")({
 function PublicResumePage() {
 	const { resume } = Route.useLoaderData();
 
-	const { mutateAsync: printResumeAsPDF, isPending: isPrinting } = useMutation(
-		orpc.printer.printResumeAsPDF.mutationOptions(),
-	);
+	const { mutateAsync: exportResume, isPending: isPrinting } = useMutation({
+		mutationFn: (data: { id: string; format: "pdf" | "docx" }) => api.exportResume(data.id, data.format),
+	});
 
 	const handleDownload = useCallback(async () => {
 		if (!resume) return;
-		const { url } = await printResumeAsPDF({ id: resume.id });
+		const { url } = await exportResume({ id: resume.id, format: "pdf" });
 		downloadFromUrl(url, `resume-${resume.name}.pdf`);
-	}, [resume, printResumeAsPDF]);
+	}, [resume, exportResume]);
 
 	return (
 		<>

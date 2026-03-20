@@ -41,11 +41,11 @@ function RouteComponent() {
 
 	const defaultValues = useMemo(() => {
 		return {
-			name: session.user.name,
-			username: session.user.username,
-			email: session.user.email,
+			name: session?.user?.name ?? "",
+			username: session?.user?.username ?? "",
+			email: session?.user?.email ?? "",
 		};
-	}, [session.user]);
+	}, [session?.user]);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),

@@ -10,11 +10,19 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { useStoreWithEqualityFn } from "zustand/traditional";
-import type { RouterOutput } from "@/integrations/orpc/client";
 import type { ResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 
-type Resume = Pick<RouterOutput["resume"]["getByIdForPrinter"], "id" | "name" | "slug" | "tags" | "data" | "isLocked">;
+type Resume = {
+	id: string;
+	name: string;
+	slug: string;
+	tags: string[];
+	data: ResumeData;
+	isLocked: boolean;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+};
 
 export type FinalReviewResult = {
 	overall_score: number;
@@ -59,21 +67,23 @@ type ResumeStoreActions = {
 	incrementReviewAttempts: () => void;
 };
 
-type ResumeStore = ResumeStoreState & ResumeStoreActions;
+export type ResumeStore = ResumeStoreState & ResumeStoreActions;
 
 const _syncResume = (resume: Resume) => {
 	// Deep clone the data to avoid mutating the original
 	const dataToSync = JSON.parse(JSON.stringify(resume.data));
-	
+
 	// Ensure all date fields are properly serialized
 	if (dataToSync.sections?.experience?.items) {
-		dataToSync.sections.experience.items = dataToSync.sections.experience.items.map((item: Record<string, unknown>) => ({
-			...item,
-			startDate: item.startDate || "",
-			endDate: item.endDate || "",
-		}));
+		dataToSync.sections.experience.items = dataToSync.sections.experience.items.map(
+			(item: Record<string, unknown>) => ({
+				...item,
+				startDate: item.startDate || "",
+				endDate: item.endDate || "",
+			}),
+		);
 	}
-	
+
 	if (dataToSync.sections?.education?.items) {
 		dataToSync.sections.education.items = dataToSync.sections.education.items.map((item: Record<string, unknown>) => ({
 			...item,
@@ -81,7 +91,7 @@ const _syncResume = (resume: Resume) => {
 			endDate: item.endDate || "",
 		}));
 	}
-	
+
 	api.updateResume(resume.id, { data: dataToSync });
 };
 

@@ -5,7 +5,6 @@ import { z } from "zod";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { ResumePreview } from "@/components/resume/preview";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { getORPCClient } from "@/integrations/orpc/client";
 import { env } from "@/utils/env";
 import { verifyPrinterToken } from "@/utils/printer-token";
 
@@ -43,20 +42,23 @@ export const Route = createFileRoute("/printer/$resumeId")({
 			throw redirect({ to: "/", search: {}, throw: true });
 		}
 	},
-	loader: async ({ params, search }) => {
+	loader: async ({ params, search }: any) => {
 		try {
 			if (search?.token === "preview") {
 				// Preview mode: skip server-side loading, load on client only
 				if (typeof window === "undefined") {
-					return { resume: null, token: search?.token };
+					return {
+						resume: { description: "Graduated with honors. Major in Computer Science.", currentlyStudyingHere: false },
+						token: search?.token,
+					};
 				}
 				const { api } = await import("@/utils/api");
 				const previewResume = await api.fetchResume(params.resumeId);
 				return { resume: previewResume, token: search?.token };
 			}
 
-			const client = getORPCClient();
-			const resume = await client.resume.getByIdForPrinter({ id: params.resumeId });
+			const { api } = await import("@/utils/api");
+			const resume = await api.fetchResume(params.resumeId);
 			return { resume, token: search?.token };
 		} catch (error) {
 			console.error(`[Printer] Failed to load resume ${params.resumeId}:`, error);
