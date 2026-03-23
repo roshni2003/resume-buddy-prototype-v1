@@ -42,7 +42,6 @@ import { Popover, PopoverContent, PopoverHeader, PopoverTitle, PopoverTrigger } 
 import { ReviewDrawer } from "@/components/ui/review-drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDialogStore } from "@/dialogs/store";
-import { orpc } from "@/integrations/orpc/client";
 import type { ResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 import { downloadFromUrl, generateFilename } from "@/utils/file";
@@ -61,7 +60,19 @@ export function BuilderTopTray() {
 		mutationFn: (data: { id: string; format: "pdf" | "docx" }) => api.exportResume(data.id, data.format),
 	});
 
-	const { mutateAsync: runFinalReview } = useMutation(orpc.ai.finalReview.mutationOptions());
+	const { mutateAsync: runFinalReview } = useMutation({
+		mutationFn: (data: {
+			provider: string;
+			model: string;
+			apiKey: string;
+			baseURL?: string;
+			resume: Record<string, unknown>;
+			photo?: {
+				url?: string;
+				visible?: boolean;
+			};
+		}) => api.finalReview(data),
+	});
 
 	const setShowReviewDrawer = useResumeStore((state: ResumeStore) => state.setShowReviewDrawer);
 	const setReviewing = useResumeStore((state: ResumeStore) => state.setReviewing);

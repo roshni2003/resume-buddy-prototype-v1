@@ -5,7 +5,7 @@ import { env } from "./env";
 const PRINTER_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Generates a time-limited token for printer route access.
+ * x a time-limited token for printer route access.
  * Token format: base64(resumeId:timestamp).signature
  */
 export const generatePrinterToken = createIsomorphicFn().server((resumeId: string) => {

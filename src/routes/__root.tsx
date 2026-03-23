@@ -35,14 +35,14 @@ const appName = "Zoe Resume Builder";
 const tagline = "Build your professional resume with AI assistance";
 const title = `${appName} — ${tagline}`;
 const description =
-	"Zoe Resume Builder is a free and open-source resume builder with AI assistance that simplifies the process of creating, updating, and sharing your resume.";
+	"Zoe Resume Builder is a free resume builder with AI assistance that simplifies the process of creating, updating, and sharing your resume.";
 
 await loadLocale(await getLocale());
 
 export const Route = createRootRouteWithContext<RouterContext>()({
 	shellComponent: RootDocument,
 	head: () => {
-		const appUrl = process.env.APP_URL ?? "https://rxresu.me/";
+		const appUrl = process.env.APP_URL ?? "https://zoe-resume-builder.com/";
 
 		return {
 			links: [

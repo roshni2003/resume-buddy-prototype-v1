@@ -27,6 +27,7 @@ import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard
 import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
 import { Route as ApiOpenapiSplatRouteImport } from "./routes/api/openapi.$";
 import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth.$";
+import { Route as ApiAiFinalReviewRouteImport } from "./routes/api/ai/final-review";
 
 const SchemaDotjsonRoute = SchemaDotjsonRouteImport.update({
   id: "/schema.json",
@@ -118,6 +119,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: "/api/auth/$",
   getParentRoute: () => rootRouteImport,
 } as any);
+const ApiAiFinalReviewRoute = ApiAiFinalReviewRouteImport.update({
+  id: "/api/ai/final-review",
+  path: "/api/ai/final-review",
+  getParentRoute: () => rootRouteImport,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof HomeIndexRoute;
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   "/printer/$resumeId": typeof PrinterResumeIdRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
+  "/api/ai/final-review": typeof ApiAiFinalReviewRoute;
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   "/": typeof HomeIndexRoute;
   "/auth": typeof AuthIndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
+  "/api/ai/final-review": typeof ApiAiFinalReviewRoute;
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   "/_home/": typeof HomeIndexRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
+  "/api/ai/final-review": typeof ApiAiFinalReviewRoute;
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | "/printer/$resumeId"
     | "/auth/"
     | "/dashboard/"
+    | "/api/ai/final-review"
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | "/"
     | "/auth"
     | "/dashboard"
+    | "/api/ai/final-review"
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | "/_home/"
     | "/auth/"
     | "/dashboard/"
+    | "/api/ai/final-review"
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
@@ -245,6 +257,7 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute;
   PrinterResumeIdRoute: typeof PrinterResumeIdRoute;
   AuthIndexRoute: typeof AuthIndexRoute;
+  ApiAiFinalReviewRoute: typeof ApiAiFinalReviewRoute;
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute;
   ApiOpenapiSplatRoute: typeof ApiOpenapiSplatRoute;
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute;
@@ -379,6 +392,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ApiAuthSplatRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/api/ai/final-review": {
+      id: "/api/ai/final-review";
+      path: "/api/ai/final-review";
+      fullPath: "/api/ai/final-review";
+      preLoaderRoute: typeof ApiAiFinalReviewRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -431,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   PrinterResumeIdRoute: PrinterResumeIdRoute,
   AuthIndexRoute: AuthIndexRoute,
+  ApiAiFinalReviewRoute: ApiAiFinalReviewRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiOpenapiSplatRoute: ApiOpenapiSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
