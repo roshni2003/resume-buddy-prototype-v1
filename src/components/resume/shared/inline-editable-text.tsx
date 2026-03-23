@@ -47,8 +47,15 @@ export function InlineEditableText({
 				onBlur={() => setIsFocused(false)}
 				onClick={(event) => {
 					if (as === "a" && href) {
-						event.preventDefault();
-						window.open(href, "_blank", "noopener,noreferrer");
+						if (event.ctrlKey || event.metaKey) {
+							window.open(href, "_blank", "noopener,noreferrer");
+						} else {
+							// Prevent default navigation to allow editing on simple click.
+							// Browsers normally handle contentEditable caret placement
+							// but preventing default on the 'a' tag ensures no unwanted
+							// side effects like mail/dialer app triggers.
+							event.preventDefault();
+						}
 					}
 				}}
 				onInput={(event) => {
