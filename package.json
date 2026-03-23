@@ -1,14 +1,20 @@
 {
-	"name": "Zoe Resume Builder",
-	"description": "Zoe Resume Builder is a free resume builder that simplifies the process of creating, updating, and sharing your resume.",
+	"name": "reactive-resume",
+	"description": "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume.",
 	"version": "5.0.5",
 	"license": "MIT",
 	"type": "module",
 	"packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/navgurukul/zoe-resume-builder.git"
-	},	"scripts": {
+		"url": "https://github.com/amruthpillai/reactive-resume.git"
+	},
+	"author": {
+		"name": "Amruth Pillai",
+		"email": "hello@amruthpillai.com",
+		"url": "https://amruthpillai.com"
+	},
+	"scripts": {
 		"build": "vite build",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",

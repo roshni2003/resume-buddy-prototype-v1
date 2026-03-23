@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://zoe-resume-builder.com/sitemap.xml
+Sitemap: https://rxresu.me/sitemap.xml

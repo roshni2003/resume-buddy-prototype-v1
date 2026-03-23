@@ -26,30 +26,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	return response.json();
 }
 
-// Local API request (for same-server endpoints like /api/*)
-async function localRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-	const url = path.startsWith("/") ? path : `/${path}`;
-	const response = await fetch(url, {
-		...options,
-		headers: {
-			"Content-Type": "application/json",
-			...options.headers,
-		},
-		credentials: "include", // Include cookies for authentication
-	});
-
-	if (!response.ok) {
-		const errorBody = await response.json().catch(() => ({}));
-		throw new Error(errorBody.error || errorBody.message || `Request failed with status ${response.status}`);
-	}
-
-	if (response.status === 204) {
-		return undefined as unknown as T;
-	}
-
-	return response.json();
-}
-
 export interface ResumeSummary {
 	id: string;
 	name: string;
@@ -208,34 +184,4 @@ export const api = {
 		request<{ url: string }>(`/resumes/${id}/export?format=${format}`, {
 			method: "GET",
 		}),
-
-	// 12. POST: /api/ai/final-review (local API endpoint)
-	finalReview: async (data: {
-		provider: string;
-		model: string;
-		apiKey: string;
-		baseURL?: string;
-		resume: Record<string, unknown>;
-		photo?: {
-			url?: string;
-			visible?: boolean;
-		};
-	}) => {
-		return localRequest<{
-			overall_score: number;
-			critical: string[];
-			important: string[];
-			suggestions: string[];
-			strengths: string[];
-			detailed_checks: {
-				photo_verdict: string;
-				link_status: string;
-				grammar_tense: string;
-			};
-			final_verdict: "READY" | "NEEDS_MINOR_FIXES" | "NEEDS_MAJOR_WORK";
-		}>("/api/ai/final-review", {
-			method: "POST",
-			body: JSON.stringify(data),
-		});
-	},
 };

@@ -79,7 +79,7 @@ export function DashboardSidebar() {
 						<SidebarMenuButton asChild className="h-auto justify-center">
 							<Link to="/">
 								<BrandIcon variant="icon" className="size-6" />
-								<h1 className="sr-only">Zoe Resume Builder</h1>
+								<h1 className="sr-only">Reactive Resume</h1>
 							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>

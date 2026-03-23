@@ -37,7 +37,7 @@ services:
       retries: 10
 
   # As an alternative to browserless, you can also use a lightweight image like chromedp/headless-shell:latest
-  # See documentation for more information about alternative printer options.
+  # See https://docs.rxresu.me/self-hosting/docker#alternative-printer-options for more information.
   # chrome:
   #   image: chromedp/headless-shell:latest
   #   restart: unless-stopped
@@ -75,8 +75,8 @@ services:
         condition: service_healthy
 
   reactive_resume:
-    image: navgurukul/zoe-resume-builder:latest
-    # image: ghcr.io/navgurukul/zoe-resume-builder:latest
+    image: amruthpillai/reactive-resume:latest
+    # image: ghcr.io/amruthpillai/reactive-resume:latest
     environment:
       # Server
       - TZ=Etc/UTC
