@@ -211,18 +211,18 @@ export function BuilderTopTray() {
 
 	return (
 		<>
-			<div className="flex flex-wrap items-center justify-end gap-1.5 overflow-visible sm:gap-2">
+			<div className="flex items-center justify-end gap-1 overflow-visible sm:gap-2">
 				{/* Colors Button */}
 				<Popover>
 					<PopoverTrigger asChild>
 						<Button
 							size="sm"
 							variant="outline"
-							className="h-8 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
 							aria-label="Colors"
 						>
 							<PaletteIcon className="h-4 w-4" />
-							<span className="hidden sm:inline">
+							<span className="hidden lg:inline">
 								<Trans>Colors</Trans>
 							</span>
 						</Button>
@@ -246,9 +246,14 @@ export function BuilderTopTray() {
 				{/* Fonts Button */}
 				<Popover>
 					<PopoverTrigger asChild>
-						<Button size="sm" variant="outline" className="h-8 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3" aria-label="Fonts">
+						<Button
+							size="sm"
+							variant="outline"
+							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+							aria-label="Fonts"
+						>
 							<TextTIcon className="h-4 w-4" />
-							<span className="hidden sm:inline">
+							<span className="hidden lg:inline">
 								<Trans>Fonts</Trans>
 							</span>
 						</Button>
@@ -273,11 +278,11 @@ export function BuilderTopTray() {
 					size="sm"
 					variant="outline"
 					onClick={() => openDialog("resume.template.gallery", undefined)}
-					className="h-8 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+					className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
 					aria-label="Templates"
 				>
 					<SwapIcon className="h-4 w-4" />
-					<span className="hidden sm:inline">
+					<span className="hidden lg:inline">
 						<Trans>Templates</Trans>
 					</span>
 				</Button>
@@ -285,12 +290,12 @@ export function BuilderTopTray() {
 				{/* Final Review Button with Warning */}
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<div>
+						<div className="shrink-0">
 							<Button
 								size="sm"
 								variant="outline"
 								className={cn(
-									"flex items-center justify-center gap-1.5 px-2 sm:h-9 sm:w-auto sm:gap-2 sm:px-3",
+									"flex shrink-0 items-center justify-center gap-1.5 px-2 sm:h-9 sm:w-auto sm:gap-2 sm:px-3",
 									"border-0 shadow-sm transition-all duration-300",
 									"!bg-gradient-to-r !from-indigo-600 !to-purple-600 !text-white",
 									"hover:!from-indigo-700 hover:!to-purple-700",
@@ -310,7 +315,7 @@ export function BuilderTopTray() {
 										<AnimatedEyes />
 									</motion.div>
 								)}
-								<span className="hidden sm:inline">
+								<span className="hidden lg:inline">
 									<Trans>Final Review</Trans>
 								</span>
 							</Button>
@@ -336,12 +341,12 @@ export function BuilderTopTray() {
 						size="sm"
 						variant="outline"
 						onClick={() => setShowReviewDrawer(true)}
-						className="h-8 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+						className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
 						aria-label="View Last Review"
 						title="View your last review results"
 					>
 						<ShieldWarningIcon className="h-4 w-4" />
-						<span className="hidden sm:inline">
+						<span className="hidden lg:inline">
 							<Trans>View Review</Trans>
 						</span>
 					</Button>
@@ -354,11 +359,11 @@ export function BuilderTopTray() {
 							size="sm"
 							variant="default"
 							disabled={isPrinting}
-							className="flex items-center justify-center gap-1.5 bg-emerald-600 px-2 text-white hover:bg-emerald-700 sm:h-9 sm:w-auto sm:gap-2 sm:px-3"
+							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-2 text-white hover:bg-emerald-700 sm:h-9 sm:w-auto sm:gap-2 sm:px-3"
 							aria-label="Download"
 						>
 							{isPrinting ? <CircleNotchIcon className={cn("animate-spin")} /> : <DownloadSimpleIcon />}
-							<span className="hidden sm:inline">
+							<span className="hidden lg:inline">
 								<Trans>Download</Trans>
 							</span>
 						</Button>
