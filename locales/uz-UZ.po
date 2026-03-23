@@ -101,10 +101,6 @@ msgstr "Yillar davomida ko'plab odamlar menga Reactive Resume bilan bo'lgan tajr
 msgid "A new verification link has been sent to your email address. Please check your inbox to verify your account."
 msgstr "Yangi tasdiqlash havolasi elektron pochta manzilingizga yuborildi. Akkountingizni tasdiqlash uchun pochtangizni tekshiring."
 
-#: src/components/ui/copyright.tsx
-msgid "A passion project by <0>Amruth Pillai</0>."
-msgstr "<0>Amruth Pillai</0> tomonidan ishtiyoq loyihasi."
-
 #: src/dialogs/resume/index.tsx
 #: src/dialogs/resume/index.tsx
 msgid "A resume with this slug already exists."

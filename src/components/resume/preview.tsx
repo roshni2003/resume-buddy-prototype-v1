@@ -185,7 +185,7 @@ function PageContainer({
 						rel="noopener"
 						target="_blank"
 						className="group/link"
-						href="https://docs.rxresu.me/guides/fitting-content-on-a-page"
+						href="#"
 					>
 						<Alert className="max-w-[calc(var(--page-width)*0.65)] text-yellow-600 sm:max-w-sm">
 							<WarningIcon color="currentColor" />

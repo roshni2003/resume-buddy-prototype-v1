@@ -8,7 +8,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE: ${{ github.repository }}
+  IMAGE: ${{ github.reposi          --annotation "index:org.opencontainers.image.title=Zoe Resume Builder" \
+          --annotation "index:org.opencontainers.image.description=A free and open-source resume builder." \
+          --annotation "index:org.opencontainers.image.vendor=NavGurukul" \
+          --annotation "index:org.opencontainers.image.url=https://zoe-resume-builder.com" \
+          --annotation "index:org.opencontainers.image.documentation=https://zoe-resume-builder.com/docs" \
+          --annotation "index:org.opencontainers.image.source=https://github.com/navgurukul/zoe-resume-builder" \}
 
 jobs:
   build:

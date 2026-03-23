@@ -32,14 +32,14 @@ async function handler({ request }: { request: Request }) {
 	if (request.method === "GET" && request.url.endsWith("/spec.json")) {
 		const spec = await openAPIGenerator.generate(router, {
 			info: {
-				title: "Reactive Resume",
+				title: "Zoe Resume Builder",
 				version: "5.0.0",
-				description: "Reactive Resume API",
-				license: { name: "MIT", url: "https://github.com/amruthpillai/reactive-resume/blob/main/LICENSE" },
-				contact: { name: "Amruth Pillai", email: "hello@amruthpillai.com", url: "https://amruthpillai.com" },
+				description: "Zoe Resume Builder API",
+				license: { name: "MIT", url: "https://github.com/navgurukul/zoe-resume-builder/blob/main/LICENSE" },
+				contact: { name: "NavGurukul", email: "contact@navgurukul.org", url: "https://navgurukul.org" },
 			},
 			servers: [{ url: `${env.APP_URL}/api/openapi` }],
-			externalDocs: { url: "https://docs.rxresu.me", description: "Reactive Resume Documentation" },
+			externalDocs: { url: "https://zoe-resume-builder.com/docs", description: "Zoe Resume Builder Documentation" },
 			components: {
 				securitySchemes: {
 					apiKey: {
