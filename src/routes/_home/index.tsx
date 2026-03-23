@@ -1,9 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { templates } from "@/dialogs/resume/template/data";
 
 export const Route = createFileRoute("/_home/")({
-	component: RouteComponent,
+	beforeLoad: () => {
+		throw redirect({ to: "/dashboard/resumes" });
+	},
+	component: () => null,
 });
 
 function RouteComponent() {
