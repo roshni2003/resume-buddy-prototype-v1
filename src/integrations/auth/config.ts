@@ -81,18 +81,20 @@ const getAuthConfig = () => {
 	const db = getDatabase();
 	
 	if (!db) {
-	// Return a minimal auth config when database is not available
-	console.warn("⚠️  Database not configured. Authentication will not work properly.");
-	return betterAuth({
-		appName: "Zoe Resume Builder",
-		baseURL: env.APP_URL,
-		secret: env.AUTH_SECRET || "fallback-secret-for-no-backend",
-		telemetry: { enabled: false },
-	});
-}
+		// Return a minimal auth config when database is not available
+		console.warn("⚠️  Database not configured. Authentication will not work properly.");
+		return betterAuth({
+			appName: "Reactive Resume",
+			baseURL: env.APP_URL,
+			secret: env.AUTH_SECRET || "fallback-secret-for-no-backend",
+			telemetry: { enabled: false },
+		});
+	}
 
-return betterAuth({
-	appName: "Zoe Resume Builder",		baseURL: env.APP_URL,
+	return betterAuth({
+		appName: "Reactive Resume",
+
+		baseURL: env.APP_URL,
 		secret: env.AUTH_SECRET || "fallback-secret-for-no-backend",
 
 		database: drizzleAdapter(db, { schema, provider: "pg" }),
@@ -115,7 +117,7 @@ return betterAuth({
 				await sendEmail({
 					to: user.email,
 					subject: "Reset your password",
-					text: `You requested a password reset for your Zoe Resume Builder account.\n\nTo reset your password, please visit the following URL:\n${url}.\n\nIf you did not request a password reset, please ignore this email.`,
+					text: `You requested a password reset for your Reactive Resume account.\n\nTo reset your password, please visit the following URL:\n${url}.\n\nIf you did not request a password reset, please ignore this email.`,
 				});
 			},
 			password: {
@@ -131,7 +133,7 @@ return betterAuth({
 				await sendEmail({
 					to: user.email,
 					subject: "Verify your email",
-					text: `You recently signed up for an account on Zoe Resume Builder.\n\nTo verify your email, please visit the following URL:\n${url}`,
+					text: `You recently signed up for an account on Reactive Resume.\n\nTo verify your email, please visit the following URL:\n${url}`,
 				});
 			},
 		},
@@ -143,7 +145,7 @@ return betterAuth({
 					await sendEmail({
 						to: newEmail,
 						subject: "Verify your new email",
-						text: `You recently requested to change your email on Zoe Resume Builder from ${user.email} to ${newEmail}.\n\nTo verify this change, please visit the following URL:\n${url}\n\nIf you did not request this change, please ignore this email.`,
+						text: `You recently requested to change your email on Reactive Resume from ${user.email} to ${newEmail}.\n\nTo verify this change, please visit the following URL:\n${url}\n\nIf you did not request this change, please ignore this email.`,
 					});
 				},
 			},
@@ -256,11 +258,11 @@ return betterAuth({
 				validationOrder: { username: "post-normalization", displayUsername: "post-normalization" },
 			}),
 			twoFactor({
-				issuer: "Zoe Resume Builder",
+				issuer: "Reactive Resume",
 			}),
 			passkey({
 				origin: env.APP_URL,
-				rpName: "Zoe Resume Builder",
+				rpName: "Reactive Resume",
 				rpID: new URL(env.APP_URL).hostname,
 			}),
 			genericOAuth({
