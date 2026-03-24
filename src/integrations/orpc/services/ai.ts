@@ -13,21 +13,24 @@ import pdfParserSystemPrompt from "@/integrations/ai/prompts/pdf-parser-system.m
 import pdfParserUserPrompt from "@/integrations/ai/prompts/pdf-parser-user.md?raw";
 import type { ResumeData } from "@/schema/resume/data";
 import { defaultResumeData, resumeDataSchema } from "@/schema/resume/data";
+import { env } from "@/utils/env";
 
 export const aiProviderSchema = z.enum(["ollama", "openai", "gemini", "anthropic", "vercel-ai-gateway"]);
 
 export type AIProvider = z.infer<typeof aiProviderSchema>;
 
 export type GetModelInput = {
-	provider: AIProvider;
-	model: string;
-	apiKey: string;
-	baseURL: string;
+	provider?: AIProvider;
+	model?: string;
+	apiKey?: string;
+	baseURL?: string;
 };
 
 function getModel(input: GetModelInput) {
-	const { provider, model, apiKey } = input;
-	const baseURL = input.baseURL || undefined;
+	const provider = input.provider || env.AI_PROVIDER || "gemini";
+	const model = input.model || env.AI_MODEL || "gemini-1.5-flash";
+	const apiKey = input.apiKey || env.AI_API_KEY || "";
+	const baseURL = input.baseURL || env.AI_BASE_URL || undefined;
 
 	return match(provider)
 		.with("openai", () => createOpenAI({ apiKey, baseURL }).languageModel(model))
@@ -39,10 +42,10 @@ function getModel(input: GetModelInput) {
 }
 
 export const aiCredentialsSchema = z.object({
-	provider: aiProviderSchema,
-	model: z.string(),
-	apiKey: z.string(),
-	baseURL: z.string(),
+	provider: aiProviderSchema.optional(),
+	model: z.string().optional(),
+	apiKey: z.string().optional(),
+	baseURL: z.string().optional(),
 });
 
 export const fileInputSchema = z.object({
