@@ -2,20 +2,29 @@ import { ORPCError } from "@orpc/client";
 import { AISDKError } from "ai";
 import z, { ZodError } from "zod";
 import { publicProcedure } from "../context";
-import { aiCredentialsSchema, aiService, fileInputSchema, formatZodError } from "../services/ai";
+import { aiCredentialsSchema, aiProviderSchema, aiService, fileInputSchema, formatZodError } from "../services/ai";
 
 export const aiRouter = {
-	testConnection: publicProcedure.input(aiCredentialsSchema).handler(async ({ input }) => {
-		try {
-			return await aiService.testConnection(input);
-		} catch (error) {
-			if (error instanceof AISDKError) {
-				throw new ORPCError("BAD_GATEWAY", { message: error.message });
-			}
+	testConnection: publicProcedure
+		.input(
+			z.object({
+				provider: aiProviderSchema,
+				model: z.string(),
+				apiKey: z.string(),
+				baseURL: z.string(),
+			}),
+		)
+		.handler(async ({ input }) => {
+			try {
+				return await aiService.testConnection(input);
+			} catch (error) {
+				if (error instanceof AISDKError) {
+					throw new ORPCError("BAD_GATEWAY", { message: error.message });
+				}
 
-			throw error;
-		}
-	}),
+				throw error;
+			}
+		}),
 
 	generateContent: publicProcedure
 		.input(

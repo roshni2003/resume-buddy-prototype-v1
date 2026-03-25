@@ -32,10 +32,11 @@ export function AIGenerateButton({
 }: AIGenerateButtonProps) {
 	const isMounted = useRef(true);
 
-	// Use environment variables for AI configuration (optional, server provides defaults)
-	const provider = import.meta.env.VITE_AI_PROVIDER as AIProvider | undefined;
-	const model = import.meta.env.VITE_AI_MODEL as string | undefined;
-	const baseURL = import.meta.env.VITE_AI_BASE_URL as string | undefined;
+	// Use environment variables for AI configuration
+	const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
+	const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
+	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
+	const baseURL = import.meta.env.VITE_AI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta";
 
 	const { mutate: generateContent, isPending } = useMutation(orpc.ai.generateContent.mutationOptions());
 
@@ -46,6 +47,7 @@ export function AIGenerateButton({
 		};
 	}, []);
 
+	const isConfigured = !!apiKey && !!model;
 	const hasReachedLimit = roundsUsed >= maxRounds;
 	const roundsRemaining = Math.max(0, maxRounds - roundsUsed);
 	const isLoading = isPending;
@@ -65,6 +67,11 @@ export function AIGenerateButton({
 		if (isLoading) {
 			console.log("Already generating, ignoring click");
 			toast.info(t`Please wait for the current generation to complete.`);
+			return;
+		}
+
+		if (!isConfigured) {
+			toast.error(t`AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file.`);
 			return;
 		}
 
@@ -90,6 +97,7 @@ export function AIGenerateButton({
 			{
 				provider,
 				model,
+				apiKey,
 				baseURL,
 				type,
 				data: enhancedData,

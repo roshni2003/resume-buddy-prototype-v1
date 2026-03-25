@@ -74,10 +74,12 @@ export function BuilderTopTray() {
 	const [reviewStartTime, setReviewStartTime] = useState<number>(0);
 	const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	const provider = import.meta.env.VITE_AI_PROVIDER;
-	const model = import.meta.env.VITE_AI_MODEL;
+	const provider = import.meta.env.VITE_AI_PROVIDER || "gemini";
+	const model = import.meta.env.VITE_AI_MODEL || "gemini-2.0-flash-exp";
+	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
 	const baseURL = import.meta.env.VITE_AI_BASE_URL;
 	const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+	const isConfigured = !!apiKey && !!model;
 	const [showLastAttemptConfirm, setShowLastAttemptConfirm] = useState(false);
 
 	useEffect(() => {
@@ -89,7 +91,8 @@ export function BuilderTopTray() {
 	}, []);
 
 	const onFinalReview = async () => {
-		if (!resume) {
+		if (!resume || !isConfigured) {
+			toast.error(t`AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file.`);
 			return;
 		}
 
@@ -130,6 +133,7 @@ export function BuilderTopTray() {
 			const result = await runFinalReview({
 				provider,
 				model,
+				apiKey,
 				baseURL,
 				resume: resume.data as Record<string, unknown>,
 				photo: {
