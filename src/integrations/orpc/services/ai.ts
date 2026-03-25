@@ -20,9 +20,9 @@ export const aiProviderSchema = z.enum(["ollama", "openai", "gemini", "anthropic
 export type AIProvider = z.infer<typeof aiProviderSchema>;
 
 export type GetModelInput = {
-	provider: AIProvider;
-	model: string;
-	apiKey: string;
+	provider?: AIProvider;
+	model?: string;
+	apiKey?: string;
 	baseURL?: string;
 };
 
@@ -42,9 +42,9 @@ function getModel(input: GetModelInput) {
 }
 
 export const aiCredentialsSchema = z.object({
-	provider: aiProviderSchema,
-	model: z.string(),
-	apiKey: z.string(),
+	provider: aiProviderSchema.optional(),
+	model: z.string().optional(),
+	apiKey: z.string().optional(),
 	baseURL: z.string().optional(),
 });
 

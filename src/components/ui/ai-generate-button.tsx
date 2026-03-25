@@ -88,9 +88,9 @@ export function AIGenerateButton({
 
 		generateContent(
 			{
-				provider,
-				model,
-				baseURL,
+				...(provider && { provider }),
+				...(model && { model }),
+				...(baseURL && { baseURL }),
 				type,
 				data: enhancedData,
 			},

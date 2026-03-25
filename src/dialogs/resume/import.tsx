@@ -141,44 +141,40 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 				data = importer.parse(json);
 			}
 
-			if (values.type === "pdf") {
-				if (!isAIEnabled)
-					throw new Error(t`This feature requires AI Integration to be enabled. Please enable it in the settings.`);
+		if (values.type === "pdf") {
+			if (!isAIEnabled)
+				throw new Error(t`This feature requires AI Integration to be enabled. Please enable it in the settings.`);
 
-				const arrayBuffer = await values.file.arrayBuffer();
-				const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+			const arrayBuffer = await values.file.arrayBuffer();
+			const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-				data = await client.ai.parsePdf({
-					provider,
-					model,
-					apiKey,
-					baseURL,
-					file: { name: values.file.name, data: base64 },
-				});
-			}
+			data = await client.ai.parsePdf({
+				...(provider && { provider }),
+				...(model && { model }),
+				...(apiKey && { apiKey }),
+				...(baseURL && { baseURL }),
+				file: { name: values.file.name, data: base64 },
+			});
+		}			if (values.type === "docx") {
+			if (!isAIEnabled)
+				throw new Error(t`This feature requires AI Integration to be enabled. Please enable it in the settings.`);
 
-			if (values.type === "docx") {
-				if (!isAIEnabled)
-					throw new Error(t`This feature requires AI Integration to be enabled. Please enable it in the settings.`);
+			const arrayBuffer = await values.file.arrayBuffer();
+			const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+			const mediaType =
+				values.file.type === "application/msword"
+					? ("application/msword" as const)
+					: ("application/vnd.openxmlformats-officedocument.wordprocessingml.document" as const);
 
-				const arrayBuffer = await values.file.arrayBuffer();
-				const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-				const mediaType =
-					values.file.type === "application/msword"
-						? ("application/msword" as const)
-						: ("application/vnd.openxmlformats-officedocument.wordprocessingml.document" as const);
-
-				data = await client.ai.parseDocx({
-					provider,
-					model,
-					apiKey,
-					baseURL,
-					mediaType,
-					file: { name: values.file.name, data: base64 },
-				});
-			}
-
-			if (!data) throw new Error("No data was returned from the AI provider.");
+			data = await client.ai.parseDocx({
+				...(provider && { provider }),
+				...(model && { model }),
+				...(apiKey && { apiKey }),
+				...(baseURL && { baseURL }),
+				mediaType,
+				file: { name: values.file.name, data: base64 },
+			});
+		}			if (!data) throw new Error("No data was returned from the AI provider.");
 
 			const name = data.basics.name || generateRandomName();
 			await createResume({

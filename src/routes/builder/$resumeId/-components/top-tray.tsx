@@ -129,9 +129,9 @@ export function BuilderTopTray() {
 
 		try {
 			const result = await runFinalReview({
-				provider,
-				model,
-				apiKey,
+				...(provider && { provider }),
+				...(model && { model }),
+				...(apiKey && { apiKey }),
 				...(baseURL && { baseURL }),
 				resume: resume.data as Record<string, unknown>,
 				photo: {
