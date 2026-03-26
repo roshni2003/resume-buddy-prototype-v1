@@ -35,6 +35,7 @@ export function AIGenerateButton({
 	// Use environment variables for AI configuration (optional, server provides defaults)
 	const provider = import.meta.env.VITE_AI_PROVIDER as AIProvider | undefined;
 	const model = import.meta.env.VITE_AI_MODEL as string | undefined;
+	const apiKey = import.meta.env.VITE_AI_API_KEY as string | undefined;
 	const baseURL = import.meta.env.VITE_AI_BASE_URL as string | undefined;
 
 	const { mutate: generateContent, isPending } = useMutation(orpc.ai.generateContent.mutationOptions());
@@ -90,6 +91,7 @@ export function AIGenerateButton({
 			{
 				...(provider && { provider }),
 				...(model && { model }),
+				...(apiKey && { apiKey }),
 				...(baseURL && { baseURL }),
 				type,
 				data: enhancedData,
