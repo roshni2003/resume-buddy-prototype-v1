@@ -190,10 +190,10 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 		createResume(resumeData, {
 			onSuccess: async (response) => {
 				const resumeId = response.id;
-				
+
 				// Wait a moment for the API to process the resume creation
-				await new Promise(resolve => setTimeout(resolve, 500));
-				
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
 				try {
 					// Fetch the created resume to get the full data structure
 					const createdResume = await api.fetchResume(resumeId);
@@ -264,7 +264,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 
 					toast.success(t`Your resume has been created successfully.`, { id: toastId });
 					closeDialog();
-					
+
 					// Navigate to builder
 					navigate({ to: "/builder/$resumeId", params: { resumeId } });
 				} catch (error) {
@@ -276,8 +276,11 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 				}
 			},
 			onError: (error) => {
-				if (error.message === "RESUME_SLUG_ALREADY_EXISTS") {
-					toast.error(t`A resume with this slug already exists.`, { id: toastId });
+				if (
+					error.message === "RESUME_SLUG_ALREADY_EXISTS" ||
+					error.message.toLowerCase().includes("internal server error")
+				) {
+					toast.error(t`Name already exists, please use a different name.`, { id: toastId });
 					return;
 				}
 
@@ -302,17 +305,17 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						></div>
 					</div>
 				</div>
-
-			{/* Header with Zoe */}
-			<div className="mb-6 flex items-start gap-4 border-gray-100 border-b pb-6">
-				<div className="shrink-0">
-					<img src="/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full" />
-				</div>
-				<div>
-					<h2 className="mb-1 font-bold text-emerald-900 text-xl">Let's build your resume</h2>
-					<p className="text-gray-600">I'm Zoe, your AI assistant for Resume Builder. Start with your basics.</p>
-				</div>
-			</div>				<Form {...basicDetailsForm}>
+				{/* Header with Zoe */}
+				<div className="mb-6 flex items-start gap-4 border-gray-100 border-b pb-6">
+					<div className="shrink-0">
+						<img src="/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full" />
+					</div>
+					<div>
+						<h2 className="mb-1 font-bold text-emerald-900 text-xl">Let's build your resume</h2>
+						<p className="text-gray-600">I'm Zoe, your AI assistant for Resume Builder. Start with your basics.</p>
+					</div>
+				</div>{" "}
+				<Form {...basicDetailsForm}>
 					<form onSubmit={basicDetailsForm.handleSubmit(onBasicDetailsSubmit)} className="space-y-6">
 						{/* Profile Photo Upload */}
 						<div className="flex items-start gap-6">
@@ -579,16 +582,16 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 					></div>
 				</div>
 			</div>
-
-		{/* Header */}
-		<div className="mb-8 text-center">
-			<div className="mb-4 flex items-center justify-center gap-2">
-				<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full" />
-				<span className="font-medium text-gray-600 text-sm">Zoe AI - Resume Builder Assistant</span>
-			</div>
-			<h1 className="mb-2 font-bold text-3xl text-emerald-900">Choose Your Template</h1>
-			<p className="text-gray-600">Pick a design that matches your style. You can always change it later.</p>
-		</div>			{/* Templates Grid */}
+			{/* Header */}
+			<div className="mb-8 text-center">
+				<div className="mb-4 flex items-center justify-center gap-2">
+					<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full" />
+					<span className="font-medium text-gray-600 text-sm">Zoe AI - Resume Builder Assistant</span>
+				</div>
+				<h1 className="mb-2 font-bold text-3xl text-emerald-900">Choose Your Template</h1>
+				<p className="text-gray-600">Pick a design that matches your style. You can always change it later.</p>
+			</div>{" "}
+			{/* Templates Grid */}
 			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{Object.entries(templates).map(([key, template]) => (
 					<TemplateCard
@@ -601,7 +604,6 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 					/>
 				))}
 			</div>
-
 			{/* Navigation Buttons */}
 			<DialogFooter className="flex items-center justify-between border-gray-200 border-t pt-6">
 				<Button style={{ backgroundColor: "grey" }} type="button" variant="outline" onClick={() => setCurrentStep(1)}>
@@ -652,8 +654,11 @@ export function UpdateResumeDialog({ data }: DialogProps<"resume.update">) {
 				closeDialog();
 			},
 			onError: (error) => {
-				if (error.message === "RESUME_SLUG_ALREADY_EXISTS") {
-					toast.error(t`A resume with this slug already exists.`, { id: toastId });
+				if (
+					error.message === "RESUME_SLUG_ALREADY_EXISTS" ||
+					error.message.toLowerCase().includes("internal server error")
+				) {
+					toast.error(t`Name already exists, please use a different name.`, { id: toastId });
 					return;
 				}
 
@@ -734,6 +739,14 @@ export function DuplicateResumeDialog({ data }: DialogProps<"resume.duplicate">)
 				}
 			},
 			onError: (error) => {
+				if (
+					error.message === "RESUME_SLUG_ALREADY_EXISTS" ||
+					error.message.toLowerCase().includes("internal server error")
+				) {
+					toast.error(t`Name already exists, please use a different name.`, { id: toastId });
+					return;
+				}
+
 				toast.error(error.message, { id: toastId });
 			},
 		});
