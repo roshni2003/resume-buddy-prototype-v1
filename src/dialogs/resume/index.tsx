@@ -5,7 +5,6 @@ import {
 	ArrowLeftIcon,
 	ArrowRightIcon,
 	CameraIcon,
-	MagicWandIcon,
 	PencilSimpleLineIcon,
 	PlusIcon,
 	TrashIcon,
@@ -787,10 +786,6 @@ function ResumeForm() {
 		return `${window.location.origin}/${session?.user.username ?? ""}/`;
 	}, [session]);
 
-	const onGenerateName = () => {
-		form.setValue("name", generateRandomName(), { shouldDirty: true });
-	};
-
 	return (
 		<>
 			<FormField
@@ -801,15 +796,9 @@ function ResumeForm() {
 						<FormLabel>
 							<Trans>Name</Trans>
 						</FormLabel>
-						<div className="flex items-center gap-x-2">
-							<FormControl>
-								<Input min={1} max={64} {...field} />
-							</FormControl>
-
-							<Button size="icon" variant="outline" title={t`Generate a random name`} onClick={onGenerateName}>
-								<MagicWandIcon />
-							</Button>
-						</div>
+						<FormControl>
+							<Input min={1} max={64} {...field} />
+						</FormControl>
 						<FormMessage />
 						<FormDescription>
 							<Trans>Tip: You can name the resume referring to the position you are applying for.</Trans>
