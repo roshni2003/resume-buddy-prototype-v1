@@ -280,7 +280,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 					error.message === "RESUME_SLUG_ALREADY_EXISTS" ||
 					error.message.toLowerCase().includes("internal server error")
 				) {
-					toast.error(t`Name already exists, please use a different name.`, { id: toastId });
+					toast.error("Name already exists, please use a different name.", { id: toastId });
 					return;
 				}
 
@@ -658,7 +658,7 @@ export function UpdateResumeDialog({ data }: DialogProps<"resume.update">) {
 					error.message === "RESUME_SLUG_ALREADY_EXISTS" ||
 					error.message.toLowerCase().includes("internal server error")
 				) {
-					toast.error(t`Name already exists, please use a different name.`, { id: toastId });
+					toast.error("Name already exists, please use a different name.", { id: toastId });
 					return;
 				}
 
@@ -743,7 +743,7 @@ export function DuplicateResumeDialog({ data }: DialogProps<"resume.duplicate">)
 					error.message === "RESUME_SLUG_ALREADY_EXISTS" ||
 					error.message.toLowerCase().includes("internal server error")
 				) {
-					toast.error(t`Name already exists, please use a different name.`, { id: toastId });
+					toast.error("Name already exists, please use a different name.", { id: toastId });
 					return;
 				}
 

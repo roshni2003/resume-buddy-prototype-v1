@@ -19,6 +19,21 @@ msgstr ""
 "X-Crowdin-File-ID: 518\n"
 
 #. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Last Updated"
+msgstr "最後更新日期"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Created"
+msgstr "建立日期"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Name"
+msgstr "名稱"
+
+#. js-lingui-explicit-id
 #: src/components/command-palette/pages/navigation.tsx
 msgid "go-to"
 msgstr ""
@@ -43,21 +58,6 @@ msgstr ""
 #: src/components/command-palette/pages/navigation.tsx
 msgid "profile"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Last Updated"
-msgstr "最後更新日期"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Created"
-msgstr "建立日期"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Name"
-msgstr "名稱"
 
 #. placeholder {0}: section.items.length
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
@@ -89,11 +89,6 @@ msgstr "新的驗證連結已傳送至您的電子郵件地址。請檢查收件
 #: src/components/ui/copyright.tsx
 msgid "A passion project by <0>Amruth Pillai</0>."
 msgstr "一個由 <0>Amruth Pillai</0> 發起的熱血專案。"
-
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-msgid "A resume with this slug already exists."
-msgstr "已有使用這個標示碼的履歷。"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "A4"
@@ -172,11 +167,6 @@ msgstr "南非荷蘭語"
 #: src/dialogs/resume/import.tsx
 msgid "AI"
 msgstr "AI"
-
-#: src/components/ui/ai-generate-button.tsx
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file."
-msgstr ""
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "AI is reviewing your resume..."
@@ -1124,6 +1114,12 @@ msgstr "移動到"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "名稱"
+
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+msgid "Name already exists, please use a different name."
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Nepali"

@@ -14,6 +14,21 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Last Updated"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Created"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Name"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/components/command-palette/pages/navigation.tsx
 msgid "go-to"
 msgstr ""
@@ -37,21 +52,6 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/components/command-palette/pages/navigation.tsx
 msgid "profile"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Last Updated"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Created"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Name"
 msgstr ""
 
 #. placeholder {0}: section.items.length
@@ -83,11 +83,6 @@ msgstr ""
 
 #: src/components/ui/copyright.tsx
 msgid "A passion project by <0>Amruth Pillai</0>."
-msgstr ""
-
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-msgid "A resume with this slug already exists."
 msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
@@ -166,11 +161,6 @@ msgstr ""
 #: src/dialogs/resume/import.tsx
 #: src/dialogs/resume/import.tsx
 msgid "AI"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file."
 msgstr ""
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
@@ -1118,6 +1108,12 @@ msgstr ""
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
+msgstr ""
+
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+msgid "Name already exists, please use a different name."
 msgstr ""
 
 #: src/utils/locale.ts

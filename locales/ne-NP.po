@@ -19,6 +19,21 @@ msgstr ""
 "X-Crowdin-File-ID: 518\n"
 
 #. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Last Updated"
+msgstr "अन्तिम पटक अद्यावधिक गरिएको"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Created"
+msgstr "बनाइएको मिति"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Name"
+msgstr "नाम"
+
+#. js-lingui-explicit-id
 #: src/components/command-palette/pages/navigation.tsx
 msgid "go-to"
 msgstr ""
@@ -43,21 +58,6 @@ msgstr ""
 #: src/components/command-palette/pages/navigation.tsx
 msgid "profile"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Last Updated"
-msgstr "अन्तिम पटक अद्यावधिक गरिएको"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Created"
-msgstr "बनाइएको मिति"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Name"
-msgstr "नाम"
 
 #. placeholder {0}: section.items.length
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
@@ -89,11 +89,6 @@ msgstr "तपाईंको इमेल ठेगानामा नयाँ
 #: src/components/ui/copyright.tsx
 msgid "A passion project by <0>Amruth Pillai</0>."
 msgstr "<0>Amruth Pillai</0> द्वारा बनाइएको एउटा जोश र लगनको परियोजना।"
-
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-msgid "A resume with this slug already exists."
-msgstr "यस स्लग भएको एउटा बायोडाटा पहिले नै अवस्थित छ।"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "A4"
@@ -172,11 +167,6 @@ msgstr "अफ्रिकान्स"
 #: src/dialogs/resume/import.tsx
 msgid "AI"
 msgstr "AI"
-
-#: src/components/ui/ai-generate-button.tsx
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file."
-msgstr ""
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "AI is reviewing your resume..."
@@ -1124,6 +1114,12 @@ msgstr "यसमा सार्नुहोस्"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "नाम"
+
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+msgid "Name already exists, please use a different name."
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Nepali"

@@ -14,6 +14,21 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Last Updated"
+msgstr "Last Updated"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Created"
+msgstr "Created"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Name"
+msgstr "Name"
+
+#. js-lingui-explicit-id
 #: src/components/command-palette/pages/navigation.tsx
 msgid "go-to"
 msgstr "go-to"
@@ -38,21 +53,6 @@ msgstr "settings"
 #: src/components/command-palette/pages/navigation.tsx
 msgid "profile"
 msgstr "profile"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Last Updated"
-msgstr "Last Updated"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Created"
-msgstr "Created"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Name"
-msgstr "Name"
 
 #. placeholder {0}: section.items.length
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
@@ -84,11 +84,6 @@ msgstr "A new verification link has been sent to your email address. Please chec
 #: src/components/ui/copyright.tsx
 msgid "A passion project by <0>Amruth Pillai</0>."
 msgstr "A passion project by <0>Amruth Pillai</0>."
-
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-msgid "A resume with this slug already exists."
-msgstr "A resume with this slug already exists."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "A4"
@@ -167,11 +162,6 @@ msgstr "Afrikaans"
 #: src/dialogs/resume/import.tsx
 msgid "AI"
 msgstr "AI"
-
-#: src/components/ui/ai-generate-button.tsx
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file."
-msgstr "AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "AI is reviewing your resume..."
@@ -1119,6 +1109,12 @@ msgstr "Move to"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "Name"
+
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+#: src/dialogs/resume/index.tsx
+msgid "Name already exists, please use a different name."
+msgstr "Name already exists, please use a different name."
 
 #: src/utils/locale.ts
 msgid "Nepali"
