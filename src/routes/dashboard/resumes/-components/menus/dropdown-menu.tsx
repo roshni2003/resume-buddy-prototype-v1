@@ -69,7 +69,7 @@ export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
 
 				<DropdownMenuItem disabled={resume.isLocked} onSelect={handleUpdate}>
 					<PencilSimpleLineIcon />
-					<Trans>Update</Trans>
+					<Trans>Rename</Trans>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem onSelect={handleDuplicate}>

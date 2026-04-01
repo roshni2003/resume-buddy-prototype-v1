@@ -117,7 +117,7 @@ export function ResumeContextMenu({ resume, children }: Props) {
 				>
 					<PencilSimpleLineIcon className="size-4" />
 					<span className="font-medium">
-						<Trans>Update</Trans>
+						<Trans>Rename</Trans>
 					</span>
 				</ContextMenuItem>
 

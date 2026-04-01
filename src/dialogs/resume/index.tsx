@@ -11,18 +11,15 @@ import {
 } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
-import { ChipInput } from "@/components/input/chip-input";
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
-import { authClient } from "@/integrations/auth/client";
 import { api } from "@/utils/api";
 import { generateRandomName, slugify } from "@/utils/string";
 import { type DialogProps, useDialogStore } from "../store";
@@ -671,10 +668,10 @@ export function UpdateResumeDialog({ data }: DialogProps<"resume.update">) {
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-x-2">
 					<PencilSimpleLineIcon />
-					<Trans>Update Resume</Trans>
+					<Trans>Rename Resume</Trans>
 				</DialogTitle>
 				<DialogDescription>
-					<Trans>Changed your mind? Rename your resume to something more descriptive.</Trans>
+					<Trans>Give your resume a new name.</Trans>
 				</DialogDescription>
 			</DialogHeader>
 
@@ -780,11 +777,11 @@ export function DuplicateResumeDialog({ data }: DialogProps<"resume.duplicate">)
 
 function ResumeForm() {
 	const form = useFormContext<FormValues>();
-	const { data: session } = authClient.useSession();
-
-	const slugPrefix = useMemo(() => {
-		return `${window.location.origin}/${session?.user.username ?? ""}/`;
-	}, [session]);
+	// slugPrefix commented out — used only by the Slug field which is temporarily hidden
+	// const { data: session } = authClient.useSession();
+	// const slugPrefix = useMemo(() => {
+	// 	return `${window.location.origin}/${session?.user.username ?? ""}/`;
+	// }, [session]);
 
 	return (
 		<>
@@ -807,6 +804,7 @@ function ResumeForm() {
 				)}
 			/>
 
+			{/* Slug field commented out — not copyable and public slug URL not yet functional
 			<FormField
 				control={form.control}
 				name="slug"
@@ -830,7 +828,9 @@ function ResumeForm() {
 					</FormItem>
 				)}
 			/>
+			*/}
 
+			{/* Tags field commented out — no filtering/search feature currently uses tags
 			<FormField
 				control={form.control}
 				name="tags"
@@ -849,6 +849,7 @@ function ResumeForm() {
 					</FormItem>
 				)}
 			/>
+			*/}
 		</>
 	);
 }
