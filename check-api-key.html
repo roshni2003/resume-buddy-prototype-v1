@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Key Checker</title>
+</head>
+<body>
+    <h1>Check API Key in localStorage</h1>
+    <button onclick="checkKey()">Check Current API Key</button>
+    <button onclick="clearKey()">Clear API Key</button>
+    <button onclick="setTestKey()">Set Test Key</button>
+    <pre id="output"></pre>
+    
+    <script>
+        function log(msg) {
+            document.getElementById('output').innerHTML += msg + '\n';
+        }
+        
+        function checkKey() {
+            document.getElementById('output').innerHTML = '';
+            const key = localStorage.getItem('gemini_api_key');
+            if (key) {
+                log('✅ API Key found in localStorage:');
+                log('   First 20 chars: ' + key.substring(0, 20) + '...');
+                log('   Length: ' + key.length + ' characters');
+            } else {
+                log('❌ No API key found in localStorage');
+            }
+            
+            // Check all localStorage items
+            log('\n📦 All localStorage items:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                log('   ' + key + ': ' + localStorage.getItem(key).substring(0, 30) + '...');
+            }
+        }
+        
+        function clearKey() {
+            localStorage.removeItem('gemini_api_key');
+            log('🗑️ API key cleared');
+            checkKey();
+        }
+        
+        function setTestKey() {
+            const key = prompt('Enter your Gemini API key:');
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                log('💾 API key saved');
+                checkKey();
+            }
+        }
+    </script>
+</body>
+</html>

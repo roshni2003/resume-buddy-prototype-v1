@@ -1,9 +1,27 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = import.meta.env.VITE_AI_API_KEY || "";
+// Helper function to get API key from localStorage or environment
+function getApiKey(): string {
+  // First try to get from localStorage (user-provided key)
+  const localKey = typeof localStorage !== "undefined" ? localStorage.getItem("gemini_api_key") : null;
+  if (localKey) {
+    console.log("Using API key from localStorage:", localKey.substring(0, 10) + "...");
+    return localKey;
+  }
+  
+  // Fallback to environment variable
+  const envKey = import.meta.env.VITE_AI_API_KEY || "";
+  console.log("Using API key from environment:", envKey ? envKey.substring(0, 10) + "..." : "NONE");
+  return envKey;
+}
+
 const MODEL_NAME = import.meta.env.VITE_AI_MODEL || "models/gemini-2.0-flash-exp";
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+// Helper function to get or create GoogleGenerativeAI instance with current API key
+function getGenAI(): GoogleGenerativeAI {
+  const apiKey = getApiKey();
+  return new GoogleGenerativeAI(apiKey);
+}
 
 interface ExperienceData {
   position: string;
@@ -22,6 +40,11 @@ interface SummaryData {
 
 export async function generateExperienceDescription(data: ExperienceData): Promise<string> {
   try {
+    // Get fresh API key from localStorage
+    const currentApiKey = getApiKey();
+    console.log("🔑 generateExperienceDescription - Using API key:", currentApiKey ? currentApiKey.substring(0, 15) + "..." : "NONE");
+    
+    const genAI = getGenAI(); // Get instance with current API key
     const model = genAI.getGenerativeModel({ 
       model: MODEL_NAME,
       generationConfig: {
@@ -79,6 +102,11 @@ RULES:
 
 export async function generateProfessionalSummary(data: SummaryData): Promise<string> {
   try {
+    // Get fresh API key from localStorage
+    const currentApiKey = getApiKey();
+    console.log("🔑 generateProfessionalSummary - Using API key:", currentApiKey ? currentApiKey.substring(0, 15) + "..." : "NONE");
+    
+    const genAI = getGenAI(); // Get instance with current API key
     const model = genAI.getGenerativeModel({ 
       model: MODEL_NAME,
       generationConfig: {

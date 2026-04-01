@@ -29,7 +29,19 @@ export type GetModelInput = {
 function getModel(input: GetModelInput) {
 	const provider = input.provider || env.AI_PROVIDER || "gemini";
 	const model = input.model || env.AI_MODEL || "gemini-1.5-flash";
-	const apiKey = input.apiKey || env.AI_API_KEY || "";
+	
+	// Check localStorage for user-provided API key first (for Gemini provider)
+	let apiKey = input.apiKey || env.AI_API_KEY || "";
+	if (provider === "gemini" && typeof localStorage !== "undefined") {
+		const localKey = localStorage.getItem("gemini_api_key");
+		if (localKey) {
+			console.log("Using Gemini API key from localStorage:", localKey.substring(0, 10) + "...");
+			apiKey = localKey;
+		} else {
+			console.log("Using Gemini API key from environment:", apiKey ? apiKey.substring(0, 10) + "..." : "NONE");
+		}
+	}
+	
 	const baseURL = input.baseURL || env.AI_BASE_URL || undefined;
 
 	return match(provider)
