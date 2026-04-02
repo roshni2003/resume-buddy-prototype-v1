@@ -616,7 +616,7 @@ export function UpdateResumeDialog({ data }: DialogProps<"resume.update">) {
 	const queryClient = useQueryClient();
 
 	const { mutate: updateResume, isPending } = useMutation({
-		mutationFn: api.updateResume,
+		mutationFn: (data: FormValues) => api.updateResume(data.id, data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["resumes"] });
 		},
@@ -654,7 +654,7 @@ export function UpdateResumeDialog({ data }: DialogProps<"resume.update">) {
 					error.message === "RESUME_SLUG_ALREADY_EXISTS" ||
 					error.message.toLowerCase().includes("internal server error")
 				) {
-					toast.error("Name already exists, please use a different name.", { id: toastId });
+					toast.error(t`Name already exists, please use a different name.`, { id: toastId });
 					return;
 				}
 
