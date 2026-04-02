@@ -347,10 +347,6 @@ msgstr "ಕ್ಯಾಟಲನ್"
 msgid "Certifications"
 msgstr "ಪ್ರಮಾಣಪತ್ರಗಳು"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "ಮನಸ್ಸು ಬದಲಾಯಿಸಿದಿರಾ? ನಿಮ್ಮ ರೆಸ್ಯೂಮ್ ಅನ್ನು ಇನ್ನಷ್ಟು ವಿವರಣಾತ್ಮಕ ಹೆಸರಿಗೆ ಮರುಹೆಸರಿಸಿ."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "ಚೈನೀಸ್ (ಸರಳೀಕೃತ)"
@@ -779,10 +775,6 @@ msgstr "ಫ್ರೆಂಚ್"
 msgid "Full Width"
 msgstr "ಪೂರ್ಣ ಅಗಲ"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "ಯಾದೃಚ್ಛಿಕ ಹೆಸರನ್ನು ತಯಾರಿಸಿ"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "ಜರ್ಮನ್"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "ಹೆಸರು"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "ಪಾಸ್‌ವರ್ಡ್ ರಕ್ಷಣೆಯನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತಿದೆ..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "ಮರುಹೆಸರಿಸಿ"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "ಕೌಶಲ್ಯಗಳು"
 msgid "Slovak"
 msgstr "ಸ್ಲೋವಾಕ್"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "ಸ್ಲಗ್"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "ಡಾರ್ಕ್ ಥೀಮ್‌ಗೆ ಬದಲಾಯಿಸಿ"
 msgid "Switch to light theme"
 msgstr "ಲೈಟ್ ಥೀಮ್‌ಗೆ ಬದಲಾಯಿಸಿ"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "ಟ್ಯಾಗ್‌ಗಳು"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "ಟ್ಯಾಗ್‌ಗಳನ್ನು ಕೀವರ್ಡ್‌ಗಳ ಮೂಲಕ ನಿಮ್ಮ ರೆಸ್ಯೂಮ್ ಅನ್ನು ವರ್ಗೀಕರಿಸಲು ಬಳಸಬಹುದು."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "ತಮಿಳು"
@@ -1744,10 +1732,6 @@ msgstr "ಈ ಕ್ರಿಯೆಯನ್ನು ಹಿಂತೆಗೆದುಕೊ�
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು AI ಏಕೀಕರಣವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು. ದಯವಿಟ್ಟು ಅದನ್ನು ಸೆಟ್ಟಿಂಗ್ಸ್‌ನಲ್ಲಿ ಸಕ್ರಿಯಗೊಳಿಸಿ."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "ಇದು ನಿಮ್ಮ ರೆಸ್ಯೂಮ್‌ಗಾಗಿ URL ಗೆ ಅನುಕೂಲಕರವಾದ ಹೆಸರು."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "ಪರಿಶೀಲಿಸಲಾಗಿಲ್ಲ"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "ನವೀಕರಿಸಿ"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸ್ವಯಂಸೇವಕ ಅನುಭವವನ್ನು ನವೀಕರಿಸಿ"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "ರೆಸ್ಯೂಮ್ ನವೀಕರಿಸಿ"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

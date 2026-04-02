@@ -342,10 +342,6 @@ msgstr "Catalan"
 msgid "Certifications"
 msgstr "Certifications"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Changed your mind? Rename your resume to something more descriptive."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Chinese (Simplified)"
@@ -774,10 +770,6 @@ msgstr "French"
 msgid "Full Width"
 msgstr "Full Width"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Generate a random name"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr "Generated content is too short. Please try again."
@@ -794,6 +786,10 @@ msgstr "Generating refinement (Round {0}/{maxRounds})..."
 #: src/utils/locale.ts
 msgid "German"
 msgstr "German"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr "Give your resume a new name."
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1111,8 +1107,6 @@ msgid "Name"
 msgstr "Name"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr "Name already exists, please use a different name."
 
@@ -1370,8 +1364,14 @@ msgid "Removing password protection..."
 msgstr "Removing password protection..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Rename"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr "Rename Resume"
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1568,10 +1568,6 @@ msgstr "Skills"
 msgid "Slovak"
 msgstr "Slovak"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Slug"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1663,14 +1659,6 @@ msgstr "Switch to dark theme"
 msgid "Switch to light theme"
 msgstr "Switch to light theme"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Tags"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Tags can be used to categorize your resume by keywords."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamil"
@@ -1739,10 +1727,6 @@ msgstr "This action cannot be undone."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "This feature requires AI Integration to be enabled. Please enable it in the settings."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "This is a URL-friendly name for your resume."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1882,8 +1866,6 @@ msgstr "Unverified"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Update"
 
@@ -1946,10 +1928,6 @@ msgstr "Update an existing summary item"
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Update an existing volunteer experience"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Update Resume"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
@@ -2076,3 +2054,9 @@ msgstr "Your resume's public link is currently protected by a password. Share th
 #: src/utils/locale.ts
 msgid "Zulu"
 msgstr "Zulu"
+
+msgid "DBeXFR"
+msgstr "Rename Resume"
+
+msgid "cn2elv"
+msgstr "Give your resume a new name."

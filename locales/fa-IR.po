@@ -347,10 +347,6 @@ msgstr "کاتالان"
 msgid "Certifications"
 msgstr "گواهینامه‌ها"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "نظرتان عوض شده؟ نام رزومه خود را به چیزی توصیفی‌تر تغییر دهید."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "چینی (ساده‌شده)"
@@ -779,10 +775,6 @@ msgstr "فرانسوی"
 msgid "Full Width"
 msgstr "تمام‌عرض"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "تولید یک نام تصادفی"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "آلمانی"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "نام"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "در حال حذف حفاظت با گذرواژه..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "تغییر نام"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "مهارت‌ها"
 msgid "Slovak"
 msgstr "اسلواکی"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "نام یکتا"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "تغییر به تم تیره"
 msgid "Switch to light theme"
 msgstr "تغییر به تم روشن"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "برچسب‌ها"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "برچسب‌ها را می‌توان برای دسته‌بندی رزومه شما بر اساس کلیدواژه‌ها استفاده کرد."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "تامیلی"
@@ -1744,10 +1732,6 @@ msgstr "این عمل قابل بازگشت نیست."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "این قابلیت نیاز دارد یکپارچه‌سازی هوش مصنوعی فعال باشد. لطفاً آن را در تنظیمات فعال کنید."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "این یک نام مناسب برای URLِ رزومه شما است."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "تأیید نشده"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "به‌روزرسانی"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "به‌روزرسانی یک سابقه داوطلبانهٔ موجود"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "به‌روزرسانی رزومه"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

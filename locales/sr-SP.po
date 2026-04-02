@@ -347,10 +347,6 @@ msgstr "Каталонски"
 msgid "Certifications"
 msgstr "Сертификације"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Променили сте мишљење? Преименујте свој резиме у нешто описније."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Кинески (поједностављени)"
@@ -779,10 +775,6 @@ msgstr "Француски"
 msgid "Full Width"
 msgstr "Пуна ширина"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Генериши насумично име"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Немачки"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Име"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Уклањање заштите лозинком..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Преименуј"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Вештине"
 msgid "Slovak"
 msgstr "Словачки"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Идентификатор (slug)"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Пребаци на тамну тему"
 msgid "Switch to light theme"
 msgstr "Пребаци на светлу тему"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Ознаке"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Ознаке се могу користити за категоризацију резимеа по кључним речима."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Тамилски"
@@ -1744,10 +1732,6 @@ msgstr "Ова радња се не може опозвати."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Ова функција захтева да буде омогућена AI интеграција. Омогућите је у подешавањима."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Ово је URL-пријатељско име за ваш резиме."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Неверификовано"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Ажурирај"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Ажурирај постојеће волонтерско искуство"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Ажурирај резиме"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

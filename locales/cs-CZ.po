@@ -347,10 +347,6 @@ msgstr "Katalánština"
 msgid "Certifications"
 msgstr "Osvědčení"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Rozmysleli jste si to? Přejmenujte svůj životopis na něco výstižnějšího."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Čínština (zjednodušená)"
@@ -779,10 +775,6 @@ msgstr "Francouzština"
 msgid "Full Width"
 msgstr "Plná šířka"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Vygenerovat náhodný název"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Němčina"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Název"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Odstraňování ochrany heslem…"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Přejmenovat"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Dovednosti"
 msgid "Slovak"
 msgstr "Slovenština"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Slug"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Přepnout na tmavý motiv"
 msgid "Switch to light theme"
 msgstr "Přepnout na světlý motiv"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Tagy"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Tagy lze použít k kategorizaci životopisu podle klíčových slov."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamilština"
@@ -1744,10 +1732,6 @@ msgstr "Tuto akci nelze vrátit zpět."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Tato funkce vyžaduje aktivovanou integraci AI. Povolte ji prosím v nastavení."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Toto je název vašeho životopisu vhodný pro URL adresu."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Neověřeno"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Aktualizovat"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Aktualizovat existující dobrovolnickou zkušenost"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Aktualizovat životopis"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

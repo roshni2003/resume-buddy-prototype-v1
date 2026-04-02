@@ -347,10 +347,6 @@ msgstr "Catalan"
 msgid "Certifications"
 msgstr "Pensijilan"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Berubah fikiran? Tukar nama resume anda kepada sesuatu yang lebih deskriptif."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Cina (Ringkas)"
@@ -779,10 +775,6 @@ msgstr "Perancis"
 msgid "Full Width"
 msgstr "Lebar Penuh"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Jana nama rawak"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Bahasa Jerman"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Nama"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Membuang perlindungan kata laluan..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Namakan Semula"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Kemahiran"
 msgid "Slovak"
 msgstr "Slovak"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Slug"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Tukar kepada tema gelap"
 msgid "Switch to light theme"
 msgstr "Tukar kepada tema cerah"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Tag"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Tag boleh digunakan untuk mengkategorikan resume anda mengikut kata kunci."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamil"
@@ -1744,10 +1732,6 @@ msgstr "Tindakan ini tidak boleh dibatalkan."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Ciri ini memerlukan Integrasi AI diaktifkan. Sila aktifkannya dalam tetapan."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Ini ialah nama mesra URL untuk resume anda."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Belum disahkan"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Kemas kini"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Kemas kini pengalaman sukarelawan sedia ada"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Kemas Kini Resume"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

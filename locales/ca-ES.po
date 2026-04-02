@@ -347,10 +347,6 @@ msgstr "Català"
 msgid "Certifications"
 msgstr "Certificacions"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Has canviat d’idea? Canvia el nom del currículum per fer-lo més descriptiu."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Xinès (simplificat)"
@@ -779,10 +775,6 @@ msgstr "Francès"
 msgid "Full Width"
 msgstr "Amplada completa"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Genera un nom aleatori"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Alemany"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Nom"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "S’està desactivant la protecció amb contrasenya..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Canvia el nom"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Habilitats"
 msgid "Slovak"
 msgstr "Eslovac"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Identificador llegible (slug)"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Canvia al tema fosc"
 msgid "Switch to light theme"
 msgstr "Canvia al tema clar"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Etiquetes"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Les etiquetes es poden utilitzar per categoritzar el currículum per paraules clau."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamil"
@@ -1744,10 +1732,6 @@ msgstr "Aquesta acció no es pot desfer."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Aquesta funció requereix que la integració amb IA estigui activada. Activa-la a la configuració."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Aquest és un nom d’URL fàcil d’utilitzar per al currículum."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Sense verificar"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Actualitza"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Actualitza una experiència de voluntariat existent"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Actualitza el currículum"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

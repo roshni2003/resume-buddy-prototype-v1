@@ -347,10 +347,6 @@ msgstr "Katalanisht"
 msgid "Certifications"
 msgstr "Certifikime"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Ndërruat mendje? Riemërtoni CV-në tuaj me diçka më përshkruese."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Kinezçe (E thjeshtuar)"
@@ -779,10 +775,6 @@ msgstr "Frëngjisht"
 msgid "Full Width"
 msgstr "Gjerësi e plotë"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Gjenero një emër të rastësishëm"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Gjermanisht"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Emri"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Po hiqet mbrojtja me fjalëkalim..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Riemërto"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Aftësi"
 msgid "Slovak"
 msgstr "Sllovakisht"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Linku i normalizuar"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Kalo te tema e errët"
 msgid "Switch to light theme"
 msgstr "Kalo te tema e çelët"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Etiketa"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Etiketat mund të përdoren për të kategorizuar CV-në tuaj sipas fjalëve kyçe."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamile"
@@ -1744,10 +1732,6 @@ msgstr "Ky veprim nuk mund të zhbëhet."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Kjo veçori kërkon që Integrimi i AI të jetë aktivizuar. Ju lutemi aktivizojeni te parametrat."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Ky është një emër miqësor për URL për CV-në tuaj."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "I paverifikuar"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Përditëso"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Përditëso një eksperiencë vullnetare ekzistuese"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Përditëso CV-në"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

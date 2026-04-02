@@ -347,10 +347,6 @@ msgstr "Καταλανικά"
 msgid "Certifications"
 msgstr "Πιστοποιήσεις"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Αλλάξατε γνώμη; Μετονομάστε το βιογραφικό σας σημείωμα σε κάτι πιο περιγραφικό."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Κινέζικα (Απλοποιημένα)"
@@ -779,10 +775,6 @@ msgstr "Γαλλικά"
 msgid "Full Width"
 msgstr "Πλήρες πλάτος"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Δημιουργία τυχαίου ονόματος"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Γερμανικά"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Όνομα"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Κατάργηση προστασίας με κωδικό πρόσβασης..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Μετονομασία"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Δεξιότητες"
 msgid "Slovak"
 msgstr "Σλοβακικά"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Slug"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Εναλλαγή σε σκοτεινό θέμα"
 msgid "Switch to light theme"
 msgstr "Εναλλαγή σε φωτεινό θέμα"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Ετικέτες"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Οι ετικέτες μπορούν να χρησιμοποιηθούν για να κατηγοριοποιήσετε το βιογραφικό σας σημείωμα με βάση λέξεις-κλειδιά."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Ταμίλ"
@@ -1744,10 +1732,6 @@ msgstr "Αυτή η ενέργεια δεν μπορεί να αναιρεθεί
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Αυτή η λειτουργία απαιτεί να είναι ενεργοποιημένη η ενσωμάτωση ΤΝ. Ενεργοποιήστε την στις ρυθμίσεις."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Αυτό είναι ένα φιλικό προς το URL όνομα για το βιογραφικό σας σημείωμα."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Μη επαληθευμένο"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Ενημέρωση"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Ενημέρωση υπάρχουσας εθελοντικής εμπειρίας"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Ενημέρωση βιογραφικού σημειώματος"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

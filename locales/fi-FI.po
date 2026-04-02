@@ -347,10 +347,6 @@ msgstr "katalaani"
 msgid "Certifications"
 msgstr "Sertifikaatit"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Muutitko mieltäsi? Nimeä ansioluettelosi uudelleen kuvaavammaksi."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "kiina (yksinkertaistettu)"
@@ -779,10 +775,6 @@ msgstr "ranska"
 msgid "Full Width"
 msgstr "Täysi leveys"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Luo satunnainen nimi"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "saksa"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Nimi"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Poistetaan salasanasuojausta..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Nimeä uudelleen"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Taidot"
 msgid "Slovak"
 msgstr "slovakki"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Polkutunnus"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Vaihda tummaan teemaan"
 msgid "Switch to light theme"
 msgstr "Vaihda vaaleaan teemaan"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Tunnisteet"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Tunnisteilla voit luokitella ansioluettelosi avainsanojen mukaan."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "tamili"
@@ -1744,10 +1732,6 @@ msgstr "Tätä toimintoa ei voi perua."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Tämä ominaisuus edellyttää, että tekoälyintegraatio on otettu käyttöön. Ota se käyttöön asetuksista."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Tämä on URL-ystävällinen nimi ansioluettelollesi."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Vahvistamaton"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Päivitä"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Päivitä olemassa oleva vapaaehtoistyökokemus"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Päivitä ansioluettelo"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

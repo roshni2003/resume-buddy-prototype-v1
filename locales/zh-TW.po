@@ -347,10 +347,6 @@ msgstr "加泰隆尼亞語"
 msgid "Certifications"
 msgstr "證照"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "改變主意了嗎？將履歷重新命名成更具描述性的名稱吧。"
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "中文（簡體）"
@@ -779,10 +775,6 @@ msgstr "法文"
 msgid "Full Width"
 msgstr "全幅寬"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "產生隨機名稱"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "德文"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "名稱"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "正在移除密碼保護…"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "重新命名"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "技能"
 msgid "Slovak"
 msgstr "斯洛伐克語"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "標示碼"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "切換至深色主題"
 msgid "Switch to light theme"
 msgstr "切換至淺色主題"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "標籤"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "標籤可用來依關鍵詞替履歷分類。"
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "泰米爾語"
@@ -1744,10 +1732,6 @@ msgstr "此動作無法復原。"
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "此功能需要啟用 AI 整合。請先在設定中啟用。"
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "這是用於履歷的 URL 友善名稱。"
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "未驗證"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "更新"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "更新現有的志工經歷"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "更新履歷"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

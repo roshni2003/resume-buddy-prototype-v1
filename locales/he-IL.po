@@ -347,10 +347,6 @@ msgstr "קטלאנית"
 msgid "Certifications"
 msgstr "הסמכות"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "התחרטת? אפשר לשנות את שם קורות החיים שלך לשם תיאורי יותר."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "סינית (מופשטת)"
@@ -779,10 +775,6 @@ msgstr "צרפתית"
 msgid "Full Width"
 msgstr "רוחב מלא"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "יצירת שם אקראי"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "גרמנית"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "שם"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "מסיר את ההגנה באמצעות סיסמה..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "שינוי שם"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "מיומנויות"
 msgid "Slovak"
 msgstr "סלובקית"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "שם ייצוגי"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "מעבר לערכת עיצוב כהה"
 msgid "Switch to light theme"
 msgstr "מעבר לערכת עיצוב בהירה"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "תגיות"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "אפשר להשתמש בתגיות כדי לסווג את קורות החיים שלך לפי מילות מפתח."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "טמילית"
@@ -1744,10 +1732,6 @@ msgstr "לא ניתן לבטל פעולה זו."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "תכונה זו דורשת הפעלת שילוב בינה מלאכותית. נא להפעיל זאת בהגדרות."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "זהו שם ידידותי לכתובת URL עבור קורות החיים שלך."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "לא מאומת"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "עדכון"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "עדכון ניסיון התנדבות קיים"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "עדכון קורות חיים"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

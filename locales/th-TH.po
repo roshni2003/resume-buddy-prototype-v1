@@ -347,10 +347,6 @@ msgstr "คาตาลัน"
 msgid "Certifications"
 msgstr "ใบรับรอง"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "เปลี่ยนใจหรือไม่? เปลี่ยนชื่อเรซูเม่ของคุณให้อธิบายมากขึ้น"
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "จีน (ตัวย่อ)"
@@ -779,10 +775,6 @@ msgstr "ฝรั่งเศส"
 msgid "Full Width"
 msgstr "เต็มความกว้าง"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "สร้างชื่อแบบสุ่ม"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "ภาษาเยอรมัน"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "ชื่อ"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "กำลังลบการป้องกันด้วยรหัสผ่าน..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "เปลี่ยนชื่อ"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "ทักษะ"
 msgid "Slovak"
 msgstr "สโลวัก"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "ชื่อ"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "เปลี่ยนเป็นธีมมืด"
 msgid "Switch to light theme"
 msgstr "เปลี่ยนเป็นธีมสว่าง"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "แท็ก"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "แท็กสามารถใช้เพื่อจัดหมวดหมู่เรซูเม่ของคุณด้วยคีย์เวิร์ด"
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "ทมิฬ"
@@ -1744,10 +1732,6 @@ msgstr "การดำเนินการนี้ไม่สามารถ
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "ฟีเจอร์นี้จำเป็นต้องเปิดการผสาน AI โปรดเปิดใช้ในหน้าการตั้งค่า"
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "นี่คือชื่อเรซูเม่ที่เหมาะสำหรับใช้ใน URL"
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "ยังไม่ยืนยัน"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "อัปเดต"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "อัปเดตประสบการณ์อาสาสมัครที่มีอยู่"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "อัปเดตประวัติย่อ"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

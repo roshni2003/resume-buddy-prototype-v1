@@ -347,10 +347,6 @@ msgstr "ካታላንኛ"
 msgid "Certifications"
 msgstr "የማረጋገጫዎች"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "ልብዎን ቀይራችሁ? የየታሪክዎን ስም ወደ በተገለጸ ነገር ይቀይሩት።"
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "ቻይንኛ (ቀለል ያለ)"
@@ -779,10 +775,6 @@ msgstr "ፈረንሳይኛ"
 msgid "Full Width"
 msgstr "ሙሉ ወፍር "
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "የተዘፈነ ስም ይፍጠሩ"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "ጀርመንኛ"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "ስም"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "የይለፍ ቃል ጥበቃን በማስወገድ ላይ…"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "ስም ቀይር"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "ችሎታዎች"
 msgid "Slovak"
 msgstr "ስሎቫክኛ"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Slug"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "ወደ ጨለማ ገጽታ ቀይር"
 msgid "Switch to light theme"
 msgstr "ወደ ብርሃን ገጽታ ቀይር"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "መለያ መለያዎች"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "መለያዎች በአርእስት መሰረት የየታሪክዎን ማቅረቢያ ለመመደብ ሊውሉ ይችላሉ።"
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "ታሚልኛ"
@@ -1744,10 +1732,6 @@ msgstr "ይህ ተግባር መቀለብ አይቻልም።"
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "ይህ ባህሪ የ AI ማዋቀር እንዲነቃ ያስፈልጋል። እባክዎ በቅንብሮች ውስጥ ያንቁት።"
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "ይህ ለየታሪክዎ ተመቻቹ የ URL ስም ነው።"
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "ያልተረጋገጠ"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "አዘምን"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "ያለ የቀድሞ የበኩል መደገፍ ልምድን አዘምን"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "የየታሪክ ማቅረቢያን አዘምን"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

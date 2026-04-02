@@ -347,10 +347,6 @@ msgstr "Katalan tili"
 msgid "Certifications"
 msgstr "Sertifikatlar"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Fikringiz oʻzgardimi? Rezyumeningizga tushunarliroq nom bering."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Xitoy (Soddalashtirilgan)"
@@ -779,10 +775,6 @@ msgstr "Fransuz tili"
 msgid "Full Width"
 msgstr "To‘liq kenglik"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Tasodifiy ism yaratish"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Nemischa"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Ism"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Parol himoyasi olib tashlanmoqda..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Nomini o‘zgartirish"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Koʻnikmalar"
 msgid "Slovak"
 msgstr "Slovak tili"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Slug"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Qorong'u mavzuga o'tish"
 msgid "Switch to light theme"
 msgstr "Yorug' mavzuga o'tish"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Teglar"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Teglar rezyumeningizni kalit so'zlar orqali toifalash uchun ishlatilishi mumkin."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamil tili"
@@ -1744,10 +1732,6 @@ msgstr "Bu amalni bekor qilib boʻlmaydi."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Bu funksiya uchun AI integratsiyasi yoqilgan boʻlishi kerak. Iltimos, sozlamalardan uni yoqing."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Bu rezyume uchun URL uchun qulay ism."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Tasdiqlanmagan"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Yangilash"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Mavjud ko'ngilli tajribani yangilash"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Rezyumeni yangilash"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."

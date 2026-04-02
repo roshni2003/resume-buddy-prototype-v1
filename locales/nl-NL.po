@@ -347,10 +347,6 @@ msgstr "Catalaans"
 msgid "Certifications"
 msgstr "Certificeringen"
 
-#: src/dialogs/resume/index.tsx
-msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Van gedachten veranderd? Hernoem uw cv naar iets beschrijvenders."
-
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Chinees (vereenvoudigd)"
@@ -779,10 +775,6 @@ msgstr "Frans"
 msgid "Full Width"
 msgstr "Volledige breedte"
 
-#: src/dialogs/resume/index.tsx
-msgid "Generate a random name"
-msgstr "Genereer een willekeurige naam"
-
 #: src/components/ui/ai-generate-button.tsx
 msgid "Generated content is too short. Please try again."
 msgstr ""
@@ -799,6 +791,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "German"
 msgstr "Duits"
+
+#: src/dialogs/resume/index.tsx
+msgid "Give your resume a new name."
+msgstr ""
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go Back"
@@ -1116,8 +1112,6 @@ msgid "Name"
 msgstr "Naam"
 
 #: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
-#: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
 msgstr ""
 
@@ -1375,8 +1369,14 @@ msgid "Removing password protection..."
 msgstr "Wachtwoordbeveiliging wordt verwijderd..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Rename"
 msgstr "Hernoemen"
+
+#: src/dialogs/resume/index.tsx
+msgid "Rename Resume"
+msgstr ""
 
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Resend verification email"
@@ -1573,10 +1573,6 @@ msgstr "Vaardigheden"
 msgid "Slovak"
 msgstr "Slowaaks"
 
-#: src/dialogs/resume/index.tsx
-msgid "Slug"
-msgstr "Korte naam"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1668,14 +1664,6 @@ msgstr "Overschakelen naar donker thema"
 msgid "Switch to light theme"
 msgstr "Overschakelen naar licht thema"
 
-#: src/dialogs/resume/index.tsx
-msgid "Tags"
-msgstr "Tags"
-
-#: src/dialogs/resume/index.tsx
-msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Tags kunnen worden gebruikt om uw cv te categoriseren op trefwoorden."
-
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamil"
@@ -1744,10 +1732,6 @@ msgstr "Deze actie kan niet ongedaan worden gemaakt."
 #: src/dialogs/resume/import.tsx
 msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
 msgstr "Deze functie vereist dat AI-integratie is ingeschakeld. Schakel dit in de instellingen in."
-
-#: src/dialogs/resume/index.tsx
-msgid "This is a URL-friendly name for your resume."
-msgstr "Dit is een URL-vriendelijke naam voor uw cv."
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
@@ -1887,8 +1871,6 @@ msgstr "Niet geverifiëerd"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Bijwerken"
 
@@ -1951,10 +1933,6 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Een bestaande vrijwilligerservaring bijwerken"
-
-#: src/dialogs/resume/index.tsx
-msgid "Update Resume"
-msgstr "Cv bijwerken"
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
