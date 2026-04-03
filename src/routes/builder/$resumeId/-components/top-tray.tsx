@@ -74,9 +74,23 @@ export function BuilderTopTray() {
 	const [reviewStartTime, setReviewStartTime] = useState<number>(0);
 	const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+	// Helper function to get API key from localStorage or environment
+	const getApiKey = () => {
+		if (typeof localStorage !== "undefined") {
+			const localKey = localStorage.getItem("gemini_api_key");
+			if (localKey) {
+				console.log("🔑 Using API key from localStorage for Final Review:", localKey.substring(0, 15) + "...");
+				return localKey;
+			}
+		}
+		const envKey = import.meta.env.VITE_AI_API_KEY || "";
+		console.log("🔑 Using API key from environment for Final Review:", envKey ? envKey.substring(0, 15) + "..." : "NONE");
+		return envKey;
+	};
+
 	const provider = import.meta.env.VITE_AI_PROVIDER || "gemini";
 	const model = import.meta.env.VITE_AI_MODEL || "gemini-2.0-flash-exp";
-	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
+	const apiKey = getApiKey(); // Now gets from localStorage first!
 	const baseURL = import.meta.env.VITE_AI_BASE_URL || undefined;
 	const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 	const [showLastAttemptConfirm, setShowLastAttemptConfirm] = useState(false);

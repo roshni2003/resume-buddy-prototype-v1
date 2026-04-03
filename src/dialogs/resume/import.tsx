@@ -66,10 +66,26 @@ const formSchema = z.discriminatedUnion("type", [
 type FormValues = z.infer<typeof formSchema>;
 
 export function ImportResumeDialog(_: DialogProps<"resume.import">) {
+	// Helper function to get API key from localStorage or environment
+	const getApiKey = (): string => {
+		if (typeof localStorage !== "undefined") {
+			const localKey = localStorage.getItem("gemini_api_key");
+			if (localKey) {
+				console.log("🔑 Using API key from localStorage for Import:", localKey.substring(0, 15) + "...");
+				return localKey;
+			}
+		}
+		const envKey = import.meta.env.VITE_AI_API_KEY || "";
+		if (envKey) {
+			console.log("🔑 Using API key from environment for Import:", envKey.substring(0, 15) + "...");
+		}
+		return envKey;
+	};
+
 	// Use environment variables for AI configuration
 	const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
 	const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
-	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
+	const apiKey = getApiKey(); // Now gets from localStorage first!
 	const baseURL = import.meta.env.VITE_AI_BASE_URL;
 	const isAIEnabled = !!apiKey && !!model;
 
