@@ -1,4 +1,5 @@
 import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import {
 	CircleNotchIcon,
@@ -50,6 +51,7 @@ import { cn } from "@/utils/style";
 import { AnimatedEyes, DeadEyes } from "./animated-eyes";
 
 export function BuilderTopTray() {
+	const { i18n } = useLingui();
 	const openDialog = useDialogStore((state) => state.openDialog);
 	const params = useParams({ from: "/builder/$resumeId" });
 	const { data: resume } = useQuery({
@@ -84,7 +86,10 @@ export function BuilderTopTray() {
 			}
 		}
 		const envKey = import.meta.env.VITE_AI_API_KEY || "";
-		console.log("🔑 Using API key from environment for Final Review:", envKey ? envKey.substring(0, 15) + "..." : "NONE");
+		console.log(
+			"🔑 Using API key from environment for Final Review:",
+			envKey ? envKey.substring(0, 15) + "..." : "NONE",
+		);
 		return envKey;
 	};
 
@@ -127,8 +132,13 @@ export function BuilderTopTray() {
 		setReviewing(true);
 		setReviewStartTime(Date.now());
 
-		const toastId = toast.loading(t`AI is reviewing your resume...`, {
-			description: t`Looking for improvements in layout, spacing, and content.`,
+		const toastId = toast.loading(i18n._(t({ id: "ai.review.loading", message: "AI is reviewing your resume..." })), {
+			description: i18n._(
+				t({
+					id: "ai.review.loading.description",
+					message: "Looking for improvements in layout, spacing, and content.",
+				}),
+			),
 		});
 
 		// Show fallback message if API takes too long
@@ -168,9 +178,18 @@ export function BuilderTopTray() {
 			setReviewResult(result);
 			setShowReviewDrawer(true);
 
-			toast.success(t`Review complete!`, {
+			toast.success(i18n._(t({ id: "ai.review.success", message: "Review complete!" })), {
 				id: toastId,
-				description: t`Score: ${result.overall_score}/100 - ${result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"}`,
+				description: i18n._(
+					t({
+						id: "ai.review.success.description",
+						message: "Score: {score}/100 - {verdict}",
+						values: {
+							score: result.overall_score,
+							verdict: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements",
+						},
+					}),
+				),
 			});
 		} catch (error) {
 			if (fallbackTimeoutRef.current) {
@@ -180,9 +199,14 @@ export function BuilderTopTray() {
 			setReviewing(false);
 			console.error("Final Review Error:", error);
 
-			toast.error(t`Review failed. Please try again.`, {
+			toast.error(i18n._(t({ id: "ai.review.error", message: "Review failed. Please try again." })), {
 				id: toastId,
-				description: t`There was an error analyzing your resume. Please check your AI configuration.`,
+				description: i18n._(
+					t({
+						id: "ai.review.error.description",
+						message: "There was an error analyzing your resume. Please check your AI configuration.",
+					}),
+				),
 			});
 		}
 	};

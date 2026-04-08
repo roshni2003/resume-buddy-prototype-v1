@@ -205,6 +205,18 @@ msgstr "Anyone who has the resume's public URL will be able to view and download
 msgid "Anyone with the link can view and download the resume."
 msgstr "Anyone with the link can view and download the resume."
 
+#: src/routes/dashboard/route.tsx
+msgid "API Key"
+msgstr "API Key"
+
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "API Key cleared! The page will reload to apply changes."
+msgstr "API Key cleared! The page will reload to apply changes."
+
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "API Key saved successfully! The page will reload to apply changes."
+msgstr "API Key saved successfully! The page will reload to apply changes."
+
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "App"
 msgstr "App"
@@ -330,6 +342,7 @@ msgstr "By the community, for the community."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+#: src/routes/dashboard/-components/api-key-dialog.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
 msgstr "Cancel"
@@ -357,6 +370,10 @@ msgstr "Circle"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Circle (100pt)"
 msgstr "Circle (100pt)"
+
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Clear Current Key"
+msgstr "Clear Current Key"
 
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
@@ -512,6 +529,10 @@ msgstr "Creating your resume..."
 #: src/components/ui/review-drawer.tsx
 msgid "Critical Issues"
 msgstr "Critical Issues"
+
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Current API Key"
+msgstr "Current API Key"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Currently studying here"
@@ -679,6 +700,10 @@ msgstr "English"
 msgid "Enter the URL to link to"
 msgstr "Enter the URL to link to"
 
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Enter your Gemini API Key"
+msgstr "Enter your Gemini API Key"
+
 #: src/utils/resume/section.tsx
 msgid "Experience"
 msgstr "Experience"
@@ -687,6 +712,10 @@ msgstr "Experience"
 msgid "Export"
 msgstr "Export"
 
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Failed to clear API key"
+msgstr "Failed to clear API key"
+
 #: src/components/ui/review-drawer-fixed.tsx
 msgid "Failed to fix issues automatically"
 msgstr "Failed to fix issues automatically"
@@ -694,6 +723,10 @@ msgstr "Failed to fix issues automatically"
 #: src/components/ui/ai-generate-button.tsx
 msgid "Failed to generate content"
 msgstr "Failed to generate content"
+
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Failed to save API key"
+msgstr "Failed to save API key"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Filter by"
@@ -1225,6 +1258,10 @@ msgstr "Picture uploaded successfully!"
 msgid "Picture URL"
 msgstr "Picture URL"
 
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Please enter an API key"
+msgstr "Please enter an API key"
+
 #: src/components/input/rich-input.tsx
 msgid "Please enter the URL:"
 msgstr "Please enter the URL:"
@@ -1399,7 +1436,6 @@ msgstr "Resume Score"
 #: src/components/command-palette/pages/resumes.tsx
 #: src/components/command-palette/pages/resumes.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/route.tsx
 msgid "Resumes"
 msgstr "Resumes"
 
@@ -1451,6 +1487,10 @@ msgstr "Russian"
 msgid "Save Changes"
 msgstr "Save Changes"
 
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Saving..."
+msgstr "Saving..."
+
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "School"
@@ -1487,6 +1527,10 @@ msgstr "Select..."
 #: src/utils/locale.ts
 msgid "Serbian"
 msgstr "Serbian"
+
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Set Gemini API Key"
+msgstr "Set Gemini API Key"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1732,6 +1776,10 @@ msgstr "This feature requires AI Integration to be enabled. Please enable it in 
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr "This is taking a bit longer than expected, please wait..."
 
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "This key will be stored locally in your browser and used for AI features."
+msgstr "This key will be stored locally in your browser and used for AI features."
+
 #: src/dialogs/resume/import.tsx
 msgid "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
 msgstr "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
@@ -1933,6 +1981,10 @@ msgstr "Update an existing volunteer experience"
 msgid "Updating your resume..."
 msgstr "Updating your resume..."
 
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "Use This"
+msgstr "Use This"
+
 #: src/dialogs/resume/sections/profile.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Username"
@@ -2055,8 +2107,83 @@ msgstr "Your resume's public link is currently protected by a password. Share th
 msgid "Zulu"
 msgstr "Zulu"
 
-msgid "DBeXFR"
-msgstr "Rename Resume"
+msgid "dashboard.api-key.button"
+msgstr "API Key"
 
-msgid "cn2elv"
-msgstr "Give your resume a new name."
+msgid "dashboard.api-key.dialog.title"
+msgstr "Set Gemini API Key"
+
+msgid "dashboard.api-key.dialog.current-key"
+msgstr "Current API Key"
+
+msgid "dashboard.api-key.dialog.clear-button"
+msgstr "Clear Current Key"
+
+msgid "dashboard.api-key.dialog.input-label"
+msgstr "Enter your Gemini API Key"
+
+msgid "dashboard.api-key.dialog.input-help"
+msgstr "This key will be stored locally in your browser and used for AI features."
+
+msgid "dashboard.api-key.dialog.saving"
+msgstr "Saving..."
+
+msgid "dashboard.api-key.dialog.use-button"
+msgstr "Use This"
+
+msgid "dashboard.api-key.error.missing-key"
+msgstr "Please enter an API key"
+
+msgid "dashboard.api-key.success.save"
+msgstr "API Key saved successfully! The page will reload to apply changes."
+
+msgid "dashboard.api-key.error.save"
+msgstr "Failed to save API key"
+
+msgid "dashboard.api-key.success.clear"
+msgstr "API Key cleared! The page will reload to apply changes."
+
+msgid "dashboard.api-key.error.clear"
+msgstr "Failed to clear API key"
+
+msgid "ai.generate.success"
+msgstr "Content generated successfully!"
+
+msgid "ai.generate.error"
+msgstr "Failed to generate content"
+
+msgid "ai.review.loading"
+msgstr "AI is reviewing your resume..."
+
+msgid "ai.review.success"
+msgstr "Review complete!"
+
+msgid "ai.review.success.description"
+msgstr "Score: {score}/100 - {verdict}"
+
+msgid "ai.review.error"
+msgstr "Review failed. Please try again."
+
+msgid "ai.review.error.description"
+msgstr "There was an error analyzing your resume. Please check your AI configuration."
+
+msgid "ai.generate.wait"
+msgstr "Please wait for the current generation to complete."
+
+msgid "ai.generate.error.word-count"
+msgstr "Please write at least 5 words before asking Zoe."
+
+msgid "ai.generate.error.limit-reached"
+msgstr "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
+
+msgid "ai.generate.loading.first"
+msgstr "Generating first suggestion..."
+
+msgid "ai.generate.loading.refine"
+msgstr "Generating refinement (Round {round}/{maxRounds})..."
+
+msgid "ai.generate.error.too-short"
+msgstr "Generated content is too short. Please try again."
+
+msgid "ai.review.loading.description"
+msgstr "Looking for improvements in layout, spacing, and content."

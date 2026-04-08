@@ -1,9 +1,9 @@
 // components/ui/ai-generate-button.tsx
 import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import type { AIProvider } from "@/integrations/ai/types";
 import { orpc } from "@/integrations/orpc/client";
 import { Button } from "./button";
 
@@ -30,6 +30,7 @@ export function AIGenerateButton({
 	isWordCountValid = true,
 	onRoundComplete,
 }: AIGenerateButtonProps) {
+	const { i18n } = useLingui();
 	const isMounted = useRef(true);
 
 	// Helper function to get API key from localStorage or environment
@@ -47,12 +48,6 @@ export function AIGenerateButton({
 		}
 		return envKey;
 	};
-
-	// Use environment variables for AI configuration (optional, server provides defaults)
-	const provider = import.meta.env.VITE_AI_PROVIDER as AIProvider | undefined;
-	const model = import.meta.env.VITE_AI_MODEL as string | undefined;
-	const apiKey = getApiKey(); // Now gets from localStorage first!
-	const baseURL = import.meta.env.VITE_AI_BASE_URL as string | undefined;
 
 	const { mutate: generateContent, isPending } = useMutation(orpc.ai.generateContent.mutationOptions());
 
@@ -81,34 +76,46 @@ export function AIGenerateButton({
 		// Prevent multiple clicks while generating
 		if (isLoading) {
 			console.log("Already generating, ignoring click");
-			toast.info(t`Please wait for the current generation to complete.`);
+			toast.info(i18n._(t({ id: "ai.generate.wait", message: "Please wait for the current generation to complete." })));
 			return;
 		}
 
 		if (!isWordCountValid) {
-			toast.error(t`Please write at least 5 words before asking Zoe.`);
+			toast.error(
+				i18n._(t({ id: "ai.generate.error.word-count", message: "Please write at least 5 words before asking Zoe." })),
+			);
 			return;
 		}
 
 		if (hasReachedLimit) {
-			toast.error(t`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`);
+			toast.error(
+				i18n._(
+					t({
+						id: "ai.generate.error.limit-reached",
+						message: "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions.",
+						values: { maxRounds },
+					}),
+				),
+			);
 			return;
 		}
 
-		console.log("Starting generation for round:", roundsUsed + 1);
-
+		const apiKey = getApiKey();
 		const toastId = toast.loading(
 			roundsUsed === 0
-				? t`Generating first suggestion...`
-				: t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`,
+				? i18n._(t({ id: "ai.generate.loading.first", message: "Generating first suggestion..." }))
+				: i18n._(
+						t({
+							id: "ai.generate.loading.refine",
+							message: "Generating refinement (Round {round}/{maxRounds})...",
+							values: { round: roundsUsed + 1, maxRounds },
+						}),
+					),
 		);
 
 		generateContent(
 			{
-				...(provider && { provider }),
-				...(model && { model }),
-				...(apiKey && { apiKey }),
-				...(baseURL && { baseURL }),
+				apiKey,
 				type,
 				data: enhancedData,
 			},
@@ -118,22 +125,33 @@ export function AIGenerateButton({
 
 					// Check if content is valid
 					if (!content || content.length < 10) {
-						toast.error(t`Generated content is too short. Please try again.`, { id: toastId });
+						toast.error(
+							i18n._(
+								t({
+									id: "ai.generate.error.too-short",
+									message: "Generated content is too short. Please try again.",
+								}),
+							),
+							{ id: toastId },
+						);
 						return;
 					}
 
-					toast.success(t`Content generated successfully!`, { id: toastId });
+					toast.success(i18n._(t({ id: "ai.generate.success", message: "Content generated successfully!" })), {
+						id: toastId,
+					});
 					onGenerated(content);
 
 					// Record the round
 					if (isMounted.current) {
-						console.log("Recording round completion");
 						onRoundComplete?.();
 					}
 				},
 				onError: (error) => {
 					console.error("Generation error:", error);
-					toast.error(error.message || t`Failed to generate content`, { id: toastId });
+					toast.error(error.message || i18n._(t({ id: "ai.generate.error", message: "Failed to generate content" })), {
+						id: toastId,
+					});
 				},
 			},
 		);
