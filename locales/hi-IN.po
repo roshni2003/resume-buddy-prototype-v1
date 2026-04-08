@@ -168,8 +168,9 @@ msgstr "अफ्रीकान्स"
 msgid "AI"
 msgstr "AI"
 
+#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "AI is reviewing your resume..."
+msgid "ai.review.loading"
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
@@ -209,6 +210,21 @@ msgstr "जिसके पास भी रेज़्यूमे का स�
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Anyone with the link can view and download the resume."
 msgstr "लिंक वाला कोई भी व्यक्ति रेज़्यूमे देख और डाउनलोड कर सकता है।"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/route.tsx
+msgid "dashboard.api-key.button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.success.clear"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.success.save"
+msgstr ""
 
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "App"
@@ -335,6 +351,7 @@ msgstr "समुदाय द्वारा, समुदाय के लि�
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+#: src/routes/dashboard/-components/api-key-dialog.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
 msgstr "रद्द करें"
@@ -361,6 +378,11 @@ msgstr "गोला"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Circle (100pt)"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.dialog.clear-button"
 msgstr ""
 
 #: src/components/ui/multiple-combobox.tsx
@@ -403,8 +425,9 @@ msgstr "पुष्टि करें"
 msgid "Content"
 msgstr ""
 
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "Content generated successfully!"
+msgid "ai.generate.success"
 msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
@@ -516,6 +539,11 @@ msgstr "आपका रेज़्यूमे बनाया जा रह�
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Critical Issues"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.dialog.current-key"
 msgstr ""
 
 #: src/dialogs/resume/sections/education.tsx
@@ -684,6 +712,11 @@ msgstr "अंग्रेज़ी"
 msgid "Enter the URL to link to"
 msgstr "लिंक करने के लिए URL दर्ज करें"
 
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.dialog.input-label"
+msgstr ""
+
 #: src/utils/resume/section.tsx
 msgid "Experience"
 msgstr "अनुभव"
@@ -692,12 +725,23 @@ msgstr "अनुभव"
 msgid "Export"
 msgstr "निर्यात"
 
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.error.clear"
+msgstr ""
+
 #: src/components/ui/review-drawer-fixed.tsx
 msgid "Failed to fix issues automatically"
 msgstr ""
 
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "Failed to generate content"
+msgid "ai.generate.error"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.error.save"
 msgstr ""
 
 #: src/routes/dashboard/resumes/index.tsx
@@ -775,17 +819,19 @@ msgstr "फ़्रेंच"
 msgid "Full Width"
 msgstr "पूर्ण चौड़ाई"
 
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "Generated content is too short. Please try again."
+msgid "ai.generate.error.too-short"
 msgstr ""
 
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "Generating first suggestion..."
+msgid "ai.generate.loading.first"
 msgstr ""
 
-#. placeholder {0}: roundsUsed + 1
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "Generating refinement (Round {0}/{maxRounds})..."
+msgid "ai.generate.loading.refine"
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1065,8 +1111,9 @@ msgstr "लॉक करें"
 msgid "Logout"
 msgstr "लॉगआउट"
 
+#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Looking for improvements in layout, spacing, and content."
+msgid "ai.review.loading.description"
 msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
@@ -1230,6 +1277,11 @@ msgstr ""
 msgid "Picture URL"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.error.missing-key"
+msgstr ""
+
 #: src/components/input/rich-input.tsx
 msgid "Please enter the URL:"
 msgstr ""
@@ -1242,8 +1294,9 @@ msgstr ""
 msgid "Please try fixing issues manually or contact support."
 msgstr ""
 
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "Please wait for the current generation to complete."
+msgid "ai.generate.wait"
 msgstr ""
 
 #. placeholder {0}: format.toUpperCase()
@@ -1260,8 +1313,9 @@ msgstr ""
 msgid "Please wait while your PDF is being generated..."
 msgstr "कृपया प्रतीक्षा करें, आपका PDF जेनरेट किया जा रहा है..."
 
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "Please write at least 5 words before asking Zoe."
+msgid "ai.generate.error.word-count"
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1404,16 +1458,17 @@ msgstr ""
 #: src/components/command-palette/pages/resumes.tsx
 #: src/components/command-palette/pages/resumes.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/route.tsx
 msgid "Resumes"
 msgstr "रेज़्यूमे"
 
+#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Review complete!"
+msgid "ai.review.success"
 msgstr ""
 
+#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Review failed. Please try again."
+msgid "ai.review.error"
 msgstr ""
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
@@ -1456,14 +1511,18 @@ msgstr "रूसी"
 msgid "Save Changes"
 msgstr "परिवर्तन सेव करें"
 
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.dialog.saving"
+msgstr ""
+
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "स्कूल"
 
-#. placeholder {0}: result.overall_score
-#. placeholder {1}: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"
+#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Score: {0}/100 - {1}"
+msgid "ai.review.success.description"
 msgstr ""
 
 #: src/components/input/icon-picker.tsx
@@ -1492,6 +1551,11 @@ msgstr "चुनें..."
 #: src/utils/locale.ts
 msgid "Serbian"
 msgstr "सर्बियाई"
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.dialog.title"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1719,8 +1783,9 @@ msgstr ""
 msgid "There was a problem while generating the PDF, please try again in some time."
 msgstr "PDF जेनरेट करते समय कोई समस्या आई, कृपया कुछ समय बाद फिर से प्रयास करें।"
 
+#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "There was an error analyzing your resume. Please check your AI configuration."
+msgid "ai.review.error.description"
 msgstr ""
 
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
@@ -1735,6 +1800,11 @@ msgstr "इस फ़ीचर के लिए AI इंटीग्रेश�
 
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.dialog.input-help"
 msgstr ""
 
 #: src/dialogs/resume/import.tsx
@@ -1938,6 +2008,11 @@ msgstr "मौजूदा स्वयंसेवी अनुभव अपड
 msgid "Updating your resume..."
 msgstr "आपका रेज़्यूमे अपडेट किया जा रहा है..."
 
+#. js-lingui-explicit-id
+#: src/routes/dashboard/-components/api-key-dialog.tsx
+msgid "dashboard.api-key.dialog.use-button"
+msgstr ""
+
 #: src/dialogs/resume/sections/profile.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Username"
@@ -2006,8 +2081,9 @@ msgstr ""
 msgid "You have unsaved changes that will be lost."
 msgstr ""
 
+#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
+msgid "ai.generate.error.limit-reached"
 msgstr ""
 
 #. placeholder {0}: format.toUpperCase()

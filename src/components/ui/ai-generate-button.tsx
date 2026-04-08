@@ -1,5 +1,5 @@
 // components/ui/ai-generate-button.tsx
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";

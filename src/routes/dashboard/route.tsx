@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 import { Key } from "@phosphor-icons/react";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
