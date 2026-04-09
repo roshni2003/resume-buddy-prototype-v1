@@ -12,10 +12,10 @@ TASK:
 Generate achievement-focused work experience bullet points.
 
 INPUT:
-Job Title: ${data.position || data.title || 'N/A'}
-Company: ${data.company || 'N/A'}
-Responsibilities: ${data.responsibilities || ''}
-Projects: ${data.projectDetails || ''}
+Job Title: ${data.position || data.title || "N/A"}
+Company: ${data.company || "N/A"}
+Responsibilities: ${data.responsibilities || ""}
+Projects: ${data.projectDetails || ""}
 
 STRICT RULES:
 - Output ONLY bullet points
@@ -31,22 +31,17 @@ STRICT RULES:
 Generate bullet points now:
 `,
 
-	projects: (data: {
-		name?: string;
-		technologies?: string;
-		description?: string;
-		highlights?: string;
-	}) => `
+	projects: (data: { name?: string; technologies?: string; description?: string; highlights?: string }) => `
 You are an expert ATS resume writer.
 
 TASK:
 Generate technical, ATS-friendly project bullet points.
 
 INPUT:
-Project Name: ${data.name || 'N/A'}
-Technologies: ${data.technologies || 'N/A'}
-Description: ${data.description || ''}
-Highlights: ${data.highlights || ''}
+Project Name: ${data.name || "N/A"}
+Technologies: ${data.technologies || "N/A"}
+Description: ${data.description || ""}
+Highlights: ${data.highlights || ""}
 
 STRICT RULES:
 - Output ONLY bullet points
@@ -69,14 +64,17 @@ TASK:
 Write a professional resume summary.
 
 INPUT:
-${typeof userData === 'string' ? userData : JSON.stringify(userData, null, 2)}
+${typeof userData === "string" ? userData : JSON.stringify(userData, null, 2)}
 
 STRICT RULES:
 - Output ONLY the summary
-- Write EXACTLY 3–4 sentences
+- Write EXACTLY 3-4 sentences
 - Convert Hinglish to professional English
 - Highlight role, core skills, and career focus
 - Use ATS-friendly keywords
+- PRESERVE all specific numbers, metrics, and quantities (e.g., "10+ skills", "2+ years", "5 certifications")
+- DO NOT exaggerate or hallucinate experience, roles, or achievements not present in the input
+- STICK to the facts provided in the input
 - Do NOT apologize, explain, or mention missing data
 
 Generate the professional summary now:
