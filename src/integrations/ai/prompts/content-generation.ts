@@ -23,7 +23,10 @@ STRICT RULES:
 - Start every bullet with a strong action verb
 - Focus on impact, performance, scalability, and collaboration
 - Use metrics only if provided
-- Keep each bullet 1–2 lines
+- Keep each bullet 1-2 lines
+- PRESERVE all specific numbers, metrics, and quantities (e.g., "200 users", "10+ features")
+- DO NOT exaggerate or hallucinate experience, roles, or achievements not present in the input
+- STICK to the facts provided in the input
 - Do NOT apologize, explain, or mention missing data
 - English only
 - Format bullets starting with •
@@ -49,7 +52,10 @@ STRICT RULES:
 - Start each bullet with a strong action verb
 - Clearly state what was built and its impact
 - Highlight technologies and functionality
-- Keep each bullet 1–2 lines
+- Keep each bullet 1-2 lines
+- PRESERVE all specific numbers, metrics, and quantities (e.g., "200 users", "10+ features")
+- DO NOT exaggerate or hallucinate experience, roles, or achievements not present in the input
+- STICK to the facts provided in the input
 - Do NOT apologize, explain, or mention missing data
 - English only
 - Format bullets starting with •
