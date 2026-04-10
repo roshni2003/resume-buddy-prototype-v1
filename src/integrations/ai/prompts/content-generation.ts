@@ -79,6 +79,8 @@ STRICT RULES:
 - Highlight role, core skills, and career focus
 - Use ATS-friendly keywords
 - PRESERVE all specific numbers, metrics, and quantities (e.g., "10+ skills", "2+ years", "5 certifications")
+- AUDIT the logic of the input: If dates are reversed (e.g., 2010 to 2005), correct them to be chronological (e.g., 2005 to 2010).
+- RESOLVE conflicting roles or simultaneous impossible titles: If a user claims conflicting or overlapping roles at the same company, simplify to the most senior role or a logical professional description.
 - DO NOT exaggerate or hallucinate experience, roles, or achievements not present in the input
 - STICK to the facts provided in the input
 - Do NOT apologize, explain, or mention missing data
