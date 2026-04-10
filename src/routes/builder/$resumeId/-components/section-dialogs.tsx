@@ -1,6 +1,6 @@
 // Light-themed dialog wrappers for section forms (without SectionBase accordion)
 
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { CircleNotchIcon, DownloadIcon, FileDocIcon, FilePdfIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";

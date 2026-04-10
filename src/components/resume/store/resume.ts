@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { debounce } from "es-toolkit";
 import isDeepEqual from "fast-deep-equal";
 import type { WritableDraft } from "immer";

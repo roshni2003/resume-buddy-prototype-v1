@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { CircleNotchIcon, LockSimpleIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import dayjs from "dayjs";

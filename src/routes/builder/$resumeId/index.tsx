@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { FloppyDiskIcon } from "@phosphor-icons/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";

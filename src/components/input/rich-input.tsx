@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 import { LinkIcon, TextBolderIcon, TextItalicIcon, TextUnderlineIcon } from "@phosphor-icons/react";
 import Highlight from "@tiptap/extension-highlight";

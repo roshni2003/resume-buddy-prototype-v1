@@ -219,6 +219,7 @@ function SummaryItemForm({
 									<Trans>Content</Trans>
 								</FormLabel>
 								<AIGenerateButton
+									resumeId={useResumeStore.getState().resume.id}
 									type="summary"
 									data={{
 										name: resumeData.basics.name,

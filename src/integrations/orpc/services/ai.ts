@@ -29,11 +29,7 @@ export type GetModelInput = {
 function getModel(input: GetModelInput) {
 	const provider = input.provider || env.AI_PROVIDER || "gemini";
 	const model = input.model || env.AI_MODEL || "gemini-1.5-flash";
-
-	if (!env.AI_MODEL && !input.model) {
-		console.warn(`⚠️ AI_MODEL is not defined in environment. Falling back to default: ${model}`);
-	}
-
+	
 	// Check localStorage for user-provided API key first (for Gemini provider)
 	let apiKey = input.apiKey || env.AI_API_KEY || "";
 	if (provider === "gemini" && typeof localStorage !== "undefined") {
@@ -42,13 +38,10 @@ function getModel(input: GetModelInput) {
 			console.log("Using Gemini API key from localStorage:", localKey.substring(0, 10) + "...");
 			apiKey = localKey;
 		} else {
-			console.log(
-				`Using Gemini API key from environment for model ${model}:`,
-				apiKey ? `${apiKey.substring(0, 10)}...` : "NONE",
-			);
+			console.log("Using Gemini API key from environment:", apiKey ? apiKey.substring(0, 10) + "..." : "NONE");
 		}
 	}
-
+	
 	const baseURL = input.baseURL || env.AI_BASE_URL || undefined;
 
 	return match(provider)

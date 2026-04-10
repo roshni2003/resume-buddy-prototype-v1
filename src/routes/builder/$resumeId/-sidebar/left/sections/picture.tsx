@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import { CameraIcon, PencilSimpleIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";

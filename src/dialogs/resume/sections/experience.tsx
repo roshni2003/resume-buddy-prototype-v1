@@ -309,6 +309,7 @@ function ExperienceForm() {
 							<FormLabel>Description</FormLabel>
 
 							<AIGenerateButton
+								resumeId={useResumeStore.getState().resume.id}
 								type="experience"
 								data={{
 									company: form.getValues("company"),

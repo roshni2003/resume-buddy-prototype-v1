@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import {
 	BroomIcon,

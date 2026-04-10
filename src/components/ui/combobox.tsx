@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";

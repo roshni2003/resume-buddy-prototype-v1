@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { DownloadSimpleIcon } from "@phosphor-icons/react";
 import { useDialogStore } from "@/dialogs/store";
 import { BaseCard } from "./base-card";

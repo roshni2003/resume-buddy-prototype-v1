@@ -4,10 +4,11 @@ import { useLingui } from "@lingui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { Button } from "./button";
 
 type AIGenerateButtonProps = {
+	resumeId: string;
 	type: "experience" | "projects" | "summary" | "custom";
 	data: Record<string, unknown>;
 	onGenerated: (content: string) => void;
@@ -20,6 +21,7 @@ type AIGenerateButtonProps = {
 };
 
 export function AIGenerateButton({
+	resumeId,
 	type,
 	data,
 	onGenerated,
@@ -33,23 +35,9 @@ export function AIGenerateButton({
 	const { i18n } = useLingui();
 	const isMounted = useRef(true);
 
-	// Helper function to get API key from localStorage or environment
-	const getApiKey = (): string | undefined => {
-		if (typeof localStorage !== "undefined") {
-			const localKey = localStorage.getItem("gemini_api_key");
-			if (localKey) {
-				console.log("🔑 Using API key from localStorage for AI Generate:", localKey.substring(0, 15) + "...");
-				return localKey;
-			}
-		}
-		const envKey = import.meta.env.VITE_AI_API_KEY as string | undefined;
-		if (envKey) {
-			console.log("🔑 Using API key from environment for AI Generate:", envKey.substring(0, 15) + "...");
-		}
-		return envKey;
-	};
-
-	const { mutate: generateContent, isPending } = useMutation(orpc.ai.generateContent.mutationOptions());
+	const { mutate: generateContent, isPending } = useMutation({
+		mutationFn: api.generateAIContent,
+	});
 
 	// Cleanup on unmount
 	useEffect(() => {
@@ -89,72 +77,65 @@ export function AIGenerateButton({
 
 		if (hasReachedLimit) {
 			toast.error(
-				i18n._(
-					t({
-						id: "ai.generate.error.limit-reached",
-						message: "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions.",
-						values: { maxRounds },
-					}),
-				),
+				i18n._(t`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`),
 			);
 			return;
 		}
 
-		const apiKey = getApiKey();
 		const toastId = toast.loading(
 			roundsUsed === 0
 				? i18n._(t({ id: "ai.generate.loading.first", message: "Generating first suggestion..." }))
-				: i18n._(
-						t({
-							id: "ai.generate.loading.refine",
-							message: "Generating refinement (Round {round}/{maxRounds})...",
-							values: { round: roundsUsed + 1, maxRounds },
-						}),
-					),
+				: i18n._(t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`),
 		);
 
-		generateContent(
-			{
-				apiKey,
-				type,
-				data: enhancedData,
+		// Map type to backend key
+		const payload: Parameters<typeof api.generateAIContent>[0] = {
+			resume_id: resumeId,
+		};
+
+		if (type === "summary") payload.summary = JSON.stringify(enhancedData);
+		else if (type === "experience") payload.ExperienceDescription = JSON.stringify(enhancedData);
+		else if (type === "projects") payload.ProjectsDescription = JSON.stringify(enhancedData);
+		else payload.summary = JSON.stringify(enhancedData); // Fallback for custom
+
+		generateContent(payload, {
+			onSuccess: (response) => {
+				const contentKey = Object.keys(response).find((key) => key !== "resume_id");
+				const content = contentKey ? response[contentKey] : "";
+
+				console.log("Generation successful, content length:", content?.length);
+
+				// Check if content is valid
+				if (!content || content.length < 10) {
+					toast.error(
+						i18n._(
+							t({
+								id: "ai.generate.error.too-short",
+								message: "Generated content is too short. Please try again.",
+							}),
+						),
+						{ id: toastId },
+					);
+					return;
+				}
+
+				toast.success(i18n._(t({ id: "ai.generate.success", message: "Content generated successfully!" })), {
+					id: toastId,
+				});
+				onGenerated(content);
+
+				// Record the round
+				if (isMounted.current) {
+					onRoundComplete?.();
+				}
 			},
-			{
-				onSuccess: (content) => {
-					console.log("Generation successful, content length:", content?.length);
-
-					// Check if content is valid
-					if (!content || content.length < 10) {
-						toast.error(
-							i18n._(
-								t({
-									id: "ai.generate.error.too-short",
-									message: "Generated content is too short. Please try again.",
-								}),
-							),
-							{ id: toastId },
-						);
-						return;
-					}
-
-					toast.success(i18n._(t({ id: "ai.generate.success", message: "Content generated successfully!" })), {
-						id: toastId,
-					});
-					onGenerated(content);
-
-					// Record the round
-					if (isMounted.current) {
-						onRoundComplete?.();
-					}
-				},
-				onError: (error) => {
-					console.error("Generation error:", error);
-					toast.error(error.message || i18n._(t({ id: "ai.generate.error", message: "Failed to generate content" })), {
-						id: toastId,
-					});
-				},
+			onError: (error) => {
+				console.error("Generation error:", error);
+				toast.error(error.message || i18n._(t({ id: "ai.generate.error", message: "Failed to generate content" })), {
+					id: toastId,
+				});
 			},
-		);
+		});
 	};
 
 	// Determine button text based on state

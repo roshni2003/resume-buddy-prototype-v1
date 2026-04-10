@@ -184,4 +184,18 @@ export const api = {
 		request<{ url: string }>(`/resumes/${id}/export?format=${format}`, {
 			method: "GET",
 		}),
+
+	// 12. POST: /ai/generate-summary
+	// This endpoint handles summary, experience, projects, and final review depending on the keys provided.
+	generateAIContent: (payload: {
+		resume_id: string;
+		summary?: string;
+		ExperienceDescription?: string;
+		ProjectsDescription?: string;
+		FinalReview?: string;
+	}) =>
+		request<Record<string, string>>("/ai/generate-summary", {
+			method: "POST",
+			body: JSON.stringify(payload),
+		}),
 };

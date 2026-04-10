@@ -11,7 +11,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import { DotsSixVerticalIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { type CSSProperties, forwardRef, type HTMLAttributes, useCallback, useState } from "react";

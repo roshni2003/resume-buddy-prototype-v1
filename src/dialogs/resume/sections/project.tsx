@@ -257,6 +257,7 @@ function ProjectForm() {
 								<Trans>Description</Trans>
 							</FormLabel>
 							<AIGenerateButton
+								resumeId={useResumeStore.getState().resume.id}
 								type="projects"
 								data={{
 									name,

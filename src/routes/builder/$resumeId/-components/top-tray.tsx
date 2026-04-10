@@ -43,7 +43,6 @@ import { Popover, PopoverContent, PopoverHeader, PopoverTitle, PopoverTrigger } 
 import { ReviewDrawer } from "@/components/ui/review-drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDialogStore } from "@/dialogs/store";
-import { orpc } from "@/integrations/orpc/client";
 import type { ResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 import { downloadFromUrl, generateFilename } from "@/utils/file";
@@ -63,7 +62,9 @@ export function BuilderTopTray() {
 		mutationFn: (data: { id: string; format: "pdf" | "docx" }) => api.exportResume(data.id, data.format),
 	});
 
-	const { mutateAsync: runFinalReview } = useMutation(orpc.ai.finalReview.mutationOptions());
+	const { mutateAsync: runFinalReview } = useMutation({
+		mutationFn: api.generateAIContent,
+	});
 
 	const setShowReviewDrawer = useResumeStore((state: ResumeStore) => state.setShowReviewDrawer);
 	const setReviewing = useResumeStore((state: ResumeStore) => state.setReviewing);
@@ -76,27 +77,6 @@ export function BuilderTopTray() {
 	const [reviewStartTime, setReviewStartTime] = useState<number>(0);
 	const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	// Helper function to get API key from localStorage or environment
-	const getApiKey = () => {
-		if (typeof localStorage !== "undefined") {
-			const localKey = localStorage.getItem("gemini_api_key");
-			if (localKey) {
-				console.log("🔑 Using API key from localStorage for Final Review:", localKey.substring(0, 15) + "...");
-				return localKey;
-			}
-		}
-		const envKey = import.meta.env.VITE_AI_API_KEY || "";
-		console.log(
-			"🔑 Using API key from environment for Final Review:",
-			envKey ? envKey.substring(0, 15) + "..." : "NONE",
-		);
-		return envKey;
-	};
-
-	const provider = import.meta.env.VITE_AI_PROVIDER || "gemini";
-	const model = import.meta.env.VITE_AI_MODEL || "gemini-2.0-flash-exp";
-	const apiKey = getApiKey(); // Now gets from localStorage first!
-	const baseURL = import.meta.env.VITE_AI_BASE_URL || undefined;
 	const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 	const [showLastAttemptConfirm, setShowLastAttemptConfirm] = useState(false);
 
@@ -152,17 +132,27 @@ export function BuilderTopTray() {
 		}, 6000);
 
 		try {
-			const result = await runFinalReview({
-				...(provider && { provider }),
-				...(model && { model }),
-				...(apiKey && { apiKey }),
-				...(baseURL && { baseURL }),
-				resume: resume.data as Record<string, unknown>,
-				photo: {
-					url: resume.data.picture?.url,
-					visible: !resume.data.picture?.hidden,
-				},
+			const response = await runFinalReview({
+				resume_id: resume.id,
+				FinalReview: JSON.stringify({
+					resume: resume.data,
+					photo: {
+						url: resume.data.picture?.url,
+						visible: !resume.data.picture?.hidden,
+					},
+				}),
 			});
+
+			const reviewRaw = response.FinalReview;
+			if (!reviewRaw) throw new Error("No review result received from AI");
+
+			let result;
+			try {
+				result = JSON.parse(reviewRaw);
+			} catch (e) {
+				console.error("Failed to parse Final Review result:", e);
+				throw new Error("Invalid review format received from AI");
+			}
 
 			// Ensure minimum 1.2 seconds loading time for UX
 			const elapsedTime = Date.now() - reviewStartTime;
@@ -191,7 +181,7 @@ export function BuilderTopTray() {
 					}),
 				),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			if (fallbackTimeoutRef.current) {
 				clearTimeout(fallbackTimeoutRef.current);
 			}
@@ -201,12 +191,14 @@ export function BuilderTopTray() {
 
 			toast.error(i18n._(t({ id: "ai.review.error", message: "Review failed. Please try again." })), {
 				id: toastId,
-				description: i18n._(
-					t({
-						id: "ai.review.error.description",
-						message: "There was an error analyzing your resume. Please check your AI configuration.",
-					}),
-				),
+				description:
+					error.message ||
+					i18n._(
+						t({
+							id: "ai.review.error.description",
+							message: "There was an error analyzing your resume. Please check your AI configuration.",
+						}),
+					),
 			});
 		}
 	};
