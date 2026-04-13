@@ -62,7 +62,7 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 	return (
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PlusIcon />
 					<Trans>Create a new experience</Trans>
 				</DialogTitle>
@@ -73,13 +73,12 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ExperienceForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={closeDialog}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Create</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -128,7 +127,7 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 	return (
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PencilSimpleLineIcon />
 					<Trans>Update an existing experience</Trans>
 				</DialogTitle>
@@ -139,13 +138,12 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ExperienceForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={closeDialog}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Save Changes</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -305,8 +303,8 @@ function ExperienceForm() {
 				name="description"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<div className="flex items-center justify-between">
-							<FormLabel>Description</FormLabel>
+						<div className="flex flex-row items-center justify-between">
+							<FormLabel className="text-xs sm:text-base">Description</FormLabel>
 
 							<AIGenerateButton
 								resumeId={useResumeStore.getState().resume.id}
@@ -321,6 +319,7 @@ function ExperienceForm() {
 								maxRounds={maxRounds}
 								isWordCountValid={isWordCountValid}
 								disabled={roundsUsed >= maxRounds || !isWordCountValid} // Disable button after maxRounds
+								className="scale-85 sm:scale-100"
 							/>
 						</div>
 
