@@ -214,7 +214,7 @@ function SummaryItemForm({
 				render={({ field }) => {
 					return (
 						<FormItem>
-							<div className="flex items-center justify-between">
+							<div className="flex flex-col items-start gap-y-2 sm:flex-row sm:items-center sm:justify-between">
 								<FormLabel>
 									<Trans>Content</Trans>
 								</FormLabel>
