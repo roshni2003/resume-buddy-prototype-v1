@@ -52,7 +52,7 @@ export function CreateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 	return (
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PlusIcon />
 					<Trans>Create a new summary item</Trans>
 				</DialogTitle>
@@ -63,13 +63,12 @@ export function CreateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 				<form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
 					<SummaryItemForm aiUsage={{ roundsUsed, maxRounds, incrementRoundsUsed, resetRounds }} />
 
-					<DialogFooter>
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Create</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={requestClose}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -122,7 +121,7 @@ export function UpdateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 	return (
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PencilSimpleLineIcon />
 					<Trans>Update an existing summary item</Trans>
 				</DialogTitle>
@@ -133,13 +132,12 @@ export function UpdateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 				<form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
 					<SummaryItemForm aiUsage={{ roundsUsed, maxRounds, incrementRoundsUsed, resetRounds }} />
 
-					<DialogFooter>
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Save Changes</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={requestClose}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -214,7 +212,7 @@ function SummaryItemForm({
 				render={({ field }) => {
 					return (
 						<FormItem>
-							<div className="flex flex-col items-start gap-y-2 sm:flex-row sm:items-center sm:justify-between">
+							<div className="flex flex-row items-center justify-between">
 								<FormLabel>
 									<Trans>Content</Trans>
 								</FormLabel>
@@ -233,6 +231,7 @@ function SummaryItemForm({
 									maxRounds={maxRounds}
 									isWordCountValid={isWordCountValid}
 									disabled={roundsUsed >= maxRounds || !isWordCountValid} // Disable button after maxRounds
+									className="scale-90 sm:scale-100"
 								/>
 							</div>
 							<FormControl>
