@@ -134,16 +134,11 @@ export function BuilderTopTray() {
 		try {
 			const response = await runFinalReview({
 				resume_id: resume.id,
-				FinalReview: JSON.stringify({
-					resume: resume.data,
-					photo: {
-						url: resume.data.picture?.url,
-						visible: !resume.data.picture?.hidden,
-					},
-				}),
+				type: "FinalReview",
+				value: "string",
 			});
 
-			const reviewRaw = response.FinalReview;
+			const reviewRaw = response.FinalReview || Object.values(response)[0];
 			if (!reviewRaw) throw new Error("No review result received from AI");
 
 			let result;

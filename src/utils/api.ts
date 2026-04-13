@@ -189,13 +189,14 @@ export const api = {
 	// This endpoint handles summary, experience, projects, and final review depending on the keys provided.
 	generateAIContent: (payload: {
 		resume_id: string;
-		summary?: string;
-		ExperienceDescription?: string;
-		ProjectsDescription?: string;
-		FinalReview?: string;
+		type: "summary" | "ExperienceDescription" | "ProjectsDescription" | "FinalReview";
+		value: string;
 	}) =>
-		request<Record<string, string>>("/ai/generate-summary", {
+		request<Record<string, string>>(`/ai/generate-summary/${payload.resume_id}`, {
 			method: "POST",
-			body: JSON.stringify(payload),
+			body: JSON.stringify({
+				type: payload.type,
+				value: payload.value,
+			}),
 		}),
 };

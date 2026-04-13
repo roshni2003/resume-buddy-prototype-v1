@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { api } from "@/utils/api";
+import { stripHtml } from "@/utils/string";
 import { Button } from "./button";
 
 type AIGenerateButtonProps = {
@@ -50,16 +51,6 @@ export function AIGenerateButton({
 	const roundsRemaining = Math.max(0, maxRounds - roundsUsed);
 	const isLoading = isPending;
 
-	// Add round context to the data
-	const enhancedData = {
-		...data,
-		aiRound: roundsUsed + 1,
-		maxRounds: maxRounds,
-		isFirstRound: roundsUsed === 0,
-		isSecondRound: roundsUsed === 1,
-		previousContent: roundsUsed > 0 ? data.description || data.content : undefined,
-	};
-
 	const handleGenerate = () => {
 		// Prevent multiple clicks while generating
 		if (isLoading) {
@@ -88,54 +79,72 @@ export function AIGenerateButton({
 				: i18n._(t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`),
 		);
 
-		// Map type to backend key
-		const payload: Parameters<typeof api.generateAIContent>[0] = {
-			resume_id: resumeId,
-		};
+		let backendType: "summary" | "ExperienceDescription" | "ProjectsDescription" = "summary";
+		if (type === "experience") backendType = "ExperienceDescription";
+		else if (type === "projects") backendType = "ProjectsDescription";
 
-		if (type === "summary") payload.summary = JSON.stringify(enhancedData);
-		else if (type === "experience") payload.ExperienceDescription = JSON.stringify(enhancedData);
-		else if (type === "projects") payload.ProjectsDescription = JSON.stringify(enhancedData);
-		else payload.summary = JSON.stringify(enhancedData); // Fallback for custom
+		const value = stripHtml(
+			(data.currentSummary || data.description || data.content || Object.values(data)[0] || "") as string,
+		);
 
-		generateContent(payload, {
-			onSuccess: (response) => {
-				const contentKey = Object.keys(response).find((key) => key !== "resume_id");
-				const content = contentKey ? response[contentKey] : "";
+		// Backend requires non-empty value. Notify user instead of sending default prompts.
+		if (!value.trim()) {
+			toast.error(
+				i18n._(
+					t({
+						id: "ai.generate.error.empty",
+						message: "Please enter some details first to generate AI content.",
+					}),
+				),
+				{ id: toastId },
+			);
+			return;
+		}
 
-				console.log("Generation successful, content length:", content?.length);
-
-				// Check if content is valid
-				if (!content || content.length < 10) {
-					toast.error(
-						i18n._(
-							t({
-								id: "ai.generate.error.too-short",
-								message: "Generated content is too short. Please try again.",
-							}),
-						),
-						{ id: toastId },
-					);
-					return;
-				}
-
-				toast.success(i18n._(t({ id: "ai.generate.success", message: "Content generated successfully!" })), {
-					id: toastId,
-				});
-				onGenerated(content);
-
-				// Record the round
-				if (isMounted.current) {
-					onRoundComplete?.();
-				}
+		generateContent(
+			{
+				resume_id: resumeId,
+				type: backendType,
+				value: value,
 			},
-			onError: (error) => {
-				console.error("Generation error:", error);
-				toast.error(error.message || i18n._(t({ id: "ai.generate.error", message: "Failed to generate content" })), {
-					id: toastId,
-				});
+			{
+				onSuccess: (response) => {
+					const content = response[backendType] || Object.values(response)[0];
+
+					console.log("Generation successful, content length:", content?.length);
+
+					// Check if content is valid
+					if (!content || content.length < 10) {
+						toast.error(
+							i18n._(
+								t({
+									id: "ai.generate.error.too-short",
+									message: "Generated content is too short. Please try again.",
+								}),
+							),
+							{ id: toastId },
+						);
+						return;
+					}
+
+					toast.success(i18n._(t({ id: "ai.generate.success", message: "Content generated successfully!" })), {
+						id: toastId,
+					});
+					onGenerated(content);
+
+					// Record the round
+					if (isMounted.current) {
+						onRoundComplete?.();
+					}
+				},
+				onError: (error) => {
+					console.error("Generation error:", error);
+					toast.error(error.message || i18n._(t({ id: "ai.generate.error", message: "Failed to generate content" })), {
+						id: toastId,
+					});
+				},
 			},
-		});
+		);
 	};
 
 	// Determine button text based on state
