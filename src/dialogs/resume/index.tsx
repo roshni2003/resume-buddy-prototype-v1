@@ -539,7 +539,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						</div>
 
 						{/* Navigation Buttons */}
-						<DialogFooter className="flex items-center justify-between pt-6">
+						<DialogFooter className="grid grid-cols-2 gap-x-2 pt-6 sm:flex sm:items-center sm:justify-between">
 							<Button
 								type="button"
 								variant="outline"
@@ -550,11 +550,9 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 								Cancel
 							</Button>
 
-							<div className="flex gap-2">
-								<Button type="submit" disabled={!isFormValid} className="bg-emerald-600 hover:bg-emerald-700">
-									Continue
-								</Button>
-							</div>
+							<Button type="submit" disabled={!isFormValid} className="bg-emerald-600 hover:bg-emerald-700">
+								Continue
+							</Button>
 						</DialogFooter>
 					</form>
 				</Form>
