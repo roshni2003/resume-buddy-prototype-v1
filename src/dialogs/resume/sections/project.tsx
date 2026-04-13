@@ -115,7 +115,7 @@ export function UpdateProjectDialog({ data }: DialogProps<"resume.sections.proje
 	return (
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PencilSimpleLineIcon />
 					<Trans>Update an existing project</Trans>
 				</DialogTitle>
@@ -126,13 +126,12 @@ export function UpdateProjectDialog({ data }: DialogProps<"resume.sections.proje
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ProjectForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={closeDialog}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Save Changes</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -252,10 +251,8 @@ function ProjectForm() {
 				name="description"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<div className="flex items-center justify-between">
-							<FormLabel>
-								<Trans>Description</Trans>
-							</FormLabel>
+						<div className="flex flex-row items-center justify-between">
+							<FormLabel className="text-xs sm:text-base">Description</FormLabel>
 							<AIGenerateButton
 								resumeId={useResumeStore.getState().resume.id}
 								type="projects"
@@ -275,6 +272,7 @@ function ProjectForm() {
 								maxRounds={maxRounds}
 								isWordCountValid={isWordCountValid}
 								disabled={roundsUsed >= maxRounds || !isWordCountValid}
+								className="scale-85 sm:scale-100"
 							/>
 						</div>
 						<FormControl>
