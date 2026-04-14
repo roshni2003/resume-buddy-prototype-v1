@@ -108,7 +108,7 @@ function RouteComponent() {
 							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Total Resumes</Trans>
 							</p>
-							<p className="font-bold text-emerald-600 text-xl sm:text-2xl">{statistics?.totalResumes ?? 0}</p>
+							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalResumes ?? 0}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +130,7 @@ function RouteComponent() {
 							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Last Update</Trans>
 							</p>
-							<p className="font-semibold text-emerald-600 text-sm sm:text-base">{lastUpdateText}</p>
+							<p className="font-bold text-emerald-600 text-sm sm:text-base">{lastUpdateText}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,16 +146,16 @@ function RouteComponent() {
 				</div>
 
 				{/* Total Downloads */}
-				<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 					<div className="mb-3 flex items-start justify-between">
 						<div>
-							<p className="mb-1 text-gray-600 text-sm">
+							<p className="mb-1 text-gray-600 text-xs sm:text-sm">
 								<Trans>Total Downloads</Trans>
 							</p>
 							<p className="mb-2 text-gray-500 text-xs">
 								<Trans>This month</Trans>
 							</p>
-							<p className="font-bold text-2xl text-emerald-600">{statistics?.totalDownloads ?? 0}</p>
+							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalDownloads ?? 0}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,13 +171,13 @@ function RouteComponent() {
 				</div>
 
 				{/* Total Submissions */}
-				<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 					<div className="mb-3 flex items-start justify-between">
 						<div>
-							<p className="mb-2 text-gray-600 text-sm">
+							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Total Submissions</Trans>
 							</p>
-							<p className="font-semibold text-amber-600 text-base">
+							<p className="font-semibold text-amber-600 text-sm sm:text-base">
 								<Trans>Coming Soon!</Trans>
 							</p>
 						</div>
