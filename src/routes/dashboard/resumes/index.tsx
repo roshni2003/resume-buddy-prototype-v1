@@ -130,7 +130,7 @@ function RouteComponent() {
 							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Last Update</Trans>
 							</p>
-							<p className="font-bold text-emerald-600 text-sm sm:text-base">{lastUpdateText}</p>
+							<p className="font-semibold text-emerald-600 text-sm sm:text-base">{lastUpdateText}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
