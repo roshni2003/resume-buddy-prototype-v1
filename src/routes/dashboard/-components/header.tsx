@@ -1,7 +1,6 @@
 import type { Icon as IconType } from "@phosphor-icons/react";
 import { cn } from "@/utils/style";
 
-
 type Props = {
 	title: string;
 	icon: IconType;

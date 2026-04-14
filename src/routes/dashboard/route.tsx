@@ -1,13 +1,10 @@
 import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import { Key } from "@phosphor-icons/react";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { ReadCvLogoIcon } from "@phosphor-icons/react";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
 import { getInitials } from "@/utils/string";
-import { ApiKeyDialog } from "./-components/api-key-dialog";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
@@ -20,7 +17,6 @@ export const Route = createFileRoute("/dashboard")({
 
 function RouteComponent() {
 	const { i18n } = useLingui();
-	const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
 
 	return (
 		<div className="flex min-h-screen flex-col bg-gray-50">
@@ -34,14 +30,14 @@ function RouteComponent() {
 					</div>{" "}
 					{/* Center: Navigation */}
 					<nav className="flex items-center gap-2">
-						<Button
-							onClick={() => setApiKeyDialogOpen(true)}
-							variant="ghost"
+						<Link
+							to="/dashboard/resumes"
+							activeProps={{ className: "bg-emerald-50 text-emerald-700" }}
 							className="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-gray-700 text-sm transition-all hover:bg-gray-100 sm:px-4"
 						>
-							<Key className="size-5" />
-							<span>{i18n._(t({ id: "dashboard.api-key.button", message: "API Key" }))}</span>
-						</Button>
+							<ReadCvLogoIcon className="size-5" />
+							<span>{i18n._(t`Resumes`)}</span>
+						</Link>
 					</nav>
 					{/* Right: User Menu */}
 					<UserDropdownMenu>
@@ -65,9 +61,6 @@ function RouteComponent() {
 			<main className="@container mx-auto w-full max-w-7xl flex-1 p-6">
 				<Outlet />
 			</main>
-
-			{/* API Key Dialog */}
-			<ApiKeyDialog open={apiKeyDialogOpen} onOpenChange={setApiKeyDialogOpen} />
 		</div>
 	);
 }
