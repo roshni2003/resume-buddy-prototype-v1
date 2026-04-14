@@ -1,6 +1,5 @@
 // components/ui/ai-generate-button.tsx
-import { t } from "@lingui/macro";
-import { useLingui } from "@lingui/react";
+import { t } from "@lingui/core/macro";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -9,7 +8,6 @@ import { orpc } from "@/integrations/orpc/client";
 import { Button } from "./button";
 
 type AIGenerateButtonProps = {
-	resumeId: string;
 	type: "experience" | "projects" | "summary" | "custom";
 	data: Record<string, unknown>;
 	onGenerated: (content: string) => void;
@@ -22,7 +20,6 @@ type AIGenerateButtonProps = {
 };
 
 export function AIGenerateButton({
-	resumeId,
 	type,
 	data,
 	onGenerated,
@@ -33,14 +30,13 @@ export function AIGenerateButton({
 	isWordCountValid = true,
 	onRoundComplete,
 }: AIGenerateButtonProps) {
-	const { i18n } = useLingui();
 	const isMounted = useRef(true);
 
-	// Use environment variables for AI configuration (optional, server provides defaults)
-	const provider = import.meta.env.VITE_AI_PROVIDER as AIProvider | undefined;
-	const model = import.meta.env.VITE_AI_MODEL as string | undefined;
-	const apiKey = import.meta.env.VITE_AI_API_KEY as string | undefined;
-	const baseURL = import.meta.env.VITE_AI_BASE_URL as string | undefined;
+	// Use environment variables for AI configuration
+	const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
+	const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
+	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
+	const baseURL = import.meta.env.VITE_AI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta";
 
 	const { mutate: generateContent, isPending } = useMutation(orpc.ai.generateContent.mutationOptions());
 
@@ -51,101 +47,83 @@ export function AIGenerateButton({
 		};
 	}, []);
 
+	const isConfigured = !!apiKey && !!model;
 	const hasReachedLimit = roundsUsed >= maxRounds;
 	const roundsRemaining = Math.max(0, maxRounds - roundsUsed);
 	const isLoading = isPending;
+
+	// Add round context to the data
+	const enhancedData = {
+		...data,
+		aiRound: roundsUsed + 1,
+		maxRounds: maxRounds,
+		isFirstRound: roundsUsed === 0,
+		isSecondRound: roundsUsed === 1,
+		previousContent: roundsUsed > 0 ? data.description || data.content : undefined,
+	};
 
 	const handleGenerate = () => {
 		// Prevent multiple clicks while generating
 		if (isLoading) {
 			console.log("Already generating, ignoring click");
-			toast.info(i18n._(t({ id: "ai.generate.wait", message: "Please wait for the current generation to complete." })));
+			toast.info(t`Please wait for the current generation to complete.`);
+			return;
+		}
+
+		if (!isConfigured) {
+			toast.error(t`AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file.`);
 			return;
 		}
 
 		if (!isWordCountValid) {
-			toast.error(
-				i18n._(t({ id: "ai.generate.error.word-count", message: "Please write at least 5 words before asking Zoe." })),
-			);
+			toast.error(t`Please write at least 5 words before asking Zoe.`);
 			return;
 		}
 
 		if (hasReachedLimit) {
-			toast.error(
-				i18n._(t`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`),
-			);
+			toast.error(t`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`);
 			return;
 		}
+
+		console.log("Starting generation for round:", roundsUsed + 1);
 
 		const toastId = toast.loading(
 			roundsUsed === 0
-				? i18n._(t({ id: "ai.generate.loading.first", message: "Generating first suggestion..." }))
-				: i18n._(t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`),
+				? t`Generating first suggestion...`
+				: t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`,
 		);
-
-		let backendType: "summary" | "ExperienceDescription" | "ProjectsDescription" = "summary";
-		if (type === "experience") backendType = "ExperienceDescription";
-		else if (type === "projects") backendType = "ProjectsDescription";
-
-		const value = stripHtml(
-			(data.currentSummary || data.description || data.content || Object.values(data)[0] || "") as string,
-		);
-
-		// Backend requires non-empty value. Notify user instead of sending default prompts.
-		if (!value.trim()) {
-			toast.error(
-				i18n._(
-					t({
-						id: "ai.generate.error.empty",
-						message: "Please enter some details first to generate AI content.",
-					}),
-				),
-				{ id: toastId },
-			);
-			return;
-		}
 
 		generateContent(
 			{
-				resume_id: resumeId,
-				type: backendType,
-				value: value,
+				provider,
+				model,
+				apiKey,
+				baseURL,
+				type,
+				data: enhancedData,
 			},
 			{
-				onSuccess: (response) => {
-					const content = response[backendType] || Object.values(response)[0];
-
+				onSuccess: (content) => {
 					console.log("Generation successful, content length:", content?.length);
 
 					// Check if content is valid
 					if (!content || content.length < 10) {
-						toast.error(
-							i18n._(
-								t({
-									id: "ai.generate.error.too-short",
-									message: "Generated content is too short. Please try again.",
-								}),
-							),
-							{ id: toastId },
-						);
+						toast.error(t`Generated content is too short. Please try again.`, { id: toastId });
 						return;
 					}
 
-					toast.success(i18n._(t({ id: "ai.generate.success", message: "Content generated successfully!" })), {
-						id: toastId,
-					});
+					toast.success(t`Content generated successfully!`, { id: toastId });
 					onGenerated(content);
 
 					// Record the round
 					if (isMounted.current) {
+						console.log("Recording round completion");
 						onRoundComplete?.();
 					}
 				},
 				onError: (error) => {
 					console.error("Generation error:", error);
-					toast.error(error.message || i18n._(t({ id: "ai.generate.error", message: "Failed to generate content" })), {
-						id: toastId,
-					});
+					toast.error(error.message || t`Failed to generate content`, { id: toastId });
 				},
 			},
 		);

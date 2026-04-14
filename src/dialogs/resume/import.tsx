@@ -66,14 +66,14 @@ const formSchema = z.discriminatedUnion("type", [
 type FormValues = z.infer<typeof formSchema>;
 
 export function ImportResumeDialog(_: DialogProps<"resume.import">) {
-	// Use environment variables for AI configuration
-	const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
-	const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
-	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
-	const baseURL = import.meta.env.VITE_AI_BASE_URL;
-	const isAIEnabled = !!apiKey && !!model;
+  // Use environment variables for AI configuration
+  const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
+  const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
+  const apiKey = import.meta.env.VITE_AI_API_KEY || "";
+  const baseURL = import.meta.env.VITE_AI_BASE_URL;
+  const isAIEnabled = !!apiKey && !!model;
 
-	const closeDialog = useDialogStore((state) => state.closeDialog);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
 	const prevTypeRef = useRef<string>("");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);

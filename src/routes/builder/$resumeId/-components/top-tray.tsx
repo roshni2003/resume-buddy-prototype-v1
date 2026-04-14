@@ -77,16 +77,12 @@ export function BuilderTopTray() {
 	const [reviewStartTime, setReviewStartTime] = useState<number>(0);
 	const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-<<<<<<< HEAD
-=======
 	const provider = import.meta.env.VITE_AI_PROVIDER || "gemini";
 	const model = import.meta.env.VITE_AI_MODEL || "gemini-2.0-flash-exp";
 	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
 	const baseURL = import.meta.env.VITE_AI_BASE_URL || undefined;
->>>>>>> parent of c058837 (Merge pull request #48 from navgurukul/apikey-dialog)
 	const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 	const [showLastAttemptConfirm, setShowLastAttemptConfirm] = useState(false);
-
 	useEffect(() => {
 		return () => {
 			if (fallbackTimeoutRef.current) {
@@ -149,10 +145,16 @@ export function BuilderTopTray() {
 			if (!reviewRaw) throw new Error("No review result received from AI");
 
 			let result;
-			try {
-				result = JSON.parse(reviewRaw);
-			} catch (e) {
-				console.error("Failed to parse Final Review result:", e);
+			if (typeof reviewRaw === "string") {
+				try {
+					result = JSON.parse(reviewRaw);
+				} catch (e) {
+					console.error("Failed to parse Final Review result:", e);
+					throw new Error("Invalid review format received from AI");
+				}
+			} else if (typeof reviewRaw === "object" && reviewRaw !== null) {
+				result = reviewRaw;
+			} else {
 				throw new Error("Invalid review format received from AI");
 			}
 
@@ -170,18 +172,9 @@ export function BuilderTopTray() {
 			setReviewResult(result);
 			setShowReviewDrawer(true);
 
-			toast.success(i18n._(t({ id: "ai.review.success", message: "Review complete!" })), {
+			toast.success(t`Review complete!`, {
 				id: toastId,
-				description: i18n._(
-					t({
-						id: "ai.review.success.description",
-						message: "Score: {score}/100 - {verdict}",
-						values: {
-							score: result.overall_score,
-							verdict: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements",
-						},
-					}),
-				),
+				description: t`Score: ${result.overall_score}/100 - ${result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"}`,
 			});
 		} catch (error: any) {
 			if (fallbackTimeoutRef.current) {
