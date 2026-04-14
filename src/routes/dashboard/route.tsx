@@ -1,7 +1,7 @@
-import { t } from "@lingui/macro";
+// import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import { ReadCvLogoIcon } from "@phosphor-icons/react";
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+// import { ReadCvLogoIcon } from "@phosphor-icons/react";
+import { createFileRoute,Outlet } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
 import { getInitials } from "@/utils/string";
@@ -29,7 +29,7 @@ function RouteComponent() {
 						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Zoe Resume Builder</h1>
 					</div>{" "}
 					{/* Center: Navigation */}
-					<nav className="flex items-center gap-2">
+					{/* <nav className="flex items-center gap-2">
 						<Link
 							to="/dashboard/resumes"
 							activeProps={{ className: "bg-emerald-50 text-emerald-700" }}
@@ -38,7 +38,7 @@ function RouteComponent() {
 							<ReadCvLogoIcon className="size-5" />
 							<span>{i18n._(t`Resumes`)}</span>
 						</Link>
-					</nav>
+					</nav> */}
 					{/* Right: User Menu */}
 					<UserDropdownMenu>
 						{({ session }) => (
