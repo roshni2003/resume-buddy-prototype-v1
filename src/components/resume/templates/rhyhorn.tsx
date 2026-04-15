@@ -76,8 +76,8 @@ function Header() {
 	};
 
 	return (
-		<div data-section-id="header" className="page-header flex flex-col items-center gap-y-(--page-gap-y)">
-			<div className="page-basics grow space-y-(--page-gap-y)">
+		<div data-section-id="header" className="page-header flex items-start gap-x-6">
+			<div className="page-basics min-w-0 flex-1 space-y-(--page-gap-y)">
 				<div>
 					<h2 className="basics-name">
 						<InlineEditableText value={basics.name} placeholder="Your Name" onChange={handleNameChange} />
