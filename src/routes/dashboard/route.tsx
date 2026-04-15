@@ -8,9 +8,7 @@ import { getInitials } from "@/utils/string";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
-	// Removed auth redirect to allow public access to dashboard
 	beforeLoad: async ({ context }) => {
-		// No authentication required; return session if present
 		return { session: context.session };
 	},
 });
