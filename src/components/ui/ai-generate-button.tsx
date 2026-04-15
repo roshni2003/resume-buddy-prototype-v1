@@ -1,7 +1,8 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useResumeStore } from "@/components/resume/store/resume";
 import { api } from "@/utils/api";
 import { stripHtml } from "@/utils/string";
 import { Button } from "./button";
@@ -32,6 +33,8 @@ export function AIGenerateButton({
 	onRoundComplete,
 }: AIGenerateButtonProps) {
 	const isMounted = useRef(true);
+	const storeResumeId = useResumeStore((state) => state.resume.id);
+	const effectiveResumeId = resumeId || storeResumeId;
 
 	const { mutate: generateContent, isPending } = useMutation({
 		mutationFn: api.generateAIContent,
@@ -78,13 +81,27 @@ export function AIGenerateButton({
 		const apiType =
 			type === "experience" ? "ExperienceDescription" : type === "projects" ? "ProjectsDescription" : type;
 
+		const value = stripHtml(
+			(data.currentSummary || data.description || data.content || Object.values(data)[0] || "") as string,
+		);
+
+		// Backend requires non-empty value. Notify user instead of sending default prompts.
+		if (!value.trim()) {
+			toast.error(
+				t({
+					id: "ai.generate.error.empty",
+					message: "Please enter some details first to generate AI content.",
+				}),
+				{ id: toastId },
+			);
+			return;
+		}
+
 		generateContent(
 			{
-				resume_id: resumeId || "",
+				resume_id: effectiveResumeId || "",
 				type: apiType as "summary" | "ExperienceDescription" | "ProjectsDescription" | "FinalReview",
-				value: stripHtml(
-					(data.currentSummary as string) || (data.description as string) || (data.content as string) || "",
-				),
+				value: value,
 			},
 			{
 				onSuccess: (response) => {
