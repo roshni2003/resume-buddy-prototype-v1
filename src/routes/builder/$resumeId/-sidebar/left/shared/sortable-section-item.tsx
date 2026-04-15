@@ -6,6 +6,7 @@ import {
 	EyeClosedIcon,
 	EyeIcon,
 	PencilSimpleLineIcon,
+	SparkleIcon,
 	TrashSimpleIcon,
 } from "@phosphor-icons/react";
 import { useResumeStore } from "@/components/resume/store/resume";
@@ -35,6 +36,7 @@ type Props<T extends CustomSectionItem | SectionItemType> = {
 	title: string;
 	subtitle?: string;
 	customSectionId?: string;
+	onAskZoe?: () => void;
 };
 
 export function SortableSectionItem<T extends CustomSectionItem | SectionItemType>({
@@ -43,6 +45,7 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 	title,
 	subtitle,
 	customSectionId,
+	onAskZoe,
 }: Props<T>) {
 	const confirm = useConfirm();
 	const { openDialog } = useDialogStore();
@@ -145,6 +148,13 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 								<CopySimpleIcon />
 								<Trans>Duplicate</Trans>
 							</DropdownMenuItem>
+
+							{onAskZoe && (
+								<DropdownMenuItem onSelect={onAskZoe}>
+									<SparkleIcon className="text-emerald-600" />
+									<Trans>Ask Zoe</Trans>
+								</DropdownMenuItem>
+							)}
 
 							<MoveItemSubmenu type={type} item={item} customSectionId={customSectionId} />
 						</DropdownMenuGroup>

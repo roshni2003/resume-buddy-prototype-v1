@@ -1,14 +1,14 @@
-// components/ui/ai-generate-button.tsx
 import { t } from "@lingui/core/macro";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import type { AIProvider } from "@/integrations/ai/types";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
+import { stripHtml } from "@/utils/string";
 import { Button } from "./button";
 
 type AIGenerateButtonProps = {
-	type: "experience" | "projects" | "summary" | "custom";
+	resumeId?: string;
+	type: "experience" | "projects" | "summary" | "custom" | "ExperienceDescription" | "ProjectsDescription";
 	data: Record<string, unknown>;
 	onGenerated: (content: string) => void;
 	disabled?: boolean;
@@ -20,6 +20,7 @@ type AIGenerateButtonProps = {
 };
 
 export function AIGenerateButton({
+	resumeId,
 	type,
 	data,
 	onGenerated,
@@ -32,13 +33,9 @@ export function AIGenerateButton({
 }: AIGenerateButtonProps) {
 	const isMounted = useRef(true);
 
-	// Use environment variables for AI configuration
-	const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
-	const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
-	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
-	const baseURL = import.meta.env.VITE_AI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta";
-
-	const { mutate: generateContent, isPending } = useMutation(orpc.ai.generateContent.mutationOptions());
+	const { mutate: generateContent, isPending } = useMutation({
+		mutationFn: api.generateAIContent,
+	});
 
 	// Cleanup on unmount
 	useEffect(() => {
@@ -47,31 +44,15 @@ export function AIGenerateButton({
 		};
 	}, []);
 
-	const isConfigured = !!apiKey && !!model;
 	const hasReachedLimit = roundsUsed >= maxRounds;
 	const roundsRemaining = Math.max(0, maxRounds - roundsUsed);
 	const isLoading = isPending;
-
-	// Add round context to the data
-	const enhancedData = {
-		...data,
-		aiRound: roundsUsed + 1,
-		maxRounds: maxRounds,
-		isFirstRound: roundsUsed === 0,
-		isSecondRound: roundsUsed === 1,
-		previousContent: roundsUsed > 0 ? data.description || data.content : undefined,
-	};
 
 	const handleGenerate = () => {
 		// Prevent multiple clicks while generating
 		if (isLoading) {
 			console.log("Already generating, ignoring click");
 			toast.info(t`Please wait for the current generation to complete.`);
-			return;
-		}
-
-		if (!isConfigured) {
-			toast.error(t`AI is not configured. Please set VITE_AI_API_KEY and VITE_AI_MODEL in your .env file.`);
 			return;
 		}
 
@@ -93,17 +74,21 @@ export function AIGenerateButton({
 				: t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`,
 		);
 
+		// Map simpler internal types to what the API expects
+		const apiType =
+			type === "experience" ? "ExperienceDescription" : type === "projects" ? "ProjectsDescription" : type;
+
 		generateContent(
 			{
-				provider,
-				model,
-				apiKey,
-				baseURL,
-				type,
-				data: enhancedData,
+				resume_id: resumeId || "",
+				type: apiType as "summary" | "ExperienceDescription" | "ProjectsDescription" | "FinalReview",
+				value: stripHtml(
+					(data.currentSummary as string) || (data.description as string) || (data.content as string) || "",
+				),
 			},
 			{
-				onSuccess: (content) => {
+				onSuccess: (response) => {
+					const content = Object.values(response)[0];
 					console.log("Generation successful, content length:", content?.length);
 
 					// Check if content is valid
@@ -121,7 +106,7 @@ export function AIGenerateButton({
 						onRoundComplete?.();
 					}
 				},
-				onError: (error) => {
+				onError: (error: any) => {
 					console.error("Generation error:", error);
 					toast.error(error.message || t`Failed to generate content`, { id: toastId });
 				},
@@ -131,14 +116,15 @@ export function AIGenerateButton({
 
 	// Determine button text based on state
 	const getButtonText = () => {
-		if (isLoading) return "Generating...";
+		if (isLoading) return t`Generating...`;
 
-		if (hasReachedLimit) return "Ask Zoe (Used)";
+		if (hasReachedLimit) return t`Ask Zoe (Used)`;
 
-		return `Ask Zoe (${roundsRemaining} ${roundsRemaining === 1 ? "round" : "rounds"} remaining)`;
+		return t`Ask Zoe (${roundsRemaining} ${roundsRemaining === 1 ? "round" : "rounds"} remaining)`;
 	};
 
 	const isDisabled = disabled || isLoading || !isWordCountValid || hasReachedLimit;
+
 	return (
 		<Button
 			type="button"

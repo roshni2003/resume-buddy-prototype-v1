@@ -3,7 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { SortableList } from "@/components/ui/sortable-list";
-import { generateExperienceDescription } from "@/utils/ai-service";
+import { api } from "@/utils/api";
+import { stripHtml } from "@/utils/string";
 import { SectionBase } from "../shared/section-base";
 import { SectionAddItemButton } from "../shared/section-item";
 import { SortableSectionItem } from "../shared/sortable-section-item";
@@ -11,10 +12,10 @@ import { SortableSectionItem } from "../shared/sortable-section-item";
 // Function to format date as 'Sep/2026'
 function formatExperienceDate(dateString: string | undefined): string {
 	if (!dateString) return "";
-	
+
 	try {
 		const date = new Date(dateString);
-		const month = date.toLocaleString('en-US', { month: 'short' });
+		const month = date.toLocaleString("en-US", { month: "short" });
 		const year = date.getFullYear();
 		return `${month}/${year}`;
 	} catch {
@@ -39,12 +40,13 @@ export function ExperienceSectionBuilder() {
 			}
 
 			// Call real AI with the experience data
-			const aiDescription = await generateExperienceDescription({
-				position: item.position,
-				company: item.company,
-				location: item.location,
-				period: `${item.startDate || ""} - ${item.endDate || (item.currentlyWorkingHere ? "Present" : "")}`.trim(),
+			const response = await api.generateAIContent({
+				resume_id: useResumeStore.getState().resume.id,
+				type: "ExperienceDescription",
+				value: stripHtml(`${item.position} at ${item.company}`),
 			});
+
+			const aiDescription = Object.values(response)[0];
 
 			// Update the description with AI-generated content
 			updateResumeData((draft) => {
@@ -92,6 +94,7 @@ export function ExperienceSectionBuilder() {
 							]
 								.filter(Boolean)
 								.join(" • ")}
+							onAskZoe={() => handleAskZoe(item.id)}
 						/>
 					)}
 				/>
