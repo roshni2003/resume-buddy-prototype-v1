@@ -54,7 +54,7 @@ export function CreateProjectDialog({ data }: DialogProps<"resume.sections.proje
 	return (
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PlusIcon />
 					<Trans>Create a new project</Trans>
 				</DialogTitle>
@@ -65,13 +65,12 @@ export function CreateProjectDialog({ data }: DialogProps<"resume.sections.proje
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ProjectForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={closeDialog}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Create</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -254,7 +253,6 @@ function ProjectForm() {
 						<div className="flex flex-row items-center justify-between">
 							<FormLabel className="text-xs sm:text-base">Description</FormLabel>
 							<AIGenerateButton
-								resumeId={useResumeStore.getState().resume.id}
 								type="projects"
 								data={{
 									name,
