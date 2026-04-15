@@ -206,21 +206,6 @@ msgstr "Anyone who has the resume's public URL will be able to view and download
 msgid "Anyone with the link can view and download the resume."
 msgstr "Anyone with the link can view and download the resume."
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/route.tsx
-msgid "dashboard.api-key.button"
-msgstr "API Key"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.success.clear"
-msgstr "API Key cleared! The page will reload to apply changes."
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.success.save"
-msgstr "API Key saved successfully! The page will reload to apply changes."
-
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "App"
 msgstr "App"
@@ -249,6 +234,19 @@ msgstr "Are you sure you want to remove password protection?"
 #: src/dialogs/resume/sections/education.tsx
 msgid "Area of Study"
 msgstr "Area of Study"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
+msgid "Ask Zoe"
+msgstr "Ask Zoe"
+
+#. placeholder {0}: roundsRemaining === 1 ? "round" : "rounds"
+#: src/components/ui/ai-generate-button.tsx
+msgid "Ask Zoe ({roundsRemaining} {0} remaining)"
+msgstr "Ask Zoe ({roundsRemaining} {0} remaining)"
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Ask Zoe (Used)"
+msgstr "Ask Zoe (Used)"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Aspect Ratio"
@@ -346,7 +344,6 @@ msgstr "By the community, for the community."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-#: src/routes/dashboard/-components/api-key-dialog.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
 msgstr "Cancel"
@@ -374,11 +371,6 @@ msgstr "Circle"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Circle (100pt)"
 msgstr "Circle (100pt)"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.clear-button"
-msgstr "Clear Current Key"
 
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
@@ -420,9 +412,8 @@ msgstr "Confirm"
 msgid "Content"
 msgstr "Content"
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.success"
+msgid "Content generated successfully!"
 msgstr "Content generated successfully!"
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
@@ -536,11 +527,6 @@ msgstr "Creating your resume..."
 msgid "Critical Issues"
 msgstr "Critical Issues"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.current-key"
-msgstr "Current API Key"
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Currently studying here"
 msgstr "Currently studying here"
@@ -600,7 +586,6 @@ msgstr "Deleting your resume..."
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
@@ -707,11 +692,6 @@ msgstr "English"
 msgid "Enter the URL to link to"
 msgstr "Enter the URL to link to"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.input-label"
-msgstr "Enter your Gemini API Key"
-
 #: src/utils/resume/section.tsx
 msgid "Experience"
 msgstr "Experience"
@@ -720,24 +700,13 @@ msgstr "Experience"
 msgid "Export"
 msgstr "Export"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.error.clear"
-msgstr "Failed to clear API key"
-
 #: src/components/ui/review-drawer-fixed.tsx
 msgid "Failed to fix issues automatically"
 msgstr "Failed to fix issues automatically"
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error"
+msgid "Failed to generate content"
 msgstr "Failed to generate content"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.error.save"
-msgstr "Failed to save API key"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Filter by"
@@ -814,20 +783,22 @@ msgstr "French"
 msgid "Full Width"
 msgstr "Full Width"
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error.too-short"
+msgid "Generated content is too short. Please try again."
 msgstr "Generated content is too short. Please try again."
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.loading.first"
+msgid "Generating first suggestion..."
 msgstr "Generating first suggestion..."
 
-#. js-lingui-explicit-id
+#. placeholder {0}: roundsUsed + 1
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.loading.refine"
-msgstr "Generating refinement (Round {round}/{maxRounds})..."
+msgid "Generating refinement (Round {0}/{maxRounds})..."
+msgstr "Generating refinement (Round {0}/{maxRounds})..."
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Generating..."
+msgstr "Generating..."
 
 #: src/utils/locale.ts
 msgid "German"
@@ -1273,9 +1244,9 @@ msgid "Picture URL"
 msgstr "Picture URL"
 
 #. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.error.missing-key"
-msgstr "Please enter an API key"
+#: src/components/ui/ai-generate-button.tsx
+msgid "ai.generate.error.empty"
+msgstr "Please enter some details first to generate AI content."
 
 #: src/components/input/rich-input.tsx
 msgid "Please enter the URL:"
@@ -1289,9 +1260,8 @@ msgstr "Please select a valid image file (PNG, JPG, WEBP, etc.)"
 msgid "Please try fixing issues manually or contact support."
 msgstr "Please try fixing issues manually or contact support."
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.wait"
+msgid "Please wait for the current generation to complete."
 msgstr "Please wait for the current generation to complete."
 
 #. placeholder {0}: format.toUpperCase()
@@ -1308,9 +1278,8 @@ msgstr "Please wait while your DOCX is being generated..."
 msgid "Please wait while your PDF is being generated..."
 msgstr "Please wait while your PDF is being generated..."
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error.word-count"
+msgid "Please write at least 5 words before asking Zoe."
 msgstr "Please write at least 5 words before asking Zoe."
 
 #: src/utils/locale.ts
@@ -1456,9 +1425,8 @@ msgstr "Resume Score"
 msgid "Resumes"
 msgstr "Resumes"
 
-#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "ai.review.success"
+msgid "Review complete!"
 msgstr "Review complete!"
 
 #. js-lingui-explicit-id
@@ -1506,19 +1474,15 @@ msgstr "Russian"
 msgid "Save Changes"
 msgstr "Save Changes"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.saving"
-msgstr "Saving..."
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "School"
 
-#. js-lingui-explicit-id
+#. placeholder {0}: result.overall_score
+#. placeholder {1}: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "ai.review.success.description"
-msgstr "Score: {score}/100 - {verdict}"
+msgid "Score: {0}/100 - {1}"
+msgstr "Score: {0}/100 - {1}"
 
 #: src/components/input/icon-picker.tsx
 #: src/components/input/icon-picker.tsx
@@ -1546,11 +1510,6 @@ msgstr "Select..."
 #: src/utils/locale.ts
 msgid "Serbian"
 msgstr "Serbian"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.title"
-msgstr "Set Gemini API Key"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1797,11 +1756,6 @@ msgstr "This feature requires AI Integration to be enabled. Please enable it in 
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr "This is taking a bit longer than expected, please wait..."
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.input-help"
-msgstr "This key will be stored locally in your browser and used for AI features."
-
 #: src/dialogs/resume/import.tsx
 msgid "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
 msgstr "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
@@ -2003,11 +1957,6 @@ msgstr "Update an existing volunteer experience"
 msgid "Updating your resume..."
 msgstr "Updating your resume..."
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.use-button"
-msgstr "Use This"
-
 #: src/dialogs/resume/sections/profile.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Username"
@@ -2076,9 +2025,8 @@ msgstr "You have 1 more AI suggestion left for this text."
 msgid "You have unsaved changes that will be lost."
 msgstr "You have unsaved changes that will be lost."
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error.limit-reached"
+msgid "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
 msgstr "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
 
 #. placeholder {0}: format.toUpperCase()

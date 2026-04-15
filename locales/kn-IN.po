@@ -211,21 +211,6 @@ msgstr "ರೆಸ್ಯೂಮ್‌ನ ಸಾರ್ವಜನಿಕ URL ಹೊಂ
 msgid "Anyone with the link can view and download the resume."
 msgstr "ಲಿಂಕ್ ಹೊಂದಿರುವ ಯಾರಾದರೂ ರೆಸ್ಯೂಮ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಮತ್ತು ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದು."
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/route.tsx
-msgid "dashboard.api-key.button"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.success.clear"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.success.save"
-msgstr ""
-
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "App"
 msgstr "ಆ್ಯಪ್"
@@ -254,6 +239,19 @@ msgstr "ಪಾಸ್‌ವರ್ಡ್ ರಕ್ಷೆಯನ್ನು ತೆಗ�
 #: src/dialogs/resume/sections/education.tsx
 msgid "Area of Study"
 msgstr "ಅಧ್ಯಯನದ ಕ್ಷೇತ್ರ"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
+msgid "Ask Zoe"
+msgstr ""
+
+#. placeholder {0}: roundsRemaining === 1 ? "round" : "rounds"
+#: src/components/ui/ai-generate-button.tsx
+msgid "Ask Zoe ({roundsRemaining} {0} remaining)"
+msgstr ""
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Ask Zoe (Used)"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Aspect Ratio"
@@ -351,7 +349,6 @@ msgstr "ಸಮುದಾಯದಿಂದ, ಸಮುದಾಯಕ್ಕಾಗಿ."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-#: src/routes/dashboard/-components/api-key-dialog.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
 msgstr "ರದ್ದುಮಾಡಿ"
@@ -378,11 +375,6 @@ msgstr "ವೃತ್ತ"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Circle (100pt)"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.clear-button"
 msgstr ""
 
 #: src/components/ui/multiple-combobox.tsx
@@ -425,9 +417,8 @@ msgstr "ದೃಢೀಕರಿಸಿ"
 msgid "Content"
 msgstr ""
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.success"
+msgid "Content generated successfully!"
 msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
@@ -541,11 +532,6 @@ msgstr "ನಿಮ್ಮ ರೆಸ್ಯೂಮ್ ರಚಿಸಲಾಗುತ್�
 msgid "Critical Issues"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.current-key"
-msgstr ""
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Currently studying here"
 msgstr ""
@@ -605,7 +591,6 @@ msgstr "ನಿಮ್ಮ ರೆಸ್ಯೂಮ್ ಅಳಿಸಲಾಗುತ್�
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
@@ -712,11 +697,6 @@ msgstr "ಆಂಗ್ಲ"
 msgid "Enter the URL to link to"
 msgstr "ಲಿಂಕ್ ಮಾಡಲು URL ಅನ್ನು ನಮೂದಿಸಿ"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.input-label"
-msgstr ""
-
 #: src/utils/resume/section.tsx
 msgid "Experience"
 msgstr "ಅನುಭವ"
@@ -725,23 +705,12 @@ msgstr "ಅನುಭವ"
 msgid "Export"
 msgstr "ರಫ್ತು ಮಾಡು"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.error.clear"
-msgstr ""
-
 #: src/components/ui/review-drawer-fixed.tsx
 msgid "Failed to fix issues automatically"
 msgstr ""
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.error.save"
+msgid "Failed to generate content"
 msgstr ""
 
 #: src/routes/dashboard/resumes/index.tsx
@@ -819,19 +788,21 @@ msgstr "ಫ್ರೆಂಚ್"
 msgid "Full Width"
 msgstr "ಪೂರ್ಣ ಅಗಲ"
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error.too-short"
+msgid "Generated content is too short. Please try again."
 msgstr ""
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.loading.first"
+msgid "Generating first suggestion..."
 msgstr ""
 
-#. js-lingui-explicit-id
+#. placeholder {0}: roundsUsed + 1
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.loading.refine"
+msgid "Generating refinement (Round {0}/{maxRounds})..."
+msgstr ""
+
+#: src/components/ui/ai-generate-button.tsx
+msgid "Generating..."
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1278,8 +1249,8 @@ msgid "Picture URL"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.error.missing-key"
+#: src/components/ui/ai-generate-button.tsx
+msgid "ai.generate.error.empty"
 msgstr ""
 
 #: src/components/input/rich-input.tsx
@@ -1294,9 +1265,8 @@ msgstr ""
 msgid "Please try fixing issues manually or contact support."
 msgstr ""
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.wait"
+msgid "Please wait for the current generation to complete."
 msgstr ""
 
 #. placeholder {0}: format.toUpperCase()
@@ -1313,9 +1283,8 @@ msgstr ""
 msgid "Please wait while your PDF is being generated..."
 msgstr "ದಯವಿಟ್ಟು ನಿಮ್ಮ PDF ರಚಿಸಲಾಗುವವರೆಗೆ ನಿರೀಕ್ಷಿಸಿ..."
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error.word-count"
+msgid "Please write at least 5 words before asking Zoe."
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1461,9 +1430,8 @@ msgstr ""
 msgid "Resumes"
 msgstr "ರೆಸ್ಯೂಮೇ"
 
-#. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "ai.review.success"
+msgid "Review complete!"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1511,18 +1479,14 @@ msgstr "ರಷಿಯನ್"
 msgid "Save Changes"
 msgstr "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸು"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.saving"
-msgstr ""
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "ಶಾಲೆ"
 
-#. js-lingui-explicit-id
+#. placeholder {0}: result.overall_score
+#. placeholder {1}: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "ai.review.success.description"
+msgid "Score: {0}/100 - {1}"
 msgstr ""
 
 #: src/components/input/icon-picker.tsx
@@ -1551,11 +1515,6 @@ msgstr "ಆಯ್ಕೆಮಾಡಿ..."
 #: src/utils/locale.ts
 msgid "Serbian"
 msgstr "ಸರ್ಬಿಯನ್"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.title"
-msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -1802,11 +1761,6 @@ msgstr "ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು AI ಏಕ
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr ""
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.input-help"
-msgstr ""
-
 #: src/dialogs/resume/import.tsx
 msgid "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
 msgstr "ಇದು AI ಪ್ರೊವೈಡರ್‌ನ ಪ್ರತಿಕ್ರಿಯೆಯ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿ ಕೆಲ ನಿಮಿಷಗಳು ತೆಗೆದುಕೊಳ್ಳಬಹುದು. ದಯವಿಟ್ಟು ವಿಂಡೋ ಅನ್ನು ಮುಚ್ಚಬೇಡಿ ಅಥವಾ ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಬೇಡಿ."
@@ -2008,11 +1962,6 @@ msgstr "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸ್ವಯಂಸೇ�
 msgid "Updating your resume..."
 msgstr "ನಿಮ್ಮ ರೆಸ್ಯೂಮ್ ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ..."
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/-components/api-key-dialog.tsx
-msgid "dashboard.api-key.dialog.use-button"
-msgstr ""
-
 #: src/dialogs/resume/sections/profile.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Username"
@@ -2081,9 +2030,8 @@ msgstr ""
 msgid "You have unsaved changes that will be lost."
 msgstr ""
 
-#. js-lingui-explicit-id
 #: src/components/ui/ai-generate-button.tsx
-msgid "ai.generate.error.limit-reached"
+msgid "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
 msgstr ""
 
 #. placeholder {0}: format.toUpperCase()
