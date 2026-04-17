@@ -24,6 +24,8 @@ import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/re
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
 import { Route as UploadsUserIdSplatRouteImport } from "./routes/uploads/$userId.$";
 import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
+import { Route as DashboardAdminMixpanelRouteImport } from "./routes/dashboard/admin/mixpanel";
+import { Route as DashboardAdminAnalyticsRouteImport } from "./routes/dashboard/admin/analytics";
 import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
 import { Route as ApiOpenapiSplatRouteImport } from "./routes/api/openapi.$";
 import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth.$";
@@ -103,6 +105,16 @@ const DashboardSettingsProfileRoute =
     path: "/settings/profile",
     getParentRoute: () => DashboardRouteRoute,
   } as any);
+const DashboardAdminMixpanelRoute = DashboardAdminMixpanelRouteImport.update({
+  id: "/admin/mixpanel",
+  path: "/admin/mixpanel",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
+  id: "/admin/analytics",
+  path: "/admin/analytics",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: "/api/rpc/$",
   path: "/api/rpc/$",
@@ -133,6 +145,8 @@ export interface FileRoutesByFullPath {
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
+  "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
+  "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
@@ -150,6 +164,8 @@ export interface FileRoutesByTo {
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
+  "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
+  "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId": typeof BuilderResumeIdIndexRoute;
@@ -171,6 +187,8 @@ export interface FileRoutesById {
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
+  "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
+  "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
@@ -192,6 +210,8 @@ export interface FileRouteTypes {
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
+    | "/dashboard/admin/analytics"
+    | "/dashboard/admin/mixpanel"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId/"
@@ -209,6 +229,8 @@ export interface FileRouteTypes {
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
+    | "/dashboard/admin/analytics"
+    | "/dashboard/admin/mixpanel"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId"
@@ -229,6 +251,8 @@ export interface FileRouteTypes {
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
+    | "/dashboard/admin/analytics"
+    | "/dashboard/admin/mixpanel"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId/"
@@ -358,6 +382,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardSettingsProfileRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/dashboard/admin/mixpanel": {
+      id: "/dashboard/admin/mixpanel";
+      path: "/admin/mixpanel";
+      fullPath: "/dashboard/admin/mixpanel";
+      preLoaderRoute: typeof DashboardAdminMixpanelRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/admin/analytics": {
+      id: "/dashboard/admin/analytics";
+      path: "/admin/analytics";
+      fullPath: "/dashboard/admin/analytics";
+      preLoaderRoute: typeof DashboardAdminAnalyticsRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     "/api/rpc/$": {
       id: "/api/rpc/$";
       path: "/api/rpc/$";
@@ -396,12 +434,16 @@ const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute;
+  DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute;
+  DashboardAdminMixpanelRoute: typeof DashboardAdminMixpanelRoute;
   DashboardSettingsProfileRoute: typeof DashboardSettingsProfileRoute;
   DashboardResumesIndexRoute: typeof DashboardResumesIndexRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
+  DashboardAdminMixpanelRoute: DashboardAdminMixpanelRoute,
   DashboardSettingsProfileRoute: DashboardSettingsProfileRoute,
   DashboardResumesIndexRoute: DashboardResumesIndexRoute,
 };

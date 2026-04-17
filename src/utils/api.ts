@@ -45,6 +45,84 @@ export interface ResumeStatistics {
 	lastUpdated: string | null;
 }
 
+export interface PaginationInfo {
+	page: number;
+	limit: number;
+	totalUsers: number;
+	totalPages: number;
+}
+
+export interface ResumeAIUsage {
+	resumeId: string;
+	requestsCount: number;
+	tokensUsed: number;
+	costUsd: number;
+}
+
+export interface AIStats {
+	totalCalls: number;
+	failedCalls: number;
+	failureRatePercent: number;
+	totalTokens: number;
+	totalCostUsd: number;
+	perResumeUsage: ResumeAIUsage[];
+}
+
+export interface DownloadStats {
+	total: number;
+	pdf: number;
+	docx: number;
+	hasAtLeastOneDownload: boolean;
+	downloadsPerUser: number;
+}
+
+export interface UserAnalyticsItem {
+	userId: string | number;
+	hasAtLeastOneResume: boolean;
+	totalLiveResumes: number;
+	lastResumeUpdatedAt: string;
+	downloads: DownloadStats;
+	ai: AIStats;
+}
+
+export interface UserAnalyticsResponse {
+	pagination: PaginationInfo;
+	users: UserAnalyticsItem[];
+}
+
+// AI Invocation Specifics
+export interface AIInvocationItem {
+	id: string;
+	resumeId: string;
+	keyName: string;
+	userInput: string;
+	response: string;
+	status: "success" | "failure" | "timeout" | string;
+	errorCode: string | null;
+	errorMessage: string | null;
+	inputTokens: number;
+	outputTokens: number;
+	createdAt: string;
+}
+
+export interface AIInvocationSummary {
+	totalInvocations: number;
+	successCount: number;
+	errorCount: number;
+	timeoutCount: number;
+	failedCalls: number;
+	failureRatePercent: number;
+	totalTokens: number;
+	totalCostUsd: number;
+	averageLatencyMs: number;
+}
+
+export interface AIInvocationsResponse {
+	pagination: PaginationInfo & { totalInvocations: number };
+	summary: AIInvocationSummary;
+	invocations: AIInvocationItem[];
+}
+
 // ----- Helpers -----
 
 const mapResume = (resume: ResumeSummary): ResumeSummary => {
@@ -76,7 +154,9 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 			},
 		},
 	};
-}; // ----- API -----
+};
+
+// ----- API -----
 
 export const api = {
 	// 1. GET: /resumes/user
@@ -186,7 +266,6 @@ export const api = {
 		}),
 
 	// 12. POST: /ai/generate-summary
-	// This endpoint handles summary, experience, projects, and final review depending on the keys provided.
 	generateAIContent: (payload: {
 		resume_id: string;
 		type: "summary" | "ExperienceDescription" | "ProjectsDescription" | "FinalReview";
@@ -199,4 +278,12 @@ export const api = {
 				value: payload.value,
 			}),
 		}),
+
+	// 13. GET: /analytics/users
+	fetchUserAnalytics: (page: number, limit: number) =>
+		request<UserAnalyticsResponse>(`/analytics/users?page=${page}&limit=${limit}`),
+
+	// 14. GET: /analytics/users/{user_id}/ai-invocations
+	fetchUserAIInvocations: (userId: string | number, page: number, limit: number) =>
+		request<AIInvocationsResponse>(`/analytics/users/${userId}/ai-invocations?page=${page}&limit=${limit}`),
 };
