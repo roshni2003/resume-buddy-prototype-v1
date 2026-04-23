@@ -31,9 +31,6 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@ai-sdk/anthropic": "^3.0.35",
-		"@ai-sdk/google": "^3.0.20",
-		"@ai-sdk/openai": "^3.0.25",
 		"@aws-sdk/client-s3": "^3.980.0",
 		"@better-auth/core": "1.5.0-beta.11",
 		"@better-auth/passkey": "1.5.0-beta.11",
@@ -42,7 +39,6 @@
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
 		"@fontsource-variable/ibm-plex-sans": "^5.2.8",
-		"@google/generative-ai": "^0.24.1",
 		"@hookform/resolvers": "^5.2.2",
 		"@lingui/core": "^5.9.0",
 		"@lingui/macro": "^5.9.2",
@@ -69,10 +65,7 @@
 		"@tiptap/pm": "^3.18.0",
 		"@tiptap/react": "^3.18.0",
 		"@tiptap/starter-kit": "^3.18.0",
-		"ai": "^6.0.67",
-		"ai-sdk-ollama": "^3.3.0",
 		"bcrypt": "^6.0.0",
-		"better-auth": "1.5.0-beta.11",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
