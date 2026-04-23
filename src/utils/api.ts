@@ -286,4 +286,9 @@ export const api = {
 	// 14. GET: /analytics/users/{user_id}/ai-invocations
 	fetchUserAIInvocations: (userId: string | number, page: number, limit: number) =>
 		request<AIInvocationsResponse>(`/analytics/users/${userId}/ai-invocations?page=${page}&limit=${limit}`),
+
+	// 15. GET: /auth/me (Current user profile)
+	fetchProfile: async () => {
+		return request<{ id: string; email: string; name?: string }>("/auth/me");
+	},
 };

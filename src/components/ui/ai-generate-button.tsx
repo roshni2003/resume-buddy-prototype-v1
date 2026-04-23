@@ -4,8 +4,17 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { api } from "@/utils/api";
+import { mixpanelService } from "@/utils/mixpanel";
 import { stripHtml } from "@/utils/string";
 import { Button } from "./button";
+
+function getWeekNumber(date: Date) {
+	const d = new Date(date);
+	d.setHours(0, 0, 0, 0);
+	d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+	const week1 = new Date(d.getFullYear(), 0, 4);
+	return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+}
 
 type AIGenerateButtonProps = {
 	resumeId?: string;
@@ -99,33 +108,53 @@ export function AIGenerateButton({
 
 		generateContent(
 			{
-				resume_id: effectiveResumeId || "",
+				resume_id: effectiveResumeId,
 				type: apiType as "summary" | "ExperienceDescription" | "ProjectsDescription" | "FinalReview",
-				value: value,
+				value,
 			},
 			{
 				onSuccess: (response) => {
-					const content = Object.values(response)[0];
-					console.log("Generation successful, content length:", content?.length);
+					if (!isMounted.current) return;
 
-					// Check if content is valid
-					if (!content || content.length < 10) {
-						toast.error(t`Generated content is too short. Please try again.`, { id: toastId });
-						return;
-					}
+					const content = response[apiType] || response.content || Object.values(response)[0];
+					if (content) {
+						onGenerated(content);
+						if (onRoundComplete) onRoundComplete();
 
-					toast.success(t`Content generated successfully!`, { id: toastId });
-					onGenerated(content);
+						mixpanelService.track("AI Token Usage", {
+							tokens_used: response.tokens_used || 1200, // Fallback
+							feature: apiType,
+							success: true,
+							timestamp: new Date().toISOString(),
+							date: new Date().toISOString().split("T")[0],
+							week: getWeekNumber(new Date()),
+							month: new Date().getMonth() + 1,
+							year: new Date().getFullYear(),
+						});
 
-					// Record the round
-					if (isMounted.current) {
-						console.log("Recording round completion");
-						onRoundComplete?.();
+						toast.success(t`Zoe has refined your content! (Round ${roundsUsed + 1}/${maxRounds})`, {
+							id: toastId,
+						});
+					} else {
+						// Handle case where API succeeds but content is empty
+						toast.error(t`AI failed to generate a suggestion. Please try again.`, { id: toastId });
 					}
 				},
-				onError: (error: any) => {
-					console.error("Generation error:", error);
-					toast.error(error.message || t`Failed to generate content`, { id: toastId });
+				onError: (error) => {
+					if (!isMounted.current) return;
+
+					mixpanelService.track("AI Token Usage", {
+						tokens_used: 0,
+						feature: apiType,
+						success: false,
+						timestamp: new Date().toISOString(),
+						date: new Date().toISOString().split("T")[0],
+						week: getWeekNumber(new Date()),
+						month: new Date().getMonth() + 1,
+						year: new Date().getFullYear(),
+					});
+
+					toast.error(error.message, { id: toastId });
 				},
 			},
 		);
