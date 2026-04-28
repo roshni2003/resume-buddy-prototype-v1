@@ -1,6 +1,5 @@
 import { passkeyClient } from "@better-auth/passkey/client";
 import {
-	apiKeyClient,
 	genericOAuthClient,
 	inferAdditionalFields,
 	twoFactorClient,
@@ -12,7 +11,6 @@ import type { auth } from "./config";
 const getAuthClient = () => {
 	return createAuthClient({
 		plugins: [
-			apiKeyClient(),
 			usernameClient(),
 			twoFactorClient({
 				onTwoFactorRedirect() {
