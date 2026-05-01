@@ -72,10 +72,15 @@ const config = defineConfig({
 		lingui(),
 		tailwindcss(),
 		// nitro({
-		// 	/* plugins: ["plugins/1.migrate.ts"] */
+		//  /* plugins: ["plugins/1.migrate.ts"] */
 		// }),
 
-		tanstackStart({ router: { semicolons: true, quoteStyle: "double" } }),
+		tanstackStart({
+			router: { semicolons: true, quoteStyle: "double" },
+			server: {
+				preset: "aws-amplify",
+			},
+		}),
 		react({ babel: { plugins: ["@lingui/babel-plugin-lingui-macro"] } }),
 		VitePWA({
 			outDir: "public",
