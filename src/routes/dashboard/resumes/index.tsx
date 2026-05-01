@@ -106,7 +106,7 @@ function RouteComponent() {
 					<div className="mb-3 flex items-start justify-between">
 						<div>
 							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
-								<Trans>Total Resumes Updated</Trans>
+								<Trans>User Total Resumes</Trans>
 							</p>
 							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalResumes ?? 0}</p>
 						</div>
