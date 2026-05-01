@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "routes": [
+    {
+      "path": "/assets/*",
+      "target": {
+        "kind": "Static"
+      }
+    },
+    {
+      "path": "/*",
+      "target": {
+        "kind": "Compute",
+        "src": "default"
+      }
+    }
+  ],
+  "computeResources": [
+    {
+      "name": "default",
+      "runtime": "nodejs18.x",
+      "entrypoint": "server.js"
+    }
+  ]
+}
