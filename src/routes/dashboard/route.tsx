@@ -1,14 +1,35 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
-import { createFileRoute,Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
+import { getAuthToken, isValidToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
+import { buildZuvyLoginUrl } from "@/utils/zuvy-redirect";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
 	beforeLoad: async ({ context }) => {
+		if (typeof window === "undefined") return { session: context.session };
+
+		const url = new URL(window.location.href);
+		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
+
+		// Guard dashboard routes
+		const token = getAuthToken();
+		const hasZuvySession = Boolean(context.session?.user);
+		const hasToken = isValidToken(token);
+
+		if (!hasToken && token) localStorage.removeItem("authToken");
+
+		// Access requires either a local Zuvy session OR a valid token extracted from the URL.
+		if (!hasToken && !hasZuvySession && !devBypass) {
+			throw redirect({
+				to: buildZuvyLoginUrl(window.location.href),
+			});
+		}
+
 		return { session: context.session };
 	},
 });

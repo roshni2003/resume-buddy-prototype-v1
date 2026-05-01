@@ -31,7 +31,22 @@ export const getORPCClient = createIsomorphicFn()
 		const link = new RPCLink({
 			url: `${window.location.origin}/api/rpc`,
 			fetch: (request, init) => {
-				return fetch(request, { ...init, credentials: "include" });
+				const headers = new Headers(request instanceof Request ? request.headers : undefined);
+
+				const initReq = init as RequestInit | undefined;
+				if (initReq?.headers) {
+					const initHeaders = new Headers(initReq.headers);
+					initHeaders.forEach((value, key) => {
+						headers.set(key, value);
+					});
+				}
+
+				const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+				if (token) {
+					headers.set("Authorization", `Bearer ${token}`);
+				}
+
+				return fetch(request, { ...init, headers, credentials: "include" });
 			},
 			// interceptors: [
 			// 	onError((error) => {
