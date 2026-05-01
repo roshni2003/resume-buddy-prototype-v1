@@ -13,6 +13,12 @@ writeFileSync(
 			version: 1,
 			routes: [
 				{
+					path: "/assets/<*>",
+					target: {
+						kind: "Static",
+					},
+				},
+				{
 					path: "/<*>",
 					target: {
 						kind: "Compute",
