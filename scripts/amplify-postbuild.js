@@ -13,17 +13,7 @@ writeFileSync(
 			version: 1,
 			routes: [
 				{
-					path: "/assets/*",
-					target: {
-						kind: "Static",
-					},
-					fallback: {
-						kind: "Compute",
-						src: "default",
-					},
-				},
-				{
-					path: "/*",
+					path: "/<*>",
 					target: {
 						kind: "Compute",
 						src: "default",
@@ -37,6 +27,10 @@ writeFileSync(
 					entrypoint: "server.js",
 				},
 			],
+			framework: {
+				name: "vite",
+				version: "5.0.0",
+			},
 		},
 		null,
 		2,
