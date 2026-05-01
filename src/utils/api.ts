@@ -1,18 +1,47 @@
 import type { ResumeData } from "@/schema/resume/data";
+import { getAuthToken } from "@/utils/auth-token";
+import { redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
 const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
-const AUTH_TOKEN = import.meta.env.VITE_AUTH_TOKEN as string;
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const url = path.startsWith("http") ? path : `${VITE_AI_BASE_URL_DEV}${path}`;
+	const token = getAuthToken();
+
+	if (import.meta.env.DEV) {
+		// eslint-disable-next-line no-console
+		console.log("🚀 API Request", {
+			method: options.method ?? "GET",
+			url,
+			hasToken: Boolean(token),
+		});
+	}
+
 	const response = await fetch(url, {
 		...options,
 		headers: {
 			"Content-Type": "application/json",
-			Authorization: `Bearer ${AUTH_TOKEN}`,
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
 			...options.headers,
 		},
 	});
+
+	if (import.meta.env.DEV) {
+		// eslint-disable-next-line no-console
+		console.log("✅ API Response", {
+			url,
+			status: response.status,
+			ok: response.ok,
+		});
+	}
+
+	if (response.status === 401) {
+		if (typeof window !== "undefined") {
+			localStorage.removeItem("authToken");
+		}
+		redirectToZuvyLogin();
+		throw new Error("Unauthorized");
+	}
 
 	if (!response.ok) {
 		const errorBody = await response.json().catch(() => ({}));

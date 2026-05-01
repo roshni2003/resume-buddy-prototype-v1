@@ -6,25 +6,17 @@ type JwtPayload = {
 
 const safeDecodeJwtPayload = (token: string): JwtPayload | null => {
 	try {
-		console.log("Safe Decode Start. Token parts:", token.split(".").length);
 		const base64Url = token.split(".")[1];
 		if (!base64Url) return null;
-		let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-		const padLength = (4 - (base64.length % 4)) % 4;
-		base64 += "=".repeat(padLength);
-		console.log("Base64 string padded length:", base64.length);
+		const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
 		const jsonPayload = decodeURIComponent(
 			atob(base64)
 				.split("")
 				.map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
 				.join(""),
 		);
-		console.log("JSON Payload Decoded:", jsonPayload);
-		const parsed = JSON.parse(jsonPayload) as JwtPayload;
-		console.log("Parsed JWT successfully:", parsed);
-		return parsed;
-	} catch (e: unknown) {
-		console.error("JWT Decode Error:", e instanceof Error ? e.message : e);
+		return JSON.parse(jsonPayload) as JwtPayload;
+	} catch {
 		return null;
 	}
 };
@@ -39,5 +31,32 @@ export const isValidToken = (token: string | null): boolean => {
 
 export const getAuthToken = (): string | null => {
 	if (typeof window === "undefined") return null;
+
+	// Just-in-time extraction to catch soft navigations or pre-hydration queries natively
+	try {
+		const url = new URL(window.location.href);
+		let extractedToken = url.searchParams.get("token");
+		if (!extractedToken && url.hash.includes("token=")) {
+			extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
+		}
+		if (extractedToken && extractedToken !== "preview") {
+			const oldToken = localStorage.getItem(AUTH_TOKEN_KEY);
+
+			// Clean the URL so the token is not visible or accidentally shared
+			url.searchParams.delete("token");
+			if (window.history.replaceState) {
+				window.history.replaceState({}, "", url.toString());
+			}
+
+			if (oldToken && oldToken !== extractedToken) {
+				// Wipe React Query cache manually on new token insertion to prevent rendering old cached resumes!
+				window.location.reload();
+			}
+			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
+		}
+	} catch {
+		// ignore
+	}
+
 	return localStorage.getItem(AUTH_TOKEN_KEY);
 };

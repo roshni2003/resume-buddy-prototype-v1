@@ -74,19 +74,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			scripts: [
 				{
 					children: `
-						try {
-							var u = new URL(window.location.href);
-							var t = u.searchParams.get('token');
-							if (!t && u.hash.includes('token=')) {
-								t = new URLSearchParams(u.hash.replace(/^#/, '')).get('token');
-							}
-							if (t && t !== 'preview') {
-								localStorage.setItem('authToken', t);
-								u.searchParams.delete('token');
-								window.history.replaceState({}, '', u.toString());
-							}
-						} catch(e) {}
-
 						if('serviceWorker' in navigator) {
 							window.addEventListener('load', () => {
 								navigator.serviceWorker.register('/sw.js', { scope: '/' })

@@ -16,17 +16,15 @@ export const Route = createFileRoute("/dashboard")({
 		const url = new URL(window.location.href);
 		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
 
-		// Guard dashboard routes
 		const token = getAuthToken();
 		const hasZuvySession = Boolean(context.session?.user);
 		const hasToken = isValidToken(token);
 
 		if (!hasToken && token) localStorage.removeItem("authToken");
 
-		// Access requires either a local Zuvy session OR a valid token extracted from the URL.
 		if (!hasToken && !hasZuvySession && !devBypass) {
 			throw redirect({
-				to: buildZuvyLoginUrl(window.location.href),
+				href: buildZuvyLoginUrl(window.location.href),
 			});
 		}
 
@@ -35,7 +33,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function RouteComponent() {
-	const { i18n } = useLingui();
+	useLingui();
 
 	return (
 		<div className="flex min-h-screen flex-col bg-gray-50">
