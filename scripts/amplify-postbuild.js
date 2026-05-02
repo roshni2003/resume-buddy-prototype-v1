@@ -20,7 +20,6 @@ writeFileSync(
 					target: {
 						kind: "Static",
 					},
-					fallback: null,
 				},
 				{
 					path: "/*",
@@ -28,7 +27,6 @@ writeFileSync(
 						kind: "Compute",
 						src: "default",
 					},
-					fallback: null,
 				},
 			],
 			computeResources: [
