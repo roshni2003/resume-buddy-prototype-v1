@@ -3,11 +3,36 @@ frontend:
   phases:
     preBuild:
       commands:
-        - corepack enable
+        - npm install -g pnpm@10.28.2
         - pnpm install --frozen-lockfile
     build:
       commands:
         - pnpm build
+        - |
+          cat > .amplify-hosting/deploy-manifest.json << 'EOF'
+          {
+            "version": 1,
+            "routes": [
+              {
+                "path": "/assets/*",
+                "target": { "kind": "Static" },
+                "fallback": null
+              },
+              {
+                "path": "/*",
+                "target": { "kind": "Compute", "src": "default" },
+                "fallback": null
+              }
+            ],
+            "computeResources": [
+              {
+                "name": "default",
+                "runtime": "nodejs20.x",
+                "entrypoint": "server.js"
+              }
+            ]
+          }
+          EOF
   artifacts:
     baseDirectory: .amplify-hosting
     files:

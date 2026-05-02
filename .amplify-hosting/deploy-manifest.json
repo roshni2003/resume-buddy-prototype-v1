@@ -5,20 +5,22 @@
       "path": "/assets/*",
       "target": {
         "kind": "Static"
-      }
+      },
+      "fallback": null
     },
     {
       "path": "/*",
       "target": {
         "kind": "Compute",
         "src": "default"
-      }
+      },
+      "fallback": null
     }
   ],
   "computeResources": [
     {
       "name": "default",
-      "runtime": "nodejs18.x",
+      "runtime": "nodejs20.x",
       "entrypoint": "server.js"
     }
   ]
