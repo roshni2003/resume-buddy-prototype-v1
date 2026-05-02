@@ -6,6 +6,9 @@ mkdirSync(".amplify-hosting/static", { recursive: true });
 cpSync("dist/client", ".amplify-hosting/static", { recursive: true });
 cpSync("dist/server", ".amplify-hosting/compute/default", { recursive: true });
 
+// Required for Node.js to treat server.js as ES module
+writeFileSync(".amplify-hosting/compute/default/package.json", JSON.stringify({ type: "module" }, null, 2));
+
 writeFileSync(
 	".amplify-hosting/deploy-manifest.json",
 	JSON.stringify(
@@ -17,6 +20,7 @@ writeFileSync(
 					target: {
 						kind: "Static",
 					},
+					fallback: null,
 				},
 				{
 					path: "/*",
@@ -24,19 +28,16 @@ writeFileSync(
 						kind: "Compute",
 						src: "default",
 					},
+					fallback: null,
 				},
 			],
 			computeResources: [
 				{
 					name: "default",
-					runtime: "nodejs18.x",
+					runtime: "nodejs20.x",
 					entrypoint: "server.js",
 				},
 			],
-			framework: {
-				name: "vite",
-				version: "5.0.0",
-			},
 		},
 		null,
 		2,
