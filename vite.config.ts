@@ -72,7 +72,7 @@ const config = defineConfig({
         reflectPolyfillPlugin(),
         lingui(),
         tailwindcss(),
-        tanstackStart({ server: { preset: "aws-amplify" }, router: { semicolons: true, quoteStyle: "double" } }),
+        tanstackStart({ router: { semicolons: true, quoteStyle: "double" } }),
         react({ babel: { plugins: ["@lingui/babel-plugin-lingui-macro"] } }),
         VitePWA({
             outDir: "public",
