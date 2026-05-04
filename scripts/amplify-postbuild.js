@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import { cpSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "fs";
 
 mkdirSync(".amplify-hosting/compute/default", { recursive: true });
@@ -12,29 +11,9 @@ cpSync("dist/server", ".amplify-hosting/compute/default", { recursive: true });
 renameSync(".amplify-hosting/compute/default/server.js", ".amplify-hosting/compute/default/app.js");
 cpSync("scripts/amplify-server-wrapper.js", ".amplify-hosting/compute/default/server.js");
 
-// The bundle leaves several deps externalized (bcryptjs, drizzle-orm, pg, nodemailer,
-// @aws-sdk/client-s3, etc.). Install them as production deps in the compute directory
-// so they resolve at runtime.
-const rootPkg = JSON.parse(readFileSync("package.json", "utf-8"));
-writeFileSync(
-	".amplify-hosting/compute/default/package.json",
-	JSON.stringify(
-		{
-			name: "amplify-compute",
-			type: "module",
-			version: rootPkg.version,
-			dependencies: rootPkg.dependencies,
-		},
-		null,
-		2,
-	),
-);
-
-console.log("📦 Installing production dependencies in compute directory...");
-execSync("pnpm install --prod --ignore-scripts --no-frozen-lockfile --shamefully-hoist", {
-	cwd: ".amplify-hosting/compute/default",
-	stdio: "inherit",
-});
+// SSR build is configured with ssr.noExternal: true so all deps are bundled
+// into server.js. Only need package.json with type:module for ES module loading.
+writeFileSync(".amplify-hosting/compute/default/package.json", JSON.stringify({ type: "module" }, null, 2));
 
 const manifest = {
 	version: 1,

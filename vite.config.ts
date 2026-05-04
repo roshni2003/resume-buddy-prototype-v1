@@ -45,6 +45,14 @@ const config = defineConfig({
         ],
     },
 
+    // Bundle all dependencies into the SSR build so the deployed server.js is
+    // self-contained (no node_modules required at runtime). Sharp is native and
+    // is loaded via dynamic import with its own try/catch; keep it external.
+    ssr: {
+        noExternal: true,
+        external: ["sharp", "pg-native"],
+    },
+
     build: {
         chunkSizeWarningLimit: 10 * 1024, // 10mb
 
