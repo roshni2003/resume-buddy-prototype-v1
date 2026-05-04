@@ -1,20 +1,26 @@
 {
   "version": 1,
+  "framework": {
+    "name": "tanstack-start",
+    "version": "1.0.0"
+  },
   "routes": [
     {
-      "path": "/assets/*",
+      "path": "/*.*",
       "target": {
         "kind": "Static"
       },
-      "fallback": null
+      "fallback": {
+        "kind": "Compute",
+        "src": "default"
+      }
     },
     {
       "path": "/*",
       "target": {
         "kind": "Compute",
         "src": "default"
-      },
-      "fallback": null
+      }
     }
   ],
   "computeResources": [

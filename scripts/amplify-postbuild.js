@@ -11,15 +11,26 @@ writeFileSync(".amplify-hosting/compute/default/package.json", JSON.stringify({ 
 
 const manifest = {
 	version: 1,
+	framework: {
+		name: "tanstack-start",
+		version: "1.0.0",
+	},
 	routes: [
 		{
-			path: "/<*>",
+			path: "/*.*",
 			target: {
+				kind: "Static",
+			},
+			fallback: {
 				kind: "Compute",
 				src: "default",
 			},
-			fallback: {
-				kind: "Static",
+		},
+		{
+			path: "/*",
+			target: {
+				kind: "Compute",
+				src: "default",
 			},
 		},
 	],
