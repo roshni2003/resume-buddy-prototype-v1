@@ -1,10 +1,15 @@
-import { cpSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { cpSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "fs";
 
 mkdirSync(".amplify-hosting/compute/default", { recursive: true });
 mkdirSync(".amplify-hosting/static", { recursive: true });
 
 cpSync("dist/client", ".amplify-hosting/static", { recursive: true });
 cpSync("dist/server", ".amplify-hosting/compute/default", { recursive: true });
+
+// TanStack Start outputs a fetch handler (no HTTP listener), so wrap it.
+// Rename the built handler to app.js and install our wrapper as the server entrypoint.
+renameSync(".amplify-hosting/compute/default/server.js", ".amplify-hosting/compute/default/app.js");
+cpSync("scripts/amplify-server-wrapper.js", ".amplify-hosting/compute/default/server.js");
 
 // Required for Node.js to treat server.js as ES module
 writeFileSync(".amplify-hosting/compute/default/package.json", JSON.stringify({ type: "module" }, null, 2));
