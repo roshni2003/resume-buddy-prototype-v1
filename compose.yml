@@ -1,4 +1,4 @@
-name: reactive_resume
+Sname: reactive_resume
 
 services:
   postgres:

@@ -18,6 +18,8 @@ export const env = createEnv({
 	server: {
 		// Server
 		TZ: z.string().default("Etc/UTC"),
+		APP_URL: z.string().url().default("http://localhost:3000"),
+		PRINTER_ENDPOINT: z.string().url().optional(),
 
 		// Database
 		DATABASE_URL: z.url({ protocol: /postgres(ql)?/ }).optional(),
