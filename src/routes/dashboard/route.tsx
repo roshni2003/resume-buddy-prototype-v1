@@ -23,22 +23,8 @@ export const Route = createFileRoute("/dashboard")({
 		if (!hasToken && token) localStorage.removeItem("authToken");
 
 		if (!hasToken && !hasZuvySession && !devBypass) {
-			if (typeof window !== "undefined") {
-				if (
-					window.confirm(
-						"DEBUG: Token is missing or invalid! Redirecting to Zuvy. Press Cancel to stay. Token was: " +
-							String(token),
-					)
-				) {
-					throw redirect({
-						href: buildZuvyLoginUrl(window.location.href),
-					});
-				} else {
-					return { session: context.session };
-				}
-			}
 			throw redirect({
-				href: buildZuvyLoginUrl("https://zoe.zuvy.org"),
+				href: buildZuvyLoginUrl(window.location.href),
 			});
 		}
 
