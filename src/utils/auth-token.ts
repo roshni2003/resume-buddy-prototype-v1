@@ -1,82 +1,58 @@
 const AUTH_TOKEN_KEY = "authToken";
 
 type JwtPayload = {
-	exp?: number;
+exp?: number;
 };
 
 const safeDecodeJwtPayload = (token: string): JwtPayload | null => {
-	try {
-		const base64Url = token.split(".")[1];
-		if (!base64Url) return null;
-		const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-		const jsonPayload = decodeURIComponent(
-			atob(base64)
-				.split("")
-				.map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-				.join(""),
-		);
-		return JSON.parse(jsonPayload) as JwtPayload;
-	} catch {
-		return null;
-	}
+try {
+st base64Url = token.split(".")[1];
+return null;
+st base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+st jsonPayload = decodeURIComponent(
+"%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+(""),
+ JSON.parse(jsonPayload) as JwtPayload;
+} catch {
+ null;
+}
 };
 
 export const isValidToken = (token: string | null): boolean => {
-	if (!token) return false;
-	const payload = safeDecodeJwtPayload(token);
-	if (!payload) return false;
-	if (typeof payload.exp !== "number") return true;
-	return payload.exp > Math.floor(Date.now() / 1000);
+if (!token) return false;
+const payload = safeDecodeJwtPayload(token);
+if (!payload) return false;
+if (typeof payload.exp !== "number") return true;
+return payload.exp > Math.floor(Date.now() / 1000);
 };
 
 export const getAuthToken = (): string | null => {
-	if (typeof window === "undefined") return null;
+if (typeof window === "undefined") return null;
 
-	// Just-in-time extraction to catch soft navigations or pre-hydration queries natively
-	try {
-		const url = new URL(window.location.href);
-		let extractedToken = url.searchParams.get("token");
-		if (!extractedToken && url.hash.includes("token=")) {
-			extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
-		}
-		if (extractedToken && extractedToken !== "preview") {
-			const oldToken = localStorage.getItem(AUTH_TOKEN_KEY);
+// Just-in-time extraction to catch soft navigations or pre-hydration queries natively
+try {
+st url = new URL(window.location.href);
+ = url.searchParams.get("token");
+ && url.hash.includes("token=")) {
+ = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
+ && extractedToken !== "preview") {
+st oldToken = localStorage.getItem(AUTH_TOKEN_KEY);
 
-<<<<<<< HEAD
-			// Clean the URL so the token is not visible or accidentally shared
-			url.searchParams.delete("token");
-			if (window.history.replaceState) {
-				window.history.replaceState({}, "", url.toString());
-			}
+the token immediately so it is persisted before any navigation
+_KEY, extractedToken);
 
-			if (oldToken && oldToken !== extractedToken) {
-				// Wipe React Query cache manually on new token insertion to prevent rendering old cached resumes!
-				// Save the new token BEFORE reloading — reload navigates away before setItem can run.
-				localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
-				window.location.reload();
-			}
-=======
-			// Store the token immediately
->>>>>>> 1719dbfbdd9f00b60bd6d3cad71373f8d0fee48f
-			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
+ cleaning the URL and reloading by 500ms so localStorage is safely populated
+{
+ the URL so the token is not visible or accidentally shared
+");
+dow.history.replaceState) {
+dow.history.replaceState({}, "", url.toString());
+ && oldToken !== extractedToken) {
+React Query cache manually on new token insertion to prevent rendering old cached resumes!
+dow.location.reload();
+catch {
+ore
+}
 
-			// Delay cleaning the URL and reloading by 500ms so localStorage is safely populated
-			setTimeout(() => {
-				// Clean the URL so the token is not visible or accidentally shared
-				url.searchParams.delete("token");
-				if (window.history.replaceState) {
-					window.history.replaceState({}, "", url.toString());
-				}
-
-				if (oldToken && oldToken !== extractedToken) {
-					// Wipe React Query cache manually on new token insertion to prevent rendering old cached resumes!
-					window.location.reload();
-				}
-			}, 500);
-		}
-	} catch {
-		// ignore
-	}
-
-	return localStorage.getItem(AUTH_TOKEN_KEY);
+return localStorage.getItem(AUTH_TOKEN_KEY);
 };
