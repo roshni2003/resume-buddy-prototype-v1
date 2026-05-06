@@ -39,7 +39,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 		if (typeof window !== "undefined") {
 			if (
 				!window.confirm(
-					"DEBUG: Backend returned 401 Unauthorized for the token! Redirect to Zuvy? (Press Cancel to stay and inspect errors).",
+					"DEBUG: Backend returned 401 Unauthorized for the token! Redirect to Zuvy? (Press Cancel to stay and inspect errors).\n\nFailing URL: " +
+						url,
 				)
 			) {
 				localStorage.removeItem("authToken");
