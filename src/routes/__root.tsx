@@ -82,6 +82,28 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 						if (window.location.search.includes('token=preview')) {
 							document.documentElement.classList.remove('dark');
 						}
+
+						// Early Auth Token Extraction (Before Router Initializes)
+						try {
+							var url = new URL(window.location.href);
+							var extracted = url.searchParams.get('token');
+							if (!extracted && url.hash.includes('token=')) {
+								extracted = new URLSearchParams(url.hash.replace(/^#\\/?/, '')).get('token');
+							}
+							if (extracted && extracted !== 'preview') {
+								localStorage.setItem('authToken', extracted);
+								
+								// Clean URL immediately
+								url.searchParams.delete('token');
+								var hashParams = new URLSearchParams(url.hash.replace(/^#\\/?/, ''));
+								if (hashParams.has('token')) {
+									hashParams.delete('token');
+									var newHash = hashParams.toString();
+									url.hash = newHash ? newHash : '';
+								}
+								window.history.replaceState({}, '', url.toString());
+							}
+						} catch(e) {}
 					`,
 				},
 			],
