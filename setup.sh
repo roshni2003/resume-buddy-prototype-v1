@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # ============================================
-# Zoe Resume Builder - One-Click Setup Script
+# Resume Buddy - One-Click Setup Script
 # ============================================
 
 set -e  # Exit on error
 
-echo "🚀 Welcome to Zoe Resume Builder Setup!"
+echo "🚀 Welcome to Resume Buddy Setup!"
 echo "========================================"
 echo ""
 
