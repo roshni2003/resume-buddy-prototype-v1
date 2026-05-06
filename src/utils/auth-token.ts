@@ -7,10 +7,10 @@ exp?: number;
 const safeDecodeJwtPayload = (token: string): JwtPayload | null => {
 try {
 st base64Url = token.split(".")[1];
-return null;
+ null;
 st base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
 st jsonPayload = decodeURIComponent(
-"%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
++ c.charCodeAt(0).toString(16)).slice(-2))
 (""),
  JSON.parse(jsonPayload) as JwtPayload;
 } catch {
@@ -38,10 +38,10 @@ st url = new URL(window.location.href);
  && extractedToken !== "preview") {
 st oldToken = localStorage.getItem(AUTH_TOKEN_KEY);
 
-the token immediately so it is persisted before any navigation
+ immediately so it is persisted before any navigation
 _KEY, extractedToken);
 
- cleaning the URL and reloading by 500ms so localStorage is safely populated
+ing the URL and reloading by 500ms so localStorage is safely populated
 {
  the URL so the token is not visible or accidentally shared
 ");
