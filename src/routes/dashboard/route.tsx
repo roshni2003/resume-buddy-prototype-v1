@@ -43,7 +43,7 @@ function RouteComponent() {
 					{/* Left: Logo and Title */}
 					<div className="flex items-center gap-2 sm:gap-3">
 						<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full sm:h-10 sm:w-8" />
-						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Zoe Resume Builder</h1>
+						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Resume Buddy</h1>
 					</div>{" "}
 					{/* Center: Navigation */}
 					{/* <nav className="flex items-center gap-2">

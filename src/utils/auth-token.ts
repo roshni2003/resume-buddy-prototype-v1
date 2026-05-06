@@ -42,19 +42,22 @@ export const getAuthToken = (): string | null => {
 		if (extractedToken && extractedToken !== "preview") {
 			const oldToken = localStorage.getItem(AUTH_TOKEN_KEY);
 
-			// Store the token immediately before doing any history modification or reloads
+			// Store the token immediately
 			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
 
-			// Clean the URL so the token is not visible or accidentally shared
-			url.searchParams.delete("token");
-			if (window.history.replaceState) {
-				window.history.replaceState({}, "", url.toString());
-			}
+			// Delay cleaning the URL and reloading by 500ms so localStorage is safely populated
+			setTimeout(() => {
+				// Clean the URL so the token is not visible or accidentally shared
+				url.searchParams.delete("token");
+				if (window.history.replaceState) {
+					window.history.replaceState({}, "", url.toString());
+				}
 
-			if (oldToken && oldToken !== extractedToken) {
-				// Wipe React Query cache manually on new token insertion to prevent rendering old cached resumes!
-				window.location.reload();
-			}
+				if (oldToken && oldToken !== extractedToken) {
+					// Wipe React Query cache manually on new token insertion to prevent rendering old cached resumes!
+					window.location.reload();
+				}
+			}, 500);
 		}
 	} catch {
 		// ignore
