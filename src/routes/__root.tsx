@@ -110,6 +110,21 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 		};
 	},
 	beforeLoad: async () => {
+		// Extract token from URL *here* — before any child route (/_home/) can redirect and strip ?token=
+		if (typeof window !== "undefined") {
+			try {
+				const url = new URL(window.location.href);
+				let token = url.searchParams.get("token");
+				if (!token && url.hash.includes("token=")) {
+					token = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
+				}
+				if (token && token !== "preview") {
+					localStorage.setItem("authToken", token);
+				}
+			} catch {
+				// ignore
+			}
+		}
 		const [theme, locale, session, flags] = await Promise.all([
 			getTheme(),
 			getLocale(),
