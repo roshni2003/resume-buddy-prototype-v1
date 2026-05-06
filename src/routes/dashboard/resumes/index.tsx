@@ -175,7 +175,7 @@ function RouteComponent() {
 					<div className="mb-3 flex items-start justify-between">
 						<div>
 							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
-								<Trans>Total Submissions</Trans>
+								<Trans>Tota Submissions</Trans>
 							</p>
 							<p className="font-semibold text-amber-600 text-sm sm:text-base">
 								<Trans>Coming Soon!</Trans>
