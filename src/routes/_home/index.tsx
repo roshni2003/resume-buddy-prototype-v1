@@ -3,8 +3,8 @@ import { useState } from "react";
 import { templates } from "@/dialogs/resume/template/data";
 
 export const Route = createFileRoute("/_home/")({
-	beforeLoad: () => {
-		throw redirect({ to: "/dashboard/resumes" });
+	beforeLoad: ({ search }) => {
+		throw redirect({ to: "/dashboard/resumes", search });
 	},
 	component: () => null,
 });
