@@ -50,6 +50,8 @@ export const getAuthToken = (): string | null => {
 
 			if (oldToken && oldToken !== extractedToken) {
 				// Wipe React Query cache manually on new token insertion to prevent rendering old cached resumes!
+				// Save the new token BEFORE reloading — reload navigates away before setItem can run.
+				localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
 				window.location.reload();
 			}
 			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
