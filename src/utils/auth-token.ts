@@ -42,6 +42,9 @@ export const getAuthToken = (): string | null => {
 		if (extractedToken && extractedToken !== "preview") {
 			const oldToken = localStorage.getItem(AUTH_TOKEN_KEY);
 
+			// Store the token immediately before doing any history modification or reloads
+			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
+
 			// Clean the URL so the token is not visible or accidentally shared
 			url.searchParams.delete("token");
 			if (window.history.replaceState) {
@@ -52,7 +55,6 @@ export const getAuthToken = (): string | null => {
 				// Wipe React Query cache manually on new token insertion to prevent rendering old cached resumes!
 				window.location.reload();
 			}
-			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
 		}
 	} catch {
 		// ignore
