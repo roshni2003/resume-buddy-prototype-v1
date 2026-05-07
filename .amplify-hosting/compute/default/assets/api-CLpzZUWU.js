@@ -4,12 +4,7 @@ var safeDecodeJwtPayload = (token) => {
 		const base64Url = token.split(".")[1];
 		if (!base64Url) return null;
 		const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-		const jsonPayload = decodeURIComponent(
-			atob(base64)
-				.split("")
-				.map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-				.join(""),
-		);
+		const jsonPayload = decodeURIComponent(atob(base64).split("").map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
 		return JSON.parse(jsonPayload);
 	} catch {
 		return null;
@@ -27,8 +22,7 @@ const getAuthToken = () => {
 	try {
 		const url = new URL(window.location.href);
 		let extractedToken = url.searchParams.get("token");
-		if (!extractedToken && url.hash.includes("token="))
-			extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
+		if (!extractedToken && url.hash.includes("token=")) extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
 		if (extractedToken && extractedToken !== "preview") {
 			const oldToken = localStorage.getItem(AUTH_TOKEN_KEY);
 			url.searchParams.delete("token");
@@ -65,9 +59,9 @@ async function request(path, options = {}) {
 		...options,
 		headers: {
 			"Content-Type": "application/json",
-			...(token ? { Authorization: `Bearer ${token}` } : {}),
-			...options.headers,
-		},
+			...token ? { Authorization: `Bearer ${token}` } : {},
+			...options.headers
+		}
 	});
 	if (response.status === 401) {
 		if (typeof window !== "undefined") localStorage.removeItem("authToken");
@@ -102,12 +96,12 @@ var mapResume = (resume) => {
 							...item,
 							startDate: typeof item.startDate === "string" ? item.startDate : "",
 							endDate: typeof item.endDate === "string" ? item.endDate : "",
-							currentlyWorkingHere: typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false,
+							currentlyWorkingHere: typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false
 						};
-					}),
-				},
-			},
-		},
+					})
+				}
+			}
+		}
 	};
 };
 const api = {
@@ -121,22 +115,19 @@ const api = {
 	fetchResume: async (id) => {
 		return mapResume(await request(`/resumes/${id}`));
 	},
-	updateResume: (id, data) =>
-		request(`/resumes/${id}`, {
-			method: "PUT",
-			body: JSON.stringify(data),
-		}),
+	updateResume: (id, data) => request(`/resumes/${id}`, {
+		method: "PUT",
+		body: JSON.stringify(data)
+	}),
 	deleteResume: (id) => request(`/resumes/${id}`, { method: "DELETE" }),
-	createResume: (data) =>
-		request("/resumes", {
-			method: "POST",
-			body: JSON.stringify(data),
-		}),
-	duplicateResume: (id, overrides = {}) =>
-		request(`/resumes/${id}/duplicate`, {
-			method: "POST",
-			body: JSON.stringify(overrides),
-		}),
+	createResume: (data) => request("/resumes", {
+		method: "POST",
+		body: JSON.stringify(data)
+	}),
+	duplicateResume: (id, overrides = {}) => request(`/resumes/${id}/duplicate`, {
+		method: "POST",
+		body: JSON.stringify(overrides)
+	}),
 	fetchStatistics: () => request("/resumes/statistics"),
 	fetchResumeStatistics: async (id) => {
 		try {
@@ -144,7 +135,7 @@ const api = {
 			return {
 				...stats,
 				lastViewedAt: stats.lastViewedAt ? new Date(stats.lastViewedAt) : null,
-				lastDownloadedAt: stats.lastDownloadedAt ? new Date(stats.lastDownloadedAt) : null,
+				lastDownloadedAt: stats.lastDownloadedAt ? new Date(stats.lastDownloadedAt) : null
 			};
 		} catch (error) {
 			console.warn(`Failed to fetch statistics for resume ${id}, returning mock data.`, error);
@@ -153,29 +144,26 @@ const api = {
 				views: 0,
 				downloads: 0,
 				lastViewedAt: null,
-				lastDownloadedAt: null,
+				lastDownloadedAt: null
 			};
 		}
 	},
-	setPassword: (id, password) =>
-		request(`/resumes/${id}/set-password`, {
-			method: "POST",
-			body: JSON.stringify({ password }),
-		}),
+	setPassword: (id, password) => request(`/resumes/${id}/set-password`, {
+		method: "POST",
+		body: JSON.stringify({ password })
+	}),
 	removePassword: (id) => request(`/resumes/${id}/remove-password`, { method: "POST" }),
-	setLocked: (id, isLocked) =>
-		request(`/resumes/${id}/set-locked`, {
-			method: "POST",
-			body: JSON.stringify({ isLocked }),
-		}),
+	setLocked: (id, isLocked) => request(`/resumes/${id}/set-locked`, {
+		method: "POST",
+		body: JSON.stringify({ isLocked })
+	}),
 	exportResume: (id, format, _data) => request(`/resumes/${id}/export?format=${format}`, { method: "GET" }),
-	generateAIContent: (payload) =>
-		request(`/ai/generate-summary/${payload.resume_id}`, {
-			method: "POST",
-			body: JSON.stringify({
-				type: payload.type,
-				value: payload.value,
-			}),
-		}),
+	generateAIContent: (payload) => request(`/ai/generate-summary/${payload.resume_id}`, {
+		method: "POST",
+		body: JSON.stringify({
+			type: payload.type,
+			value: payload.value
+		})
+	})
 };
 export { isValidToken as i, buildZuvyLoginUrl as n, getAuthToken as r, api as t };

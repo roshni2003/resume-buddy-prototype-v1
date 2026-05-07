@@ -1,18 +1,14 @@
-import { isPlainObject } from "es-toolkit";
-import { Label, Slot } from "radix-ui";
+import { t as cn } from "./style-BVXxCckg.js";
 import * as React from "react";
 import { jsx } from "react/jsx-runtime";
+import { Label, Slot } from "radix-ui";
 import { Controller, FormProvider, useFormContext, useFormState } from "react-hook-form";
-import { t as cn } from "./style-BVXxCckg.js";
-
+import { isPlainObject } from "es-toolkit";
 function Label$1({ className, ...props }) {
 	return /* @__PURE__ */ jsx(Label.Root, {
 		"data-slot": "label",
-		className: cn(
-			"flex select-none items-center gap-2 font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50",
-			className,
-		),
-		...props,
+		className: cn("flex select-none items-center gap-2 font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50", className),
+		...props
 	});
 }
 var Form = FormProvider;
@@ -20,7 +16,7 @@ var FormFieldContext = React.createContext({});
 var FormField = ({ ...props }) => {
 	return /* @__PURE__ */ jsx(FormFieldContext.Provider, {
 		value: { name: props.name },
-		children: /* @__PURE__ */ jsx(Controller, { ...props }),
+		children: /* @__PURE__ */ jsx(Controller, { ...props })
 	});
 };
 var useFormField = () => {
@@ -37,7 +33,7 @@ var useFormField = () => {
 		formItemId: `${id}-form-item`,
 		formDescriptionId: `${id}-form-item-description`,
 		formMessageId: `${id}-form-item-message`,
-		...fieldState,
+		...fieldState
 	};
 };
 var FormItemContext = React.createContext({});
@@ -48,8 +44,8 @@ function FormItem({ className, ...props }) {
 		children: /* @__PURE__ */ jsx("div", {
 			"data-slot": "form-item",
 			className: cn("grid gap-1.5", className),
-			...props,
-		}),
+			...props
+		})
 	});
 }
 function FormLabel({ className, ...props }) {
@@ -59,7 +55,7 @@ function FormLabel({ className, ...props }) {
 		"data-error": !!error,
 		className: cn("mb-0.5 data-[error=true]:text-destructive", className),
 		htmlFor: formItemId,
-		...props,
+		...props
 	});
 }
 function FormControl({ ...props }) {
@@ -69,7 +65,7 @@ function FormControl({ ...props }) {
 		id: formItemId,
 		"aria-describedby": !error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`,
 		"aria-invalid": !!error,
-		...props,
+		...props
 	});
 }
 function FormDescription({ className, ...props }) {
@@ -78,7 +74,7 @@ function FormDescription({ className, ...props }) {
 		"data-slot": "form-description",
 		id: formDescriptionId,
 		className: cn("text-muted-foreground text-xs leading-normal", className),
-		...props,
+		...props
 	});
 }
 function FormMessage({ className, ...props }) {
@@ -99,16 +95,7 @@ function FormMessage({ className, ...props }) {
 		"data-slot": "form-message",
 		className: cn("line-clamp-1 text-xs", error ? "text-destructive" : "text-muted-foreground", className),
 		...props,
-		children: body,
+		children: body
 	});
 }
-export {
-	FormItem as a,
-	Label$1 as c,
-	FormField as i,
-	FormControl as n,
-	FormLabel as o,
-	FormDescription as r,
-	FormMessage as s,
-	Form as t,
-};
+export { FormItem as a, Label$1 as c, FormField as i, FormControl as n, FormLabel as o, FormDescription as r, FormMessage as s, Form as t };

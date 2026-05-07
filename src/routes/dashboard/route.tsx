@@ -2,7 +2,6 @@
 import { useLingui } from "@lingui/react";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
 import { getAuthToken, isValidToken } from "@/utils/auth-token";
@@ -35,19 +34,6 @@ export const Route = createFileRoute("/dashboard")({
 
 function RouteComponent() {
 	useLingui();
-
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			const url = new URL(window.location.href);
-			let token = url.searchParams.get("token");
-			if (!token && url.hash.includes("token=")) {
-				token = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
-			}
-			if (token && token !== "preview") {
-				localStorage.setItem("authToken", token);
-			}
-		}
-	}, []);
 
 	return (
 		<div className="flex min-h-screen flex-col bg-gray-50">

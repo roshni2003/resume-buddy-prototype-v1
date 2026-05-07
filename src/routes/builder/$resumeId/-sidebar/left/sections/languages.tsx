@@ -25,13 +25,7 @@ export function LanguagesSectionBuilder() {
 				onReorder={handleReorder}
 				keyExtractor={(item) => item.id}
 				renderItem={(item) => (
-					<SortableSectionItem
-						key={item.id}
-						type="languages"
-						item={item}
-						title={item.language}
-						subtitle={item.fluency}
-					/>
+					<SortableSectionItem key={item.id} type="languages" item={item} title={item.language} subtitle={item.fluency} />
 				)}
 			/>
 

@@ -1,26 +1,8 @@
 import { env } from "@better-auth/core/env";
 import { BetterAuthError } from "@better-auth/core/error";
 import { defineErrorCodes } from "@better-auth/core/utils/error-codes";
-
 function escapeRegExpChar(char) {
-	if (
-		char === "-" ||
-		char === "^" ||
-		char === "$" ||
-		char === "+" ||
-		char === "." ||
-		char === "(" ||
-		char === ")" ||
-		char === "|" ||
-		char === "[" ||
-		char === "]" ||
-		char === "{" ||
-		char === "}" ||
-		char === "*" ||
-		char === "?" ||
-		char === "\\"
-	)
-		return `\\${char}`;
+	if (char === "-" || char === "^" || char === "$" || char === "+" || char === "." || char === "(" || char === ")" || char === "|" || char === "[" || char === "]" || char === "{" || char === "}" || char === "*" || char === "?" || char === "\\") return `\\${char}`;
 	else return char;
 }
 function escapeRegExpString(str) {
@@ -54,10 +36,9 @@ function transform(pattern, separator = true) {
 		const nextSegment = segments[s + 1];
 		let currentSeparator = "";
 		if (!segment && s > 0) continue;
-		if (separator)
-			if (s === segments.length - 1) currentSeparator = optionalSeparator;
-			else if (nextSegment !== "**") currentSeparator = requiredSeparator;
-			else currentSeparator = "";
+		if (separator) if (s === segments.length - 1) currentSeparator = optionalSeparator;
+		else if (nextSegment !== "**") currentSeparator = requiredSeparator;
+		else currentSeparator = "";
 		if (separator && segment === "**") {
 			if (currentSeparator) {
 				result += s === 0 ? "" : currentSeparator;
@@ -85,23 +66,11 @@ function isMatch(regexp, sample) {
 	return regexp.test(sample);
 }
 function wildcardMatch(pattern, options) {
-	if (typeof pattern !== "string" && !Array.isArray(pattern))
-		throw new TypeError(
-			`The first argument must be a single pattern string or an array of patterns, but ${typeof pattern} given`,
-		);
+	if (typeof pattern !== "string" && !Array.isArray(pattern)) throw new TypeError(`The first argument must be a single pattern string or an array of patterns, but ${typeof pattern} given`);
 	if (typeof options === "string" || typeof options === "boolean") options = { separator: options };
-	if (
-		arguments.length === 2 &&
-		!(typeof options === "undefined" || (typeof options === "object" && options !== null && !Array.isArray(options)))
-	)
-		throw new TypeError(
-			`The second argument must be an options object or a string/boolean separator, but ${typeof options} given`,
-		);
+	if (arguments.length === 2 && !(typeof options === "undefined" || typeof options === "object" && options !== null && !Array.isArray(options))) throw new TypeError(`The second argument must be an options object or a string/boolean separator, but ${typeof options} given`);
 	options = options || {};
-	if (options.separator === "\\")
-		throw new Error(
-			"\\ is not a valid separator because it is used for escaping. Try setting the separator to `true` instead",
-		);
+	if (options.separator === "\\") throw new Error("\\ is not a valid separator because it is used for escaping. Try setting the separator to `true` instead");
 	const regexpPattern = transform(pattern, options.separator);
 	const regexp = new RegExp(`^${regexpPattern}$`, options.flags);
 	const fn = isMatch.bind(null, regexp);
@@ -111,13 +80,8 @@ function wildcardMatch(pattern, options) {
 	return fn;
 }
 function isLoopbackForDevScheme(host) {
-	const hostname = host
-		.replace(/:\d+$/, "")
-		.replace(/^\[|\]$/g, "")
-		.toLowerCase();
-	return (
-		hostname === "localhost" || hostname.endsWith(".localhost") || hostname === "::1" || hostname.startsWith("127.")
-	);
+	const hostname = host.replace(/:\d+$/, "").replace(/^\[|\]$/g, "").toLowerCase();
+	return hostname === "localhost" || hostname.endsWith(".localhost") || hostname === "::1" || hostname.startsWith("127.");
 }
 function checkHasPath(url) {
 	try {
@@ -129,8 +93,7 @@ function checkHasPath(url) {
 function assertHasProtocol(url) {
 	try {
 		const parsedUrl = new URL(url);
-		if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:")
-			throw new BetterAuthError(`Invalid base URL: ${url}. URL must include 'http://' or 'https://'`);
+		if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") throw new BetterAuthError(`Invalid base URL: ${url}. URL must include 'http://' or 'https://'`);
 	} catch (error) {
 		if (error instanceof BetterAuthError) throw error;
 		throw new BetterAuthError(`Invalid base URL: ${url}. Please provide a valid base URL.`, { cause: error });
@@ -148,42 +111,32 @@ function validateProxyHeader(header, type) {
 	if (!header || header.trim() === "") return false;
 	if (type === "proto") return header === "http" || header === "https";
 	if (type === "host") {
-		if (
-			[/\.\./, /\0/, /[\s]/, /^[.]/, /[<>'"]/, /javascript:/i, /file:/i, /data:/i].some((pattern) =>
-				pattern.test(header),
-			)
-		)
-			return false;
-		return (
-			/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*(:[0-9]{1,5})?$/.test(
-				header,
-			) ||
-			/^(\d{1,3}\.){3}\d{1,3}(:[0-9]{1,5})?$/.test(header) ||
-			/^\[[0-9a-fA-F:]+\](:[0-9]{1,5})?$/.test(header) ||
-			/^localhost(:[0-9]{1,5})?$/i.test(header)
-		);
+		if ([
+			/\.\./,
+			/\0/,
+			/[\s]/,
+			/^[.]/,
+			/[<>'"]/,
+			/javascript:/i,
+			/file:/i,
+			/data:/i
+		].some((pattern) => pattern.test(header))) return false;
+		return /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*(:[0-9]{1,5})?$/.test(header) || /^(\d{1,3}\.){3}\d{1,3}(:[0-9]{1,5})?$/.test(header) || /^\[[0-9a-fA-F:]+\](:[0-9]{1,5})?$/.test(header) || /^localhost(:[0-9]{1,5})?$/i.test(header);
 	}
 	return false;
 }
 function getBaseURL(url, path, request, loadEnv, trustedProxyHeaders) {
 	if (url) return withPath(url, path);
 	if (loadEnv !== false) {
-		const fromEnv =
-			env.BETTER_AUTH_URL ||
-			env.NEXT_PUBLIC_BETTER_AUTH_URL ||
-			env.PUBLIC_BETTER_AUTH_URL ||
-			env.NUXT_PUBLIC_BETTER_AUTH_URL ||
-			env.NUXT_PUBLIC_AUTH_URL ||
-			(env.BASE_URL !== "/" ? env.BASE_URL : void 0);
+		const fromEnv = env.BETTER_AUTH_URL || env.NEXT_PUBLIC_BETTER_AUTH_URL || env.PUBLIC_BETTER_AUTH_URL || env.NUXT_PUBLIC_BETTER_AUTH_URL || env.NUXT_PUBLIC_AUTH_URL || (env.BASE_URL !== "/" ? env.BASE_URL : void 0);
 		if (fromEnv) return withPath(fromEnv, path);
 	}
 	const fromRequest = request?.headers.get("x-forwarded-host");
 	const fromRequestProto = request?.headers.get("x-forwarded-proto");
 	if (fromRequest && fromRequestProto && trustedProxyHeaders) {
-		if (validateProxyHeader(fromRequestProto, "proto") && validateProxyHeader(fromRequest, "host"))
-			try {
-				return withPath(`${fromRequestProto}://${fromRequest}`, path);
-			} catch (_error) {}
+		if (validateProxyHeader(fromRequestProto, "proto") && validateProxyHeader(fromRequest, "host")) try {
+			return withPath(`${fromRequestProto}://${fromRequest}`, path);
+		} catch (_error) {}
 	}
 	if (request) {
 		const url$1 = getOrigin(request.url);
@@ -215,21 +168,13 @@ function getHost(url) {
 	}
 }
 function isDynamicBaseURLConfig(config) {
-	return (
-		typeof config === "object" && config !== null && "allowedHosts" in config && Array.isArray(config.allowedHosts)
-	);
+	return typeof config === "object" && config !== null && "allowedHosts" in config && Array.isArray(config.allowedHosts);
 }
 function isRequestLike(value) {
 	if (value instanceof Request) return true;
-	if (typeof value !== "object" || value === null || Object.prototype.toString.call(value) !== "[object Request]")
-		return false;
+	if (typeof value !== "object" || value === null || Object.prototype.toString.call(value) !== "[object Request]") return false;
 	const v = value;
-	return (
-		typeof v.url === "string" &&
-		typeof v.headers === "object" &&
-		v.headers !== null &&
-		typeof v.headers.get === "function"
-	);
+	return typeof v.url === "string" && typeof v.headers === "object" && v.headers !== null && typeof v.headers.get === "function";
 }
 function getHostFromSource(source, trustedProxyHeaders) {
 	const headers = isRequestLike(source) ? source.headers : source;
@@ -239,12 +184,11 @@ function getHostFromSource(source, trustedProxyHeaders) {
 	}
 	const host = headers.get("host");
 	if (host && validateProxyHeader(host, "host")) return host;
-	if (isRequestLike(source))
-		try {
-			return new URL(source.url).host;
-		} catch {
-			return null;
-		}
+	if (isRequestLike(source)) try {
+		return new URL(source.url).host;
+	} catch {
+		return null;
+	}
 	return null;
 }
 function getProtocolFromSource(source, configProtocol, trustedProxyHeaders) {
@@ -254,43 +198,30 @@ function getProtocolFromSource(source, configProtocol, trustedProxyHeaders) {
 		const forwardedProto = headers.get("x-forwarded-proto");
 		if (forwardedProto && validateProxyHeader(forwardedProto, "proto")) return forwardedProto;
 	}
-	if (isRequestLike(source))
-		try {
-			const url = new URL(source.url);
-			if (url.protocol === "http:" || url.protocol === "https:") return url.protocol.slice(0, -1);
-		} catch {}
+	if (isRequestLike(source)) try {
+		const url = new URL(source.url);
+		if (url.protocol === "http:" || url.protocol === "https:") return url.protocol.slice(0, -1);
+	} catch {}
 	const host = getHostFromSource(source, trustedProxyHeaders);
 	if (host && isLoopbackForDevScheme(host)) return "http";
 	return "https";
 }
 var matchesHostPattern = (host, pattern) => {
 	if (!host || !pattern) return false;
-	const normalizedHost = host
-		.replace(/^https?:\/\//, "")
-		.split("/")[0]
-		.toLowerCase();
-	const normalizedPattern = pattern
-		.replace(/^https?:\/\//, "")
-		.split("/")[0]
-		.toLowerCase();
-	if (normalizedPattern.includes("*") || normalizedPattern.includes("?"))
-		return wildcardMatch(normalizedPattern)(normalizedHost);
+	const normalizedHost = host.replace(/^https?:\/\//, "").split("/")[0].toLowerCase();
+	const normalizedPattern = pattern.replace(/^https?:\/\//, "").split("/")[0].toLowerCase();
+	if (normalizedPattern.includes("*") || normalizedPattern.includes("?")) return wildcardMatch(normalizedPattern)(normalizedHost);
 	return normalizedHost.toLowerCase() === normalizedPattern.toLowerCase();
 };
 function resolveDynamicBaseURL(config, source, basePath, trustedProxyHeaders) {
 	const host = getHostFromSource(source, trustedProxyHeaders);
 	if (!host) {
 		if (config.fallback) return withPath(config.fallback, basePath);
-		throw new BetterAuthError(
-			"Could not determine host from request headers. Please provide a fallback URL in your baseURL config.",
-		);
+		throw new BetterAuthError("Could not determine host from request headers. Please provide a fallback URL in your baseURL config.");
 	}
-	if (config.allowedHosts.some((pattern) => matchesHostPattern(host, pattern)))
-		return withPath(`${getProtocolFromSource(source, config.protocol, trustedProxyHeaders)}://${host}`, basePath);
+	if (config.allowedHosts.some((pattern) => matchesHostPattern(host, pattern))) return withPath(`${getProtocolFromSource(source, config.protocol, trustedProxyHeaders)}://${host}`, basePath);
 	if (config.fallback) return withPath(config.fallback, basePath);
-	throw new BetterAuthError(
-		`Host "${host}" is not in the allowed hosts list. Allowed hosts: ${config.allowedHosts.join(", ")}. Add this host to your allowedHosts config or provide a fallback URL.`,
-	);
+	throw new BetterAuthError(`Host "${host}" is not in the allowed hosts list. Allowed hosts: ${config.allowedHosts.join(", ")}. Add this host to your allowedHosts config or provide a fallback URL.`);
 }
 function resolveBaseURL(config, basePath, source, loadEnv, trustedProxyHeaders) {
 	if (isDynamicBaseURLConfig(config)) {
@@ -319,8 +250,7 @@ function _defu(baseObject, defaults, namespace = ".", merger) {
 		if (value === null || value === void 0) continue;
 		if (merger && merger(object, key, value, namespace)) continue;
 		if (Array.isArray(value) && Array.isArray(object[key])) object[key] = [...value, ...object[key]];
-		else if (isPlainObject(value) && isPlainObject(object[key]))
-			object[key] = _defu(value, object[key], (namespace ? `${namespace}.` : "") + key.toString(), merger);
+		else if (isPlainObject(value) && isPlainObject(object[key])) object[key] = _defu(value, object[key], (namespace ? `${namespace}.` : "") + key.toString(), merger);
 		else object[key] = value;
 	}
 	return object;
@@ -347,15 +277,12 @@ var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) =>
-	key in obj
-		? __defProp(obj, key, {
-				enumerable: true,
-				configurable: true,
-				writable: true,
-				value,
-			})
-		: (obj[key] = value);
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, {
+	enumerable: true,
+	configurable: true,
+	writable: true,
+	value
+}) : obj[key] = value;
 var __spreadValues = (a, b) => {
 	for (var prop in b || (b = {})) if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop]);
 	if (__getOwnPropSymbols) {
@@ -381,14 +308,13 @@ var initializePlugins = async (url, options) => {
 		onResponse: [options == null ? void 0 : options.onResponse],
 		onSuccess: [options == null ? void 0 : options.onSuccess],
 		onError: [options == null ? void 0 : options.onError],
-		onRetry: [options == null ? void 0 : options.onRetry],
+		onRetry: [options == null ? void 0 : options.onRetry]
 	};
-	if (!options || !(options == null ? void 0 : options.plugins))
-		return {
-			url,
-			options: opts,
-			hooks,
-		};
+	if (!options || !(options == null ? void 0 : options.plugins)) return {
+		url,
+		options: opts,
+		hooks
+	};
 	for (const plugin of (options == null ? void 0 : options.plugins) || []) {
 		if (plugin.init) {
 			const pluginRes = await ((_a = plugin.init) == null ? void 0 : _a.call(plugin, url.toString(), options));
@@ -404,7 +330,7 @@ var initializePlugins = async (url, options) => {
 	return {
 		url,
 		options: opts,
-		hooks,
+		hooks
 	};
 };
 var LinearRetryStrategy = class {
@@ -412,8 +338,7 @@ var LinearRetryStrategy = class {
 		this.options = options;
 	}
 	shouldAttemptRetry(attempt, response) {
-		if (this.options.shouldRetry)
-			return Promise.resolve(attempt < this.options.attempts && this.options.shouldRetry(response));
+		if (this.options.shouldRetry) return Promise.resolve(attempt < this.options.attempts && this.options.shouldRetry(response));
 		return Promise.resolve(attempt < this.options.attempts);
 	}
 	getDelay() {
@@ -425,8 +350,7 @@ var ExponentialRetryStrategy = class {
 		this.options = options;
 	}
 	shouldAttemptRetry(attempt, response) {
-		if (this.options.shouldRetry)
-			return Promise.resolve(attempt < this.options.attempts && this.options.shouldRetry(response));
+		if (this.options.shouldRetry) return Promise.resolve(attempt < this.options.attempts && this.options.shouldRetry(response));
 		return Promise.resolve(attempt < this.options.attempts);
 	}
 	getDelay(attempt) {
@@ -434,34 +358,27 @@ var ExponentialRetryStrategy = class {
 	}
 };
 function createRetryStrategy(options) {
-	if (typeof options === "number")
-		return new LinearRetryStrategy({
-			type: "linear",
-			attempts: options,
-			delay: 1e3,
-		});
+	if (typeof options === "number") return new LinearRetryStrategy({
+		type: "linear",
+		attempts: options,
+		delay: 1e3
+	});
 	switch (options.type) {
-		case "linear":
-			return new LinearRetryStrategy(options);
-		case "exponential":
-			return new ExponentialRetryStrategy(options);
-		default:
-			throw new Error("Invalid retry strategy");
+		case "linear": return new LinearRetryStrategy(options);
+		case "exponential": return new ExponentialRetryStrategy(options);
+		default: throw new Error("Invalid retry strategy");
 	}
 }
 var getAuthHeader = async (options) => {
 	const headers = {};
-	const getValue = async (value) => (typeof value === "function" ? await value() : value);
+	const getValue = async (value) => typeof value === "function" ? await value() : value;
 	if (options == null ? void 0 : options.auth) {
 		if (options.auth.type === "Bearer") {
 			const token = await getValue(options.auth.token);
 			if (!token) return headers;
 			headers["authorization"] = `Bearer ${token}`;
 		} else if (options.auth.type === "Basic") {
-			const [username, password] = await Promise.all([
-				getValue(options.auth.username),
-				getValue(options.auth.password),
-			]);
+			const [username, password] = await Promise.all([getValue(options.auth.username), getValue(options.auth.password)]);
 			if (!username || !password) return headers;
 			headers["authorization"] = `Basic ${btoa(`${username}:${password}`)}`;
 		} else if (options.auth.type === "Custom") {
@@ -475,7 +392,12 @@ var getAuthHeader = async (options) => {
 var JSON_RE = /^application\/(?:[\w!#$%&*.^`~-]*\+)?json(;.+)?$/i;
 function detectResponseType(request) {
 	const _contentType = request.headers.get("content-type");
-	const textTypes = /* @__PURE__ */ new Set(["image/svg", "application/xml", "application/xhtml", "application/html"]);
+	const textTypes = /* @__PURE__ */ new Set([
+		"image/svg",
+		"application/xml",
+		"application/xhtml",
+		"application/html"
+	]);
 	if (!_contentType) return "json";
 	const contentType = _contentType.split(";").shift() || "";
 	if (JSON_RE.test(contentType)) return "json";
@@ -497,7 +419,7 @@ function isJSONSerializable(value) {
 	if (t !== "object") return false;
 	if (Array.isArray(value)) return true;
 	if (value.buffer) return false;
-	return (value.constructor && value.constructor.name === "Object") || typeof value.toJSON === "function";
+	return value.constructor && value.constructor.name === "Object" || typeof value.toJSON === "function";
 }
 function jsonParse(text) {
 	try {
@@ -533,8 +455,7 @@ function getBody(options) {
 	if (!(options == null ? void 0 : options.body)) return null;
 	const headers = new Headers(options == null ? void 0 : options.headers);
 	if (isJSONSerializable(options.body) && !headers.has("content-type")) {
-		for (const [key, value] of Object.entries(options == null ? void 0 : options.body))
-			if (value instanceof Date) options.body[key] = value.toISOString();
+		for (const [key, value] of Object.entries(options == null ? void 0 : options.body)) if (value instanceof Date) options.body[key] = value.toISOString();
 		return JSON.stringify(options.body);
 	}
 	if (headers.has("content-type") && headers.get("content-type") === "application/x-www-form-urlencoded") {
@@ -555,16 +476,12 @@ function getMethod(url, options) {
 }
 function getTimeout(options, controller) {
 	let abortTimeout;
-	if (!(options == null ? void 0 : options.signal) && (options == null ? void 0 : options.timeout))
-		abortTimeout = setTimeout(
-			() => (controller == null ? void 0 : controller.abort()),
-			options == null ? void 0 : options.timeout,
-		);
+	if (!(options == null ? void 0 : options.signal) && (options == null ? void 0 : options.timeout)) abortTimeout = setTimeout(() => controller == null ? void 0 : controller.abort(), options == null ? void 0 : options.timeout);
 	return {
 		abortTimeout,
 		clearTimeout: () => {
 			if (abortTimeout) clearTimeout(abortTimeout);
-		},
+		}
 	};
 }
 var ValidationError = class _ValidationError extends Error {
@@ -579,26 +496,23 @@ async function parseStandardSchema(schema, input) {
 	if (result.issues) throw new ValidationError(result.issues);
 	return result.value;
 }
-var methods = ["get", "post", "put", "patch", "delete"];
+var methods = [
+	"get",
+	"post",
+	"put",
+	"patch",
+	"delete"
+];
 var applySchemaPlugin = (config) => ({
 	id: "apply-schema",
 	name: "Apply Schema",
 	version: "1.0.0",
 	async init(url, options) {
 		var _a, _b, _c, _d;
-		const schema =
-			((_b =
-				(_a = config.plugins) == null
-					? void 0
-					: _a.find((plugin) => {
-							var _a2;
-							return ((_a2 = plugin.schema) == null ? void 0 : _a2.config)
-								? url.startsWith(plugin.schema.config.baseURL || "") ||
-										url.startsWith(plugin.schema.config.prefix || "")
-								: false;
-						})) == null
-				? void 0
-				: _b.schema) || config.schema;
+		const schema = ((_b = (_a = config.plugins) == null ? void 0 : _a.find((plugin) => {
+			var _a2;
+			return ((_a2 = plugin.schema) == null ? void 0 : _a2.config) ? url.startsWith(plugin.schema.config.baseURL || "") || url.startsWith(plugin.schema.config.prefix || "") : false;
+		})) == null ? void 0 : _b.schema) || config.schema;
 		if (schema) {
 			let urlKey = url;
 			if ((_c = schema.config) == null ? void 0 : _c.prefix) {
@@ -614,61 +528,45 @@ var applySchemaPlugin = (config) => ({
 			if (keySchema) {
 				let opts = __spreadProps(__spreadValues({}, options), {
 					method: keySchema.method,
-					output: keySchema.output,
+					output: keySchema.output
 				});
-				if (!(options == null ? void 0 : options.disableValidation))
-					opts = __spreadProps(__spreadValues({}, opts), {
-						body: keySchema.input
-							? await parseStandardSchema(keySchema.input, options == null ? void 0 : options.body)
-							: options == null
-								? void 0
-								: options.body,
-						params: keySchema.params
-							? await parseStandardSchema(keySchema.params, options == null ? void 0 : options.params)
-							: options == null
-								? void 0
-								: options.params,
-						query: keySchema.query
-							? await parseStandardSchema(keySchema.query, options == null ? void 0 : options.query)
-							: options == null
-								? void 0
-								: options.query,
-					});
+				if (!(options == null ? void 0 : options.disableValidation)) opts = __spreadProps(__spreadValues({}, opts), {
+					body: keySchema.input ? await parseStandardSchema(keySchema.input, options == null ? void 0 : options.body) : options == null ? void 0 : options.body,
+					params: keySchema.params ? await parseStandardSchema(keySchema.params, options == null ? void 0 : options.params) : options == null ? void 0 : options.params,
+					query: keySchema.query ? await parseStandardSchema(keySchema.query, options == null ? void 0 : options.query) : options == null ? void 0 : options.query
+				});
 				return {
 					url,
-					options: opts,
+					options: opts
 				};
 			}
 		}
 		return {
 			url,
-			options,
+			options
 		};
-	},
+	}
 });
 var createFetch = (config) => {
 	async function $fetch(url, options) {
-		const opts = __spreadProps(__spreadValues(__spreadValues({}, config), options), {
-			plugins: [
-				...((config == null ? void 0 : config.plugins) || []),
-				applySchemaPlugin(config || {}),
-				...((options == null ? void 0 : options.plugins) || []),
-			],
-		});
-		if (config == null ? void 0 : config.catchAllError)
-			try {
-				return await betterFetch(url, opts);
-			} catch (error) {
-				return {
-					data: null,
-					error: {
-						status: 500,
-						statusText: "Fetch Error",
-						message: "Fetch related error. Captured by catchAllError option. See error property for more details.",
-						error,
-					},
-				};
-			}
+		const opts = __spreadProps(__spreadValues(__spreadValues({}, config), options), { plugins: [
+			...(config == null ? void 0 : config.plugins) || [],
+			applySchemaPlugin(config || {}),
+			...(options == null ? void 0 : options.plugins) || []
+		] });
+		if (config == null ? void 0 : config.catchAllError) try {
+			return await betterFetch(url, opts);
+		} catch (error) {
+			return {
+				data: null,
+				error: {
+					status: 500,
+					statusText: "Fetch Error",
+					message: "Fetch related error. Captured by catchAllError option. See error property for more details.",
+					error
+				}
+			};
+		}
 		return await betterFetch(url, opts);
 	}
 	return $fetch;
@@ -677,7 +575,7 @@ function getURL2(url, option) {
 	const { baseURL, params, query } = option || {
 		query: {},
 		params: {},
-		baseURL: "",
+		baseURL: ""
 	};
 	let basePath = url.startsWith("http") ? url.split("/").slice(0, 3).join("/") : baseURL || "";
 	if (url.startsWith("@")) {
@@ -697,14 +595,13 @@ function getURL2(url, option) {
 		} else serializedValue = JSON.stringify(value);
 		queryParams.set(key, serializedValue);
 	}
-	if (params)
-		if (Array.isArray(params)) {
-			const paramPaths = path.split("/").filter((p) => p.startsWith(":"));
-			for (const [index, key] of paramPaths.entries()) {
-				const value = params[index];
-				path = path.replace(key, value);
-			}
-		} else for (const [key, value] of Object.entries(params)) path = path.replace(`:${key}`, String(value));
+	if (params) if (Array.isArray(params)) {
+		const paramPaths = path.split("/").filter((p) => p.startsWith(":"));
+		for (const [index, key] of paramPaths.entries()) {
+			const value = params[index];
+			path = path.replace(key, value);
+		}
+	} else for (const [key, value] of Object.entries(params)) path = path.replace(`:${key}`, String(value));
 	path = path.split("/").map(encodeURIComponent).join("/");
 	if (path.startsWith("/")) path = path.slice(1);
 	let queryParamString = queryParams.toString();
@@ -727,17 +624,13 @@ var betterFetch = async (url, options) => {
 		headers,
 		body,
 		method,
-		signal,
+		signal
 	});
-	for (const onRequest of hooks.onRequest)
-		if (onRequest) {
-			const res = await onRequest(context);
-			if (typeof res === "object" && res !== null) context = res;
-		}
-	if (
-		("pipeTo" in context && typeof context.pipeTo === "function") ||
-		typeof ((_b = options == null ? void 0 : options.body) == null ? void 0 : _b.pipe) === "function"
-	) {
+	for (const onRequest of hooks.onRequest) if (onRequest) {
+		const res = await onRequest(context);
+		if (typeof res === "object" && res !== null) context = res;
+	}
+	if ("pipeTo" in context && typeof context.pipeTo === "function" || typeof ((_b = options == null ? void 0 : options.body) == null ? void 0 : _b.pipe) === "function") {
 		if (!("duplex" in context)) context.duplex = "half";
 	}
 	const { clearTimeout: clearTimeout2 } = getTimeout(opts, controller);
@@ -745,53 +638,36 @@ var betterFetch = async (url, options) => {
 	clearTimeout2();
 	const responseContext = {
 		response,
-		request: context,
+		request: context
 	};
-	for (const onResponse of hooks.onResponse)
-		if (onResponse) {
-			const r = await onResponse(
-				__spreadProps(__spreadValues({}, responseContext), {
-					response: ((_c = options == null ? void 0 : options.hookOptions) == null ? void 0 : _c.cloneResponse)
-						? response.clone()
-						: response,
-				}),
-			);
-			if (r instanceof Response) response = r;
-			else if (typeof r === "object" && r !== null) response = r.response;
-		}
+	for (const onResponse of hooks.onResponse) if (onResponse) {
+		const r = await onResponse(__spreadProps(__spreadValues({}, responseContext), { response: ((_c = options == null ? void 0 : options.hookOptions) == null ? void 0 : _c.cloneResponse) ? response.clone() : response }));
+		if (r instanceof Response) response = r;
+		else if (typeof r === "object" && r !== null) response = r.response;
+	}
 	if (response.ok) {
-		if (!(context.method !== "HEAD"))
-			return {
-				data: "",
-				error: null,
-			};
+		if (!(context.method !== "HEAD")) return {
+			data: "",
+			error: null
+		};
 		const responseType = detectResponseType(response);
 		const successContext = {
 			data: null,
 			response,
-			request: context,
+			request: context
 		};
 		if (responseType === "json" || responseType === "text") {
 			const text = await response.text();
 			successContext.data = await ((_d = context.jsonParser) != null ? _d : jsonParse)(text);
 		} else successContext.data = await response[responseType]();
 		if (context == null ? void 0 : context.output) {
-			if (context.output && !context.disableValidation)
-				successContext.data = await parseStandardSchema(context.output, successContext.data);
+			if (context.output && !context.disableValidation) successContext.data = await parseStandardSchema(context.output, successContext.data);
 		}
-		for (const onSuccess of hooks.onSuccess)
-			if (onSuccess)
-				await onSuccess(
-					__spreadProps(__spreadValues({}, successContext), {
-						response: ((_e = options == null ? void 0 : options.hookOptions) == null ? void 0 : _e.cloneResponse)
-							? response.clone()
-							: response,
-					}),
-				);
+		for (const onSuccess of hooks.onSuccess) if (onSuccess) await onSuccess(__spreadProps(__spreadValues({}, successContext), { response: ((_e = options == null ? void 0 : options.hookOptions) == null ? void 0 : _e.cloneResponse) ? response.clone() : response }));
 		if (options == null ? void 0 : options.throw) return successContext.data;
 		return {
 			data: successContext.data,
-			error: null,
+			error: null
 		};
 	}
 	const parser = (_f = options == null ? void 0 : options.jsonParser) != null ? _f : jsonParse;
@@ -804,18 +680,10 @@ var betterFetch = async (url, options) => {
 		request: context,
 		error: __spreadProps(__spreadValues({}, errorObject), {
 			status: response.status,
-			statusText: response.statusText,
-		}),
+			statusText: response.statusText
+		})
 	};
-	for (const onError of hooks.onError)
-		if (onError)
-			await onError(
-				__spreadProps(__spreadValues({}, errorContext), {
-					response: ((_g = options == null ? void 0 : options.hookOptions) == null ? void 0 : _g.cloneResponse)
-						? response.clone()
-						: response,
-				}),
-			);
+	for (const onError of hooks.onError) if (onError) await onError(__spreadProps(__spreadValues({}, errorContext), { response: ((_g = options == null ? void 0 : options.hookOptions) == null ? void 0 : _g.cloneResponse) ? response.clone() : response }));
 	if (options == null ? void 0 : options.retry) {
 		const retryStrategy = createRetryStrategy(options.retry);
 		const _retryAttempt = (_h = options.retryAttempt) != null ? _h : 0;
@@ -826,14 +694,13 @@ var betterFetch = async (url, options) => {
 			return await betterFetch(url, __spreadProps(__spreadValues({}, options), { retryAttempt: _retryAttempt + 1 }));
 		}
 	}
-	if (options == null ? void 0 : options.throw)
-		throw new BetterFetchError(response.status, response.statusText, isJSONResponse ? errorObject : responseText);
+	if (options == null ? void 0 : options.throw) throw new BetterFetchError(response.status, response.statusText, isJSONResponse ? errorObject : responseText);
 	return {
 		data: null,
 		error: __spreadProps(__spreadValues({}, errorObject), {
 			status: response.status,
-			statusText: response.statusText,
-		}),
+			statusText: response.statusText
+		})
 	};
 };
 var TWO_FACTOR_ERROR_CODES = defineErrorCodes({
@@ -845,7 +712,7 @@ var TWO_FACTOR_ERROR_CODES = defineErrorCodes({
 	INVALID_BACKUP_CODE: "Invalid backup code",
 	INVALID_CODE: "Invalid code",
 	TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE: "Too many attempts. Please request a new code.",
-	INVALID_TWO_FACTOR_COOKIE: "Invalid two factor cookie",
+	INVALID_TWO_FACTOR_COOKIE: "Invalid two factor cookie"
 });
 var PACKAGE_VERSION = "1.6.9";
 var twoFactorClient = (options) => {
@@ -853,12 +720,10 @@ var twoFactorClient = (options) => {
 		id: "two-factor",
 		version: PACKAGE_VERSION,
 		$InferServerPlugin: {},
-		atomListeners: [
-			{
-				matcher: (path) => path.startsWith("/two-factor/"),
-				signal: "$sessionSignal",
-			},
-		],
+		atomListeners: [{
+			matcher: (path) => path.startsWith("/two-factor/"),
+			signal: "$sessionSignal"
+		}],
 		pathMethods: {
 			"/two-factor/disable": "POST",
 			"/two-factor/enable": "POST",
@@ -867,26 +732,22 @@ var twoFactorClient = (options) => {
 			"/two-factor/get-totp-uri": "POST",
 			"/two-factor/verify-totp": "POST",
 			"/two-factor/verify-otp": "POST",
-			"/two-factor/verify-backup-code": "POST",
+			"/two-factor/verify-backup-code": "POST"
 		},
-		fetchPlugins: [
-			{
-				id: "two-factor",
-				name: "two-factor",
-				hooks: {
-					async onSuccess(context) {
-						if (context.data?.twoFactorRedirect) {
-							if (options?.onTwoFactorRedirect) {
-								await options.onTwoFactorRedirect({ twoFactorMethods: context.data.twoFactorMethods });
-								return;
-							}
-							if (options?.twoFactorPage && typeof window !== "undefined") window.location.href = options.twoFactorPage;
-						}
-					},
-				},
-			},
-		],
-		$ERROR_CODES: TWO_FACTOR_ERROR_CODES,
+		fetchPlugins: [{
+			id: "two-factor",
+			name: "two-factor",
+			hooks: { async onSuccess(context) {
+				if (context.data?.twoFactorRedirect) {
+					if (options?.onTwoFactorRedirect) {
+						await options.onTwoFactorRedirect({ twoFactorMethods: context.data.twoFactorMethods });
+						return;
+					}
+					if (options?.twoFactorPage && typeof window !== "undefined") window.location.href = options.twoFactorPage;
+				}
+			} }
+		}],
+		$ERROR_CODES: TWO_FACTOR_ERROR_CODES
 	};
 };
 var USERNAME_ERROR_CODES = defineErrorCodes({
@@ -897,7 +758,7 @@ var USERNAME_ERROR_CODES = defineErrorCodes({
 	USERNAME_TOO_SHORT: "Username is too short",
 	USERNAME_TOO_LONG: "Username is too long",
 	INVALID_USERNAME: "Username is invalid",
-	INVALID_DISPLAY_USERNAME: "Display username is invalid",
+	INVALID_DISPLAY_USERNAME: "Display username is invalid"
 });
 var GENERIC_OAUTH_ERROR_CODES = defineErrorCodes({
 	INVALID_OAUTH_CONFIGURATION: "Invalid OAuth configuration",
@@ -906,27 +767,7 @@ var GENERIC_OAUTH_ERROR_CODES = defineErrorCodes({
 	PROVIDER_ID_REQUIRED: "Provider ID is required",
 	INVALID_OAUTH_CONFIG: "Invalid OAuth configuration.",
 	SESSION_REQUIRED: "Session is required",
-	ISSUER_MISMATCH:
-		"OAuth issuer mismatch. The authorization server issuer does not match the expected value (RFC 9207).",
-	ISSUER_MISSING:
-		"OAuth issuer parameter missing. The authorization server did not include the required iss parameter (RFC 9207).",
+	ISSUER_MISMATCH: "OAuth issuer mismatch. The authorization server issuer does not match the expected value (RFC 9207).",
+	ISSUER_MISSING: "OAuth issuer parameter missing. The authorization server did not include the required iss parameter (RFC 9207)."
 });
-export {
-	wildcardMatch as _,
-	TWO_FACTOR_ERROR_CODES as a,
-	createDefu as c,
-	getHost as d,
-	getOrigin as f,
-	resolveBaseURL as g,
-	isRequestLike as h,
-	PACKAGE_VERSION as i,
-	defu as l,
-	isDynamicBaseURLConfig as m,
-	USERNAME_ERROR_CODES as n,
-	betterFetch as o,
-	getProtocol as p,
-	twoFactorClient as r,
-	createFetch as s,
-	GENERIC_OAUTH_ERROR_CODES as t,
-	getBaseURL as u,
-};
+export { wildcardMatch as _, TWO_FACTOR_ERROR_CODES as a, createDefu as c, getHost as d, getOrigin as f, resolveBaseURL as g, isRequestLike as h, PACKAGE_VERSION as i, defu as l, isDynamicBaseURLConfig as m, USERNAME_ERROR_CODES as n, betterFetch as o, getProtocol as p, twoFactorClient as r, createFetch as s, GENERIC_OAUTH_ERROR_CODES as t, getBaseURL as u };

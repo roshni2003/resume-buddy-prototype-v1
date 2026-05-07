@@ -273,7 +273,9 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 							{/* Footer */}
 							<div className="space-y-2 border-t p-4">
 								{/* Auto-Fix Button - Only show if there are issues to fix */}
-								{(result.critical.length > 0 || result.important.length > 0 || result.suggestions.length > 0) && (
+								{(result.critical.length > 0 ||
+									result.important.length > 0 ||
+									result.suggestions.length > 0) && (
 									<Button
 										onClick={handleAutoFix}
 										disabled={isFixing}
