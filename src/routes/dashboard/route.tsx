@@ -1,10 +1,11 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
-import { getAuthToken, isValidToken } from "@/utils/auth-token";
+import { getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl } from "@/utils/zuvy-redirect";
 
@@ -22,7 +23,12 @@ export const Route = createFileRoute("/dashboard")({
 
 		if (!hasToken && token) localStorage.removeItem("authToken");
 
-		if (!hasToken && !hasZuvySession && !devBypass) {
+		// Shivansh's fix: if a token is present in the URL, do NOT redirect immediately.
+		// The RouteComponent's useEffect will make multiple attempts to persist it.
+		const urlToken = getUrlToken();
+		const hasUrlToken = isValidToken(urlToken);
+
+		if (!hasToken && !hasZuvySession && !hasUrlToken && !devBypass) {
 			throw redirect({
 				href: buildZuvyLoginUrl(window.location.href),
 			});
@@ -34,6 +40,39 @@ export const Route = createFileRoute("/dashboard")({
 
 function RouteComponent() {
 	useLingui();
+	const navigate = useNavigate();
+
+	// Shivansh's suggestion: use useEffect to retry token storage after render,
+	// and recheck that the token is actually stored before deciding to redirect.
+	useEffect(() => {
+		const url = new URL(window.location.href);
+		let urlToken = url.searchParams.get("token");
+		if (!urlToken && url.hash.includes("token=")) {
+			urlToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
+		}
+
+		if (urlToken && urlToken !== "preview") {
+			// Multiple attempts to persist the token (Shivansh's suggestion)
+			const stored = persistAuthToken(urlToken);
+
+			// Recheck: verify the token is actually stored after our persistence attempts
+			const storedToken = localStorage.getItem("authToken") ?? sessionStorage.getItem("authToken");
+
+			// Clean the URL so the token is no longer visible
+			url.searchParams.delete("token");
+			const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+			if (hashParams.has("token")) {
+				hashParams.delete("token");
+				url.hash = hashParams.toString();
+			}
+			window.history.replaceState({}, "", url.toString());
+
+			// If we still couldn't store and couldn't verify → redirect to Zuvy
+			if (!stored || !isValidToken(storedToken)) {
+				void navigate({ to: buildZuvyLoginUrl(window.location.origin) as never });
+			}
+		}
+	}, [navigate]);
 
 	return (
 		<div className="flex min-h-screen flex-col bg-gray-50">

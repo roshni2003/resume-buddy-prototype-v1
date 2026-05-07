@@ -84,6 +84,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 						}
 
 						// Early Auth Token Extraction (Before Router Initializes)
+						// Shivansh's fix: retry localStorage multiple times + sessionStorage fallback
 						try {
 							var url = new URL(window.location.href);
 							var extracted = url.searchParams.get('token');
@@ -91,8 +92,18 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 								extracted = new URLSearchParams(url.hash.replace(/^#\\/?/, '')).get('token');
 							}
 							if (extracted && extracted !== 'preview') {
-								localStorage.setItem('authToken', extracted);
-								
+								// Multiple attempts to store in localStorage
+								var stored = false;
+								for (var attempt = 0; attempt < 3; attempt++) {
+									try {
+										localStorage.setItem('authToken', extracted);
+										if (localStorage.getItem('authToken') === extracted) { stored = true; break; }
+									} catch(lsErr) {}
+								}
+								// Fallback: sessionStorage if localStorage keeps failing
+								if (!stored) {
+									try { sessionStorage.setItem('authToken', extracted); } catch(ssErr) {}
+								}
 								// Clean URL immediately
 								url.searchParams.delete('token');
 								var hashParams = new URLSearchParams(url.hash.replace(/^#\\/?/, ''));
