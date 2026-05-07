@@ -1,1 +1,1466 @@
-import{o as e,t}from"./jsx-runtime-D7jARjhZ.js";import{t as n}from"./react-BZSX5Bs9.js";import{D as r,J as i,O as a,S as o,T as s,b as c,j as l,w as u,y as d}from"./preload-helper-DwC0sqXt.js";import{C as f,D as p,S as m,T as h,_ as g,b as _,g as v,h as y,m as b,n as x,t as S,v as ee,x as C,y as te}from"./get-strict-context-DJn2x5wH.js";import{n as w,t as T}from"./dist-C-d3ELl8.js";import{a as E,i as D,n as ne,r as re,t as O}from"./dist-DKdYDXPR.js";var k=e(n(),1),A=new Map([[`bold`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M184.49,136.49l-80,80a12,12,0,0,1-17-17L159,128,87.51,56.49a12,12,0,1,1,17-17l80,80A12,12,0,0,1,184.49,136.49Z`}))],[`duotone`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M176,128,96,208V48Z`,opacity:`0.2`}),k.createElement(`path`,{d:`M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z`}))],[`fill`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z`}))],[`light`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M180.24,132.24l-80,80a6,6,0,0,1-8.48-8.48L167.51,128,91.76,52.24a6,6,0,0,1,8.48-8.48l80,80A6,6,0,0,1,180.24,132.24Z`}))],[`regular`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z`}))],[`thin`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M178.83,130.83l-80,80a4,4,0,0,1-5.66-5.66L170.34,128,93.17,50.83a4,4,0,0,1,5.66-5.66l80,80A4,4,0,0,1,178.83,130.83Z`}))]]),ie=new Map([[`bold`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Z`}))],[`duotone`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z`,opacity:`0.2`}),k.createElement(`path`,{d:`M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Z`}))],[`fill`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M232,128A104,104,0,1,1,128,24,104.13,104.13,0,0,1,232,128Z`}))],[`light`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M128,26A102,102,0,1,0,230,128,102.12,102.12,0,0,0,128,26Zm0,192a90,90,0,1,1,90-90A90.1,90.1,0,0,1,128,218Z`}))],[`regular`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Z`}))],[`thin`,k.createElement(k.Fragment,null,k.createElement(`path`,{d:`M128,28A100,100,0,1,0,228,128,100.11,100.11,0,0,0,128,28Zm0,192a92,92,0,1,1,92-92A92.1,92.1,0,0,1,128,220Z`}))]]),j=k.forwardRef((e,t)=>k.createElement(i,{ref:t,...e,weights:A}));j.displayName=`CaretRightIcon`;var M=k.forwardRef((e,t)=>k.createElement(i,{ref:t,...e,weights:ie}));M.displayName=`CircleIcon`;var N=e(t(),1),P=`rovingFocusGroup.onEntryFocus`,ae={bubbles:!1,cancelable:!0},F=`RovingFocusGroup`,[I,L,oe]=w(F),[se,ce]=p(F,[oe]),[le,ue]=se(F),de=k.forwardRef((e,t)=>(0,N.jsx)(I.Provider,{scope:e.__scopeRovingFocusGroup,children:(0,N.jsx)(I.Slot,{scope:e.__scopeRovingFocusGroup,children:(0,N.jsx)(fe,{...e,ref:t})})}));de.displayName=F;var fe=k.forwardRef((e,t)=>{let{__scopeRovingFocusGroup:n,orientation:r,loop:i=!1,dir:a,currentTabStopId:o,defaultCurrentTabStopId:c,onCurrentTabStopIdChange:l,onEntryFocus:u,preventScrollOnEntryFocus:p=!1,...m}=e,g=k.useRef(null),v=s(t,g),y=T(a),[b,x]=f({prop:o,defaultProp:c??null,onChange:l,caller:F}),[S,ee]=k.useState(!1),C=_(u),te=L(n),w=k.useRef(!1),[E,D]=k.useState(0);return k.useEffect(()=>{let e=g.current;if(e)return e.addEventListener(P,C),()=>e.removeEventListener(P,C)},[C]),(0,N.jsx)(le,{scope:n,orientation:r,dir:y,loop:i,currentTabStopId:b,onItemFocus:k.useCallback(e=>x(e),[x]),onItemShiftTab:k.useCallback(()=>ee(!0),[]),onFocusableItemAdd:k.useCallback(()=>D(e=>e+1),[]),onFocusableItemRemove:k.useCallback(()=>D(e=>e-1),[]),children:(0,N.jsx)(d.div,{tabIndex:S||E===0?-1:0,"data-orientation":r,...m,ref:v,style:{outline:`none`,...e.style},onMouseDown:h(e.onMouseDown,()=>{w.current=!0}),onFocus:h(e.onFocus,e=>{let t=!w.current;if(e.target===e.currentTarget&&t&&!S){let t=new CustomEvent(P,ae);if(e.currentTarget.dispatchEvent(t),!t.defaultPrevented){let e=te().filter(e=>e.focusable);ve([e.find(e=>e.active),e.find(e=>e.id===b),...e].filter(Boolean).map(e=>e.ref.current),p)}}w.current=!1}),onBlur:h(e.onBlur,()=>ee(!1))})})}),pe=`RovingFocusGroupItem`,me=k.forwardRef((e,t)=>{let{__scopeRovingFocusGroup:n,focusable:r=!0,active:i=!1,tabStopId:a,children:o,...s}=e,c=C(),l=a||c,u=ue(pe,n),f=u.currentTabStopId===l,p=L(n),{onFocusableItemAdd:m,onFocusableItemRemove:g,currentTabStopId:_}=u;return k.useEffect(()=>{if(r)return m(),()=>g()},[r,m,g]),(0,N.jsx)(I.ItemSlot,{scope:n,id:l,focusable:r,active:i,children:(0,N.jsx)(d.span,{tabIndex:f?0:-1,"data-orientation":u.orientation,...s,ref:t,onMouseDown:h(e.onMouseDown,e=>{r?u.onItemFocus(l):e.preventDefault()}),onFocus:h(e.onFocus,()=>u.onItemFocus(l)),onKeyDown:h(e.onKeyDown,e=>{if(e.key===`Tab`&&e.shiftKey){u.onItemShiftTab();return}if(e.target!==e.currentTarget)return;let t=_e(e,u.orientation,u.dir);if(t!==void 0){if(e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;e.preventDefault();let n=p().filter(e=>e.focusable).map(e=>e.ref.current);if(t===`last`)n.reverse();else if(t===`prev`||t===`next`){t===`prev`&&n.reverse();let r=n.indexOf(e.currentTarget);n=u.loop?ye(n,r+1):n.slice(r+1)}setTimeout(()=>ve(n))}}),children:typeof o==`function`?o({isCurrentTabStop:f,hasTabStop:_!=null}):o})})});me.displayName=pe;var he={ArrowLeft:`prev`,ArrowUp:`prev`,ArrowRight:`next`,ArrowDown:`next`,PageUp:`first`,Home:`first`,PageDown:`last`,End:`last`};function ge(e,t){return t===`rtl`?e===`ArrowLeft`?`ArrowRight`:e===`ArrowRight`?`ArrowLeft`:e:e}function _e(e,t,n){let r=ge(e.key,n);if(!(t===`vertical`&&[`ArrowLeft`,`ArrowRight`].includes(r))&&!(t===`horizontal`&&[`ArrowUp`,`ArrowDown`].includes(r)))return he[r]}function ve(e,t=!1){let n=document.activeElement;for(let r of e)if(r===n||(r.focus({preventScroll:t}),document.activeElement!==n))return}function ye(e,t){return e.map((n,r)=>e[(t+r)%e.length])}var be=de,xe=me,R=[`Enter`,` `],Se=[`ArrowDown`,`PageUp`,`Home`],Ce=[`ArrowUp`,`PageDown`,`End`],we=[...Se,...Ce],Te={ltr:[...R,`ArrowRight`],rtl:[...R,`ArrowLeft`]},Ee={ltr:[`ArrowLeft`],rtl:[`ArrowRight`]},z=`Menu`,[B,De,Oe]=w(z),[V,ke]=p(z,[Oe,E,ce]),H=E(),Ae=ce(),[je,U]=V(z),[Me,W]=V(z),Ne=e=>{let{__scopeMenu:t,open:n=!1,children:r,dir:i,onOpenChange:a,modal:o=!0}=e,s=H(t),[c,l]=k.useState(null),u=k.useRef(!1),d=_(a),f=T(i);return k.useEffect(()=>{let e=()=>{u.current=!0,document.addEventListener(`pointerdown`,t,{capture:!0,once:!0}),document.addEventListener(`pointermove`,t,{capture:!0,once:!0})},t=()=>u.current=!1;return document.addEventListener(`keydown`,e,{capture:!0}),()=>{document.removeEventListener(`keydown`,e,{capture:!0}),document.removeEventListener(`pointerdown`,t,{capture:!0}),document.removeEventListener(`pointermove`,t,{capture:!0})}},[]),(0,N.jsx)(D,{...s,children:(0,N.jsx)(je,{scope:t,open:n,onOpenChange:d,content:c,onContentChange:l,children:(0,N.jsx)(Me,{scope:t,onClose:k.useCallback(()=>d(!1),[d]),isUsingKeyboardRef:u,dir:f,modal:o,children:r})})})};Ne.displayName=z;var Pe=`MenuAnchor`,G=k.forwardRef((e,t)=>{let{__scopeMenu:n,...r}=e,i=H(n);return(0,N.jsx)(O,{...i,...r,ref:t})});G.displayName=Pe;var Fe=`MenuPortal`,[Ie,Le]=V(Fe,{forceMount:void 0}),Re=e=>{let{__scopeMenu:t,forceMount:n,children:r,container:i}=e,a=U(Fe,t);return(0,N.jsx)(Ie,{scope:t,forceMount:n,children:(0,N.jsx)(m,{present:n||a.open,children:(0,N.jsx)(g,{asChild:!0,container:i,children:r})})})};Re.displayName=Fe;var K=`MenuContent`,[ze,Be]=V(K),Ve=k.forwardRef((e,t)=>{let n=Le(K,e.__scopeMenu),{forceMount:r=n.forceMount,...i}=e,a=U(K,e.__scopeMenu),o=W(K,e.__scopeMenu);return(0,N.jsx)(B.Provider,{scope:e.__scopeMenu,children:(0,N.jsx)(m,{present:r||a.open,children:(0,N.jsx)(B.Slot,{scope:e.__scopeMenu,children:o.modal?(0,N.jsx)(He,{...i,ref:t}):(0,N.jsx)(Ue,{...i,ref:t})})})})}),He=k.forwardRef((e,t)=>{let n=U(K,e.__scopeMenu),r=k.useRef(null),i=s(t,r);return k.useEffect(()=>{let e=r.current;if(e)return b(e)},[]),(0,N.jsx)(Ge,{...e,ref:i,trapFocus:n.open,disableOutsidePointerEvents:n.open,disableOutsideScroll:!0,onFocusOutside:h(e.onFocusOutside,e=>e.preventDefault(),{checkForDefaultPrevented:!1}),onDismiss:()=>n.onOpenChange(!1)})}),Ue=k.forwardRef((e,t)=>{let n=U(K,e.__scopeMenu);return(0,N.jsx)(Ge,{...e,ref:t,trapFocus:!1,disableOutsidePointerEvents:!1,disableOutsideScroll:!1,onDismiss:()=>n.onOpenChange(!1)})}),We=o(`MenuContent.ScrollLock`),Ge=k.forwardRef((e,t)=>{let{__scopeMenu:n,loop:r=!1,trapFocus:i,onOpenAutoFocus:a,onCloseAutoFocus:o,disableOutsidePointerEvents:c,onEntryFocus:l,onEscapeKeyDown:u,onPointerDownOutside:d,onFocusOutside:f,onInteractOutside:p,onDismiss:m,disableOutsideScroll:g,..._}=e,b=U(K,n),x=W(K,n),S=H(n),C=Ae(n),w=De(n),[T,E]=k.useState(null),D=k.useRef(null),ne=s(t,D,b.onContentChange),O=k.useRef(0),A=k.useRef(``),ie=k.useRef(0),j=k.useRef(null),M=k.useRef(`right`),P=k.useRef(0),ae=g?y:k.Fragment,F=g?{as:We,allowPinchZoom:!0}:void 0,I=e=>{let t=A.current+e,n=w().filter(e=>!e.disabled),r=document.activeElement,i=n.find(e=>e.ref.current===r)?.textValue,a=Tt(n.map(e=>e.textValue),t,i),o=n.find(e=>e.textValue===a)?.ref.current;(function e(t){A.current=t,window.clearTimeout(O.current),t!==``&&(O.current=window.setTimeout(()=>e(``),1e3))})(t),o&&setTimeout(()=>o.focus())};k.useEffect(()=>()=>window.clearTimeout(O.current),[]),v();let L=k.useCallback(e=>M.current===j.current?.side&&Dt(e,j.current?.area),[]);return(0,N.jsx)(ze,{scope:n,searchRef:A,onItemEnter:k.useCallback(e=>{L(e)&&e.preventDefault()},[L]),onItemLeave:k.useCallback(e=>{L(e)||(D.current?.focus(),E(null))},[L]),onTriggerLeave:k.useCallback(e=>{L(e)&&e.preventDefault()},[L]),pointerGraceTimerRef:ie,onPointerGraceIntentChange:k.useCallback(e=>{j.current=e},[]),children:(0,N.jsx)(ae,{...F,children:(0,N.jsx)(ee,{asChild:!0,trapped:i,onMountAutoFocus:h(a,e=>{e.preventDefault(),D.current?.focus({preventScroll:!0})}),onUnmountAutoFocus:o,children:(0,N.jsx)(te,{asChild:!0,disableOutsidePointerEvents:c,onEscapeKeyDown:u,onPointerDownOutside:d,onFocusOutside:f,onInteractOutside:p,onDismiss:m,children:(0,N.jsx)(be,{asChild:!0,...C,dir:x.dir,orientation:`vertical`,loop:r,currentTabStopId:T,onCurrentTabStopIdChange:E,onEntryFocus:h(l,e=>{x.isUsingKeyboardRef.current||e.preventDefault()}),preventScrollOnEntryFocus:!0,children:(0,N.jsx)(re,{role:`menu`,"aria-orientation":`vertical`,"data-state":xt(b.open),"data-radix-menu-content":``,dir:x.dir,...S,..._,ref:ne,style:{outline:`none`,..._.style},onKeyDown:h(_.onKeyDown,e=>{let t=e.target.closest(`[data-radix-menu-content]`)===e.currentTarget,n=e.ctrlKey||e.altKey||e.metaKey,r=e.key.length===1;t&&(e.key===`Tab`&&e.preventDefault(),!n&&r&&I(e.key));let i=D.current;if(e.target!==i||!we.includes(e.key))return;e.preventDefault();let a=w().filter(e=>!e.disabled).map(e=>e.ref.current);Ce.includes(e.key)&&a.reverse(),Ct(a)}),onBlur:h(e.onBlur,e=>{e.currentTarget.contains(e.target)||(window.clearTimeout(O.current),A.current=``)}),onPointerMove:h(e.onPointerMove,Z(e=>{let t=e.target,n=P.current!==e.clientX;e.currentTarget.contains(t)&&n&&(M.current=e.clientX>P.current?`right`:`left`,P.current=e.clientX)}))})})})})})})});Ve.displayName=K;var Ke=`MenuGroup`,qe=k.forwardRef((e,t)=>{let{__scopeMenu:n,...r}=e;return(0,N.jsx)(d.div,{role:`group`,...r,ref:t})});qe.displayName=Ke;var Je=`MenuLabel`,Ye=k.forwardRef((e,t)=>{let{__scopeMenu:n,...r}=e;return(0,N.jsx)(d.div,{...r,ref:t})});Ye.displayName=Je;var q=`MenuItem`,Xe=`menu.itemSelect`,J=k.forwardRef((e,t)=>{let{disabled:n=!1,onSelect:r,...i}=e,a=k.useRef(null),o=W(q,e.__scopeMenu),l=Be(q,e.__scopeMenu),u=s(t,a),d=k.useRef(!1),f=()=>{let e=a.current;if(!n&&e){let t=new CustomEvent(Xe,{bubbles:!0,cancelable:!0});e.addEventListener(Xe,e=>r?.(e),{once:!0}),c(e,t),t.defaultPrevented?d.current=!1:o.onClose()}};return(0,N.jsx)(Ze,{...i,ref:u,disabled:n,onClick:h(e.onClick,f),onPointerDown:t=>{e.onPointerDown?.(t),d.current=!0},onPointerUp:h(e.onPointerUp,e=>{d.current||e.currentTarget?.click()}),onKeyDown:h(e.onKeyDown,e=>{let t=l.searchRef.current!==``;n||t&&e.key===` `||R.includes(e.key)&&(e.currentTarget.click(),e.preventDefault())})})});J.displayName=q;var Ze=k.forwardRef((e,t)=>{let{__scopeMenu:n,disabled:r=!1,textValue:i,...a}=e,o=Be(q,n),c=Ae(n),l=k.useRef(null),u=s(t,l),[f,p]=k.useState(!1),[m,g]=k.useState(``);return k.useEffect(()=>{let e=l.current;e&&g((e.textContent??``).trim())},[a.children]),(0,N.jsx)(B.ItemSlot,{scope:n,disabled:r,textValue:i??m,children:(0,N.jsx)(xe,{asChild:!0,...c,focusable:!r,children:(0,N.jsx)(d.div,{role:`menuitem`,"data-highlighted":f?``:void 0,"aria-disabled":r||void 0,"data-disabled":r?``:void 0,...a,ref:u,onPointerMove:h(e.onPointerMove,Z(e=>{r?o.onItemLeave(e):(o.onItemEnter(e),e.defaultPrevented||e.currentTarget.focus({preventScroll:!0}))})),onPointerLeave:h(e.onPointerLeave,Z(e=>o.onItemLeave(e))),onFocus:h(e.onFocus,()=>p(!0)),onBlur:h(e.onBlur,()=>p(!1))})})})}),Qe=`MenuCheckboxItem`,$e=k.forwardRef((e,t)=>{let{checked:n=!1,onCheckedChange:r,...i}=e;return(0,N.jsx)(st,{scope:e.__scopeMenu,checked:n,children:(0,N.jsx)(J,{role:`menuitemcheckbox`,"aria-checked":X(n)?`mixed`:n,...i,ref:t,"data-state":St(n),onSelect:h(i.onSelect,()=>r?.(X(n)?!0:!n),{checkForDefaultPrevented:!1})})})});$e.displayName=Qe;var et=`MenuRadioGroup`,[tt,nt]=V(et,{value:void 0,onValueChange:()=>{}}),rt=k.forwardRef((e,t)=>{let{value:n,onValueChange:r,...i}=e,a=_(r);return(0,N.jsx)(tt,{scope:e.__scopeMenu,value:n,onValueChange:a,children:(0,N.jsx)(qe,{...i,ref:t})})});rt.displayName=et;var it=`MenuRadioItem`,at=k.forwardRef((e,t)=>{let{value:n,...r}=e,i=nt(it,e.__scopeMenu),a=n===i.value;return(0,N.jsx)(st,{scope:e.__scopeMenu,checked:a,children:(0,N.jsx)(J,{role:`menuitemradio`,"aria-checked":a,...r,ref:t,"data-state":St(a),onSelect:h(r.onSelect,()=>i.onValueChange?.(n),{checkForDefaultPrevented:!1})})})});at.displayName=it;var ot=`MenuItemIndicator`,[st,ct]=V(ot,{checked:!1}),lt=k.forwardRef((e,t)=>{let{__scopeMenu:n,forceMount:r,...i}=e,a=ct(ot,n);return(0,N.jsx)(m,{present:r||X(a.checked)||a.checked===!0,children:(0,N.jsx)(d.span,{...i,ref:t,"data-state":St(a.checked)})})});lt.displayName=ot;var ut=`MenuSeparator`,dt=k.forwardRef((e,t)=>{let{__scopeMenu:n,...r}=e;return(0,N.jsx)(d.div,{role:`separator`,"aria-orientation":`horizontal`,...r,ref:t})});dt.displayName=ut;var ft=`MenuArrow`,pt=k.forwardRef((e,t)=>{let{__scopeMenu:n,...r}=e,i=H(n);return(0,N.jsx)(ne,{...i,...r,ref:t})});pt.displayName=ft;var mt=`MenuSub`,[ht,gt]=V(mt),_t=e=>{let{__scopeMenu:t,children:n,open:r=!1,onOpenChange:i}=e,a=U(mt,t),o=H(t),[s,c]=k.useState(null),[l,u]=k.useState(null),d=_(i);return k.useEffect(()=>(a.open===!1&&d(!1),()=>d(!1)),[a.open,d]),(0,N.jsx)(D,{...o,children:(0,N.jsx)(je,{scope:t,open:r,onOpenChange:d,content:l,onContentChange:u,children:(0,N.jsx)(ht,{scope:t,contentId:C(),triggerId:C(),trigger:s,onTriggerChange:c,children:n})})})};_t.displayName=mt;var Y=`MenuSubTrigger`,vt=k.forwardRef((e,t)=>{let n=U(Y,e.__scopeMenu),r=W(Y,e.__scopeMenu),i=gt(Y,e.__scopeMenu),a=Be(Y,e.__scopeMenu),o=k.useRef(null),{pointerGraceTimerRef:s,onPointerGraceIntentChange:c}=a,l={__scopeMenu:e.__scopeMenu},d=k.useCallback(()=>{o.current&&window.clearTimeout(o.current),o.current=null},[]);return k.useEffect(()=>d,[d]),k.useEffect(()=>{let e=s.current;return()=>{window.clearTimeout(e),c(null)}},[s,c]),(0,N.jsx)(G,{asChild:!0,...l,children:(0,N.jsx)(Ze,{id:i.triggerId,"aria-haspopup":`menu`,"aria-expanded":n.open,"aria-controls":i.contentId,"data-state":xt(n.open),...e,ref:u(t,i.onTriggerChange),onClick:t=>{e.onClick?.(t),!(e.disabled||t.defaultPrevented)&&(t.currentTarget.focus(),n.open||n.onOpenChange(!0))},onPointerMove:h(e.onPointerMove,Z(t=>{a.onItemEnter(t),!t.defaultPrevented&&!e.disabled&&!n.open&&!o.current&&(a.onPointerGraceIntentChange(null),o.current=window.setTimeout(()=>{n.onOpenChange(!0),d()},100))})),onPointerLeave:h(e.onPointerLeave,Z(e=>{d();let t=n.content?.getBoundingClientRect();if(t){let r=n.content?.dataset.side,i=r===`right`,o=i?-5:5,c=t[i?`left`:`right`],l=t[i?`right`:`left`];a.onPointerGraceIntentChange({area:[{x:e.clientX+o,y:e.clientY},{x:c,y:t.top},{x:l,y:t.top},{x:l,y:t.bottom},{x:c,y:t.bottom}],side:r}),window.clearTimeout(s.current),s.current=window.setTimeout(()=>a.onPointerGraceIntentChange(null),300)}else{if(a.onTriggerLeave(e),e.defaultPrevented)return;a.onPointerGraceIntentChange(null)}})),onKeyDown:h(e.onKeyDown,t=>{let i=a.searchRef.current!==``;e.disabled||i&&t.key===` `||Te[r.dir].includes(t.key)&&(n.onOpenChange(!0),n.content?.focus(),t.preventDefault())})})})});vt.displayName=Y;var yt=`MenuSubContent`,bt=k.forwardRef((e,t)=>{let n=Le(K,e.__scopeMenu),{forceMount:r=n.forceMount,...i}=e,a=U(K,e.__scopeMenu),o=W(K,e.__scopeMenu),c=gt(yt,e.__scopeMenu),l=k.useRef(null),u=s(t,l);return(0,N.jsx)(B.Provider,{scope:e.__scopeMenu,children:(0,N.jsx)(m,{present:r||a.open,children:(0,N.jsx)(B.Slot,{scope:e.__scopeMenu,children:(0,N.jsx)(Ge,{id:c.contentId,"aria-labelledby":c.triggerId,...i,ref:u,align:`start`,side:o.dir===`rtl`?`left`:`right`,disableOutsidePointerEvents:!1,disableOutsideScroll:!1,trapFocus:!1,onOpenAutoFocus:e=>{o.isUsingKeyboardRef.current&&l.current?.focus(),e.preventDefault()},onCloseAutoFocus:e=>e.preventDefault(),onFocusOutside:h(e.onFocusOutside,e=>{e.target!==c.trigger&&a.onOpenChange(!1)}),onEscapeKeyDown:h(e.onEscapeKeyDown,e=>{o.onClose(),e.preventDefault()}),onKeyDown:h(e.onKeyDown,e=>{let t=e.currentTarget.contains(e.target),n=Ee[o.dir].includes(e.key);t&&n&&(a.onOpenChange(!1),c.trigger?.focus(),e.preventDefault())})})})})})});bt.displayName=yt;function xt(e){return e?`open`:`closed`}function X(e){return e===`indeterminate`}function St(e){return X(e)?`indeterminate`:e?`checked`:`unchecked`}function Ct(e){let t=document.activeElement;for(let n of e)if(n===t||(n.focus(),document.activeElement!==t))return}function wt(e,t){return e.map((n,r)=>e[(t+r)%e.length])}function Tt(e,t,n){let r=t.length>1&&Array.from(t).every(e=>e===t[0])?t[0]:t,i=n?e.indexOf(n):-1,a=wt(e,Math.max(i,0));r.length===1&&(a=a.filter(e=>e!==n));let o=a.find(e=>e.toLowerCase().startsWith(r.toLowerCase()));return o===n?void 0:o}function Et(e,t){let{x:n,y:r}=e,i=!1;for(let e=0,a=t.length-1;e<t.length;a=e++){let o=t[e],s=t[a],c=o.x,l=o.y,u=s.x,d=s.y;l>r!=d>r&&n<(u-c)*(r-l)/(d-l)+c&&(i=!i)}return i}function Dt(e,t){return t?Et({x:e.clientX,y:e.clientY},t):!1}function Z(e){return t=>t.pointerType===`mouse`?e(t):void 0}var Ot=Ne,kt=G,At=Re,jt=Ve,Mt=qe,Nt=Ye,Pt=J,Ft=$e,It=rt,Lt=at,Rt=lt,zt=dt,Bt=pt,Vt=_t,Ht=vt,Ut=bt,Q=`DropdownMenu`,[Wt,Gt]=p(Q,[ke]),$=ke(),[Kt,qt]=Wt(Q),Jt=e=>{let{__scopeDropdownMenu:t,children:n,dir:r,open:i,defaultOpen:a,onOpenChange:o,modal:s=!0}=e,c=$(t),l=k.useRef(null),[u,d]=f({prop:i,defaultProp:a??!1,onChange:o,caller:Q});return(0,N.jsx)(Kt,{scope:t,triggerId:C(),triggerRef:l,contentId:C(),open:u,onOpenChange:d,onOpenToggle:k.useCallback(()=>d(e=>!e),[d]),modal:s,children:(0,N.jsx)(Ot,{...c,open:u,onOpenChange:d,dir:r,modal:s,children:n})})};Jt.displayName=Q;var Yt=`DropdownMenuTrigger`,Xt=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,disabled:r=!1,...i}=e,a=qt(Yt,n),o=$(n);return(0,N.jsx)(kt,{asChild:!0,...o,children:(0,N.jsx)(d.button,{type:`button`,id:a.triggerId,"aria-haspopup":`menu`,"aria-expanded":a.open,"aria-controls":a.open?a.contentId:void 0,"data-state":a.open?`open`:`closed`,"data-disabled":r?``:void 0,disabled:r,...i,ref:u(t,a.triggerRef),onPointerDown:h(e.onPointerDown,e=>{!r&&e.button===0&&e.ctrlKey===!1&&(a.onOpenToggle(),a.open||e.preventDefault())}),onKeyDown:h(e.onKeyDown,e=>{r||([`Enter`,` `].includes(e.key)&&a.onOpenToggle(),e.key===`ArrowDown`&&a.onOpenChange(!0),[`Enter`,` `,`ArrowDown`].includes(e.key)&&e.preventDefault())})})})});Xt.displayName=Yt;var Zt=`DropdownMenuPortal`,Qt=e=>{let{__scopeDropdownMenu:t,...n}=e,r=$(t);return(0,N.jsx)(At,{...r,...n})};Qt.displayName=Zt;var $t=`DropdownMenuContent`,en=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=qt($t,n),a=$(n),o=k.useRef(!1);return(0,N.jsx)(jt,{id:i.contentId,"aria-labelledby":i.triggerId,...a,...r,ref:t,onCloseAutoFocus:h(e.onCloseAutoFocus,e=>{o.current||i.triggerRef.current?.focus(),o.current=!1,e.preventDefault()}),onInteractOutside:h(e.onInteractOutside,e=>{let t=e.detail.originalEvent,n=t.button===0&&t.ctrlKey===!0,r=t.button===2||n;(!i.modal||r)&&(o.current=!0)}),style:{...e.style,"--radix-dropdown-menu-content-transform-origin":`var(--radix-popper-transform-origin)`,"--radix-dropdown-menu-content-available-width":`var(--radix-popper-available-width)`,"--radix-dropdown-menu-content-available-height":`var(--radix-popper-available-height)`,"--radix-dropdown-menu-trigger-width":`var(--radix-popper-anchor-width)`,"--radix-dropdown-menu-trigger-height":`var(--radix-popper-anchor-height)`}})});en.displayName=$t;var tn=`DropdownMenuGroup`,nn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Mt,{...i,...r,ref:t})});nn.displayName=tn;var rn=`DropdownMenuLabel`,an=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Nt,{...i,...r,ref:t})});an.displayName=rn;var on=`DropdownMenuItem`,sn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Pt,{...i,...r,ref:t})});sn.displayName=on;var cn=`DropdownMenuCheckboxItem`,ln=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Ft,{...i,...r,ref:t})});ln.displayName=cn;var un=`DropdownMenuRadioGroup`,dn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(It,{...i,...r,ref:t})});dn.displayName=un;var fn=`DropdownMenuRadioItem`,pn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Lt,{...i,...r,ref:t})});pn.displayName=fn;var mn=`DropdownMenuItemIndicator`,hn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Rt,{...i,...r,ref:t})});hn.displayName=mn;var gn=`DropdownMenuSeparator`,_n=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(zt,{...i,...r,ref:t})});_n.displayName=gn;var vn=`DropdownMenuArrow`,yn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Bt,{...i,...r,ref:t})});yn.displayName=vn;var bn=e=>{let{__scopeDropdownMenu:t,children:n,open:r,onOpenChange:i,defaultOpen:a}=e,o=$(t),[s,c]=f({prop:r,defaultProp:a??!1,onChange:i,caller:`DropdownMenuSub`});return(0,N.jsx)(Vt,{...o,open:s,onOpenChange:c,children:n})},xn=`DropdownMenuSubTrigger`,Sn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Ht,{...i,...r,ref:t})});Sn.displayName=xn;var Cn=`DropdownMenuSubContent`,wn=k.forwardRef((e,t)=>{let{__scopeDropdownMenu:n,...r}=e,i=$(n);return(0,N.jsx)(Ut,{...i,...r,ref:t,style:{...e.style,"--radix-dropdown-menu-content-transform-origin":`var(--radix-popper-transform-origin)`,"--radix-dropdown-menu-content-available-width":`var(--radix-popper-available-width)`,"--radix-dropdown-menu-content-available-height":`var(--radix-popper-available-height)`,"--radix-dropdown-menu-trigger-width":`var(--radix-popper-anchor-width)`,"--radix-dropdown-menu-trigger-height":`var(--radix-popper-anchor-height)`}})});wn.displayName=Cn;var Tn=Jt,En=Xt,Dn=Qt,On=en,kn=nn,An=sn,jn=dn,Mn=pn,Nn=hn,Pn=_n,Fn=bn,In=Sn,Ln=wn,[Rn,zn]=S(`DropdownMenuContext`),[Bn,Vn]=S(`DropdownMenuSubContext`);function Hn(e){let[t,n]=x({value:e?.open,defaultValue:e?.defaultOpen,onChange:e?.onOpenChange});return(0,N.jsx)(Rn,{value:{isOpen:t,setIsOpen:n},children:(0,N.jsx)(Tn,{"data-slot":`dropdown-menu`,...e,onOpenChange:n})})}function Un(e){return(0,N.jsx)(En,{"data-slot":`dropdown-menu-trigger`,...e})}function Wn(e){return(0,N.jsx)(Dn,{"data-slot":`dropdown-menu-portal`,...e})}function Gn(e){return(0,N.jsx)(kn,{"data-slot":`dropdown-menu-group`,...e})}function Kn(e){let[t,n]=x({value:e?.open,defaultValue:e?.defaultOpen,onChange:e?.onOpenChange});return(0,N.jsx)(Bn,{value:{isOpen:t,setIsOpen:n},children:(0,N.jsx)(Fn,{"data-slot":`dropdown-menu-sub`,...e,onOpenChange:n})})}function qn(e){return(0,N.jsx)(jn,{"data-slot":`dropdown-menu-radio-group`,...e})}function Jn({disabled:e,textValue:t,...n}){return(0,N.jsx)(In,{disabled:e,textValue:t,asChild:!0,children:(0,N.jsx)(a.div,{"data-slot":`dropdown-menu-sub-trigger`,"data-disabled":e,...n})})}function Yn({loop:e,onEscapeKeyDown:t,onPointerDownOutside:n,onFocusOutside:r,onInteractOutside:i,sideOffset:o,alignOffset:s,avoidCollisions:c,collisionBoundary:u,collisionPadding:d,arrowPadding:f,sticky:p,hideWhenDetached:m,transition:h={duration:.2},style:g,container:_,...v}){let{isOpen:y}=Vn();return(0,N.jsx)(l,{children:y&&(0,N.jsx)(Wn,{forceMount:!0,container:_,children:(0,N.jsx)(Ln,{asChild:!0,forceMount:!0,loop:e,onEscapeKeyDown:t,onPointerDownOutside:n,onFocusOutside:r,onInteractOutside:i,sideOffset:o,alignOffset:s,avoidCollisions:c,collisionBoundary:u,collisionPadding:d,arrowPadding:f,sticky:p,hideWhenDetached:m,children:(0,N.jsx)(a.div,{"data-slot":`dropdown-menu-sub-content`,initial:{opacity:0,scale:.95},animate:{opacity:1,scale:1},exit:{opacity:0,scale:.95},transition:h,style:{willChange:`opacity, transform`,...g},...v},`dropdown-menu-sub-content`)})})})}function Xn({loop:e,onCloseAutoFocus:t,onEscapeKeyDown:n,onPointerDownOutside:r,onFocusOutside:i,onInteractOutside:o,side:s,sideOffset:c,align:u,alignOffset:d,avoidCollisions:f,collisionBoundary:p,collisionPadding:m,arrowPadding:h,sticky:g,hideWhenDetached:_,transition:v={duration:.2},style:y,container:b,...x}){let{isOpen:S}=zn();return(0,N.jsx)(l,{children:S&&(0,N.jsx)(Wn,{forceMount:!0,container:b,children:(0,N.jsx)(On,{asChild:!0,loop:e,onCloseAutoFocus:t,onEscapeKeyDown:n,onPointerDownOutside:r,onFocusOutside:i,onInteractOutside:o,side:s,sideOffset:c,align:u,alignOffset:d,avoidCollisions:f,collisionBoundary:p,collisionPadding:m,arrowPadding:h,sticky:g,hideWhenDetached:_,children:(0,N.jsx)(a.div,{"data-slot":`dropdown-menu-content`,initial:{opacity:0,scale:.95},animate:{opacity:1,scale:1},exit:{opacity:0,scale:.95},transition:v,style:{willChange:`opacity, transform`,...y},...x},`dropdown-menu-content`)})})})}function Zn({disabled:e,onSelect:t,textValue:n,...r}){return(0,N.jsx)(An,{disabled:e,onSelect:t,textValue:n,asChild:!0,children:(0,N.jsx)(a.div,{"data-slot":`dropdown-menu-item`,"data-disabled":e,...r})})}function Qn({value:e,disabled:t,onSelect:n,textValue:r,...i}){return(0,N.jsx)(Mn,{value:e,disabled:t,onSelect:n,textValue:r,asChild:!0,children:(0,N.jsx)(a.div,{"data-slot":`dropdown-menu-radio-item`,"data-disabled":t,...i})})}function $n(e){return(0,N.jsx)(Pn,{"data-slot":`dropdown-menu-separator`,...e})}function er(e){return(0,N.jsx)(Nn,{"data-slot":`dropdown-menu-item-indicator`,asChild:!0,children:(0,N.jsx)(a.div,{...e})})}function tr(e){return(0,N.jsx)(Hn,{...e})}function nr(e){return(0,N.jsx)(Un,{...e})}function rr({sideOffset:e=4,className:t,children:n,...i}){return(0,N.jsx)(Xn,{sideOffset:e,className:r(`z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-32 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none`,t),...i,children:n})}function ir({...e}){return(0,N.jsx)(Gn,{...e})}function ar({className:e,inset:t,variant:n=`default`,disabled:i,...a}){return(0,N.jsx)(Zn,{disabled:i,"data-inset":t,"data-variant":n,className:r(`relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-inset:ps-8 data-[variant=destructive]:text-destructive data-[disabled=true]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 data-[variant=destructive]:*:[svg]:text-destructive!`,`data-[variant=destructive]:data-highlighted:bg-destructive/10 data-[variant=destructive]:data-highlighted:text-destructive data-highlighted:bg-accent data-highlighted:text-accent-foreground dark:data-[variant=destructive]:data-highlighted:bg-destructive/20`,e),...a})}function or(e){return(0,N.jsx)(qn,{...e})}function sr({className:e,children:t,disabled:n,...i}){return(0,N.jsxs)(Qn,{disabled:n,className:r(`relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 ps-8 pe-2 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0`,`data-highlighted:bg-accent data-highlighted:text-accent-foreground`,e),...i,children:[(0,N.jsx)(`span`,{className:`pointer-events-none absolute start-2 flex size-3.5 items-center justify-center`,children:(0,N.jsx)(er,{layoutId:`dropdown-menu-item-indicator-radio`,children:(0,N.jsx)(M,{className:`size-2 fill-current`})})}),t]})}function cr({className:e,...t}){return(0,N.jsx)($n,{className:r(`-mx-1 my-1 h-px bg-border`,e),...t})}function lr(e){return(0,N.jsx)(Kn,{...e})}function ur({disabled:e,className:t,inset:n,children:i,...a}){return(0,N.jsxs)(Jn,{disabled:e,"data-inset":n,className:r(`flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden data-inset:ps-8 data-[state=open]:text-accent-foreground`,`data-[state=open]:**:data-[slot=chevron]:rotate-90 **:data-[slot=chevron]:transition-transform **:data-[slot=chevron]:duration-300 **:data-[slot=chevron]:ease-in-out`,`data-highlighted:bg-accent data-highlighted:text-accent-foreground`,t),...a,children:[i,(0,N.jsx)(j,{"data-slot":`chevron`,className:`ml-auto size-4`})]})}function dr({className:e,...t}){return(0,N.jsx)(Yn,{className:r(`z-50 min-w-32 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg outline-none`,e),...t})}export{or as a,lr as c,nr as d,j as f,ar as i,dr as l,rr as n,sr as o,ir as r,cr as s,tr as t,ur as u};
+import { t as T, n as w } from "./dist-C-d3ELl8.js";
+import { i as D, a as E, n as ne, t as O, r as re } from "./dist-DKdYDXPR.js";
+import {
+	b as _,
+	m as b,
+	x as C,
+	v as ee,
+	C as f,
+	_ as g,
+	T as h,
+	S as m,
+	D as p,
+	t as S,
+	y as te,
+	g as v,
+	n as x,
+	h as y,
+} from "./get-strict-context-DJn2x5wH.js";
+import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
+import { O as a, b as c, y as d, J as i, j as l, S as o, D as r, T as s, w as u } from "./preload-helper-DwC0sqXt.js";
+import { t as n } from "./react-BZSX5Bs9.js";
+var k = e(n(), 1),
+	A = new Map([
+		[
+			`bold`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M184.49,136.49l-80,80a12,12,0,0,1-17-17L159,128,87.51,56.49a12,12,0,1,1,17-17l80,80A12,12,0,0,1,184.49,136.49Z`,
+				}),
+			),
+		],
+		[
+			`duotone`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, { d: `M176,128,96,208V48Z`, opacity: `0.2` }),
+				k.createElement(`path`, {
+					d: `M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z`,
+				}),
+			),
+		],
+		[
+			`fill`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z`,
+				}),
+			),
+		],
+		[
+			`light`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M180.24,132.24l-80,80a6,6,0,0,1-8.48-8.48L167.51,128,91.76,52.24a6,6,0,0,1,8.48-8.48l80,80A6,6,0,0,1,180.24,132.24Z`,
+				}),
+			),
+		],
+		[
+			`regular`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z`,
+				}),
+			),
+		],
+		[
+			`thin`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M178.83,130.83l-80,80a4,4,0,0,1-5.66-5.66L170.34,128,93.17,50.83a4,4,0,0,1,5.66-5.66l80,80A4,4,0,0,1,178.83,130.83Z`,
+				}),
+			),
+		],
+	]),
+	ie = new Map([
+		[
+			`bold`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Z`,
+				}),
+			),
+		],
+		[
+			`duotone`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, { d: `M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z`, opacity: `0.2` }),
+				k.createElement(`path`, {
+					d: `M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Z`,
+				}),
+			),
+		],
+		[
+			`fill`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, { d: `M232,128A104,104,0,1,1,128,24,104.13,104.13,0,0,1,232,128Z` }),
+			),
+		],
+		[
+			`light`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M128,26A102,102,0,1,0,230,128,102.12,102.12,0,0,0,128,26Zm0,192a90,90,0,1,1,90-90A90.1,90.1,0,0,1,128,218Z`,
+				}),
+			),
+		],
+		[
+			`regular`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Z`,
+				}),
+			),
+		],
+		[
+			`thin`,
+			k.createElement(
+				k.Fragment,
+				null,
+				k.createElement(`path`, {
+					d: `M128,28A100,100,0,1,0,228,128,100.11,100.11,0,0,0,128,28Zm0,192a92,92,0,1,1,92-92A92.1,92.1,0,0,1,128,220Z`,
+				}),
+			),
+		],
+	]),
+	j = k.forwardRef((e, t) => k.createElement(i, { ref: t, ...e, weights: A }));
+j.displayName = `CaretRightIcon`;
+var M = k.forwardRef((e, t) => k.createElement(i, { ref: t, ...e, weights: ie }));
+M.displayName = `CircleIcon`;
+var N = e(t(), 1),
+	P = `rovingFocusGroup.onEntryFocus`,
+	ae = { bubbles: !1, cancelable: !0 },
+	F = `RovingFocusGroup`,
+	[I, L, oe] = w(F),
+	[se, ce] = p(F, [oe]),
+	[le, ue] = se(F),
+	de = k.forwardRef((e, t) =>
+		(0, N.jsx)(I.Provider, {
+			scope: e.__scopeRovingFocusGroup,
+			children: (0, N.jsx)(I.Slot, { scope: e.__scopeRovingFocusGroup, children: (0, N.jsx)(fe, { ...e, ref: t }) }),
+		}),
+	);
+de.displayName = F;
+var fe = k.forwardRef((e, t) => {
+		const {
+				__scopeRovingFocusGroup: n,
+				orientation: r,
+				loop: i = !1,
+				dir: a,
+				currentTabStopId: o,
+				defaultCurrentTabStopId: c,
+				onCurrentTabStopIdChange: l,
+				onEntryFocus: u,
+				preventScrollOnEntryFocus: p = !1,
+				...m
+			} = e,
+			g = k.useRef(null),
+			v = s(t, g),
+			y = T(a),
+			[b, x] = f({ prop: o, defaultProp: c ?? null, onChange: l, caller: F }),
+			[S, ee] = k.useState(!1),
+			C = _(u),
+			te = L(n),
+			w = k.useRef(!1),
+			[E, D] = k.useState(0);
+		return (
+			k.useEffect(() => {
+				const e = g.current;
+				if (e) return e.addEventListener(P, C), () => e.removeEventListener(P, C);
+			}, [C]),
+			(0, N.jsx)(le, {
+				scope: n,
+				orientation: r,
+				dir: y,
+				loop: i,
+				currentTabStopId: b,
+				onItemFocus: k.useCallback((e) => x(e), [x]),
+				onItemShiftTab: k.useCallback(() => ee(!0), []),
+				onFocusableItemAdd: k.useCallback(() => D((e) => e + 1), []),
+				onFocusableItemRemove: k.useCallback(() => D((e) => e - 1), []),
+				children: (0, N.jsx)(d.div, {
+					tabIndex: S || E === 0 ? -1 : 0,
+					"data-orientation": r,
+					...m,
+					ref: v,
+					style: { outline: `none`, ...e.style },
+					onMouseDown: h(e.onMouseDown, () => {
+						w.current = !0;
+					}),
+					onFocus: h(e.onFocus, (e) => {
+						const t = !w.current;
+						if (e.target === e.currentTarget && t && !S) {
+							const t = new CustomEvent(P, ae);
+							if ((e.currentTarget.dispatchEvent(t), !t.defaultPrevented)) {
+								const e = te().filter((e) => e.focusable);
+								ve(
+									[e.find((e) => e.active), e.find((e) => e.id === b), ...e].filter(Boolean).map((e) => e.ref.current),
+									p,
+								);
+							}
+						}
+						w.current = !1;
+					}),
+					onBlur: h(e.onBlur, () => ee(!1)),
+				}),
+			})
+		);
+	}),
+	pe = `RovingFocusGroupItem`,
+	me = k.forwardRef((e, t) => {
+		const { __scopeRovingFocusGroup: n, focusable: r = !0, active: i = !1, tabStopId: a, children: o, ...s } = e,
+			c = C(),
+			l = a || c,
+			u = ue(pe, n),
+			f = u.currentTabStopId === l,
+			p = L(n),
+			{ onFocusableItemAdd: m, onFocusableItemRemove: g, currentTabStopId: _ } = u;
+		return (
+			k.useEffect(() => {
+				if (r) return m(), () => g();
+			}, [r, m, g]),
+			(0, N.jsx)(I.ItemSlot, {
+				scope: n,
+				id: l,
+				focusable: r,
+				active: i,
+				children: (0, N.jsx)(d.span, {
+					tabIndex: f ? 0 : -1,
+					"data-orientation": u.orientation,
+					...s,
+					ref: t,
+					onMouseDown: h(e.onMouseDown, (e) => {
+						r ? u.onItemFocus(l) : e.preventDefault();
+					}),
+					onFocus: h(e.onFocus, () => u.onItemFocus(l)),
+					onKeyDown: h(e.onKeyDown, (e) => {
+						if (e.key === `Tab` && e.shiftKey) {
+							u.onItemShiftTab();
+							return;
+						}
+						if (e.target !== e.currentTarget) return;
+						const t = _e(e, u.orientation, u.dir);
+						if (t !== void 0) {
+							if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+							e.preventDefault();
+							let n = p()
+								.filter((e) => e.focusable)
+								.map((e) => e.ref.current);
+							if (t === `last`) n.reverse();
+							else if (t === `prev` || t === `next`) {
+								t === `prev` && n.reverse();
+								const r = n.indexOf(e.currentTarget);
+								n = u.loop ? ye(n, r + 1) : n.slice(r + 1);
+							}
+							setTimeout(() => ve(n));
+						}
+					}),
+					children: typeof o == `function` ? o({ isCurrentTabStop: f, hasTabStop: _ != null }) : o,
+				}),
+			})
+		);
+	});
+me.displayName = pe;
+var he = {
+	ArrowLeft: `prev`,
+	ArrowUp: `prev`,
+	ArrowRight: `next`,
+	ArrowDown: `next`,
+	PageUp: `first`,
+	Home: `first`,
+	PageDown: `last`,
+	End: `last`,
+};
+function ge(e, t) {
+	return t === `rtl` ? (e === `ArrowLeft` ? `ArrowRight` : e === `ArrowRight` ? `ArrowLeft` : e) : e;
+}
+function _e(e, t, n) {
+	const r = ge(e.key, n);
+	if (
+		!(t === `vertical` && [`ArrowLeft`, `ArrowRight`].includes(r)) &&
+		!(t === `horizontal` && [`ArrowUp`, `ArrowDown`].includes(r))
+	)
+		return he[r];
+}
+function ve(e, t = !1) {
+	const n = document.activeElement;
+	for (const r of e) if (r === n || (r.focus({ preventScroll: t }), document.activeElement !== n)) return;
+}
+function ye(e, t) {
+	return e.map((n, r) => e[(t + r) % e.length]);
+}
+var be = de,
+	xe = me,
+	R = [`Enter`, ` `],
+	Se = [`ArrowDown`, `PageUp`, `Home`],
+	Ce = [`ArrowUp`, `PageDown`, `End`],
+	we = [...Se, ...Ce],
+	Te = { ltr: [...R, `ArrowRight`], rtl: [...R, `ArrowLeft`] },
+	Ee = { ltr: [`ArrowLeft`], rtl: [`ArrowRight`] },
+	z = `Menu`,
+	[B, De, Oe] = w(z),
+	[V, ke] = p(z, [Oe, E, ce]),
+	H = E(),
+	Ae = ce(),
+	[je, U] = V(z),
+	[Me, W] = V(z),
+	Ne = (e) => {
+		const { __scopeMenu: t, open: n = !1, children: r, dir: i, onOpenChange: a, modal: o = !0 } = e,
+			s = H(t),
+			[c, l] = k.useState(null),
+			u = k.useRef(!1),
+			d = _(a),
+			f = T(i);
+		return (
+			k.useEffect(() => {
+				const e = () => {
+						(u.current = !0),
+							document.addEventListener(`pointerdown`, t, { capture: !0, once: !0 }),
+							document.addEventListener(`pointermove`, t, { capture: !0, once: !0 });
+					},
+					t = () => (u.current = !1);
+				return (
+					document.addEventListener(`keydown`, e, { capture: !0 }),
+					() => {
+						document.removeEventListener(`keydown`, e, { capture: !0 }),
+							document.removeEventListener(`pointerdown`, t, { capture: !0 }),
+							document.removeEventListener(`pointermove`, t, { capture: !0 });
+					}
+				);
+			}, []),
+			(0, N.jsx)(D, {
+				...s,
+				children: (0, N.jsx)(je, {
+					scope: t,
+					open: n,
+					onOpenChange: d,
+					content: c,
+					onContentChange: l,
+					children: (0, N.jsx)(Me, {
+						scope: t,
+						onClose: k.useCallback(() => d(!1), [d]),
+						isUsingKeyboardRef: u,
+						dir: f,
+						modal: o,
+						children: r,
+					}),
+				}),
+			})
+		);
+	};
+Ne.displayName = z;
+var Pe = `MenuAnchor`,
+	G = k.forwardRef((e, t) => {
+		const { __scopeMenu: n, ...r } = e,
+			i = H(n);
+		return (0, N.jsx)(O, { ...i, ...r, ref: t });
+	});
+G.displayName = Pe;
+var Fe = `MenuPortal`,
+	[Ie, Le] = V(Fe, { forceMount: void 0 }),
+	Re = (e) => {
+		const { __scopeMenu: t, forceMount: n, children: r, container: i } = e,
+			a = U(Fe, t);
+		return (0, N.jsx)(Ie, {
+			scope: t,
+			forceMount: n,
+			children: (0, N.jsx)(m, {
+				present: n || a.open,
+				children: (0, N.jsx)(g, { asChild: !0, container: i, children: r }),
+			}),
+		});
+	};
+Re.displayName = Fe;
+var K = `MenuContent`,
+	[ze, Be] = V(K),
+	Ve = k.forwardRef((e, t) => {
+		const n = Le(K, e.__scopeMenu),
+			{ forceMount: r = n.forceMount, ...i } = e,
+			a = U(K, e.__scopeMenu),
+			o = W(K, e.__scopeMenu);
+		return (0, N.jsx)(B.Provider, {
+			scope: e.__scopeMenu,
+			children: (0, N.jsx)(m, {
+				present: r || a.open,
+				children: (0, N.jsx)(B.Slot, {
+					scope: e.__scopeMenu,
+					children: o.modal ? (0, N.jsx)(He, { ...i, ref: t }) : (0, N.jsx)(Ue, { ...i, ref: t }),
+				}),
+			}),
+		});
+	}),
+	He = k.forwardRef((e, t) => {
+		const n = U(K, e.__scopeMenu),
+			r = k.useRef(null),
+			i = s(t, r);
+		return (
+			k.useEffect(() => {
+				const e = r.current;
+				if (e) return b(e);
+			}, []),
+			(0, N.jsx)(Ge, {
+				...e,
+				ref: i,
+				trapFocus: n.open,
+				disableOutsidePointerEvents: n.open,
+				disableOutsideScroll: !0,
+				onFocusOutside: h(e.onFocusOutside, (e) => e.preventDefault(), { checkForDefaultPrevented: !1 }),
+				onDismiss: () => n.onOpenChange(!1),
+			})
+		);
+	}),
+	Ue = k.forwardRef((e, t) => {
+		const n = U(K, e.__scopeMenu);
+		return (0, N.jsx)(Ge, {
+			...e,
+			ref: t,
+			trapFocus: !1,
+			disableOutsidePointerEvents: !1,
+			disableOutsideScroll: !1,
+			onDismiss: () => n.onOpenChange(!1),
+		});
+	}),
+	We = o(`MenuContent.ScrollLock`),
+	Ge = k.forwardRef((e, t) => {
+		const {
+				__scopeMenu: n,
+				loop: r = !1,
+				trapFocus: i,
+				onOpenAutoFocus: a,
+				onCloseAutoFocus: o,
+				disableOutsidePointerEvents: c,
+				onEntryFocus: l,
+				onEscapeKeyDown: u,
+				onPointerDownOutside: d,
+				onFocusOutside: f,
+				onInteractOutside: p,
+				onDismiss: m,
+				disableOutsideScroll: g,
+				..._
+			} = e,
+			b = U(K, n),
+			x = W(K, n),
+			S = H(n),
+			C = Ae(n),
+			w = De(n),
+			[T, E] = k.useState(null),
+			D = k.useRef(null),
+			ne = s(t, D, b.onContentChange),
+			O = k.useRef(0),
+			A = k.useRef(``),
+			ie = k.useRef(0),
+			j = k.useRef(null),
+			M = k.useRef(`right`),
+			P = k.useRef(0),
+			ae = g ? y : k.Fragment,
+			F = g ? { as: We, allowPinchZoom: !0 } : void 0,
+			I = (e) => {
+				const t = A.current + e,
+					n = w().filter((e) => !e.disabled),
+					r = document.activeElement,
+					i = n.find((e) => e.ref.current === r)?.textValue,
+					a = Tt(
+						n.map((e) => e.textValue),
+						t,
+						i,
+					),
+					o = n.find((e) => e.textValue === a)?.ref.current;
+				(function e(t) {
+					(A.current = t),
+						window.clearTimeout(O.current),
+						t !== `` && (O.current = window.setTimeout(() => e(``), 1e3));
+				})(t),
+					o && setTimeout(() => o.focus());
+			};
+		k.useEffect(() => () => window.clearTimeout(O.current), []), v();
+		const L = k.useCallback((e) => M.current === j.current?.side && Dt(e, j.current?.area), []);
+		return (0, N.jsx)(ze, {
+			scope: n,
+			searchRef: A,
+			onItemEnter: k.useCallback(
+				(e) => {
+					L(e) && e.preventDefault();
+				},
+				[L],
+			),
+			onItemLeave: k.useCallback(
+				(e) => {
+					L(e) || (D.current?.focus(), E(null));
+				},
+				[L],
+			),
+			onTriggerLeave: k.useCallback(
+				(e) => {
+					L(e) && e.preventDefault();
+				},
+				[L],
+			),
+			pointerGraceTimerRef: ie,
+			onPointerGraceIntentChange: k.useCallback((e) => {
+				j.current = e;
+			}, []),
+			children: (0, N.jsx)(ae, {
+				...F,
+				children: (0, N.jsx)(ee, {
+					asChild: !0,
+					trapped: i,
+					onMountAutoFocus: h(a, (e) => {
+						e.preventDefault(), D.current?.focus({ preventScroll: !0 });
+					}),
+					onUnmountAutoFocus: o,
+					children: (0, N.jsx)(te, {
+						asChild: !0,
+						disableOutsidePointerEvents: c,
+						onEscapeKeyDown: u,
+						onPointerDownOutside: d,
+						onFocusOutside: f,
+						onInteractOutside: p,
+						onDismiss: m,
+						children: (0, N.jsx)(be, {
+							asChild: !0,
+							...C,
+							dir: x.dir,
+							orientation: `vertical`,
+							loop: r,
+							currentTabStopId: T,
+							onCurrentTabStopIdChange: E,
+							onEntryFocus: h(l, (e) => {
+								x.isUsingKeyboardRef.current || e.preventDefault();
+							}),
+							preventScrollOnEntryFocus: !0,
+							children: (0, N.jsx)(re, {
+								role: `menu`,
+								"aria-orientation": `vertical`,
+								"data-state": xt(b.open),
+								"data-radix-menu-content": ``,
+								dir: x.dir,
+								...S,
+								..._,
+								ref: ne,
+								style: { outline: `none`, ..._.style },
+								onKeyDown: h(_.onKeyDown, (e) => {
+									const t = e.target.closest(`[data-radix-menu-content]`) === e.currentTarget,
+										n = e.ctrlKey || e.altKey || e.metaKey,
+										r = e.key.length === 1;
+									t && (e.key === `Tab` && e.preventDefault(), !n && r && I(e.key));
+									const i = D.current;
+									if (e.target !== i || !we.includes(e.key)) return;
+									e.preventDefault();
+									const a = w()
+										.filter((e) => !e.disabled)
+										.map((e) => e.ref.current);
+									Ce.includes(e.key) && a.reverse(), Ct(a);
+								}),
+								onBlur: h(e.onBlur, (e) => {
+									e.currentTarget.contains(e.target) || (window.clearTimeout(O.current), (A.current = ``));
+								}),
+								onPointerMove: h(
+									e.onPointerMove,
+									Z((e) => {
+										const t = e.target,
+											n = P.current !== e.clientX;
+										e.currentTarget.contains(t) &&
+											n &&
+											((M.current = e.clientX > P.current ? `right` : `left`), (P.current = e.clientX));
+									}),
+								),
+							}),
+						}),
+					}),
+				}),
+			}),
+		});
+	});
+Ve.displayName = K;
+var Ke = `MenuGroup`,
+	qe = k.forwardRef((e, t) => {
+		const { __scopeMenu: n, ...r } = e;
+		return (0, N.jsx)(d.div, { role: `group`, ...r, ref: t });
+	});
+qe.displayName = Ke;
+var Je = `MenuLabel`,
+	Ye = k.forwardRef((e, t) => {
+		const { __scopeMenu: n, ...r } = e;
+		return (0, N.jsx)(d.div, { ...r, ref: t });
+	});
+Ye.displayName = Je;
+var q = `MenuItem`,
+	Xe = `menu.itemSelect`,
+	J = k.forwardRef((e, t) => {
+		const { disabled: n = !1, onSelect: r, ...i } = e,
+			a = k.useRef(null),
+			o = W(q, e.__scopeMenu),
+			l = Be(q, e.__scopeMenu),
+			u = s(t, a),
+			d = k.useRef(!1),
+			f = () => {
+				const e = a.current;
+				if (!n && e) {
+					const t = new CustomEvent(Xe, { bubbles: !0, cancelable: !0 });
+					e.addEventListener(Xe, (e) => r?.(e), { once: !0 }),
+						c(e, t),
+						t.defaultPrevented ? (d.current = !1) : o.onClose();
+				}
+			};
+		return (0, N.jsx)(Ze, {
+			...i,
+			ref: u,
+			disabled: n,
+			onClick: h(e.onClick, f),
+			onPointerDown: (t) => {
+				e.onPointerDown?.(t), (d.current = !0);
+			},
+			onPointerUp: h(e.onPointerUp, (e) => {
+				d.current || e.currentTarget?.click();
+			}),
+			onKeyDown: h(e.onKeyDown, (e) => {
+				const t = l.searchRef.current !== ``;
+				n || (t && e.key === ` `) || (R.includes(e.key) && (e.currentTarget.click(), e.preventDefault()));
+			}),
+		});
+	});
+J.displayName = q;
+var Ze = k.forwardRef((e, t) => {
+		const { __scopeMenu: n, disabled: r = !1, textValue: i, ...a } = e,
+			o = Be(q, n),
+			c = Ae(n),
+			l = k.useRef(null),
+			u = s(t, l),
+			[f, p] = k.useState(!1),
+			[m, g] = k.useState(``);
+		return (
+			k.useEffect(() => {
+				const e = l.current;
+				e && g((e.textContent ?? ``).trim());
+			}, [a.children]),
+			(0, N.jsx)(B.ItemSlot, {
+				scope: n,
+				disabled: r,
+				textValue: i ?? m,
+				children: (0, N.jsx)(xe, {
+					asChild: !0,
+					...c,
+					focusable: !r,
+					children: (0, N.jsx)(d.div, {
+						role: `menuitem`,
+						"data-highlighted": f ? `` : void 0,
+						"aria-disabled": r || void 0,
+						"data-disabled": r ? `` : void 0,
+						...a,
+						ref: u,
+						onPointerMove: h(
+							e.onPointerMove,
+							Z((e) => {
+								r
+									? o.onItemLeave(e)
+									: (o.onItemEnter(e), e.defaultPrevented || e.currentTarget.focus({ preventScroll: !0 }));
+							}),
+						),
+						onPointerLeave: h(
+							e.onPointerLeave,
+							Z((e) => o.onItemLeave(e)),
+						),
+						onFocus: h(e.onFocus, () => p(!0)),
+						onBlur: h(e.onBlur, () => p(!1)),
+					}),
+				}),
+			})
+		);
+	}),
+	Qe = `MenuCheckboxItem`,
+	$e = k.forwardRef((e, t) => {
+		const { checked: n = !1, onCheckedChange: r, ...i } = e;
+		return (0, N.jsx)(st, {
+			scope: e.__scopeMenu,
+			checked: n,
+			children: (0, N.jsx)(J, {
+				role: `menuitemcheckbox`,
+				"aria-checked": X(n) ? `mixed` : n,
+				...i,
+				ref: t,
+				"data-state": St(n),
+				onSelect: h(i.onSelect, () => r?.(X(n) ? !0 : !n), { checkForDefaultPrevented: !1 }),
+			}),
+		});
+	});
+$e.displayName = Qe;
+var et = `MenuRadioGroup`,
+	[tt, nt] = V(et, { value: void 0, onValueChange: () => {} }),
+	rt = k.forwardRef((e, t) => {
+		const { value: n, onValueChange: r, ...i } = e,
+			a = _(r);
+		return (0, N.jsx)(tt, {
+			scope: e.__scopeMenu,
+			value: n,
+			onValueChange: a,
+			children: (0, N.jsx)(qe, { ...i, ref: t }),
+		});
+	});
+rt.displayName = et;
+var it = `MenuRadioItem`,
+	at = k.forwardRef((e, t) => {
+		const { value: n, ...r } = e,
+			i = nt(it, e.__scopeMenu),
+			a = n === i.value;
+		return (0, N.jsx)(st, {
+			scope: e.__scopeMenu,
+			checked: a,
+			children: (0, N.jsx)(J, {
+				role: `menuitemradio`,
+				"aria-checked": a,
+				...r,
+				ref: t,
+				"data-state": St(a),
+				onSelect: h(r.onSelect, () => i.onValueChange?.(n), { checkForDefaultPrevented: !1 }),
+			}),
+		});
+	});
+at.displayName = it;
+var ot = `MenuItemIndicator`,
+	[st, ct] = V(ot, { checked: !1 }),
+	lt = k.forwardRef((e, t) => {
+		const { __scopeMenu: n, forceMount: r, ...i } = e,
+			a = ct(ot, n);
+		return (0, N.jsx)(m, {
+			present: r || X(a.checked) || a.checked === !0,
+			children: (0, N.jsx)(d.span, { ...i, ref: t, "data-state": St(a.checked) }),
+		});
+	});
+lt.displayName = ot;
+var ut = `MenuSeparator`,
+	dt = k.forwardRef((e, t) => {
+		const { __scopeMenu: n, ...r } = e;
+		return (0, N.jsx)(d.div, { role: `separator`, "aria-orientation": `horizontal`, ...r, ref: t });
+	});
+dt.displayName = ut;
+var ft = `MenuArrow`,
+	pt = k.forwardRef((e, t) => {
+		const { __scopeMenu: n, ...r } = e,
+			i = H(n);
+		return (0, N.jsx)(ne, { ...i, ...r, ref: t });
+	});
+pt.displayName = ft;
+var mt = `MenuSub`,
+	[ht, gt] = V(mt),
+	_t = (e) => {
+		const { __scopeMenu: t, children: n, open: r = !1, onOpenChange: i } = e,
+			a = U(mt, t),
+			o = H(t),
+			[s, c] = k.useState(null),
+			[l, u] = k.useState(null),
+			d = _(i);
+		return (
+			k.useEffect(() => (a.open === !1 && d(!1), () => d(!1)), [a.open, d]),
+			(0, N.jsx)(D, {
+				...o,
+				children: (0, N.jsx)(je, {
+					scope: t,
+					open: r,
+					onOpenChange: d,
+					content: l,
+					onContentChange: u,
+					children: (0, N.jsx)(ht, {
+						scope: t,
+						contentId: C(),
+						triggerId: C(),
+						trigger: s,
+						onTriggerChange: c,
+						children: n,
+					}),
+				}),
+			})
+		);
+	};
+_t.displayName = mt;
+var Y = `MenuSubTrigger`,
+	vt = k.forwardRef((e, t) => {
+		const n = U(Y, e.__scopeMenu),
+			r = W(Y, e.__scopeMenu),
+			i = gt(Y, e.__scopeMenu),
+			a = Be(Y, e.__scopeMenu),
+			o = k.useRef(null),
+			{ pointerGraceTimerRef: s, onPointerGraceIntentChange: c } = a,
+			l = { __scopeMenu: e.__scopeMenu },
+			d = k.useCallback(() => {
+				o.current && window.clearTimeout(o.current), (o.current = null);
+			}, []);
+		return (
+			k.useEffect(() => d, [d]),
+			k.useEffect(() => {
+				const e = s.current;
+				return () => {
+					window.clearTimeout(e), c(null);
+				};
+			}, [s, c]),
+			(0, N.jsx)(G, {
+				asChild: !0,
+				...l,
+				children: (0, N.jsx)(Ze, {
+					id: i.triggerId,
+					"aria-haspopup": `menu`,
+					"aria-expanded": n.open,
+					"aria-controls": i.contentId,
+					"data-state": xt(n.open),
+					...e,
+					ref: u(t, i.onTriggerChange),
+					onClick: (t) => {
+						e.onClick?.(t),
+							!(e.disabled || t.defaultPrevented) && (t.currentTarget.focus(), n.open || n.onOpenChange(!0));
+					},
+					onPointerMove: h(
+						e.onPointerMove,
+						Z((t) => {
+							a.onItemEnter(t),
+								!t.defaultPrevented &&
+									!e.disabled &&
+									!n.open &&
+									!o.current &&
+									(a.onPointerGraceIntentChange(null),
+									(o.current = window.setTimeout(() => {
+										n.onOpenChange(!0), d();
+									}, 100)));
+						}),
+					),
+					onPointerLeave: h(
+						e.onPointerLeave,
+						Z((e) => {
+							d();
+							const t = n.content?.getBoundingClientRect();
+							if (t) {
+								const r = n.content?.dataset.side,
+									i = r === `right`,
+									o = i ? -5 : 5,
+									c = t[i ? `left` : `right`],
+									l = t[i ? `right` : `left`];
+								a.onPointerGraceIntentChange({
+									area: [
+										{ x: e.clientX + o, y: e.clientY },
+										{ x: c, y: t.top },
+										{ x: l, y: t.top },
+										{ x: l, y: t.bottom },
+										{ x: c, y: t.bottom },
+									],
+									side: r,
+								}),
+									window.clearTimeout(s.current),
+									(s.current = window.setTimeout(() => a.onPointerGraceIntentChange(null), 300));
+							} else {
+								if ((a.onTriggerLeave(e), e.defaultPrevented)) return;
+								a.onPointerGraceIntentChange(null);
+							}
+						}),
+					),
+					onKeyDown: h(e.onKeyDown, (t) => {
+						const i = a.searchRef.current !== ``;
+						e.disabled ||
+							(i && t.key === ` `) ||
+							(Te[r.dir].includes(t.key) && (n.onOpenChange(!0), n.content?.focus(), t.preventDefault()));
+					}),
+				}),
+			})
+		);
+	});
+vt.displayName = Y;
+var yt = `MenuSubContent`,
+	bt = k.forwardRef((e, t) => {
+		const n = Le(K, e.__scopeMenu),
+			{ forceMount: r = n.forceMount, ...i } = e,
+			a = U(K, e.__scopeMenu),
+			o = W(K, e.__scopeMenu),
+			c = gt(yt, e.__scopeMenu),
+			l = k.useRef(null),
+			u = s(t, l);
+		return (0, N.jsx)(B.Provider, {
+			scope: e.__scopeMenu,
+			children: (0, N.jsx)(m, {
+				present: r || a.open,
+				children: (0, N.jsx)(B.Slot, {
+					scope: e.__scopeMenu,
+					children: (0, N.jsx)(Ge, {
+						id: c.contentId,
+						"aria-labelledby": c.triggerId,
+						...i,
+						ref: u,
+						align: `start`,
+						side: o.dir === `rtl` ? `left` : `right`,
+						disableOutsidePointerEvents: !1,
+						disableOutsideScroll: !1,
+						trapFocus: !1,
+						onOpenAutoFocus: (e) => {
+							o.isUsingKeyboardRef.current && l.current?.focus(), e.preventDefault();
+						},
+						onCloseAutoFocus: (e) => e.preventDefault(),
+						onFocusOutside: h(e.onFocusOutside, (e) => {
+							e.target !== c.trigger && a.onOpenChange(!1);
+						}),
+						onEscapeKeyDown: h(e.onEscapeKeyDown, (e) => {
+							o.onClose(), e.preventDefault();
+						}),
+						onKeyDown: h(e.onKeyDown, (e) => {
+							const t = e.currentTarget.contains(e.target),
+								n = Ee[o.dir].includes(e.key);
+							t && n && (a.onOpenChange(!1), c.trigger?.focus(), e.preventDefault());
+						}),
+					}),
+				}),
+			}),
+		});
+	});
+bt.displayName = yt;
+function xt(e) {
+	return e ? `open` : `closed`;
+}
+function X(e) {
+	return e === `indeterminate`;
+}
+function St(e) {
+	return X(e) ? `indeterminate` : e ? `checked` : `unchecked`;
+}
+function Ct(e) {
+	const t = document.activeElement;
+	for (const n of e) if (n === t || (n.focus(), document.activeElement !== t)) return;
+}
+function wt(e, t) {
+	return e.map((n, r) => e[(t + r) % e.length]);
+}
+function Tt(e, t, n) {
+	let r = t.length > 1 && Array.from(t).every((e) => e === t[0]) ? t[0] : t,
+		i = n ? e.indexOf(n) : -1,
+		a = wt(e, Math.max(i, 0));
+	r.length === 1 && (a = a.filter((e) => e !== n));
+	const o = a.find((e) => e.toLowerCase().startsWith(r.toLowerCase()));
+	return o === n ? void 0 : o;
+}
+function Et(e, t) {
+	let { x: n, y: r } = e,
+		i = !1;
+	for (let e = 0, a = t.length - 1; e < t.length; a = e++) {
+		const o = t[e],
+			s = t[a],
+			c = o.x,
+			l = o.y,
+			u = s.x,
+			d = s.y;
+		l > r != d > r && n < ((u - c) * (r - l)) / (d - l) + c && (i = !i);
+	}
+	return i;
+}
+function Dt(e, t) {
+	return t ? Et({ x: e.clientX, y: e.clientY }, t) : !1;
+}
+function Z(e) {
+	return (t) => (t.pointerType === `mouse` ? e(t) : void 0);
+}
+var Ot = Ne,
+	kt = G,
+	At = Re,
+	jt = Ve,
+	Mt = qe,
+	Nt = Ye,
+	Pt = J,
+	Ft = $e,
+	It = rt,
+	Lt = at,
+	Rt = lt,
+	zt = dt,
+	Bt = pt,
+	Vt = _t,
+	Ht = vt,
+	Ut = bt,
+	Q = `DropdownMenu`,
+	[Wt, Gt] = p(Q, [ke]),
+	$ = ke(),
+	[Kt, qt] = Wt(Q),
+	Jt = (e) => {
+		const { __scopeDropdownMenu: t, children: n, dir: r, open: i, defaultOpen: a, onOpenChange: o, modal: s = !0 } = e,
+			c = $(t),
+			l = k.useRef(null),
+			[u, d] = f({ prop: i, defaultProp: a ?? !1, onChange: o, caller: Q });
+		return (0, N.jsx)(Kt, {
+			scope: t,
+			triggerId: C(),
+			triggerRef: l,
+			contentId: C(),
+			open: u,
+			onOpenChange: d,
+			onOpenToggle: k.useCallback(() => d((e) => !e), [d]),
+			modal: s,
+			children: (0, N.jsx)(Ot, { ...c, open: u, onOpenChange: d, dir: r, modal: s, children: n }),
+		});
+	};
+Jt.displayName = Q;
+var Yt = `DropdownMenuTrigger`,
+	Xt = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, disabled: r = !1, ...i } = e,
+			a = qt(Yt, n),
+			o = $(n);
+		return (0, N.jsx)(kt, {
+			asChild: !0,
+			...o,
+			children: (0, N.jsx)(d.button, {
+				type: `button`,
+				id: a.triggerId,
+				"aria-haspopup": `menu`,
+				"aria-expanded": a.open,
+				"aria-controls": a.open ? a.contentId : void 0,
+				"data-state": a.open ? `open` : `closed`,
+				"data-disabled": r ? `` : void 0,
+				disabled: r,
+				...i,
+				ref: u(t, a.triggerRef),
+				onPointerDown: h(e.onPointerDown, (e) => {
+					!r && e.button === 0 && e.ctrlKey === !1 && (a.onOpenToggle(), a.open || e.preventDefault());
+				}),
+				onKeyDown: h(e.onKeyDown, (e) => {
+					r ||
+						([`Enter`, ` `].includes(e.key) && a.onOpenToggle(),
+						e.key === `ArrowDown` && a.onOpenChange(!0),
+						[`Enter`, ` `, `ArrowDown`].includes(e.key) && e.preventDefault());
+				}),
+			}),
+		});
+	});
+Xt.displayName = Yt;
+var Zt = `DropdownMenuPortal`,
+	Qt = (e) => {
+		const { __scopeDropdownMenu: t, ...n } = e,
+			r = $(t);
+		return (0, N.jsx)(At, { ...r, ...n });
+	};
+Qt.displayName = Zt;
+var $t = `DropdownMenuContent`,
+	en = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = qt($t, n),
+			a = $(n),
+			o = k.useRef(!1);
+		return (0, N.jsx)(jt, {
+			id: i.contentId,
+			"aria-labelledby": i.triggerId,
+			...a,
+			...r,
+			ref: t,
+			onCloseAutoFocus: h(e.onCloseAutoFocus, (e) => {
+				o.current || i.triggerRef.current?.focus(), (o.current = !1), e.preventDefault();
+			}),
+			onInteractOutside: h(e.onInteractOutside, (e) => {
+				const t = e.detail.originalEvent,
+					n = t.button === 0 && t.ctrlKey === !0,
+					r = t.button === 2 || n;
+				(!i.modal || r) && (o.current = !0);
+			}),
+			style: {
+				...e.style,
+				"--radix-dropdown-menu-content-transform-origin": `var(--radix-popper-transform-origin)`,
+				"--radix-dropdown-menu-content-available-width": `var(--radix-popper-available-width)`,
+				"--radix-dropdown-menu-content-available-height": `var(--radix-popper-available-height)`,
+				"--radix-dropdown-menu-trigger-width": `var(--radix-popper-anchor-width)`,
+				"--radix-dropdown-menu-trigger-height": `var(--radix-popper-anchor-height)`,
+			},
+		});
+	});
+en.displayName = $t;
+var tn = `DropdownMenuGroup`,
+	nn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Mt, { ...i, ...r, ref: t });
+	});
+nn.displayName = tn;
+var rn = `DropdownMenuLabel`,
+	an = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Nt, { ...i, ...r, ref: t });
+	});
+an.displayName = rn;
+var on = `DropdownMenuItem`,
+	sn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Pt, { ...i, ...r, ref: t });
+	});
+sn.displayName = on;
+var cn = `DropdownMenuCheckboxItem`,
+	ln = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Ft, { ...i, ...r, ref: t });
+	});
+ln.displayName = cn;
+var un = `DropdownMenuRadioGroup`,
+	dn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(It, { ...i, ...r, ref: t });
+	});
+dn.displayName = un;
+var fn = `DropdownMenuRadioItem`,
+	pn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Lt, { ...i, ...r, ref: t });
+	});
+pn.displayName = fn;
+var mn = `DropdownMenuItemIndicator`,
+	hn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Rt, { ...i, ...r, ref: t });
+	});
+hn.displayName = mn;
+var gn = `DropdownMenuSeparator`,
+	_n = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(zt, { ...i, ...r, ref: t });
+	});
+_n.displayName = gn;
+var vn = `DropdownMenuArrow`,
+	yn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Bt, { ...i, ...r, ref: t });
+	});
+yn.displayName = vn;
+var bn = (e) => {
+		const { __scopeDropdownMenu: t, children: n, open: r, onOpenChange: i, defaultOpen: a } = e,
+			o = $(t),
+			[s, c] = f({ prop: r, defaultProp: a ?? !1, onChange: i, caller: `DropdownMenuSub` });
+		return (0, N.jsx)(Vt, { ...o, open: s, onOpenChange: c, children: n });
+	},
+	xn = `DropdownMenuSubTrigger`,
+	Sn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Ht, { ...i, ...r, ref: t });
+	});
+Sn.displayName = xn;
+var Cn = `DropdownMenuSubContent`,
+	wn = k.forwardRef((e, t) => {
+		const { __scopeDropdownMenu: n, ...r } = e,
+			i = $(n);
+		return (0, N.jsx)(Ut, {
+			...i,
+			...r,
+			ref: t,
+			style: {
+				...e.style,
+				"--radix-dropdown-menu-content-transform-origin": `var(--radix-popper-transform-origin)`,
+				"--radix-dropdown-menu-content-available-width": `var(--radix-popper-available-width)`,
+				"--radix-dropdown-menu-content-available-height": `var(--radix-popper-available-height)`,
+				"--radix-dropdown-menu-trigger-width": `var(--radix-popper-anchor-width)`,
+				"--radix-dropdown-menu-trigger-height": `var(--radix-popper-anchor-height)`,
+			},
+		});
+	});
+wn.displayName = Cn;
+var Tn = Jt,
+	En = Xt,
+	Dn = Qt,
+	On = en,
+	kn = nn,
+	An = sn,
+	jn = dn,
+	Mn = pn,
+	Nn = hn,
+	Pn = _n,
+	Fn = bn,
+	In = Sn,
+	Ln = wn,
+	[Rn, zn] = S(`DropdownMenuContext`),
+	[Bn, Vn] = S(`DropdownMenuSubContext`);
+function Hn(e) {
+	const [t, n] = x({ value: e?.open, defaultValue: e?.defaultOpen, onChange: e?.onOpenChange });
+	return (0, N.jsx)(Rn, {
+		value: { isOpen: t, setIsOpen: n },
+		children: (0, N.jsx)(Tn, { "data-slot": `dropdown-menu`, ...e, onOpenChange: n }),
+	});
+}
+function Un(e) {
+	return (0, N.jsx)(En, { "data-slot": `dropdown-menu-trigger`, ...e });
+}
+function Wn(e) {
+	return (0, N.jsx)(Dn, { "data-slot": `dropdown-menu-portal`, ...e });
+}
+function Gn(e) {
+	return (0, N.jsx)(kn, { "data-slot": `dropdown-menu-group`, ...e });
+}
+function Kn(e) {
+	const [t, n] = x({ value: e?.open, defaultValue: e?.defaultOpen, onChange: e?.onOpenChange });
+	return (0, N.jsx)(Bn, {
+		value: { isOpen: t, setIsOpen: n },
+		children: (0, N.jsx)(Fn, { "data-slot": `dropdown-menu-sub`, ...e, onOpenChange: n }),
+	});
+}
+function qn(e) {
+	return (0, N.jsx)(jn, { "data-slot": `dropdown-menu-radio-group`, ...e });
+}
+function Jn({ disabled: e, textValue: t, ...n }) {
+	return (0, N.jsx)(In, {
+		disabled: e,
+		textValue: t,
+		asChild: !0,
+		children: (0, N.jsx)(a.div, { "data-slot": `dropdown-menu-sub-trigger`, "data-disabled": e, ...n }),
+	});
+}
+function Yn({
+	loop: e,
+	onEscapeKeyDown: t,
+	onPointerDownOutside: n,
+	onFocusOutside: r,
+	onInteractOutside: i,
+	sideOffset: o,
+	alignOffset: s,
+	avoidCollisions: c,
+	collisionBoundary: u,
+	collisionPadding: d,
+	arrowPadding: f,
+	sticky: p,
+	hideWhenDetached: m,
+	transition: h = { duration: 0.2 },
+	style: g,
+	container: _,
+	...v
+}) {
+	const { isOpen: y } = Vn();
+	return (0, N.jsx)(l, {
+		children:
+			y &&
+			(0, N.jsx)(Wn, {
+				forceMount: !0,
+				container: _,
+				children: (0, N.jsx)(Ln, {
+					asChild: !0,
+					forceMount: !0,
+					loop: e,
+					onEscapeKeyDown: t,
+					onPointerDownOutside: n,
+					onFocusOutside: r,
+					onInteractOutside: i,
+					sideOffset: o,
+					alignOffset: s,
+					avoidCollisions: c,
+					collisionBoundary: u,
+					collisionPadding: d,
+					arrowPadding: f,
+					sticky: p,
+					hideWhenDetached: m,
+					children: (0, N.jsx)(
+						a.div,
+						{
+							"data-slot": `dropdown-menu-sub-content`,
+							initial: { opacity: 0, scale: 0.95 },
+							animate: { opacity: 1, scale: 1 },
+							exit: { opacity: 0, scale: 0.95 },
+							transition: h,
+							style: { willChange: `opacity, transform`, ...g },
+							...v,
+						},
+						`dropdown-menu-sub-content`,
+					),
+				}),
+			}),
+	});
+}
+function Xn({
+	loop: e,
+	onCloseAutoFocus: t,
+	onEscapeKeyDown: n,
+	onPointerDownOutside: r,
+	onFocusOutside: i,
+	onInteractOutside: o,
+	side: s,
+	sideOffset: c,
+	align: u,
+	alignOffset: d,
+	avoidCollisions: f,
+	collisionBoundary: p,
+	collisionPadding: m,
+	arrowPadding: h,
+	sticky: g,
+	hideWhenDetached: _,
+	transition: v = { duration: 0.2 },
+	style: y,
+	container: b,
+	...x
+}) {
+	const { isOpen: S } = zn();
+	return (0, N.jsx)(l, {
+		children:
+			S &&
+			(0, N.jsx)(Wn, {
+				forceMount: !0,
+				container: b,
+				children: (0, N.jsx)(On, {
+					asChild: !0,
+					loop: e,
+					onCloseAutoFocus: t,
+					onEscapeKeyDown: n,
+					onPointerDownOutside: r,
+					onFocusOutside: i,
+					onInteractOutside: o,
+					side: s,
+					sideOffset: c,
+					align: u,
+					alignOffset: d,
+					avoidCollisions: f,
+					collisionBoundary: p,
+					collisionPadding: m,
+					arrowPadding: h,
+					sticky: g,
+					hideWhenDetached: _,
+					children: (0, N.jsx)(
+						a.div,
+						{
+							"data-slot": `dropdown-menu-content`,
+							initial: { opacity: 0, scale: 0.95 },
+							animate: { opacity: 1, scale: 1 },
+							exit: { opacity: 0, scale: 0.95 },
+							transition: v,
+							style: { willChange: `opacity, transform`, ...y },
+							...x,
+						},
+						`dropdown-menu-content`,
+					),
+				}),
+			}),
+	});
+}
+function Zn({ disabled: e, onSelect: t, textValue: n, ...r }) {
+	return (0, N.jsx)(An, {
+		disabled: e,
+		onSelect: t,
+		textValue: n,
+		asChild: !0,
+		children: (0, N.jsx)(a.div, { "data-slot": `dropdown-menu-item`, "data-disabled": e, ...r }),
+	});
+}
+function Qn({ value: e, disabled: t, onSelect: n, textValue: r, ...i }) {
+	return (0, N.jsx)(Mn, {
+		value: e,
+		disabled: t,
+		onSelect: n,
+		textValue: r,
+		asChild: !0,
+		children: (0, N.jsx)(a.div, { "data-slot": `dropdown-menu-radio-item`, "data-disabled": t, ...i }),
+	});
+}
+function $n(e) {
+	return (0, N.jsx)(Pn, { "data-slot": `dropdown-menu-separator`, ...e });
+}
+function er(e) {
+	return (0, N.jsx)(Nn, {
+		"data-slot": `dropdown-menu-item-indicator`,
+		asChild: !0,
+		children: (0, N.jsx)(a.div, { ...e }),
+	});
+}
+function tr(e) {
+	return (0, N.jsx)(Hn, { ...e });
+}
+function nr(e) {
+	return (0, N.jsx)(Un, { ...e });
+}
+function rr({ sideOffset: e = 4, className: t, children: n, ...i }) {
+	return (0, N.jsx)(Xn, {
+		sideOffset: e,
+		className: r(
+			`z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-32 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none`,
+			t,
+		),
+		...i,
+		children: n,
+	});
+}
+function ir({ ...e }) {
+	return (0, N.jsx)(Gn, { ...e });
+}
+function ar({ className: e, inset: t, variant: n = `default`, disabled: i, ...a }) {
+	return (0, N.jsx)(Zn, {
+		disabled: i,
+		"data-inset": t,
+		"data-variant": n,
+		className: r(
+			`relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-inset:ps-8 data-[variant=destructive]:text-destructive data-[disabled=true]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 data-[variant=destructive]:*:[svg]:text-destructive!`,
+			`data-[variant=destructive]:data-highlighted:bg-destructive/10 data-[variant=destructive]:data-highlighted:text-destructive data-highlighted:bg-accent data-highlighted:text-accent-foreground dark:data-[variant=destructive]:data-highlighted:bg-destructive/20`,
+			e,
+		),
+		...a,
+	});
+}
+function or(e) {
+	return (0, N.jsx)(qn, { ...e });
+}
+function sr({ className: e, children: t, disabled: n, ...i }) {
+	return (0, N.jsxs)(Qn, {
+		disabled: n,
+		className: r(
+			`relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 ps-8 pe-2 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0`,
+			`data-highlighted:bg-accent data-highlighted:text-accent-foreground`,
+			e,
+		),
+		...i,
+		children: [
+			(0, N.jsx)(`span`, {
+				className: `pointer-events-none absolute start-2 flex size-3.5 items-center justify-center`,
+				children: (0, N.jsx)(er, {
+					layoutId: `dropdown-menu-item-indicator-radio`,
+					children: (0, N.jsx)(M, { className: `size-2 fill-current` }),
+				}),
+			}),
+			t,
+		],
+	});
+}
+function cr({ className: e, ...t }) {
+	return (0, N.jsx)($n, { className: r(`-mx-1 my-1 h-px bg-border`, e), ...t });
+}
+function lr(e) {
+	return (0, N.jsx)(Kn, { ...e });
+}
+function ur({ disabled: e, className: t, inset: n, children: i, ...a }) {
+	return (0, N.jsxs)(Jn, {
+		disabled: e,
+		"data-inset": n,
+		className: r(
+			`flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden data-inset:ps-8 data-[state=open]:text-accent-foreground`,
+			`data-[state=open]:**:data-[slot=chevron]:rotate-90 **:data-[slot=chevron]:transition-transform **:data-[slot=chevron]:duration-300 **:data-[slot=chevron]:ease-in-out`,
+			`data-highlighted:bg-accent data-highlighted:text-accent-foreground`,
+			t,
+		),
+		...a,
+		children: [i, (0, N.jsx)(j, { "data-slot": `chevron`, className: `ml-auto size-4` })],
+	});
+}
+function dr({ className: e, ...t }) {
+	return (0, N.jsx)(Yn, {
+		className: r(
+			`z-50 min-w-32 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg outline-none`,
+			e,
+		),
+		...t,
+	});
+}
+export { or as a, lr as c, nr as d, j as f, ar as i, dr as l, rr as n, sr as o, ir as r, cr as s, tr as t, ur as u };

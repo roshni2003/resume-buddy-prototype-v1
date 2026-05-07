@@ -135,7 +135,7 @@ export function UpdateEducationDialog({ data }: DialogProps<"resume.sections.edu
 	};
 
 	const { blockEvents, requestClose } = useFormBlocker(form);
-console.log("Form errors:", form.formState.errors);
+	console.log("Form errors:", form.formState.errors);
 	return (
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
@@ -155,7 +155,11 @@ console.log("Form errors:", form.formState.errors);
 							<Trans>Cancel</Trans>
 						</Button>
 
-						<Button type="submit" disabled={form.formState.isSubmitting} onClick={() => console.log("Save Changes button clicked")}>
+						<Button
+							type="submit"
+							disabled={form.formState.isSubmitting}
+							onClick={() => console.log("Save Changes button clicked")}
+						>
 							<Trans>Save Changes</Trans>
 						</Button>
 					</DialogFooter>

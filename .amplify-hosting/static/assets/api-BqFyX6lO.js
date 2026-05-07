@@ -1,1 +1,2 @@
-import{t as e}from"./api-BDc_pfcq.js";export{e as api};
+import { t as e } from "./api-BDc_pfcq.js";
+export { e as api };

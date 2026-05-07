@@ -9,9 +9,7 @@ export type PaginatedLayout = {
 	isOverflowing: boolean;
 };
 
-export const useResumePagination = (
-	measurements: Record<string, number>,
-): PaginatedLayout => {
+export const useResumePagination = (measurements: Record<string, number>): PaginatedLayout => {
 	const metadata = useResumeStore((state) => state.resume.data.metadata);
 	const sections = useResumeStore((state) => state.resume.data.sections);
 	const customSections = useResumeStore((state) => state.resume.data.customSections);
@@ -53,10 +51,10 @@ export const useResumePagination = (
 		// Helper to get items for a section
 		const getSectionItems = (sectionId: string) => {
 			if (sectionId === "summary") {
-				return [summary]; 
+				return [summary];
 			}
 			if (sectionId in sections) {
-				// @ts-ignore
+				// @ts-expect-error
 				return sections[sectionId].items.filter((i: any) => !i.hidden);
 			}
 			const custom = customSections.find((s) => s.id === sectionId);
@@ -65,7 +63,6 @@ export const useResumePagination = (
 			}
 			return [];
 		};
-
 
 		const fillColumn = (
 			columnSections: string[],
@@ -158,16 +155,16 @@ export const useResumePagination = (
 						if (!pages[currentPageIndex][columnName].includes(sectionId)) {
 							pages[currentPageIndex][columnName].push(sectionId);
 						}
-						
+
 						const currentDist = itemDistribution[sectionId][currentPageIndex] || [];
 						itemDistribution[sectionId][currentPageIndex] = [...currentDist, itemId];
 						currentHeight += itemHeight + gapY;
 					}
 				}
-				
+
 				// Add section gap after section is done (only on the page it ended)
 				if (currentPageIndex < MAX_PAGES) {
-					 currentHeight += gapY;
+					currentHeight += gapY;
 				}
 			}
 		};
@@ -175,15 +172,15 @@ export const useResumePagination = (
 		// Extract sections intended for Main and Sidebar
 		// We use the first page of metadata as the "template" for which sections go where,
 		// but we flatten all pages to get the full list of sections.
-		// Actually, simpler: just take all unique sections from metadata and put them in 
+		// Actually, simpler: just take all unique sections from metadata and put them in
 		// the column they first appear in.
-		
+
 		const mainSections = new Set<string>();
 		const sidebarSections = new Set<string>();
-		
-		metadata.layout.pages.forEach(p => {
-			p.main.forEach(s => mainSections.add(s));
-			p.sidebar.forEach(s => sidebarSections.add(s));
+
+		metadata.layout.pages.forEach((p) => {
+			p.main.forEach((s) => mainSections.add(s));
+			p.sidebar.forEach((s) => sidebarSections.add(s));
 		});
 
 		// Pass headerHeight to the first page (index 0)

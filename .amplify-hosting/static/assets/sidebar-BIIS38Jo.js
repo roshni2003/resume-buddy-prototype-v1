@@ -1,1 +1,466 @@
-import{o as e,t}from"./jsx-runtime-D7jARjhZ.js";import{t as n}from"./react-BZSX5Bs9.js";import{C as r,D as i,T as a,y as o}from"./preload-helper-DwC0sqXt.js";import{l as s}from"./resume-Cd2sSNAf.js";import{C as c,D as l,S as u,T as d,_ as f,x as p,y as m}from"./get-strict-context-DJn2x5wH.js";import{l as h}from"./alert-dialog-B7DDo-NI.js";import{a as g,i as _,n as v,r as y,t as b}from"./dist-DKdYDXPR.js";import{t as x}from"./use-mobile-D_kEz352.js";import{i as S}from"./dist-Dj3RpNtB.js";var C=e(n(),1),w=e(t(),1),[T,E]=l(`Tooltip`,[g]),D=g(),O=`TooltipProvider`,ee=700,k=`tooltip.open`,[te,A]=T(O),j=e=>{let{__scopeTooltip:t,delayDuration:n=ee,skipDelayDuration:r=300,disableHoverableContent:i=!1,children:a}=e,o=C.useRef(!0),s=C.useRef(!1),c=C.useRef(0);return C.useEffect(()=>{let e=c.current;return()=>window.clearTimeout(e)},[]),(0,w.jsx)(te,{scope:t,isOpenDelayedRef:o,delayDuration:n,onOpen:C.useCallback(()=>{window.clearTimeout(c.current),o.current=!1},[]),onClose:C.useCallback(()=>{window.clearTimeout(c.current),c.current=window.setTimeout(()=>o.current=!0,r)},[r]),isPointerInTransitRef:s,onPointerInTransitChange:C.useCallback(e=>{s.current=e},[]),disableHoverableContent:i,children:a})};j.displayName=O;var M=`Tooltip`,[N,P]=T(M),F=e=>{let{__scopeTooltip:t,children:n,open:r,defaultOpen:i,onOpenChange:a,disableHoverableContent:o,delayDuration:s}=e,l=A(M,e.__scopeTooltip),u=D(t),[d,f]=C.useState(null),m=p(),h=C.useRef(0),g=o??l.disableHoverableContent,v=s??l.delayDuration,y=C.useRef(!1),[b,x]=c({prop:r,defaultProp:i??!1,onChange:e=>{e?(l.onOpen(),document.dispatchEvent(new CustomEvent(k))):l.onClose(),a?.(e)},caller:M}),S=C.useMemo(()=>b?y.current?`delayed-open`:`instant-open`:`closed`,[b]),T=C.useCallback(()=>{window.clearTimeout(h.current),h.current=0,y.current=!1,x(!0)},[x]),E=C.useCallback(()=>{window.clearTimeout(h.current),h.current=0,x(!1)},[x]),O=C.useCallback(()=>{window.clearTimeout(h.current),h.current=window.setTimeout(()=>{y.current=!0,x(!0),h.current=0},v)},[v,x]);return C.useEffect(()=>()=>{h.current&&=(window.clearTimeout(h.current),0)},[]),(0,w.jsx)(_,{...u,children:(0,w.jsx)(N,{scope:t,contentId:m,open:b,stateAttribute:S,trigger:d,onTriggerChange:f,onTriggerEnter:C.useCallback(()=>{l.isOpenDelayedRef.current?O():T()},[l.isOpenDelayedRef,O,T]),onTriggerLeave:C.useCallback(()=>{g?E():(window.clearTimeout(h.current),h.current=0)},[E,g]),onOpen:T,onClose:E,disableHoverableContent:g,children:n})})};F.displayName=M;var I=`TooltipTrigger`,L=C.forwardRef((e,t)=>{let{__scopeTooltip:n,...r}=e,i=P(I,n),s=A(I,n),c=D(n),l=a(t,C.useRef(null),i.onTriggerChange),u=C.useRef(!1),f=C.useRef(!1),p=C.useCallback(()=>u.current=!1,[]);return C.useEffect(()=>()=>document.removeEventListener(`pointerup`,p),[p]),(0,w.jsx)(b,{asChild:!0,...c,children:(0,w.jsx)(o.button,{"aria-describedby":i.open?i.contentId:void 0,"data-state":i.stateAttribute,...r,ref:l,onPointerMove:d(e.onPointerMove,e=>{e.pointerType!==`touch`&&!f.current&&!s.isPointerInTransitRef.current&&(i.onTriggerEnter(),f.current=!0)}),onPointerLeave:d(e.onPointerLeave,()=>{i.onTriggerLeave(),f.current=!1}),onPointerDown:d(e.onPointerDown,()=>{i.open&&i.onClose(),u.current=!0,document.addEventListener(`pointerup`,p,{once:!0})}),onFocus:d(e.onFocus,()=>{u.current||i.onOpen()}),onBlur:d(e.onBlur,i.onClose),onClick:d(e.onClick,i.onClose)})})});L.displayName=I;var R=`TooltipPortal`,[z,B]=T(R,{forceMount:void 0}),V=e=>{let{__scopeTooltip:t,forceMount:n,children:r,container:i}=e,a=P(R,t);return(0,w.jsx)(z,{scope:t,forceMount:n,children:(0,w.jsx)(u,{present:n||a.open,children:(0,w.jsx)(f,{asChild:!0,container:i,children:r})})})};V.displayName=R;var H=`TooltipContent`,U=C.forwardRef((e,t)=>{let n=B(H,e.__scopeTooltip),{forceMount:r=n.forceMount,side:i=`top`,...a}=e,o=P(H,e.__scopeTooltip);return(0,w.jsx)(u,{present:r||o.open,children:o.disableHoverableContent?(0,w.jsx)(J,{side:i,...a,ref:t}):(0,w.jsx)(W,{side:i,...a,ref:t})})}),W=C.forwardRef((e,t)=>{let n=P(H,e.__scopeTooltip),r=A(H,e.__scopeTooltip),i=C.useRef(null),o=a(t,i),[s,c]=C.useState(null),{trigger:l,onClose:u}=n,d=i.current,{onPointerInTransitChange:f}=r,p=C.useCallback(()=>{c(null),f(!1)},[f]),m=C.useCallback((e,t)=>{let n=e.currentTarget,r={x:e.clientX,y:e.clientY},i=ne(r,Z(r,n.getBoundingClientRect())),a=re(t.getBoundingClientRect());c(ae([...i,...a])),f(!0)},[f]);return C.useEffect(()=>()=>p(),[p]),C.useEffect(()=>{if(l&&d){let e=e=>m(e,d),t=e=>m(e,l);return l.addEventListener(`pointerleave`,e),d.addEventListener(`pointerleave`,t),()=>{l.removeEventListener(`pointerleave`,e),d.removeEventListener(`pointerleave`,t)}}},[l,d,m,p]),C.useEffect(()=>{if(s){let e=e=>{let t=e.target,n={x:e.clientX,y:e.clientY},r=l?.contains(t)||d?.contains(t),i=!ie(n,s);r?p():i&&(p(),u())};return document.addEventListener(`pointermove`,e),()=>document.removeEventListener(`pointermove`,e)}},[l,d,s,u,p]),(0,w.jsx)(J,{...e,ref:o})}),[G,K]=T(M,{isInside:!1}),q=r(`TooltipContent`),J=C.forwardRef((e,t)=>{let{__scopeTooltip:n,children:r,"aria-label":i,onEscapeKeyDown:a,onPointerDownOutside:o,...c}=e,l=P(H,n),u=D(n),{onClose:d}=l;return C.useEffect(()=>(document.addEventListener(k,d),()=>document.removeEventListener(k,d)),[d]),C.useEffect(()=>{if(l.trigger){let e=e=>{e.target?.contains(l.trigger)&&d()};return window.addEventListener(`scroll`,e,{capture:!0}),()=>window.removeEventListener(`scroll`,e,{capture:!0})}},[l.trigger,d]),(0,w.jsx)(m,{asChild:!0,disableOutsidePointerEvents:!1,onEscapeKeyDown:a,onPointerDownOutside:o,onFocusOutside:e=>e.preventDefault(),onDismiss:d,children:(0,w.jsxs)(y,{"data-state":l.stateAttribute,...u,...c,ref:t,style:{...c.style,"--radix-tooltip-content-transform-origin":`var(--radix-popper-transform-origin)`,"--radix-tooltip-content-available-width":`var(--radix-popper-available-width)`,"--radix-tooltip-content-available-height":`var(--radix-popper-available-height)`,"--radix-tooltip-trigger-width":`var(--radix-popper-anchor-width)`,"--radix-tooltip-trigger-height":`var(--radix-popper-anchor-height)`},children:[(0,w.jsx)(q,{children:r}),(0,w.jsx)(G,{scope:n,isInside:!0,children:(0,w.jsx)(s,{id:l.contentId,role:`tooltip`,children:i||r})})]})})});U.displayName=H;var Y=`TooltipArrow`,X=C.forwardRef((e,t)=>{let{__scopeTooltip:n,...r}=e,i=D(n);return K(Y,n).isInside?null:(0,w.jsx)(v,{...i,...r,ref:t})});X.displayName=Y;function Z(e,t){let n=Math.abs(t.top-e.y),r=Math.abs(t.bottom-e.y),i=Math.abs(t.right-e.x),a=Math.abs(t.left-e.x);switch(Math.min(n,r,i,a)){case a:return`left`;case i:return`right`;case n:return`top`;case r:return`bottom`;default:throw Error(`unreachable`)}}function ne(e,t,n=5){let r=[];switch(t){case`top`:r.push({x:e.x-n,y:e.y+n},{x:e.x+n,y:e.y+n});break;case`bottom`:r.push({x:e.x-n,y:e.y-n},{x:e.x+n,y:e.y-n});break;case`left`:r.push({x:e.x+n,y:e.y-n},{x:e.x+n,y:e.y+n});break;case`right`:r.push({x:e.x-n,y:e.y-n},{x:e.x-n,y:e.y+n});break}return r}function re(e){let{top:t,right:n,bottom:r,left:i}=e;return[{x:i,y:t},{x:n,y:t},{x:n,y:r},{x:i,y:r}]}function ie(e,t){let{x:n,y:r}=e,i=!1;for(let e=0,a=t.length-1;e<t.length;a=e++){let o=t[e],s=t[a],c=o.x,l=o.y,u=s.x,d=s.y;l>r!=d>r&&n<(u-c)*(r-l)/(d-l)+c&&(i=!i)}return i}function ae(e){let t=e.slice();return t.sort((e,t)=>e.x<t.x?-1:e.x>t.x?1:e.y<t.y?-1:e.y>t.y?1:0),oe(t)}function oe(e){if(e.length<=1)return e.slice();let t=[];for(let n=0;n<e.length;n++){let r=e[n];for(;t.length>=2;){let e=t[t.length-1],n=t[t.length-2];if((e.x-n.x)*(r.y-n.y)>=(e.y-n.y)*(r.x-n.x))t.pop();else break}t.push(r)}t.pop();let n=[];for(let t=e.length-1;t>=0;t--){let r=e[t];for(;n.length>=2;){let e=n[n.length-1],t=n[n.length-2];if((e.x-t.x)*(r.y-t.y)>=(e.y-t.y)*(r.x-t.x))n.pop();else break}n.push(r)}return n.pop(),t.length===1&&n.length===1&&t[0].x===n[0].x&&t[0].y===n[0].y?t:t.concat(n)}var se=j,ce=F,le=L,ue=V,de=U,Q=X;function fe({delayDuration:e=0,...t}){return(0,w.jsx)(se,{"data-slot":`tooltip-provider`,delayDuration:e,...t})}function pe({...e}){return(0,w.jsx)(fe,{children:(0,w.jsx)(ce,{"data-slot":`tooltip`,...e})})}function me({...e}){return(0,w.jsx)(le,{"data-slot":`tooltip-trigger`,...e})}function he({className:e,sideOffset:t=0,children:n,...r}){return(0,w.jsx)(ue,{children:(0,w.jsxs)(de,{"data-slot":`tooltip-content`,sideOffset:t,className:i(`data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-end-2 data-[side=right]:slide-in-from-start-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin) rounded-md bg-foreground px-3 py-1.5 text-background text-xs data-[state=delayed-open]:animate-in data-closed:animate-out data-open:animate-in`,e),...r,children:[n,(0,w.jsx)(Q,{className:`z-50 size-2.5 translate-y-[calc(-50%-2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground`})]})})}const $=h(e=>({isDragging:!1,leftSidebar:null,rightSidebar:null,isLeftSidebarCollapsed:!1,setLeftSidebar:t=>e({leftSidebar:t}),setRightSidebar:t=>e({rightSidebar:t}),setLeftSidebarCollapsed:t=>e({isLeftSidebarCollapsed:t})}));function ge(e){let t=x(),{width:n}=S(),r=(0,C.useMemo)(()=>n?t?`95%`:`45%`:0,[n,t]),i=(0,C.useMemo)(()=>n?t?0:48:0,[n,t]),a=(0,C.useMemo)(()=>t?`95%`:`30%`,[t]),o=(0,C.useCallback)(e=>{let t=e===`left`?$.getState().leftSidebar?.current:$.getState().rightSidebar?.current;return t?t.isCollapsed():!1},[]),s=(0,C.useCallback)((e,t)=>{let n=e===`left`?$.getState().leftSidebar?.current:$.getState().rightSidebar?.current;n&&((t===void 0?n.isCollapsed():t)?(n.resize(a),e===`left`&&$.getState().setLeftSidebarCollapsed(!1)):(n.collapse(),e===`left`&&$.getState().setLeftSidebarCollapsed(!0)))},[a]),c=(0,C.useMemo)(()=>({maxSidebarSize:r,collapsedSidebarSize:i,isCollapsed:o,toggleSidebar:s}),[r,i,o,s]);return e?e(c):c}export{me as a,he as i,$ as n,pe as r,ge as t};
+import { l as h } from "./alert-dialog-B7DDo-NI.js";
+import { i as S } from "./dist-Dj3RpNtB.js";
+import { i as _, t as b, a as g, n as v, r as y } from "./dist-DKdYDXPR.js";
+import { C as c, T as d, _ as f, D as l, y as m, x as p, S as u } from "./get-strict-context-DJn2x5wH.js";
+import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
+import { T as a, D as i, y as o, C as r } from "./preload-helper-DwC0sqXt.js";
+import { t as n } from "./react-BZSX5Bs9.js";
+import { l as s } from "./resume-Cd2sSNAf.js";
+import { t as x } from "./use-mobile-D_kEz352.js";
+var C = e(n(), 1),
+	w = e(t(), 1),
+	[T, E] = l(`Tooltip`, [g]),
+	D = g(),
+	O = `TooltipProvider`,
+	ee = 700,
+	k = `tooltip.open`,
+	[te, A] = T(O),
+	j = (e) => {
+		const {
+				__scopeTooltip: t,
+				delayDuration: n = ee,
+				skipDelayDuration: r = 300,
+				disableHoverableContent: i = !1,
+				children: a,
+			} = e,
+			o = C.useRef(!0),
+			s = C.useRef(!1),
+			c = C.useRef(0);
+		return (
+			C.useEffect(() => {
+				const e = c.current;
+				return () => window.clearTimeout(e);
+			}, []),
+			(0, w.jsx)(te, {
+				scope: t,
+				isOpenDelayedRef: o,
+				delayDuration: n,
+				onOpen: C.useCallback(() => {
+					window.clearTimeout(c.current), (o.current = !1);
+				}, []),
+				onClose: C.useCallback(() => {
+					window.clearTimeout(c.current), (c.current = window.setTimeout(() => (o.current = !0), r));
+				}, [r]),
+				isPointerInTransitRef: s,
+				onPointerInTransitChange: C.useCallback((e) => {
+					s.current = e;
+				}, []),
+				disableHoverableContent: i,
+				children: a,
+			})
+		);
+	};
+j.displayName = O;
+var M = `Tooltip`,
+	[N, P] = T(M),
+	F = (e) => {
+		const {
+				__scopeTooltip: t,
+				children: n,
+				open: r,
+				defaultOpen: i,
+				onOpenChange: a,
+				disableHoverableContent: o,
+				delayDuration: s,
+			} = e,
+			l = A(M, e.__scopeTooltip),
+			u = D(t),
+			[d, f] = C.useState(null),
+			m = p(),
+			h = C.useRef(0),
+			g = o ?? l.disableHoverableContent,
+			v = s ?? l.delayDuration,
+			y = C.useRef(!1),
+			[b, x] = c({
+				prop: r,
+				defaultProp: i ?? !1,
+				onChange: (e) => {
+					e ? (l.onOpen(), document.dispatchEvent(new CustomEvent(k))) : l.onClose(), a?.(e);
+				},
+				caller: M,
+			}),
+			S = C.useMemo(() => (b ? (y.current ? `delayed-open` : `instant-open`) : `closed`), [b]),
+			T = C.useCallback(() => {
+				window.clearTimeout(h.current), (h.current = 0), (y.current = !1), x(!0);
+			}, [x]),
+			E = C.useCallback(() => {
+				window.clearTimeout(h.current), (h.current = 0), x(!1);
+			}, [x]),
+			O = C.useCallback(() => {
+				window.clearTimeout(h.current),
+					(h.current = window.setTimeout(() => {
+						(y.current = !0), x(!0), (h.current = 0);
+					}, v));
+			}, [v, x]);
+		return (
+			C.useEffect(
+				() => () => {
+					h.current &&= (window.clearTimeout(h.current), 0);
+				},
+				[],
+			),
+			(0, w.jsx)(_, {
+				...u,
+				children: (0, w.jsx)(N, {
+					scope: t,
+					contentId: m,
+					open: b,
+					stateAttribute: S,
+					trigger: d,
+					onTriggerChange: f,
+					onTriggerEnter: C.useCallback(() => {
+						l.isOpenDelayedRef.current ? O() : T();
+					}, [l.isOpenDelayedRef, O, T]),
+					onTriggerLeave: C.useCallback(() => {
+						g ? E() : (window.clearTimeout(h.current), (h.current = 0));
+					}, [E, g]),
+					onOpen: T,
+					onClose: E,
+					disableHoverableContent: g,
+					children: n,
+				}),
+			})
+		);
+	};
+F.displayName = M;
+var I = `TooltipTrigger`,
+	L = C.forwardRef((e, t) => {
+		const { __scopeTooltip: n, ...r } = e,
+			i = P(I, n),
+			s = A(I, n),
+			c = D(n),
+			l = a(t, C.useRef(null), i.onTriggerChange),
+			u = C.useRef(!1),
+			f = C.useRef(!1),
+			p = C.useCallback(() => (u.current = !1), []);
+		return (
+			C.useEffect(() => () => document.removeEventListener(`pointerup`, p), [p]),
+			(0, w.jsx)(b, {
+				asChild: !0,
+				...c,
+				children: (0, w.jsx)(o.button, {
+					"aria-describedby": i.open ? i.contentId : void 0,
+					"data-state": i.stateAttribute,
+					...r,
+					ref: l,
+					onPointerMove: d(e.onPointerMove, (e) => {
+						e.pointerType !== `touch` &&
+							!f.current &&
+							!s.isPointerInTransitRef.current &&
+							(i.onTriggerEnter(), (f.current = !0));
+					}),
+					onPointerLeave: d(e.onPointerLeave, () => {
+						i.onTriggerLeave(), (f.current = !1);
+					}),
+					onPointerDown: d(e.onPointerDown, () => {
+						i.open && i.onClose(), (u.current = !0), document.addEventListener(`pointerup`, p, { once: !0 });
+					}),
+					onFocus: d(e.onFocus, () => {
+						u.current || i.onOpen();
+					}),
+					onBlur: d(e.onBlur, i.onClose),
+					onClick: d(e.onClick, i.onClose),
+				}),
+			})
+		);
+	});
+L.displayName = I;
+var R = `TooltipPortal`,
+	[z, B] = T(R, { forceMount: void 0 }),
+	V = (e) => {
+		const { __scopeTooltip: t, forceMount: n, children: r, container: i } = e,
+			a = P(R, t);
+		return (0, w.jsx)(z, {
+			scope: t,
+			forceMount: n,
+			children: (0, w.jsx)(u, {
+				present: n || a.open,
+				children: (0, w.jsx)(f, { asChild: !0, container: i, children: r }),
+			}),
+		});
+	};
+V.displayName = R;
+var H = `TooltipContent`,
+	U = C.forwardRef((e, t) => {
+		const n = B(H, e.__scopeTooltip),
+			{ forceMount: r = n.forceMount, side: i = `top`, ...a } = e,
+			o = P(H, e.__scopeTooltip);
+		return (0, w.jsx)(u, {
+			present: r || o.open,
+			children: o.disableHoverableContent
+				? (0, w.jsx)(J, { side: i, ...a, ref: t })
+				: (0, w.jsx)(W, { side: i, ...a, ref: t }),
+		});
+	}),
+	W = C.forwardRef((e, t) => {
+		const n = P(H, e.__scopeTooltip),
+			r = A(H, e.__scopeTooltip),
+			i = C.useRef(null),
+			o = a(t, i),
+			[s, c] = C.useState(null),
+			{ trigger: l, onClose: u } = n,
+			d = i.current,
+			{ onPointerInTransitChange: f } = r,
+			p = C.useCallback(() => {
+				c(null), f(!1);
+			}, [f]),
+			m = C.useCallback(
+				(e, t) => {
+					const n = e.currentTarget,
+						r = { x: e.clientX, y: e.clientY },
+						i = ne(r, Z(r, n.getBoundingClientRect())),
+						a = re(t.getBoundingClientRect());
+					c(ae([...i, ...a])), f(!0);
+				},
+				[f],
+			);
+		return (
+			C.useEffect(() => () => p(), [p]),
+			C.useEffect(() => {
+				if (l && d) {
+					const e = (e) => m(e, d),
+						t = (e) => m(e, l);
+					return (
+						l.addEventListener(`pointerleave`, e),
+						d.addEventListener(`pointerleave`, t),
+						() => {
+							l.removeEventListener(`pointerleave`, e), d.removeEventListener(`pointerleave`, t);
+						}
+					);
+				}
+			}, [l, d, m, p]),
+			C.useEffect(() => {
+				if (s) {
+					const e = (e) => {
+						const t = e.target,
+							n = { x: e.clientX, y: e.clientY },
+							r = l?.contains(t) || d?.contains(t),
+							i = !ie(n, s);
+						r ? p() : i && (p(), u());
+					};
+					return document.addEventListener(`pointermove`, e), () => document.removeEventListener(`pointermove`, e);
+				}
+			}, [l, d, s, u, p]),
+			(0, w.jsx)(J, { ...e, ref: o })
+		);
+	}),
+	[G, K] = T(M, { isInside: !1 }),
+	q = r(`TooltipContent`),
+	J = C.forwardRef((e, t) => {
+		const { __scopeTooltip: n, children: r, "aria-label": i, onEscapeKeyDown: a, onPointerDownOutside: o, ...c } = e,
+			l = P(H, n),
+			u = D(n),
+			{ onClose: d } = l;
+		return (
+			C.useEffect(() => (document.addEventListener(k, d), () => document.removeEventListener(k, d)), [d]),
+			C.useEffect(() => {
+				if (l.trigger) {
+					const e = (e) => {
+						e.target?.contains(l.trigger) && d();
+					};
+					return (
+						window.addEventListener(`scroll`, e, { capture: !0 }),
+						() => window.removeEventListener(`scroll`, e, { capture: !0 })
+					);
+				}
+			}, [l.trigger, d]),
+			(0, w.jsx)(m, {
+				asChild: !0,
+				disableOutsidePointerEvents: !1,
+				onEscapeKeyDown: a,
+				onPointerDownOutside: o,
+				onFocusOutside: (e) => e.preventDefault(),
+				onDismiss: d,
+				children: (0, w.jsxs)(y, {
+					"data-state": l.stateAttribute,
+					...u,
+					...c,
+					ref: t,
+					style: {
+						...c.style,
+						"--radix-tooltip-content-transform-origin": `var(--radix-popper-transform-origin)`,
+						"--radix-tooltip-content-available-width": `var(--radix-popper-available-width)`,
+						"--radix-tooltip-content-available-height": `var(--radix-popper-available-height)`,
+						"--radix-tooltip-trigger-width": `var(--radix-popper-anchor-width)`,
+						"--radix-tooltip-trigger-height": `var(--radix-popper-anchor-height)`,
+					},
+					children: [
+						(0, w.jsx)(q, { children: r }),
+						(0, w.jsx)(G, {
+							scope: n,
+							isInside: !0,
+							children: (0, w.jsx)(s, { id: l.contentId, role: `tooltip`, children: i || r }),
+						}),
+					],
+				}),
+			})
+		);
+	});
+U.displayName = H;
+var Y = `TooltipArrow`,
+	X = C.forwardRef((e, t) => {
+		const { __scopeTooltip: n, ...r } = e,
+			i = D(n);
+		return K(Y, n).isInside ? null : (0, w.jsx)(v, { ...i, ...r, ref: t });
+	});
+X.displayName = Y;
+function Z(e, t) {
+	const n = Math.abs(t.top - e.y),
+		r = Math.abs(t.bottom - e.y),
+		i = Math.abs(t.right - e.x),
+		a = Math.abs(t.left - e.x);
+	switch (Math.min(n, r, i, a)) {
+		case a:
+			return `left`;
+		case i:
+			return `right`;
+		case n:
+			return `top`;
+		case r:
+			return `bottom`;
+		default:
+			throw Error(`unreachable`);
+	}
+}
+function ne(e, t, n = 5) {
+	const r = [];
+	switch (t) {
+		case `top`:
+			r.push({ x: e.x - n, y: e.y + n }, { x: e.x + n, y: e.y + n });
+			break;
+		case `bottom`:
+			r.push({ x: e.x - n, y: e.y - n }, { x: e.x + n, y: e.y - n });
+			break;
+		case `left`:
+			r.push({ x: e.x + n, y: e.y - n }, { x: e.x + n, y: e.y + n });
+			break;
+		case `right`:
+			r.push({ x: e.x - n, y: e.y - n }, { x: e.x - n, y: e.y + n });
+			break;
+	}
+	return r;
+}
+function re(e) {
+	const { top: t, right: n, bottom: r, left: i } = e;
+	return [
+		{ x: i, y: t },
+		{ x: n, y: t },
+		{ x: n, y: r },
+		{ x: i, y: r },
+	];
+}
+function ie(e, t) {
+	let { x: n, y: r } = e,
+		i = !1;
+	for (let e = 0, a = t.length - 1; e < t.length; a = e++) {
+		const o = t[e],
+			s = t[a],
+			c = o.x,
+			l = o.y,
+			u = s.x,
+			d = s.y;
+		l > r != d > r && n < ((u - c) * (r - l)) / (d - l) + c && (i = !i);
+	}
+	return i;
+}
+function ae(e) {
+	const t = e.slice();
+	return t.sort((e, t) => (e.x < t.x ? -1 : e.x > t.x ? 1 : e.y < t.y ? -1 : e.y > t.y ? 1 : 0)), oe(t);
+}
+function oe(e) {
+	if (e.length <= 1) return e.slice();
+	const t = [];
+	for (let n = 0; n < e.length; n++) {
+		const r = e[n];
+		for (; t.length >= 2; ) {
+			const e = t[t.length - 1],
+				n = t[t.length - 2];
+			if ((e.x - n.x) * (r.y - n.y) >= (e.y - n.y) * (r.x - n.x)) t.pop();
+			else break;
+		}
+		t.push(r);
+	}
+	t.pop();
+	const n = [];
+	for (let t = e.length - 1; t >= 0; t--) {
+		const r = e[t];
+		for (; n.length >= 2; ) {
+			const e = n[n.length - 1],
+				t = n[n.length - 2];
+			if ((e.x - t.x) * (r.y - t.y) >= (e.y - t.y) * (r.x - t.x)) n.pop();
+			else break;
+		}
+		n.push(r);
+	}
+	return n.pop(), t.length === 1 && n.length === 1 && t[0].x === n[0].x && t[0].y === n[0].y ? t : t.concat(n);
+}
+var se = j,
+	ce = F,
+	le = L,
+	ue = V,
+	de = U,
+	Q = X;
+function fe({ delayDuration: e = 0, ...t }) {
+	return (0, w.jsx)(se, { "data-slot": `tooltip-provider`, delayDuration: e, ...t });
+}
+function pe({ ...e }) {
+	return (0, w.jsx)(fe, { children: (0, w.jsx)(ce, { "data-slot": `tooltip`, ...e }) });
+}
+function me({ ...e }) {
+	return (0, w.jsx)(le, { "data-slot": `tooltip-trigger`, ...e });
+}
+function he({ className: e, sideOffset: t = 0, children: n, ...r }) {
+	return (0, w.jsx)(ue, {
+		children: (0, w.jsxs)(de, {
+			"data-slot": `tooltip-content`,
+			sideOffset: t,
+			className: i(
+				`data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-end-2 data-[side=right]:slide-in-from-start-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin) rounded-md bg-foreground px-3 py-1.5 text-background text-xs data-[state=delayed-open]:animate-in data-closed:animate-out data-open:animate-in`,
+				e,
+			),
+			...r,
+			children: [
+				n,
+				(0, w.jsx)(Q, {
+					className: `z-50 size-2.5 translate-y-[calc(-50%-2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground`,
+				}),
+			],
+		}),
+	});
+}
+const $ = h((e) => ({
+	isDragging: !1,
+	leftSidebar: null,
+	rightSidebar: null,
+	isLeftSidebarCollapsed: !1,
+	setLeftSidebar: (t) => e({ leftSidebar: t }),
+	setRightSidebar: (t) => e({ rightSidebar: t }),
+	setLeftSidebarCollapsed: (t) => e({ isLeftSidebarCollapsed: t }),
+}));
+function ge(e) {
+	const t = x(),
+		{ width: n } = S(),
+		r = (0, C.useMemo)(() => (n ? (t ? `95%` : `45%`) : 0), [n, t]),
+		i = (0, C.useMemo)(() => (n ? (t ? 0 : 48) : 0), [n, t]),
+		a = (0, C.useMemo)(() => (t ? `95%` : `30%`), [t]),
+		o = (0, C.useCallback)((e) => {
+			const t = e === `left` ? $.getState().leftSidebar?.current : $.getState().rightSidebar?.current;
+			return t ? t.isCollapsed() : !1;
+		}, []),
+		s = (0, C.useCallback)(
+			(e, t) => {
+				const n = e === `left` ? $.getState().leftSidebar?.current : $.getState().rightSidebar?.current;
+				n &&
+					((t === void 0 ? n.isCollapsed() : t)
+						? (n.resize(a), e === `left` && $.getState().setLeftSidebarCollapsed(!1))
+						: (n.collapse(), e === `left` && $.getState().setLeftSidebarCollapsed(!0)));
+			},
+			[a],
+		),
+		c = (0, C.useMemo)(
+			() => ({ maxSidebarSize: r, collapsedSidebarSize: i, isCollapsed: o, toggleSidebar: s }),
+			[r, i, o, s],
+		);
+	return e ? e(c) : c;
+}
+export { me as a, he as i, $ as n, pe as r, ge as t };

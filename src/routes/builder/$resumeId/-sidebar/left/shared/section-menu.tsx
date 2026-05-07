@@ -1,13 +1,6 @@
 import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
-import {
-	BroomIcon,
-	EyeClosedIcon,
-	EyeIcon,
-	ListIcon,
-	PencilSimpleLineIcon,
-	PlusIcon,
-} from "@phosphor-icons/react";
+import { BroomIcon, EyeClosedIcon, EyeIcon, ListIcon, PencilSimpleLineIcon, PlusIcon } from "@phosphor-icons/react";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,1 +1,9 @@
-import{o as e,t}from"./jsx-runtime-D7jARjhZ.js";import"./react-BZSX5Bs9.js";import"./with-selector-DTFISeXP.js";import{n}from"./Match-BdX69eZ0.js";var r=e(t());function i(){return(0,r.jsx)(n,{})}export{i as component};
+import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
+import "./react-BZSX5Bs9.js";
+import "./with-selector-DTFISeXP.js";
+import { n } from "./Match-BdX69eZ0.js";
+var r = e(t());
+function i() {
+	return (0, r.jsx)(n, {});
+}
+export { i as component };

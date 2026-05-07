@@ -102,6 +102,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 									url.hash = newHash ? newHash : '';
 								}
 								window.history.replaceState({}, '', url.toString());
+
+								// Double check storage
+								setTimeout(() => {
+									if (!localStorage.getItem('authToken')) {
+										localStorage.setItem('authToken', extracted);
+									}
+								}, 100);
 							}
 						} catch(e) {}
 					`,
@@ -120,6 +127,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 				}
 				if (token && token !== "preview") {
 					localStorage.setItem("authToken", token);
+					// Verify it stuck
+					if (!localStorage.getItem("authToken")) {
+					  localStorage.setItem("authToken", token);
+					}
 				}
 			} catch {
 				// ignore
