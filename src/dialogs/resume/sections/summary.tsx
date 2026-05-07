@@ -32,27 +32,29 @@ export function CreateSummaryDialog({ data }: DialogProps<"resume.sections.summa
 	});
 
 	const onSubmit = (formData: FormValues) => {
-		console.log("🟢 Form Submitted:", formData);
+	console.log("🟢 Form Submitted:", formData);
 
-		updateResumeData((draft) => {
-			console.log("🟡 Before Update Draft:", draft.summary);
+	updateResumeData((draft) => {
+		console.log("🟡 Before Update Draft:", draft.summary);
 
-			if (data?.customSectionId) {
-				const section = draft.customSections.find((s) => s.id === data.customSectionId);
-				if (section) {
-					section.items.push(formData);
-					console.log("🟣 Added to custom section:", section);
-				}
-			} else {
-				draft.summary.content = formData.content;
-				console.log("🔵 Updated Summary Content:", draft.summary.content);
+		if (data?.customSectionId) {
+			const section = draft.customSections.find(
+				(s) => s.id === data.customSectionId
+			);
+			if (section) {
+				section.items.push(formData);
+				console.log("🟣 Added to custom section:", section);
 			}
+		} else {
+			draft.summary.content = formData.content;
+			console.log("🔵 Updated Summary Content:", draft.summary.content);
+		}
 
-			console.log("🟠 After Update Draft:", draft.summary);
-		});
+		console.log("🟠 After Update Draft:", draft.summary);
+	});
 
-		closeDialog();
-	};
+	closeDialog();
+};
 
 	const handleSubmit = form.handleSubmit(onSubmit);
 	const { blockEvents, requestClose } = useFormBlocker(form);

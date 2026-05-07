@@ -10,10 +10,10 @@ import { PageLink } from "../page-link";
 // Function to format date as 'Sep/2026'
 function formatExperienceDate(dateString: string | undefined): string {
 	if (!dateString) return "";
-
+	
 	try {
 		const date = new Date(dateString);
-		const month = date.toLocaleString("en-US", { month: "short" });
+		const month = date.toLocaleString('en-US', { month: 'short' });
 		const year = date.getFullYear();
 		return `${month} ${year}`;
 	} catch {

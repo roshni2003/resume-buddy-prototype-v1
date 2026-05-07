@@ -3,391 +3,457 @@ const templates = {
 		name: "Azurill",
 		description: { id: "1xXyOg" },
 		imageUrl: "/templates/jpg/azurill.jpg",
-		tags: ["Two-column", "Creative", "Tech", "Visual flair"],
+		tags: [
+			"Two-column",
+			"Creative",
+			"Tech",
+			"Visual flair"
+		],
 		sidebarPosition: "left",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(124, 58, 237, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(124, 58, 237, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Inter",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Inter",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	bronzor: {
 		name: "Bronzor",
 		description: { id: "UeQsID" },
 		imageUrl: "/templates/jpg/bronzor.jpg",
-		tags: ["Two-column", "Clean", "Professional", "Corporate", "Finance", "Consulting"],
+		tags: [
+			"Two-column",
+			"Clean",
+			"Professional",
+			"Corporate",
+			"Finance",
+			"Consulting"
+		],
 		sidebarPosition: "none",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(71, 85, 105, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(71, 85, 105, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "IBM Plex Sans",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "IBM Plex Sans",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	chikorita: {
 		name: "Chikorita",
 		description: { id: "zRYaz6" },
 		imageUrl: "/templates/jpg/chikorita.jpg",
-		tags: ["Two-column", "Soft accent", "Marketing", "HR", "Client-facing"],
+		tags: [
+			"Two-column",
+			"Soft accent",
+			"Marketing",
+			"HR",
+			"Client-facing"
+		],
 		sidebarPosition: "right",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(236, 72, 153, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(236, 72, 153, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Lato",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Lato",
 					fontWeights: ["600", "700"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	ditgar: {
 		name: "Ditgar",
 		description: { id: "AFElXw" },
 		imageUrl: "/templates/jpg/ditgar.jpg",
-		tags: ["Two-column", "Modern", "Developer", "Data science", "Technical PM", "Dark sidebar"],
+		tags: [
+			"Two-column",
+			"Modern",
+			"Developer",
+			"Data science",
+			"Technical PM",
+			"Dark sidebar"
+		],
 		sidebarPosition: "left",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(20, 184, 166, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(20, 184, 166, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Roboto",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Roboto",
 					fontWeights: ["600", "700"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	ditto: {
 		name: "Ditto",
 		description: { id: "ZQ9KCB" },
 		imageUrl: "/templates/jpg/ditto.jpg",
-		tags: ["Two-column", "ATS friendly", "Minimal", "Text-dense", "Traditional", "No decoration"],
+		tags: [
+			"Two-column",
+			"ATS friendly",
+			"Minimal",
+			"Text-dense",
+			"Traditional",
+			"No decoration"
+		],
 		sidebarPosition: "left",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(0, 0, 0, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(0, 0, 0, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "IBM Plex Serif",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "IBM Plex Serif",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	gengar: {
 		name: "Gengar",
 		description: { id: "Az5cR6" },
 		imageUrl: "/templates/jpg/gengar.jpg",
-		tags: ["Two-column", "Accent colors", "Clean typography", "Business analyst", "Operations"],
+		tags: [
+			"Two-column",
+			"Accent colors",
+			"Clean typography",
+			"Business analyst",
+			"Operations"
+		],
 		sidebarPosition: "left",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(139, 92, 246, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(139, 92, 246, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Open Sans",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Open Sans",
 					fontWeights: ["600", "700"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	glalie: {
 		name: "Glalie",
 		description: { id: "uYtNWm" },
 		imageUrl: "/templates/jpg/glalie.jpg",
-		tags: ["Two-column", "Minimal", "Professional", "Legal", "Finance", "Executive", "Understated"],
+		tags: [
+			"Two-column",
+			"Minimal",
+			"Professional",
+			"Legal",
+			"Finance",
+			"Executive",
+			"Understated"
+		],
 		sidebarPosition: "left",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(100, 116, 139, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(100, 116, 139, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Source Sans Pro",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Source Sans Pro",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	kakuna: {
 		name: "Kakuna",
 		description: { id: "FBGXeE" },
 		imageUrl: "/templates/jpg/kakuna.jpg",
-		tags: ["Single-column", "ATS friendly", "Compact", "Efficient", "Entry level", "Internship", "Magenta accent"],
+		tags: [
+			"Single-column",
+			"ATS friendly",
+			"Compact",
+			"Efficient",
+			"Entry level",
+			"Internship",
+			"Magenta accent"
+		],
 		sidebarPosition: "none",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(219, 39, 119, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(219, 39, 119, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Noto Sans",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Noto Sans",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	lapras: {
 		name: "Lapras",
 		description: { id: "K3weSQ" },
 		imageUrl: "/templates/jpg/lapras.jpg",
-		tags: ["Single-column", "ATS friendly", "Polished", "Senior", "Enterprise"],
+		tags: [
+			"Single-column",
+			"ATS friendly",
+			"Polished",
+			"Senior",
+			"Enterprise"
+		],
 		sidebarPosition: "none",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(30, 58, 138, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(30, 58, 138, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Merriweather",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Merriweather",
 					fontWeights: ["700"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	leafish: {
 		name: "Leafish",
 		description: { id: "skAXmS" },
 		imageUrl: "/templates/jpg/leafish.jpg",
-		tags: ["Two-column", "Muted sidebar", "Earthy", "Calm", "Sustainability", "Healthcare", "Nonprofit"],
+		tags: [
+			"Two-column",
+			"Muted sidebar",
+			"Earthy",
+			"Calm",
+			"Sustainability",
+			"Healthcare",
+			"Nonprofit"
+		],
 		sidebarPosition: "right",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(101, 163, 13, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(101, 163, 13, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Lora",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Lora",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	onyx: {
 		name: "Onyx",
 		description: { id: "u/U4gi" },
 		imageUrl: "/templates/jpg/onyx.jpg",
-		tags: ["Single-column", "ATS friendly", "Sidebar", "Grid layout", "Versatile", "Professional", "Technical"],
+		tags: [
+			"Single-column",
+			"ATS friendly",
+			"Sidebar",
+			"Grid layout",
+			"Versatile",
+			"Professional",
+			"Technical"
+		],
 		sidebarPosition: "none",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(220, 38, 38, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(220, 38, 38, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "IBM Plex Serif",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "IBM Plex Serif",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	pikachu: {
 		name: "Pikachu",
 		description: { id: "RyY4xE" },
 		imageUrl: "/templates/jpg/pikachu.jpg",
-		tags: ["Two-column", "Simple", "Creative", "Editorial", "Junior", "Accent colors"],
+		tags: [
+			"Two-column",
+			"Simple",
+			"Creative",
+			"Editorial",
+			"Junior",
+			"Accent colors"
+		],
 		sidebarPosition: "left",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(234, 179, 8, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(234, 179, 8, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Raleway",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Raleway",
 					fontWeights: ["600", "700"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
+					lineHeight: 1.5
+				}
+			}
+		}
 	},
 	rhyhorn: {
 		name: "Rhyhorn",
 		description: { id: "Doylhn" },
 		imageUrl: "/templates/jpg/rhyhorn.jpg",
-		tags: ["Single-column", "ATS friendly", "Minimal", "Clean", "Modern", "Designer", "Content creator", "Whitespace"],
+		tags: [
+			"Single-column",
+			"ATS friendly",
+			"Minimal",
+			"Clean",
+			"Modern",
+			"Designer",
+			"Content creator",
+			"Whitespace"
+		],
 		sidebarPosition: "none",
 		defaults: {
-			design: {
-				colors: {
-					primary: "rgba(59, 130, 246, 1)",
-					text: "rgba(0, 0, 0, 1)",
-					background: "rgba(255, 255, 255, 1)",
-				},
-			},
+			design: { colors: {
+				primary: "rgba(59, 130, 246, 1)",
+				text: "rgba(0, 0, 0, 1)",
+				background: "rgba(255, 255, 255, 1)"
+			} },
 			typography: {
 				body: {
 					fontFamily: "Montserrat",
 					fontWeights: ["400"],
 					fontSize: 10,
-					lineHeight: 1.5,
+					lineHeight: 1.5
 				},
 				heading: {
 					fontFamily: "Montserrat",
 					fontWeights: ["600"],
 					fontSize: 14,
-					lineHeight: 1.5,
-				},
-			},
-		},
-	},
+					lineHeight: 1.5
+				}
+			}
+		}
+	}
 };
 export { templates as t };

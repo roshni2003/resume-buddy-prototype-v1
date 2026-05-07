@@ -1,9 +1,8 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { PassThrough, Readable } from "node:stream";
-
 var NullProtoObj = /* @__PURE__ */ (() => {
-	const e = () => {};
-	return (e.prototype = Object.create(null)), Object.freeze(e.prototype), e;
+	const e = function() {};
+	return e.prototype = Object.create(null), Object.freeze(e.prototype), e;
 })();
 function lazyInherit(target, source, sourceKey) {
 	for (const key of [...Object.getOwnPropertyNames(source), ...Object.getOwnPropertySymbols(source)]) {
@@ -13,23 +12,19 @@ function lazyInherit(target, source, sourceKey) {
 		let modified = false;
 		if (desc.get) {
 			modified = true;
-			desc.get =
-				targetDesc?.get ||
-				function () {
-					return this[sourceKey][key];
-				};
+			desc.get = targetDesc?.get || function() {
+				return this[sourceKey][key];
+			};
 		}
 		if (desc.set) {
 			modified = true;
-			desc.set =
-				targetDesc?.set ||
-				function (value) {
-					this[sourceKey][key] = value;
-				};
+			desc.set = targetDesc?.set || function(value) {
+				this[sourceKey][key] = value;
+			};
 		}
 		if (!targetDesc?.value && typeof desc.value === "function") {
 			modified = true;
-			desc.value = function (...args) {
+			desc.value = function(...args) {
 				return this[sourceKey][key](...args);
 			};
 		}
@@ -49,13 +44,9 @@ var FastURL = /* @__PURE__ */ (() => {
 		#searchParams;
 		#pos;
 		constructor(url) {
-			if (typeof url === "string")
-				if (url[0] === "/") this.#href = url;
-				else this.#url = new NativeURL(url);
-			else if (_needsNormRE.test(url.pathname))
-				this.#url = new NativeURL(
-					`${url.protocol || "http:"}//${url.host || "localhost"}${url.pathname}${url.search || ""}`,
-				);
+			if (typeof url === "string") if (url[0] === "/") this.#href = url;
+			else this.#url = new NativeURL(url);
+			else if (_needsNormRE.test(url.pathname)) this.#url = new NativeURL(`${url.protocol || "http:"}//${url.host || "localhost"}${url.pathname}${url.search || ""}`);
 			else {
 				this.#protocol = url.protocol;
 				this.#host = url.host;
@@ -80,8 +71,7 @@ var FastURL = /* @__PURE__ */ (() => {
 		}
 		get href() {
 			if (this.#url) return this.#url.href;
-			if (!this.#href)
-				this.#href = `${this.#protocol || "http:"}//${this.#host || "localhost"}${this.#pathname || "/"}${this.#search || ""}`;
+			if (!this.#href) this.#href = `${this.#protocol || "http:"}//${this.#host || "localhost"}${this.#pathname || "/"}${this.#search || ""}`;
 			return this.#href;
 		}
 		#getPos() {
@@ -89,7 +79,11 @@ var FastURL = /* @__PURE__ */ (() => {
 				const url = this.href;
 				const protoIndex = url.indexOf("://");
 				const pathnameIndex = protoIndex === -1 ? -1 : url.indexOf("/", protoIndex + 4);
-				this.#pos = [protoIndex, pathnameIndex, pathnameIndex === -1 ? -1 : url.indexOf("?", pathnameIndex)];
+				this.#pos = [
+					protoIndex,
+					pathnameIndex,
+					pathnameIndex === -1 ? -1 : url.indexOf("?", pathnameIndex)
+				];
 			}
 			return this.#pos;
 		}
@@ -163,7 +157,7 @@ var NodeResponse = /* @__PURE__ */ (() => {
 			if (this.#response) return this.#response.headers;
 			if (this.#headers) return this.#headers;
 			const initHeaders = this.#init?.headers;
-			return (this.#headers = initHeaders instanceof Headers ? initHeaders : new Headers(initHeaders));
+			return this.#headers = initHeaders instanceof Headers ? initHeaders : new Headers(initHeaders);
 		}
 		get ok() {
 			if (this.#response) return this.#response.ok;
@@ -180,15 +174,10 @@ var NodeResponse = /* @__PURE__ */ (() => {
 				if (abort) stream.once("close", () => abort());
 				body = stream;
 			}
-			this.#response = new NativeResponse(
-				body,
-				this.#headers
-					? {
-							...this.#init,
-							headers: this.#headers,
-						}
-					: this.#init,
-			);
+			this.#response = new NativeResponse(body, this.#headers ? {
+				...this.#init,
+				headers: this.#headers
+			} : this.#init);
 			this.#init = void 0;
 			this.#headers = void 0;
 			this.#body = void 0;
@@ -201,48 +190,37 @@ var NodeResponse = /* @__PURE__ */ (() => {
 			let contentType;
 			let contentLength;
 			if (this.#response) body = this.#response.body;
-			else if (this.#body)
-				if (this.#body instanceof ReadableStream) body = this.#body;
-				else if (typeof this.#body === "string") {
-					body = this.#body;
-					contentType = "text/plain; charset=UTF-8";
-					contentLength = Buffer.byteLength(this.#body);
-				} else if (this.#body instanceof ArrayBuffer) {
-					body = Buffer.from(this.#body);
-					contentLength = this.#body.byteLength;
-				} else if (this.#body instanceof Uint8Array) {
-					body = this.#body;
-					contentLength = this.#body.byteLength;
-				} else if (this.#body instanceof DataView) {
-					body = Buffer.from(this.#body.buffer);
-					contentLength = this.#body.byteLength;
-				} else if (this.#body instanceof Blob) {
-					body = this.#body.stream();
-					contentType = this.#body.type;
-					contentLength = this.#body.size;
-				} else if (typeof this.#body.pipe === "function") body = this.#body;
-				else body = this._response.body;
+			else if (this.#body) if (this.#body instanceof ReadableStream) body = this.#body;
+			else if (typeof this.#body === "string") {
+				body = this.#body;
+				contentType = "text/plain; charset=UTF-8";
+				contentLength = Buffer.byteLength(this.#body);
+			} else if (this.#body instanceof ArrayBuffer) {
+				body = Buffer.from(this.#body);
+				contentLength = this.#body.byteLength;
+			} else if (this.#body instanceof Uint8Array) {
+				body = this.#body;
+				contentLength = this.#body.byteLength;
+			} else if (this.#body instanceof DataView) {
+				body = Buffer.from(this.#body.buffer);
+				contentLength = this.#body.byteLength;
+			} else if (this.#body instanceof Blob) {
+				body = this.#body.stream();
+				contentType = this.#body.type;
+				contentLength = this.#body.size;
+			} else if (typeof this.#body.pipe === "function") body = this.#body;
+			else body = this._response.body;
 			const headers = [];
 			const initHeaders = this.#init?.headers;
-			const headerEntries =
-				this.#response?.headers ||
-				this.#headers ||
-				(initHeaders
-					? Array.isArray(initHeaders)
-						? initHeaders
-						: initHeaders?.entries
-							? initHeaders.entries()
-							: Object.entries(initHeaders).map(([k, v]) => [k.toLowerCase(), v])
-					: void 0);
+			const headerEntries = this.#response?.headers || this.#headers || (initHeaders ? Array.isArray(initHeaders) ? initHeaders : initHeaders?.entries ? initHeaders.entries() : Object.entries(initHeaders).map(([k, v]) => [k.toLowerCase(), v]) : void 0);
 			let hasContentTypeHeader;
 			let hasContentLength;
-			if (headerEntries)
-				for (const [key, value] of headerEntries) {
-					if (Array.isArray(value)) for (const v of value) headers.push([key, v]);
-					else headers.push([key, value]);
-					if (key === "content-type") hasContentTypeHeader = true;
-					else if (key === "content-length") hasContentLength = true;
-				}
+			if (headerEntries) for (const [key, value] of headerEntries) {
+				if (Array.isArray(value)) for (const v of value) headers.push([key, v]);
+				else headers.push([key, value]);
+				if (key === "content-type") hasContentTypeHeader = true;
+				else if (key === "content-length") hasContentLength = true;
+			}
 			if (contentType && !hasContentTypeHeader) headers.push(["content-type", contentType]);
 			if (contentLength && !hasContentLength) headers.push(["content-length", String(contentLength)]);
 			this.#init = void 0;
@@ -253,7 +231,7 @@ var NodeResponse = /* @__PURE__ */ (() => {
 				status,
 				statusText,
 				headers,
-				body,
+				body
 			};
 		}
 	}
@@ -285,7 +263,7 @@ var H3Event = class {
 		this.url = url;
 	}
 	get res() {
-		return (this[kEventRes] ||= new H3EventResponse());
+		return this[kEventRes] ||= new H3EventResponse();
 	}
 	get runtime() {
 		return this.req.runtime;
@@ -316,10 +294,10 @@ var H3EventResponse = class {
 	status;
 	statusText;
 	get headers() {
-		return (this[kEventResHeaders] ||= new Headers());
+		return this[kEventResHeaders] ||= new Headers();
 	}
 	get errHeaders() {
-		return (this[kEventResErrHeaders] ||= new Headers());
+		return this[kEventResErrHeaders] ||= new Headers();
 	}
 };
 var DISALLOWED_STATUS_CHARS = /[^\u0009\u0020-\u007E]/g;
@@ -350,7 +328,7 @@ var HTTPError = class HTTPError$1 extends Error {
 		return new HTTPError$1({
 			...details,
 			statusText,
-			status,
+			status
 		});
 	}
 	constructor(arg1, arg2) {
@@ -360,27 +338,20 @@ var HTTPError = class HTTPError$1 extends Error {
 			messageInput = arg1;
 			details = arg2;
 		} else details = arg1;
-		const status = sanitizeStatusCode(
-			details?.status || details?.statusCode || details?.cause?.status || details?.cause?.statusCode,
-			500,
-		);
-		const statusText = sanitizeStatusMessage(
-			details?.statusText || details?.statusMessage || details?.cause?.statusText || details?.cause?.statusMessage,
-		);
-		const message =
-			messageInput ||
-			details?.message ||
-			details?.cause?.message ||
-			details?.statusText ||
-			details?.statusMessage ||
-			["HTTPError", status, statusText].filter(Boolean).join(" ");
+		const status = sanitizeStatusCode(details?.status || details?.statusCode || (details?.cause)?.status || (details?.cause)?.statusCode, 500);
+		const statusText = sanitizeStatusMessage(details?.statusText || details?.statusMessage || (details?.cause)?.statusText || (details?.cause)?.statusMessage);
+		const message = messageInput || details?.message || (details?.cause)?.message || details?.statusText || details?.statusMessage || [
+			"HTTPError",
+			status,
+			statusText
+		].filter(Boolean).join(" ");
 		super(message, { cause: details });
 		this.cause = details;
 		this.status = status;
 		this.statusText = statusText || void 0;
-		const rawHeaders = details?.headers || details?.cause?.headers;
+		const rawHeaders = details?.headers || (details?.cause)?.headers;
 		this.headers = rawHeaders ? new Headers(rawHeaders) : void 0;
-		this.unhandled = details?.unhandled ?? details?.cause?.unhandled ?? void 0;
+		this.unhandled = details?.unhandled ?? (details?.cause)?.unhandled ?? void 0;
 		this.data = details?.data;
 		this.body = details?.body;
 	}
@@ -398,7 +369,7 @@ var HTTPError = class HTTPError$1 extends Error {
 			unhandled,
 			message: unhandled ? "HTTPError" : this.message,
 			data: unhandled ? void 0 : this.data,
-			...(unhandled ? void 0 : this.body),
+			...unhandled ? void 0 : this.body
 		};
 	}
 };
@@ -415,10 +386,7 @@ function isJSONSerializable(value, _type) {
 var kNotFound = /* @__PURE__ */ Symbol.for("h3.notFound");
 var kHandled = /* @__PURE__ */ Symbol.for("h3.handled");
 function toResponse(val, event, config = {}) {
-	if (typeof val?.then === "function")
-		return (val.catch?.((error) => error) || Promise.resolve(val)).then((resolvedVal) =>
-			toResponse(resolvedVal, event, config),
-		);
+	if (typeof val?.then === "function") return (val.catch?.((error) => error) || Promise.resolve(val)).then((resolvedVal) => toResponse(resolvedVal, event, config));
 	const response = prepareResponse(val, event, config);
 	if (typeof response?.then === "function") return toResponse(response, event, config);
 	const { onResponse } = config;
@@ -439,16 +407,15 @@ var HTTPResponse = class {
 		return this.#init?.statusText || "OK";
 	}
 	get headers() {
-		return (this.#headers ||= new Headers(this.#init?.headers));
+		return this.#headers ||= new Headers(this.#init?.headers);
 	}
 };
 function prepareResponse(val, event, config, nested) {
 	if (val === kHandled) return new NodeResponse(null);
-	if (val === kNotFound)
-		val = new HTTPError({
-			status: 404,
-			message: `Cannot find any route matching [${event.req.method}] ${event.url}`,
-		});
+	if (val === kNotFound) val = new HTTPError({
+		status: 404,
+		message: `Cannot find any route matching [${event.req.method}] ${event.url}`
+	});
 	if (val && val instanceof Error) {
 		const isHTTPError = HTTPError.isError(val);
 		const error = isHTTPError ? val : new HTTPError(val);
@@ -459,11 +426,7 @@ function prepareResponse(val, event, config, nested) {
 		if (error.unhandled && !config.silent) console.error(error);
 		const { onError } = config;
 		const errHeaders = event[kEventRes]?.[kEventResErrHeaders];
-		return onError && !nested
-			? Promise.resolve(onError(error, event))
-					.catch((error$1) => error$1)
-					.then((newVal) => prepareResponse(newVal ?? val, event, config, true))
-			: errorResponse(error, config.debug, errHeaders);
+		return onError && !nested ? Promise.resolve(onError(error, event)).catch((error$1) => error$1).then((newVal) => prepareResponse(newVal ?? val, event, config, true)) : errorResponse(error, config.debug, errHeaders);
 	}
 	const preparedRes = event[kEventRes];
 	const preparedHeaders = preparedRes?.[kEventResHeaders];
@@ -474,8 +437,7 @@ function prepareResponse(val, event, config, nested) {
 		return new NodeResponse(nullBody(event.req.method, status) ? null : res.body, {
 			status,
 			statusText: res.statusText || preparedRes?.statusText,
-			headers:
-				res.headers && preparedHeaders ? mergeHeaders$1(res.headers, preparedHeaders) : res.headers || preparedHeaders,
+			headers: res.headers && preparedHeaders ? mergeHeaders$1(res.headers, preparedHeaders) : res.headers || preparedHeaders
 		});
 	}
 	if (!preparedHeaders || nested || !val.ok) return val;
@@ -486,21 +448,18 @@ function prepareResponse(val, event, config, nested) {
 		return new NodeResponse(nullBody(event.req.method, val.status) ? null : val.body, {
 			status: val.status,
 			statusText: val.statusText,
-			headers: mergeHeaders$1(val.headers, preparedHeaders),
+			headers: mergeHeaders$1(val.headers, preparedHeaders)
 		});
 	}
 }
 function mergeHeaders$1(base, overrides, target = new Headers(base)) {
-	for (const [name, value] of overrides)
-		if (name === "set-cookie") target.append(name, value);
-		else target.set(name, value);
+	for (const [name, value] of overrides) if (name === "set-cookie") target.append(name, value);
+	else target.set(name, value);
 	return target;
 }
-var frozen =
-	(name) =>
-	(...args) => {
-		throw new Error(`Headers are frozen (${name} ${args.join(", ")})`);
-	};
+var frozen = (name) => (...args) => {
+	throw new Error(`Headers are frozen (${name} ${args.join(", ")})`);
+};
 var FrozenHeaders = class extends Headers {
 	set = frozen("set");
 	append = frozen("append");
@@ -509,11 +468,10 @@ var FrozenHeaders = class extends Headers {
 var emptyHeaders = /* @__PURE__ */ new FrozenHeaders({ "content-length": "0" });
 var jsonHeaders = /* @__PURE__ */ new FrozenHeaders({ "content-type": "application/json;charset=UTF-8" });
 function prepareResponseBody(val, event, config) {
-	if (val === null || val === void 0)
-		return {
-			body: "",
-			headers: emptyHeaders,
-		};
+	if (val === null || val === void 0) return {
+		body: "",
+		headers: emptyHeaders
+	};
 	const valType = typeof val;
 	if (valType === "string") return { body: val };
 	if (val instanceof Uint8Array) {
@@ -521,20 +479,18 @@ function prepareResponseBody(val, event, config) {
 		return { body: val };
 	}
 	if (val instanceof HTTPResponse || val?.constructor?.name === "HTTPResponse") return val;
-	if (isJSONSerializable(val, valType))
-		return {
-			body: JSON.stringify(val, void 0, config.debug ? 2 : void 0),
-			headers: jsonHeaders,
-		};
-	if (valType === "bigint")
-		return {
-			body: val.toString(),
-			headers: jsonHeaders,
-		};
+	if (isJSONSerializable(val, valType)) return {
+		body: JSON.stringify(val, void 0, config.debug ? 2 : void 0),
+		headers: jsonHeaders
+	};
+	if (valType === "bigint") return {
+		body: val.toString(),
+		headers: jsonHeaders
+	};
 	if (val instanceof Blob) {
 		const headers = new Headers({
 			"content-type": val.type,
-			"content-length": val.size.toString(),
+			"content-length": val.size.toString()
 		});
 		let filename = val.name;
 		if (filename) {
@@ -543,7 +499,7 @@ function prepareResponseBody(val, event, config) {
 		}
 		return {
 			body: val.stream(),
-			headers,
+			headers
 		};
 	}
 	if (valType === "symbol") return { body: val.toString() };
@@ -551,34 +507,19 @@ function prepareResponseBody(val, event, config) {
 	return { body: val };
 }
 function nullBody(method, status) {
-	return (
-		method === "HEAD" ||
-		status === 100 ||
-		status === 101 ||
-		status === 102 ||
-		status === 204 ||
-		status === 205 ||
-		status === 304
-	);
+	return method === "HEAD" || status === 100 || status === 101 || status === 102 || status === 204 || status === 205 || status === 304;
 }
 function errorResponse(error, debug, errHeaders) {
 	let headers = error.headers ? mergeHeaders$1(jsonHeaders, error.headers) : new Headers(jsonHeaders);
 	if (errHeaders) headers = mergeHeaders$1(headers, errHeaders);
-	return new NodeResponse(
-		JSON.stringify(
-			{
-				...error.toJSON(),
-				stack: debug && error.stack ? error.stack.split("\n").map((l) => l.trim()) : void 0,
-			},
-			void 0,
-			debug ? 2 : void 0,
-		),
-		{
-			status: error.status,
-			statusText: error.statusText,
-			headers,
-		},
-	);
+	return new NodeResponse(JSON.stringify({
+		...error.toJSON(),
+		stack: debug && error.stack ? error.stack.split("\n").map((l) => l.trim()) : void 0
+	}, void 0, debug ? 2 : void 0), {
+		status: error.status,
+		statusText: error.statusText,
+		headers
+	});
 }
 var COOKIE_MAX_AGE_LIMIT = 3456e4;
 function endIndex(str, min, len) {
@@ -605,7 +546,7 @@ function valueSlice(str, min, max) {
 	return str.slice(start, end);
 }
 var NullObject = /* @__PURE__ */ (() => {
-	const C = () => {};
+	const C = function() {};
 	C.prototype = Object.create(null);
 	return C;
 })();
@@ -657,33 +598,24 @@ function serialize(_a0, _a1, _a2) {
 	const isObj = typeof _a0 === "object" && _a0 !== null;
 	const options = isObj ? _a1 : _a2;
 	const stringify = options?.stringify || JSON.stringify;
-	const cookie = isObj
-		? _a0
-		: {
-				..._a2,
-				name: _a0,
-				value: _a1 == void 0 ? "" : typeof _a1 === "string" ? _a1 : stringify(_a1),
-			};
+	const cookie = isObj ? _a0 : {
+		..._a2,
+		name: _a0,
+		value: _a1 == void 0 ? "" : typeof _a1 === "string" ? _a1 : stringify(_a1)
+	};
 	const enc = options?.encode || encodeURIComponent;
 	if (!cookieNameRegExp.test(cookie.name)) throw new TypeError(`argument name is invalid: ${cookie.name}`);
 	const value = cookie.value ? enc(cookie.value) : "";
 	if (!cookieValueRegExp.test(value)) throw new TypeError(`argument val is invalid: ${cookie.value}`);
 	if (!cookie.secure) {
 		if (cookie.partitioned) throw new TypeError(`Partitioned cookies must have the Secure attribute`);
-		if (cookie.sameSite && String(cookie.sameSite).toLowerCase() === "none")
-			throw new TypeError(`SameSite=None cookies must have the Secure attribute`);
+		if (cookie.sameSite && String(cookie.sameSite).toLowerCase() === "none") throw new TypeError(`SameSite=None cookies must have the Secure attribute`);
 		if (cookie.name.length > 9 && cookie.name.charCodeAt(0) === 95 && cookie.name.charCodeAt(1) === 95) {
 			const nameLower = cookie.name.toLowerCase();
-			if (nameLower.startsWith("__secure-") || nameLower.startsWith("__host-"))
-				throw new TypeError(`${cookie.name} cookies must have the Secure attribute`);
+			if (nameLower.startsWith("__secure-") || nameLower.startsWith("__host-")) throw new TypeError(`${cookie.name} cookies must have the Secure attribute`);
 		}
 	}
-	if (
-		cookie.name.length > 7 &&
-		cookie.name.charCodeAt(0) === 95 &&
-		cookie.name.charCodeAt(1) === 95 &&
-		cookie.name.toLowerCase().startsWith("__host-")
-	) {
+	if (cookie.name.length > 7 && cookie.name.charCodeAt(0) === 95 && cookie.name.charCodeAt(1) === 95 && cookie.name.toLowerCase().startsWith("__host-")) {
 		if (cookie.path !== "/") throw new TypeError(`__Host- cookies must have Path=/`);
 		if (cookie.domain) throw new TypeError(`__Host- cookies must not have a Domain attribute`);
 	}
@@ -701,42 +633,37 @@ function serialize(_a0, _a1, _a2) {
 		str += "; Path=" + cookie.path;
 	}
 	if (cookie.expires) {
-		if (!isDate(cookie.expires) || !Number.isFinite(cookie.expires.valueOf()))
-			throw new TypeError(`option expires is invalid: ${cookie.expires}`);
+		if (!isDate(cookie.expires) || !Number.isFinite(cookie.expires.valueOf())) throw new TypeError(`option expires is invalid: ${cookie.expires}`);
 		str += "; Expires=" + cookie.expires.toUTCString();
 	}
 	if (cookie.httpOnly) str += "; HttpOnly";
 	if (cookie.secure) str += "; Secure";
 	if (cookie.partitioned) str += "; Partitioned";
-	if (cookie.priority)
-		switch (typeof cookie.priority === "string" ? cookie.priority.toLowerCase() : void 0) {
-			case "low":
-				str += "; Priority=Low";
-				break;
-			case "medium":
-				str += "; Priority=Medium";
-				break;
-			case "high":
-				str += "; Priority=High";
-				break;
-			default:
-				throw new TypeError(`option priority is invalid: ${cookie.priority}`);
-		}
-	if (cookie.sameSite)
-		switch (typeof cookie.sameSite === "string" ? cookie.sameSite.toLowerCase() : cookie.sameSite) {
-			case true:
-			case "strict":
-				str += "; SameSite=Strict";
-				break;
-			case "lax":
-				str += "; SameSite=Lax";
-				break;
-			case "none":
-				str += "; SameSite=None";
-				break;
-			default:
-				throw new TypeError(`option sameSite is invalid: ${cookie.sameSite}`);
-		}
+	if (cookie.priority) switch (typeof cookie.priority === "string" ? cookie.priority.toLowerCase() : void 0) {
+		case "low":
+			str += "; Priority=Low";
+			break;
+		case "medium":
+			str += "; Priority=Medium";
+			break;
+		case "high":
+			str += "; Priority=High";
+			break;
+		default: throw new TypeError(`option priority is invalid: ${cookie.priority}`);
+	}
+	if (cookie.sameSite) switch (typeof cookie.sameSite === "string" ? cookie.sameSite.toLowerCase() : cookie.sameSite) {
+		case true:
+		case "strict":
+			str += "; SameSite=Strict";
+			break;
+		case "lax":
+			str += "; SameSite=Lax";
+			break;
+		case "none":
+			str += "; SameSite=None";
+			break;
+		default: throw new TypeError(`option sameSite is invalid: ${cookie.sameSite}`);
+	}
 	return str;
 }
 function isDate(val) {
@@ -765,7 +692,7 @@ function parseSetCookie(str, options) {
 	if (options?.decode !== false) value = _decode(value, options?.decode);
 	const setCookie$2 = {
 		name,
-		value,
+		value
 	};
 	let index = _endIdx + 1;
 	while (index < len) {
@@ -782,53 +709,52 @@ function parseSetCookie(str, options) {
 		if (attrEqIdx >= endIdx) attrEqIdx = -1;
 		const attr = attrEqIdx === -1 ? _trim(str, index, endIdx) : _trim(str, index, attrEqIdx);
 		const val = attrEqIdx === -1 ? void 0 : _trim(str, attrEqIdx + 1, endIdx);
-		if (val === void 0 || val.length <= 1024)
-			switch (attr.toLowerCase()) {
-				case "httponly":
-					setCookie$2.httpOnly = true;
-					break;
-				case "secure":
-					setCookie$2.secure = true;
-					break;
-				case "partitioned":
-					setCookie$2.partitioned = true;
-					break;
-				case "domain":
-					if (val) setCookie$2.domain = (val.charCodeAt(0) === 46 ? val.slice(1) : val).toLowerCase();
-					break;
-				case "path":
-					setCookie$2.path = val;
-					break;
-				case "max-age":
-					if (val && maxAgeRegExp.test(val)) setCookie$2.maxAge = Math.min(Number(val), COOKIE_MAX_AGE_LIMIT);
-					break;
-				case "expires": {
-					if (!val) break;
-					const date = new Date(val);
-					if (Number.isFinite(date.valueOf())) {
-						const maxDate = new Date(Date.now() + COOKIE_MAX_AGE_LIMIT * 1e3);
-						setCookie$2.expires = date > maxDate ? maxDate : date;
-					}
-					break;
+		if (val === void 0 || val.length <= 1024) switch (attr.toLowerCase()) {
+			case "httponly":
+				setCookie$2.httpOnly = true;
+				break;
+			case "secure":
+				setCookie$2.secure = true;
+				break;
+			case "partitioned":
+				setCookie$2.partitioned = true;
+				break;
+			case "domain":
+				if (val) setCookie$2.domain = (val.charCodeAt(0) === 46 ? val.slice(1) : val).toLowerCase();
+				break;
+			case "path":
+				setCookie$2.path = val;
+				break;
+			case "max-age":
+				if (val && maxAgeRegExp.test(val)) setCookie$2.maxAge = Math.min(Number(val), COOKIE_MAX_AGE_LIMIT);
+				break;
+			case "expires": {
+				if (!val) break;
+				const date = new Date(val);
+				if (Number.isFinite(date.valueOf())) {
+					const maxDate = new Date(Date.now() + COOKIE_MAX_AGE_LIMIT * 1e3);
+					setCookie$2.expires = date > maxDate ? maxDate : date;
 				}
-				case "priority": {
-					if (!val) break;
-					const priority = val.toLowerCase();
-					if (priority === "low" || priority === "medium" || priority === "high") setCookie$2.priority = priority;
-					break;
-				}
-				case "samesite": {
-					if (!val) break;
-					const sameSite = val.toLowerCase();
-					if (sameSite === "lax" || sameSite === "strict" || sameSite === "none") setCookie$2.sameSite = sameSite;
-					else setCookie$2.sameSite = "lax";
-					break;
-				}
-				default: {
-					const attrLower = attr.toLowerCase();
-					if (attrLower && !(attrLower in _nullProto)) setCookie$2[attrLower] = val;
-				}
+				break;
 			}
+			case "priority": {
+				if (!val) break;
+				const priority = val.toLowerCase();
+				if (priority === "low" || priority === "medium" || priority === "high") setCookie$2.priority = priority;
+				break;
+			}
+			case "samesite": {
+				if (!val) break;
+				const sameSite = val.toLowerCase();
+				if (sameSite === "lax" || sameSite === "strict" || sameSite === "none") setCookie$2.sameSite = sameSite;
+				else setCookie$2.sameSite = "lax";
+				break;
+			}
+			default: {
+				const attrLower = attr.toLowerCase();
+				if (attrLower && !(attrLower in _nullProto)) setCookie$2[attrLower] = val;
+			}
+		}
 		index = endIdx + 1;
 	}
 	return setCookie$2;
@@ -857,7 +783,7 @@ function setCookie(event, name, value, options) {
 		name,
 		value,
 		path: "/",
-		...options,
+		...options
 	});
 	const currentCookies = event.res.headers.getSetCookie();
 	if (currentCookies.length === 0) {
@@ -875,7 +801,11 @@ function setCookie(event, name, value, options) {
 	event.res.headers.append("set-cookie", newCookie);
 }
 function _getDistinctCookieKey(name, options) {
-	return [name, options.domain || "", options.path || "/"].join(";");
+	return [
+		name,
+		options.domain || "",
+		options.path || "/"
+	].join(";");
 }
 var GLOBAL_EVENT_STORAGE_KEY = Symbol.for("tanstack-start:event-storage");
 var globalObj = globalThis;
@@ -900,11 +830,10 @@ function mergeEventResponseHeaders(response, event) {
 	for (const cookie of eventSetCookies) response.headers.append("set-cookie", cookie);
 }
 function attachResponseHeaders(value, event) {
-	if (isPromiseLike(value))
-		return value.then((resolved) => {
-			if (resolved instanceof Response) mergeEventResponseHeaders(resolved, event);
-			return resolved;
-		});
+	if (isPromiseLike(value)) return value.then((resolved) => {
+		if (resolved instanceof Response) mergeEventResponseHeaders(resolved, event);
+		return resolved;
+	});
 	if (value instanceof Response) mergeEventResponseHeaders(value, event);
 	return value;
 }
@@ -914,28 +843,18 @@ function requestHandler(handler) {
 		try {
 			h3Event = new H3Event(request);
 		} catch (error) {
-			if (error instanceof URIError)
-				return new Response(null, {
-					status: 400,
-					statusText: "Bad Request",
-				});
+			if (error instanceof URIError) return new Response(null, {
+				status: 400,
+				statusText: "Bad Request"
+			});
 			throw error;
 		}
-		return toResponse(
-			attachResponseHeaders(
-				eventStorage.run({ h3Event }, () => handler(request, requestOpts)),
-				h3Event,
-			),
-			h3Event,
-		);
+		return toResponse(attachResponseHeaders(eventStorage.run({ h3Event }, () => handler(request, requestOpts)), h3Event), h3Event);
 	};
 }
 function getH3Event() {
 	const event = eventStorage.getStore();
-	if (!event)
-		throw new Error(
-			`No StartEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.`,
-		);
+	if (!event) throw new Error(`No StartEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.`);
 	return event.h3Event;
 }
 function getRequestHeaders() {
@@ -956,11 +875,4 @@ function setCookie$1(name, value, options) {
 function getResponse() {
 	return getH3Event().res;
 }
-export {
-	requestHandler as a,
-	getResponse as i,
-	getCookies as n,
-	setCookie$1 as o,
-	getRequestHeaders as r,
-	getCookie as t,
-};
+export { requestHandler as a, getResponse as i, getCookies as n, setCookie$1 as o, getRequestHeaders as r, getCookie as t };

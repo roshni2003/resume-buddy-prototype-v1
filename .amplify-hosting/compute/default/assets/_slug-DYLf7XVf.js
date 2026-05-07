@@ -1,6 +1,5 @@
-import { createFileRoute, lazyRouteComponent, notFound } from "@tanstack/react-router";
 import { t as api } from "./api-CLpzZUWU.js";
-
+import { createFileRoute, lazyRouteComponent, notFound } from "@tanstack/react-router";
 var $$splitComponentImporter = () => import("./_slug-C37Mg3T7.js");
 const Route = createFileRoute("/$username/$slug")({
 	component: lazyRouteComponent($$splitComponentImporter, "component"),
@@ -14,15 +13,6 @@ const Route = createFileRoute("/$username/$slug")({
 			throw notFound();
 		}
 	},
-	head: ({ loaderData }) => ({
-		meta: [
-			{
-				title:
-					loaderData && "resume" in loaderData && loaderData.resume
-						? `${loaderData.resume.name} - Zoe Resume Builder`
-						: "Zoe Resume Builder",
-			},
-		],
-	}),
+	head: ({ loaderData }) => ({ meta: [{ title: loaderData && "resume" in loaderData && loaderData.resume ? `${loaderData.resume.name} - Zoe Resume Builder` : "Zoe Resume Builder" }] })
 });
 export { Route as t };

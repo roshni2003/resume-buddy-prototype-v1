@@ -21,7 +21,13 @@ export function SkillsSectionBuilder() {
 				}}
 				keyExtractor={(item) => item.id}
 				renderItem={(item) => (
-					<SortableSectionItem key={item.id} type="skills" item={item} title={item.name} subtitle={item.proficiency} />
+					<SortableSectionItem
+						key={item.id}
+						type="skills"
+						item={item}
+						title={item.name}
+						subtitle={item.proficiency}
+					/>
 				)}
 			/>
 
