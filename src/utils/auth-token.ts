@@ -29,28 +29,35 @@ export const isValidToken = (token: string | null): boolean => {
 	return payload.exp > Math.floor(Date.now() / 1000);
 };
 
+/** Small promise-based yield so the browser can commit a storage write before we read back. */
+const yieldTick = (ms = 50): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
- * Persist a token with multiple attempts and a sessionStorage fallback.
+ * Persist a token with multiple awaited attempts and a sessionStorage fallback.
  * Returns true if the token was successfully verified as stored.
+ * MUST be awaited so the caller waits for the write to be committed.
  */
-export const persistAuthToken = (token: string, maxAttempts = 3): boolean => {
+export const persistAuthToken = async (token: string, maxAttempts = 3): Promise<boolean> => {
 	if (typeof window === "undefined") return false;
 
-	// Try localStorage with verification (Shivansh's suggestion: multiple attempts)
 	for (let i = 0; i < maxAttempts; i++) {
 		try {
 			localStorage.setItem(AUTH_TOKEN_KEY, token);
+			// Yield to the browser event loop so the write can be committed
+			await yieldTick(50);
 			if (localStorage.getItem(AUTH_TOKEN_KEY) === token) {
 				return true;
 			}
 		} catch {
-			// localStorage may be blocked — try next attempt or fall through
+			// localStorage may be blocked — wait and retry
+			await yieldTick(50);
 		}
 	}
 
 	// Fallback: sessionStorage (survives page load but not tab close)
 	try {
 		sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+		await yieldTick(50);
 		if (sessionStorage.getItem(AUTH_TOKEN_KEY) === token) {
 			return true;
 		}
@@ -64,39 +71,13 @@ export const persistAuthToken = (token: string, maxAttempts = 3): boolean => {
 export const getAuthToken = (): string | null => {
 	if (typeof window === "undefined") return null;
 
-	// Just-in-time extraction to catch soft navigations or pre-hydration queries natively
-	try {
-		const url = new URL(window.location.href);
-		let extractedToken = url.searchParams.get("token");
-		if (!extractedToken && url.hash.includes("token=")) {
-			extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
-		}
-		if (extractedToken && extractedToken !== "preview") {
-			// Persist using multi-attempt logic
-			persistAuthToken(extractedToken);
-
-			// Clean the URL so the token is not visible or accidentally shared
-			url.searchParams.delete("token");
-			const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
-			if (hashParams.has("token")) {
-				hashParams.delete("token");
-				url.hash = hashParams.toString();
-			}
-			if (window.history.replaceState) {
-				window.history.replaceState({}, "", url.toString());
-			}
-		}
-	} catch {
-		// ignore
-	}
-
-	// Check localStorage first, then sessionStorage as fallback
+	// Read stored token from localStorage, with sessionStorage as fallback
 	return localStorage.getItem(AUTH_TOKEN_KEY) ?? sessionStorage.getItem(AUTH_TOKEN_KEY);
 };
 
 /**
- * Extract raw token from URL without triggering side effects (no localStorage writes, no URL cleanup).
- * Used to decide whether to allow rendering before useEffect can persist the token.
+ * Extract raw token from URL without triggering side effects (no storage writes, no URL cleanup).
+ * Used by beforeLoad to decide whether to allow rendering before useEffect persists the token.
  */
 export const getUrlToken = (): string | null => {
 	if (typeof window === "undefined") return null;

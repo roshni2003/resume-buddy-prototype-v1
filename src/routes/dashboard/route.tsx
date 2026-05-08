@@ -17,15 +17,23 @@ export const Route = createFileRoute("/dashboard")({
 		const url = new URL(window.location.href);
 		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
 
+		// If there's a token in the URL, await its persistence before reading back
+		const urlToken = getUrlToken();
+		if (urlToken) {
+			await persistAuthToken(urlToken);
+		}
+
 		const token = getAuthToken();
 		const hasZuvySession = Boolean(context.session?.user);
 		const hasToken = isValidToken(token);
 
-		if (!hasToken && token) localStorage.removeItem("authToken");
+		if (!hasToken && token) {
+			localStorage.removeItem("authToken");
+			sessionStorage.removeItem("authToken");
+		}
 
-		// Shivansh's fix: if a token is present in the URL, do NOT redirect immediately.
-		// The RouteComponent's useEffect will make multiple attempts to persist it.
-		const urlToken = getUrlToken();
+		// If a URL token exists but we still couldn't persist it, let the component
+		// try again via useEffect rather than immediately redirecting to Zuvy.
 		const hasUrlToken = isValidToken(urlToken);
 
 		if (!hasToken && !hasZuvySession && !hasUrlToken && !devBypass) {
@@ -42,36 +50,38 @@ function RouteComponent() {
 	useLingui();
 	const navigate = useNavigate();
 
-	// Shivansh's suggestion: use useEffect to retry token storage after render,
-	// and recheck that the token is actually stored before deciding to redirect.
+	// Shivansh's suggestion: use useEffect with await so the browser has a chance
+	// to commit the storage write, then recheck before deciding whether to redirect.
 	useEffect(() => {
-		const url = new URL(window.location.href);
-		let urlToken = url.searchParams.get("token");
-		if (!urlToken && url.hash.includes("token=")) {
-			urlToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
-		}
-
-		if (urlToken && urlToken !== "preview") {
-			// Multiple attempts to persist the token (Shivansh's suggestion)
-			const stored = persistAuthToken(urlToken);
-
-			// Recheck: verify the token is actually stored after our persistence attempts
-			const storedToken = localStorage.getItem("authToken") ?? sessionStorage.getItem("authToken");
-
-			// Clean the URL so the token is no longer visible
-			url.searchParams.delete("token");
-			const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
-			if (hashParams.has("token")) {
-				hashParams.delete("token");
-				url.hash = hashParams.toString();
+		void (async () => {
+			const url = new URL(window.location.href);
+			let urlToken = url.searchParams.get("token");
+			if (!urlToken && url.hash.includes("token=")) {
+				urlToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
 			}
-			window.history.replaceState({}, "", url.toString());
 
-			// If we still couldn't store and couldn't verify → redirect to Zuvy
-			if (!stored || !isValidToken(storedToken)) {
-				void navigate({ to: buildZuvyLoginUrl(window.location.origin) as never });
+			if (urlToken && urlToken !== "preview") {
+				// Await multiple storage attempts (Shivansh's fix)
+				await persistAuthToken(urlToken);
+
+				// Recheck: verify the token is actually retrievable after awaited persistence
+				const storedToken = getAuthToken();
+
+				// Clean the URL so the token is no longer visible
+				url.searchParams.delete("token");
+				const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+				if (hashParams.has("token")) {
+					hashParams.delete("token");
+					url.hash = hashParams.toString();
+				}
+				window.history.replaceState({}, "", url.toString());
+
+				// Only redirect to Zuvy if the token is truly unreadable after all retries
+				if (!isValidToken(storedToken)) {
+					void navigate({ to: buildZuvyLoginUrl(window.location.origin) as never });
+				}
 			}
-		}
+		})();
 	}, [navigate]);
 
 	return (

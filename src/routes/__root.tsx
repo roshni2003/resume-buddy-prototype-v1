@@ -18,6 +18,7 @@ import { getSession } from "@/integrations/auth/functions";
 import type { AuthSession } from "@/integrations/auth/types";
 import { client, type orpc } from "@/integrations/orpc/client";
 import type { FeatureFlags } from "@/integrations/orpc/services/flags";
+import { persistAuthToken } from "@/utils/auth-token";
 import { getLocale, isRTL, type Locale, loadLocale } from "@/utils/locale";
 import { getTheme, type Theme } from "@/utils/theme";
 import appCss from "../styles/globals.css?url";
@@ -122,6 +123,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 	},
 	beforeLoad: async () => {
 		// Extract token from URL *here* — before any child route (/_home/) can redirect and strip ?token=
+		// Shivansh's fix: await persistAuthToken so the browser commits the write before we continue
 		if (typeof window !== "undefined") {
 			try {
 				const url = new URL(window.location.href);
@@ -130,7 +132,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 					token = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
 				}
 				if (token && token !== "preview") {
-					localStorage.setItem("authToken", token);
+					await persistAuthToken(token);
 				}
 			} catch {
 				// ignore
