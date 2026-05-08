@@ -32,8 +32,40 @@ export const isValidToken = (token: string | null): boolean => {
 export const getAuthToken = (): string | null => {
 	if (typeof window === "undefined") return null;
 
-	// Read stored token from localStorage, with sessionStorage as fallback
 	return localStorage.getItem(AUTH_TOKEN_KEY) ?? sessionStorage.getItem(AUTH_TOKEN_KEY);
+};
+
+const yieldTick = (ms = 50): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const persistAuthToken = async (token: string, maxAttempts = 3): Promise<boolean> => {
+	if (typeof window === "undefined") return false;
+
+	for (let i = 0; i < maxAttempts; i++) {
+		try {
+			localStorage.setItem(AUTH_TOKEN_KEY, token);
+			// Yield to the browser event loop so the write can be committed
+			await yieldTick(50);
+			if (localStorage.getItem(AUTH_TOKEN_KEY) === token) {
+				return true;
+			}
+		} catch {
+			// localStorage may be blocked — wait and retry
+			await yieldTick(50);
+		}
+	}
+
+	// Fallback: sessionStorage (survives page load but not tab close)
+	try {
+		sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+		await yieldTick(50);
+		if (sessionStorage.getItem(AUTH_TOKEN_KEY) === token) {
+			return true;
+		}
+	} catch {
+		// ignore
+	}
+
+	return false;
 };
 
 /**

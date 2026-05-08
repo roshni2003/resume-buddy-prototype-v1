@@ -179,7 +179,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 									)}
 
 									{/* Detailed Checks - Collapsible */}
-									{/* <div className="space-y-2">
+									<div className="space-y-2">
 										<Button
 											variant="outline"
 											size="sm"
@@ -209,7 +209,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 																<Trans>Photo Verdict</Trans>:
 															</span>
 															<p className="mt-1 text-muted-foreground text-sm">
-																{result.detailed_checks?.photo_verdict ?? "N/A"}
+																{result.detailed_checks.photo_verdict}
 															</p>
 														</div>
 														<Separator />
@@ -217,7 +217,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 															<span className="font-medium text-sm">
 																<Trans>Link Status</Trans>:
 															</span>
-															<p className="mt-1 text-muted-foreground text-sm">{result.detailed_checks?.link_status ?? "N/A"}</p>
+															<p className="mt-1 text-muted-foreground text-sm">{result.detailed_checks.link_status}</p>
 														</div>
 														<Separator />
 														<div>
@@ -225,14 +225,14 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 																<Trans>Grammar & Tense</Trans>:
 															</span>
 															<p className="mt-1 text-muted-foreground text-sm">
-																{result.detailed_checks?.grammar_tense ?? "N/A"}
+																{result.detailed_checks.grammar_tense}
 															</p>
 														</div>
 													</div>
 												</motion.div>
 											)}
 										</AnimatePresence>
-									</div> */}
+									</div>
 								</div>
 							</div>
 
