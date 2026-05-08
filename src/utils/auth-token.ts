@@ -44,10 +44,10 @@ export const getAuthToken = (): string | null => {
 			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
 
 			// Clean the URL so the token is not visible or accidentally shared
-			url.searchParams.delete("token");
-			if (window.history.replaceState) {
-				window.history.replaceState({}, "", url.toString());
-			}
+			// url.searchParams.delete("token");
+			// if (window.history.replaceState) {
+			// 	window.history.replaceState({}, "", url.toString());
+			// }
 		}
 	} catch {
 		// ignore

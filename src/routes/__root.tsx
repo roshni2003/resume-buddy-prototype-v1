@@ -92,16 +92,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 							}
 							if (extracted && extracted !== 'preview') {
 								localStorage.setItem('authToken', extracted);
-								
-								// Clean URL immediately
-								url.searchParams.delete('token');
-								var hashParams = new URLSearchParams(url.hash.replace(/^#\\/?/, ''));
-								if (hashParams.has('token')) {
-									hashParams.delete('token');
-									var newHash = hashParams.toString();
-									url.hash = newHash ? newHash : '';
-								}
-								window.history.replaceState({}, '', url.toString());
 							}
 						} catch(e) {}
 					`,
