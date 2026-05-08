@@ -32,7 +32,16 @@ export const isValidToken = (token: string | null): boolean => {
 export const getAuthToken = (): string | null => {
 	if (typeof window === "undefined") return null;
 
-	// Just-in-time extraction to catch soft navigations or pre-hydration queries natively
+	// Read stored token from localStorage, with sessionStorage as fallback
+	return localStorage.getItem(AUTH_TOKEN_KEY) ?? sessionStorage.getItem(AUTH_TOKEN_KEY);
+};
+
+/**
+ * Extract raw token from URL without triggering side effects (no storage writes, no URL cleanup).
+ * Used by beforeLoad to decide whether to allow rendering before useEffect persists the token.
+ */
+export const getUrlToken = (): string | null => {
+	if (typeof window === "undefined") return null;
 	try {
 		const url = new URL(window.location.href);
 		let extractedToken = url.searchParams.get("token");
@@ -52,6 +61,5 @@ export const getAuthToken = (): string | null => {
 	} catch {
 		// ignore
 	}
-
-	return localStorage.getItem(AUTH_TOKEN_KEY);
+	return null;
 };

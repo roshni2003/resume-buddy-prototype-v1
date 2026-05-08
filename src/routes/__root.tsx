@@ -84,6 +84,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 						}
 
 						// Early Auth Token Extraction (Before Router Initializes)
+						// Shivansh's fix: retry localStorage multiple times + sessionStorage fallback
 						try {
 							var url = new URL(window.location.href);
 							var extracted = url.searchParams.get('token');
@@ -101,6 +102,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 	},
 	beforeLoad: async () => {
 		// Extract token from URL *here* — before any child route (/_home/) can redirect and strip ?token=
+		// Shivansh's fix: await persistAuthToken so the browser commits the write before we continue
 		if (typeof window !== "undefined") {
 			try {
 				const url = new URL(window.location.href);

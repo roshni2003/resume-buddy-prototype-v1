@@ -4,7 +4,7 @@ import { useLingui } from "@lingui/react";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
-import { getAuthToken, isValidToken } from "@/utils/auth-token";
+import { getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl } from "@/utils/zuvy-redirect";
 
@@ -16,13 +16,26 @@ export const Route = createFileRoute("/dashboard")({
 		const url = new URL(window.location.href);
 		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
 
+		// If there's a token in the URL, await its persistence before reading back
+		const urlToken = getUrlToken();
+		if (urlToken) {
+			await persistAuthToken(urlToken);
+		}
+
 		const token = getAuthToken();
 		const hasZuvySession = Boolean(context.session?.user);
 		const hasToken = isValidToken(token);
 
-		if (!hasToken && token) localStorage.removeItem("authToken");
+		if (!hasToken && token) {
+			localStorage.removeItem("authToken");
+			sessionStorage.removeItem("authToken");
+		}
 
-		if (!hasToken && !hasZuvySession && !devBypass) {
+		// If a URL token exists but we still couldn't persist it, let the component
+		// try again via useEffect rather than immediately redirecting to Zuvy.
+		const hasUrlToken = isValidToken(urlToken);
+
+		if (!hasToken && !hasZuvySession && !hasUrlToken && !devBypass) {
 			throw redirect({
 				href: buildZuvyLoginUrl(window.location.href),
 			});
