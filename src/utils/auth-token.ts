@@ -3,6 +3,18 @@ const AUTH_TOKEN_KEY = "authToken";
 // iOS Safari private mode in cases where localStorage silently drops writes.
 const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
+// Diagnostic logging — left enabled while we debug devices where storage writes
+// silently drop. Search the console for "[auth-debug]" to trace token flow.
+const DEBUG = true;
+const tokenTail = (token: string | null | undefined) =>
+	token ? `…${token.slice(-8)} (len=${token.length})` : String(token);
+const log = (...args: unknown[]) => {
+	if (DEBUG && typeof console !== "undefined") {
+		// eslint-disable-next-line no-console
+		console.log("[auth-debug]", ...args);
+	}
+};
+
 type JwtPayload = {
 	exp?: number;
 };
@@ -78,22 +90,32 @@ export const getAuthToken = (): string | null => {
 	const fromLocal = (() => {
 		try {
 			return localStorage.getItem(AUTH_TOKEN_KEY);
-		} catch {
+		} catch (e) {
+			log("getAuthToken: localStorage.getItem threw", e);
 			return null;
 		}
 	})();
-	if (fromLocal) return fromLocal;
+	if (fromLocal) {
+		log("getAuthToken: found in localStorage", tokenTail(fromLocal));
+		return fromLocal;
+	}
 
 	const fromSession = (() => {
 		try {
 			return sessionStorage.getItem(AUTH_TOKEN_KEY);
-		} catch {
+		} catch (e) {
+			log("getAuthToken: sessionStorage.getItem threw", e);
 			return null;
 		}
 	})();
-	if (fromSession) return fromSession;
+	if (fromSession) {
+		log("getAuthToken: found in sessionStorage", tokenTail(fromSession));
+		return fromSession;
+	}
 
-	return getCookie(AUTH_TOKEN_KEY);
+	const fromCookie = getCookie(AUTH_TOKEN_KEY);
+	log("getAuthToken: cookie =", tokenTail(fromCookie));
+	return fromCookie;
 };
 
 /** Wipe the auth token from every store. Used by logout and the 401 handler. */
@@ -123,39 +145,50 @@ const yieldTick = (ms = 50): Promise<void> => new Promise((resolve) => setTimeou
 export const persistAuthToken = async (token: string, maxAttempts = 3): Promise<boolean> => {
 	if (typeof window === "undefined") return false;
 
+	log("persistAuthToken: start", tokenTail(token));
 	let storedSomewhere = false;
 
 	// 1. localStorage with retries + yield ticks (handles deferred-commit devices)
+	let localOk = false;
 	for (let i = 0; i < maxAttempts; i++) {
 		try {
 			localStorage.setItem(AUTH_TOKEN_KEY, token);
 			await yieldTick(50);
-			if (localStorage.getItem(AUTH_TOKEN_KEY) === token) {
+			const readback = localStorage.getItem(AUTH_TOKEN_KEY);
+			if (readback === token) {
+				localOk = true;
 				storedSomewhere = true;
 				break;
 			}
-		} catch {
+			log("persistAuthToken: localStorage attempt", i + 1, "readback mismatch", tokenTail(readback));
+		} catch (e) {
+			log("persistAuthToken: localStorage.setItem threw on attempt", i + 1, e);
 			await yieldTick(50);
 		}
 	}
+	log("persistAuthToken: localStorage result", localOk ? "OK" : "FAILED");
 
 	// 2. sessionStorage — always attempt as a parallel store, not just on localStorage failure.
+	let sessionOk = false;
 	try {
 		sessionStorage.setItem(AUTH_TOKEN_KEY, token);
 		await yieldTick(50);
 		if (sessionStorage.getItem(AUTH_TOKEN_KEY) === token) {
+			sessionOk = true;
 			storedSomewhere = true;
 		}
-	} catch {
-		// ignore
+	} catch (e) {
+		log("persistAuthToken: sessionStorage.setItem threw", e);
 	}
+	log("persistAuthToken: sessionStorage result", sessionOk ? "OK" : "FAILED");
 
 	// 3. First-party cookie — survives some in-app browsers and Safari private mode
 	//    where Web Storage is silently broken. Always attempted as a third fallback.
-	if (setCookie(AUTH_TOKEN_KEY, token, AUTH_COOKIE_MAX_AGE_SECONDS)) {
-		storedSomewhere = true;
-	}
+	const cookieOk = setCookie(AUTH_TOKEN_KEY, token, AUTH_COOKIE_MAX_AGE_SECONDS);
+	if (cookieOk) storedSomewhere = true;
+	log("persistAuthToken: cookie result", cookieOk ? "OK" : "FAILED");
 
+	log("persistAuthToken: done — storedSomewhere =", storedSomewhere);
 	return storedSomewhere;
 };
 
@@ -172,10 +205,12 @@ export const getUrlToken = (): string | null => {
 			extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
 		}
 		if (extractedToken && extractedToken !== "preview") {
+			log("getUrlToken: extracted from URL", tokenTail(extractedToken));
 			return extractedToken;
 		}
-	} catch {
-		// ignore
+		log("getUrlToken: no token in URL (search or hash)");
+	} catch (e) {
+		log("getUrlToken: threw", e);
 	}
 	return null;
 };

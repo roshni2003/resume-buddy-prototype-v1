@@ -88,23 +88,38 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 						// Write to every available store synchronously so devices that drop
 						// localStorage writes (iOS Safari private, in-app WebViews) can still
 						// pick up the token via sessionStorage or the first-party cookie.
+						// Diagnostic logs are prefixed with "[auth-debug] inline:" — filter the
+						// console for "[auth-debug]" to trace the full token flow.
 						try {
+							console.log('[auth-debug] inline: script start, href=', window.location.href);
 							var url = new URL(window.location.href);
 							var extracted = url.searchParams.get('token');
 							if (!extracted && url.hash.includes('token=')) {
 								extracted = new URLSearchParams(url.hash.replace(/^#\\/?/, '')).get('token');
 							}
+							var tail = extracted ? ('…' + extracted.slice(-8) + ' (len=' + extracted.length + ')') : String(extracted);
+							console.log('[auth-debug] inline: url token =', tail);
 							if (extracted && extracted !== 'preview') {
-								try { localStorage.setItem('authToken', extracted); } catch(e) {}
-								try { sessionStorage.setItem('authToken', extracted); } catch(e) {}
+								try {
+									localStorage.setItem('authToken', extracted);
+									var lsBack = localStorage.getItem('authToken');
+									console.log('[auth-debug] inline: localStorage write', lsBack === extracted ? 'OK' : 'MISMATCH', '(read tail=' + (lsBack ? lsBack.slice(-8) : lsBack) + ')');
+								} catch(e) { console.log('[auth-debug] inline: localStorage threw', e); }
+								try {
+									sessionStorage.setItem('authToken', extracted);
+									var ssBack = sessionStorage.getItem('authToken');
+									console.log('[auth-debug] inline: sessionStorage write', ssBack === extracted ? 'OK' : 'MISMATCH');
+								} catch(e) { console.log('[auth-debug] inline: sessionStorage threw', e); }
 								try {
 									var isHttps = window.location.protocol === 'https:';
 									document.cookie = 'authToken=' + encodeURIComponent(extracted)
 										+ '; Path=/; Max-Age=604800; SameSite=Lax'
 										+ (isHttps ? '; Secure' : '');
-								} catch(e) {}
+									var cookieOk = document.cookie.indexOf('authToken=') !== -1;
+									console.log('[auth-debug] inline: cookie write', cookieOk ? 'OK' : 'NOT FOUND', '(document.cookie snippet=' + document.cookie.slice(0, 100) + ')');
+								} catch(e) { console.log('[auth-debug] inline: cookie threw', e); }
 							}
-						} catch(e) {}
+						} catch(e) { console.log('[auth-debug] inline: outer threw', e); }
 					`,
 				},
 			],

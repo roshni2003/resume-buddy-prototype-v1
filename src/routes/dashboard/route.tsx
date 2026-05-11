@@ -41,6 +41,14 @@ export const Route = createFileRoute("/dashboard")({
 
 		const hasUrlToken = isValidToken(urlToken);
 
+		console.log("[auth-debug] dashboard.beforeLoad", {
+			hasUrlToken,
+			hasToken,
+			hasZuvySession,
+			devBypass,
+			willGate: !hasToken && !hasZuvySession && !hasUrlToken && !devBypass,
+		});
+
 		// Don't redirect to Zuvy immediately — render AuthGate which polls for up to 60s
 		// in case the storage write commits late on a slow/locked-down device.
 		if (!hasToken && !hasZuvySession && !hasUrlToken && !devBypass) {
@@ -71,15 +79,23 @@ function AuthGate() {
 			}
 
 			const token = getAuthToken();
+			const elapsed = Date.now() - start;
+			console.log("[auth-debug] AuthGate.tick", {
+				elapsedMs: elapsed,
+				hasUrlToken: Boolean(urlToken),
+				tokenInStore: Boolean(token),
+				tokenValid: isValidToken(token),
+			});
 			if (isValidToken(token)) {
 				// Storage finally has a valid token — reload so the route re-runs
 				// beforeLoad and renders the dashboard with auth.
+				console.log("[auth-debug] AuthGate.tick: token landed, reloading");
 				window.location.reload();
 				return;
 			}
 
-			const elapsed = Date.now() - start;
 			if (elapsed >= AUTH_GATE_TIMEOUT_MS) {
+				console.log("[auth-debug] AuthGate.tick: timed out, redirecting to Zuvy");
 				redirectToZuvyLogin();
 				return;
 			}
