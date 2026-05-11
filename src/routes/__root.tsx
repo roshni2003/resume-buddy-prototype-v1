@@ -84,8 +84,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 							document.documentElement.classList.remove('dark');
 						}
 
-						// Early Auth Token Extraction (Before Router Initializes)
-						// Shivansh's fix: retry localStorage multiple times + sessionStorage fallback
+						// Early Auth Token Extraction (Before Router Initializes).
+						// Write to every available store synchronously so devices that drop
+						// localStorage writes (iOS Safari private, in-app WebViews) can still
+						// pick up the token via sessionStorage or the first-party cookie.
 						try {
 							var url = new URL(window.location.href);
 							var extracted = url.searchParams.get('token');
@@ -93,7 +95,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 								extracted = new URLSearchParams(url.hash.replace(/^#\\/?/, '')).get('token');
 							}
 							if (extracted && extracted !== 'preview') {
-								localStorage.setItem('authToken', extracted);
+								try { localStorage.setItem('authToken', extracted); } catch(e) {}
+								try { sessionStorage.setItem('authToken', extracted); } catch(e) {}
+								try {
+									var isHttps = window.location.protocol === 'https:';
+									document.cookie = 'authToken=' + encodeURIComponent(extracted)
+										+ '; Path=/; Max-Age=604800; SameSite=Lax'
+										+ (isHttps ? '; Secure' : '');
+								} catch(e) {}
 							}
 						} catch(e) {}
 					`,

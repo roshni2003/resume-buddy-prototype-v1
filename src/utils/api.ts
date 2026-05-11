@@ -1,5 +1,5 @@
 import type { ResumeData } from "@/schema/resume/data";
-import { getAuthToken } from "@/utils/auth-token";
+import { clearAuthToken, getAuthToken } from "@/utils/auth-token";
 import { redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
 const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
@@ -36,10 +36,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	}
 
 	if (response.status === 401) {
-		if (typeof window !== "undefined") {
-			localStorage.removeItem("authToken");
-			sessionStorage.removeItem("authToken");
-		}
+		clearAuthToken();
 		redirectToZuvyLogin();
 		throw new Error("Unauthorized");
 	}
