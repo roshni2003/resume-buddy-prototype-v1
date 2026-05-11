@@ -6,6 +6,7 @@ import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import router from "@/integrations/orpc/router";
+import { getAuthToken } from "@/utils/auth-token";
 import { getLocale } from "@/utils/locale";
 
 export const getORPCClient = createIsomorphicFn()
@@ -41,7 +42,7 @@ export const getORPCClient = createIsomorphicFn()
 					});
 				}
 
-				const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+				const token = getAuthToken();
 				if (token) {
 					headers.set("Authorization", `Bearer ${token}`);
 				}

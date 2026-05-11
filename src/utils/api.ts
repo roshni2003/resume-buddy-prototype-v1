@@ -38,6 +38,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	if (response.status === 401) {
 		if (typeof window !== "undefined") {
 			localStorage.removeItem("authToken");
+			sessionStorage.removeItem("authToken");
 		}
 		redirectToZuvyLogin();
 		throw new Error("Unauthorized");

@@ -81,14 +81,7 @@ export const getUrlToken = (): string | null => {
 			extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
 		}
 		if (extractedToken && extractedToken !== "preview") {
-			// Store the token immediately so it is persisted
-			localStorage.setItem(AUTH_TOKEN_KEY, extractedToken);
-
-			// Clean the URL so the token is not visible or accidentally shared
-			// url.searchParams.delete("token");
-			// if (window.history.replaceState) {
-			// 	window.history.replaceState({}, "", url.toString());
-			// }
+			return extractedToken;
 		}
 	} catch {
 		// ignore

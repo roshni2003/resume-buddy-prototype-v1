@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getAuthToken } from "@/utils/auth-token";
 
 export interface User {
 	id: string;
@@ -16,7 +17,7 @@ export const useAuth = () => {
 
 	useEffect(() => {
 		const loadAuth = () => {
-			const storedToken = localStorage.getItem("authToken");
+			const storedToken = getAuthToken();
 			setToken(storedToken);
 
 			if (storedToken) {
@@ -45,6 +46,7 @@ export const useAuth = () => {
 
 	const logout = () => {
 		localStorage.removeItem("authToken");
+		sessionStorage.removeItem("authToken");
 		setUser(null);
 		setToken(null);
 		window.location.href = `https://app.zuvy.org/?zoeRedirectUrl=zoe.zuvy.org%3FreturnUrl%3D${encodeURIComponent(window.location.origin)}`;
