@@ -1,6 +1,5 @@
 import type { ResumeData } from "@/schema/resume/data";
 import { clearAuthToken, getAuthToken } from "@/utils/auth-token";
-import { redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
 const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
 
@@ -36,8 +35,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	}
 
 	if (response.status === 401) {
+		// Don't redirect to Zuvy directly from here — that bypasses the AuthGate's 60s
+		// retry window and creates an immediate loop on devices where storage is slow
+		// to commit. Clear the (now-rejected) token and send the user to the dashboard,
+		// which renders AuthGate and gives storage another chance before bouncing to Zuvy.
 		clearAuthToken();
-		redirectToZuvyLogin();
+		if (typeof window !== "undefined" && window.location.pathname !== "/dashboard/resumes") {
+			window.location.href = "/dashboard/resumes";
+		}
 		throw new Error("Unauthorized");
 	}
 
