@@ -3,8 +3,12 @@ import { useState } from "react";
 import { templates } from "@/dialogs/resume/template/data";
 
 export const Route = createFileRoute("/_home/")({
-	beforeLoad: ({ search }) => {
-		throw redirect({ to: "/dashboard/resumes", search });
+	beforeLoad: ({ location }) => {
+		// IMPORTANT: Do NOT use `search` here — TanStack Router strips unknown params
+		// (like ?token=) from the validated search object when there is no validateSearch.
+		// Use location.searchStr (raw query string) with href to safely forward
+		// the token through the SSR redirect to /dashboard/resumes.
+		throw redirect({ href: `/dashboard/resumes${location.searchStr}` });
 	},
 	component: () => null,
 });
