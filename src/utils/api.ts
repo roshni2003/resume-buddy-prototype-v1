@@ -1,5 +1,5 @@
 import type { ResumeData } from "@/schema/resume/data";
-import { clearAuthToken, getAuthToken } from "@/utils/auth-token";
+import { getAuthToken } from "@/utils/auth-token";
 
 const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
 
@@ -30,15 +30,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	});
 
 	if (response.status === 401) {
-		console.log("[auth-debug] api.request: 401 — backend REJECTED the token, calling clearAuthToken now");
-		// Don't redirect to Zuvy directly from here — that bypasses the AuthGate's 60s
-		// retry window and creates an immediate loop on devices where storage is slow
-		// to commit. Clear the (now-rejected) token and send the user to the dashboard,
-		// which renders AuthGate and gives storage another chance before bouncing to Zuvy.
-		clearAuthToken();
-		if (typeof window !== "undefined" && window.location.pathname !== "/dashboard/resumes") {
-			window.location.href = "/dashboard/resumes";
-		}
+		// Don't wipe the token here. The 401 means the backend rejected this token,
+		// but that doesn't tell us *why* — it could be a backend misconfiguration
+		// (wrong signing secret, wrong audience, missing user) and the token may still
+		// be valid for other purposes. Clearing the storage destroys the only evidence
+		// the user successfully authenticated and makes the failure mode look like
+		// "storage is broken" when it isn't.
+		//
+		// Log the response body so the cause is visible in the console, then surface
+		// the error to the caller (React Query). The token stays put.
+		const bodyText = await response
+			.clone()
+			.text()
+			.catch(() => "<unreadable>");
+		console.log("[auth-debug] api.request: 401 — backend rejected token. Body:", bodyText);
 		throw new Error("Unauthorized");
 	}
 
