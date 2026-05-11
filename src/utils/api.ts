@@ -7,14 +7,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const url = path.startsWith("http") ? path : `${VITE_AI_BASE_URL_DEV}${path}`;
 	const token = getAuthToken();
 
-	if (import.meta.env.DEV) {
-		// eslint-disable-next-line no-console
-		console.log("🚀 API Request", {
-			method: options.method ?? "GET",
-			url,
-			hasToken: Boolean(token),
-		});
-	}
+	console.log("[auth-debug] api.request: sending", {
+		method: options.method ?? "GET",
+		url,
+		hasAuthHeader: Boolean(token),
+		tokenTail: token ? `…${token.slice(-8)}` : null,
+	});
 
 	const response = await fetch(url, {
 		...options,
@@ -25,16 +23,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 		},
 	});
 
-	if (import.meta.env.DEV) {
-		// eslint-disable-next-line no-console
-		console.log("✅ API Response", {
-			url,
-			status: response.status,
-			ok: response.ok,
-		});
-	}
+	console.log("[auth-debug] api.request: response", {
+		url,
+		status: response.status,
+		ok: response.ok,
+	});
 
 	if (response.status === 401) {
+		console.log("[auth-debug] api.request: 401 — backend REJECTED the token, calling clearAuthToken now");
 		// Don't redirect to Zuvy directly from here — that bypasses the AuthGate's 60s
 		// retry window and creates an immediate loop on devices where storage is slow
 		// to commit. Clear the (now-rejected) token and send the user to the dashboard,

@@ -121,6 +121,10 @@ export const getAuthToken = (): string | null => {
 /** Wipe the auth token from every store. Used by logout and the 401 handler. */
 export const clearAuthToken = (): void => {
 	if (typeof window === "undefined") return;
+	// Capture a stack trace so we can see *who* wiped the token (401 handler? logout?
+	// dashboard's stale-token cleanup?). This is critical for debugging the "token
+	// disappears from storage" symptom on broken devices.
+	log("clearAuthToken: CALLED — wiping all three stores", new Error("clearAuthToken stack").stack);
 	try {
 		localStorage.removeItem(AUTH_TOKEN_KEY);
 	} catch {
