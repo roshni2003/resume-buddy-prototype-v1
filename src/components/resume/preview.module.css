@@ -7,6 +7,9 @@
 	line-height: var(--page-body-line-height);
 	color: var(--page-text-color);
 	background-color: var(--page-background-color);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: geometricPrecision;
 
 	&:not(:first-child) {
 		content-visibility: auto;
@@ -59,7 +62,8 @@
 		}
 	}
 
-	strong {
+	strong,
+	b {
 		font-weight: var(--page-body-font-weight-bold);
 	}
 
@@ -115,5 +119,28 @@
 	ul:has(li[style*="text-align: left"]),
 	ol:has(li[style*="text-align: left"]) {
 		direction: ltr;
+	}
+}
+
+.scanner {
+	position: absolute;
+	left: 0;
+	z-index: 50;
+	width: 100%;
+	height: 4px;
+	pointer-events: none;
+	background: linear-gradient(to bottom, transparent, #3b82f6, transparent);
+	box-shadow: 0 0 15px 2px #60a5fa;
+	opacity: 0.8;
+	animation: scan 4s ease-in-out infinite;
+}
+
+@keyframes scan {
+	0%,
+	100% {
+		top: 0%;
+	}
+	50% {
+		top: 100%;
 	}
 }

@@ -1,55 +1,165 @@
-import { t } from "@lingui/core/macro";
+// import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import { ReadCvLogoIcon, UserCircleIcon } from "@phosphor-icons/react";
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+// import { ReadCvLogoIcon } from "@phosphor-icons/react";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
+import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
+import { redirectToZuvyLogin } from "@/utils/zuvy-redirect";
+
+// On some devices (iOS Safari private mode, Facebook/Instagram in-app browsers) the
+// localStorage write committed in beforeLoad doesn't reflect immediately on the next read.
+// Instead of redirecting back to Zuvy on the first miss, render <AuthGate /> and keep
+// retrying for up to 60s before giving up. This breaks the redirect loop in the common
+// case where the storage write succeeds a moment later.
+const AUTH_GATE_TIMEOUT_MS = 60_000;
+const AUTH_GATE_POLL_MS = 500;
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
-	// Removed auth redirect to allow public access to dashboard
 	beforeLoad: async ({ context }) => {
-		// No authentication required; return session if present
-		return { session: context.session };
+		if (typeof window === "undefined") return { session: context.session, needsAuth: false };
+
+		const url = new URL(window.location.href);
+		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
+
+		// If there's a token in the URL, await its persistence before reading back
+		const urlToken = getUrlToken();
+		if (urlToken) {
+			await persistAuthToken(urlToken);
+		}
+
+		const token = getAuthToken();
+		const hasZuvySession = Boolean(context.session?.user);
+		const hasToken = isValidToken(token);
+
+		if (!hasToken && token) {
+			clearAuthToken();
+		}
+
+		const hasUrlToken = isValidToken(urlToken);
+
+		console.log("[auth-debug] dashboard.beforeLoad", {
+			hasUrlToken,
+			hasToken,
+			hasZuvySession,
+			devBypass,
+			willGate: !hasToken && !hasZuvySession && !hasUrlToken && !devBypass,
+		});
+
+		// Don't redirect to Zuvy immediately — render AuthGate which polls for up to 60s
+		// in case the storage write commits late on a slow/locked-down device.
+		if (!hasToken && !hasZuvySession && !hasUrlToken && !devBypass) {
+			return { session: context.session, needsAuth: true };
+		}
+
+		return { session: context.session, needsAuth: false };
 	},
 });
 
+function AuthGate() {
+	const [secondsLeft, setSecondsLeft] = useState(Math.ceil(AUTH_GATE_TIMEOUT_MS / 1000));
+
+	useEffect(() => {
+		const start = Date.now();
+		let cancelled = false;
+		let timer: ReturnType<typeof setTimeout> | null = null;
+
+		const tick = async () => {
+			if (cancelled) return;
+
+			// Re-attempt persistence from the URL each tick: on some devices the storage
+			// quota opens up after a delay, so a retry may succeed where the first write failed.
+			const urlToken = getUrlToken();
+			if (urlToken) {
+				await persistAuthToken(urlToken);
+				if (cancelled) return;
+			}
+
+			const token = getAuthToken();
+			const elapsed = Date.now() - start;
+			console.log("[auth-debug] AuthGate.tick", {
+				elapsedMs: elapsed,
+				hasUrlToken: Boolean(urlToken),
+				tokenInStore: Boolean(token),
+				tokenValid: isValidToken(token),
+			});
+			if (isValidToken(token)) {
+				// Storage finally has a valid token — reload so the route re-runs
+				// beforeLoad and renders the dashboard with auth.
+				console.log("[auth-debug] AuthGate.tick: token landed, reloading");
+				window.location.reload();
+				return;
+			}
+
+			if (elapsed >= AUTH_GATE_TIMEOUT_MS) {
+				console.log("[auth-debug] AuthGate.tick: timed out, redirecting to Zuvy");
+				redirectToZuvyLogin();
+				return;
+			}
+
+			setSecondsLeft(Math.ceil((AUTH_GATE_TIMEOUT_MS - elapsed) / 1000));
+			timer = setTimeout(tick, AUTH_GATE_POLL_MS);
+		};
+
+		void tick();
+
+		return () => {
+			cancelled = true;
+			if (timer) clearTimeout(timer);
+		};
+	}, []);
+
+	return (
+		<div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-6">
+			<div className="flex max-w-md flex-col items-center gap-6 text-center">
+				<img src="/zoe-talking.png" alt="Zoe AI" className="h-16 w-12" />
+				<div className="size-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+				<div>
+					<h1 className="mb-2 font-bold text-gray-900 text-xl">Logging you in...</h1>
+					<p className="text-gray-600 text-sm">
+						Please wait while we securely sign you in. This usually takes a few seconds.
+					</p>
+				</div>
+				<p className="text-gray-400 text-xs">
+					If this takes longer than expected, we'll redirect you to sign in again in {secondsLeft}s.
+				</p>
+			</div>
+		</div>
+	);
+}
+
 function RouteComponent() {
-	const { i18n } = useLingui();
+	useLingui();
+	const { needsAuth } = Route.useRouteContext();
+
+	if (needsAuth) {
+		return <AuthGate />;
+	}
 
 	return (
 		<div className="flex min-h-screen flex-col bg-gray-50">
 			{/* Header */}
 			<header className="border-gray-200 border-b bg-white shadow-sm">
-				<div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
 					{/* Left: Logo and Title */}
-					<div className="flex items-center gap-3">
-						<img src="/src/dialogs/resume/zoe-talking.png" alt="Zoe AI" className="h-10 w-8 rounded-full" />
-						<h1 className="font-bold text-gray-900 text-xl">Zoe Resume Builder</h1>
-					</div>
-
+					<div className="flex items-center gap-2 sm:gap-3">
+						<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full sm:h-10 sm:w-8" />
+						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Resume Buddy</h1>
+					</div>{" "}
 					{/* Center: Navigation */}
-					<nav className="flex items-center gap-2">
+					{/* <nav className="flex items-center gap-2">
 						<Link
 							to="/dashboard/resumes"
 							activeProps={{ className: "bg-emerald-50 text-emerald-700" }}
-							className="flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-100"
+							className="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-gray-700 text-sm transition-all hover:bg-gray-100 sm:px-4"
 						>
 							<ReadCvLogoIcon className="size-5" />
 							<span>{i18n._(t`Resumes`)}</span>
 						</Link>
-
-						<Link
-							to="/dashboard/settings/profile"
-							activeProps={{ className: "bg-emerald-50 text-emerald-700" }}
-							className="flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-100"
-						>
-							<UserCircleIcon className="size-5" />
-							<span>{i18n._(t`Profile`)}</span>
-						</Link>
-					</nav>
-
+					</nav> */}
 					{/* Right: User Menu */}
 					<UserDropdownMenu>
 						{({ session }) => (

@@ -1,10 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
 import { PencilSimpleLineIcon, PlusIcon } from "@phosphor-icons/react";
-import { useForm, useFormContext } from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { useForm, useFormContext, useWatch } from "react-hook-form";
 import type z from "zod";
 import { RichInput } from "@/components/input/rich-input";
 import { useResumeStore } from "@/components/resume/store/resume";
+import { AIGenerateButton } from "@/components/ui/ai-generate-button";
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,6 +23,10 @@ type FormValues = z.infer<typeof formSchema>;
 export function CreateSummaryItemDialog({ data }: DialogProps<"resume.sections.summary.create">) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
+	const roundsUsed = useResumeStore((state) => state.summaryAIRoundsUsed);
+	const incrementRoundsUsed = useResumeStore((state) => state.incrementSummaryRounds);
+	const resetRounds = useResumeStore((state) => state.resetSummaryRounds);
+	const maxRounds = 2;
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -46,7 +52,7 @@ export function CreateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 	return (
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PlusIcon />
 					<Trans>Create a new summary item</Trans>
 				</DialogTitle>
@@ -55,15 +61,14 @@ export function CreateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 
 			<Form {...form}>
 				<form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
-					<SummaryItemForm />
+					<SummaryItemForm aiUsage={{ roundsUsed, maxRounds, incrementRoundsUsed, resetRounds }} />
 
-					<DialogFooter>
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Create</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={requestClose}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -75,6 +80,10 @@ export function CreateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 export function UpdateSummaryItemDialog({ data }: DialogProps<"resume.sections.summary.update">) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const updateResumeStore = useResumeStore((state) => state.updateResumeData);
+	const roundsUsed = useResumeStore((state) => state.summaryAIRoundsUsed);
+	const incrementRoundsUsed = useResumeStore((state) => state.incrementSummaryRounds);
+	const resetRounds = useResumeStore((state) => state.resetSummaryRounds);
+	const maxRounds = 2;
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -89,11 +98,21 @@ export function UpdateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 		updateResumeStore((draft) => {
 			if (data?.customSectionId) {
 				const section = draft.customSections.find((s) => s.id === data.customSectionId);
-				if (!section) return;
+
+				if (!section) {
+					return;
+				}
+
 				const index = section.items.findIndex((item) => item.id === formData.id);
-				if (index !== -1) section.items[index] = formData;
+
+				if (index !== -1) {
+					section.items[index] = formData;
+				}
+			} else {
+				draft.summary.content = formData.content;
 			}
 		});
+
 		closeDialog();
 	};
 
@@ -102,7 +121,7 @@ export function UpdateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 	return (
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PencilSimpleLineIcon />
 					<Trans>Update an existing summary item</Trans>
 				</DialogTitle>
@@ -111,15 +130,14 @@ export function UpdateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 
 			<Form {...form}>
 				<form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
-					<SummaryItemForm />
+					<SummaryItemForm aiUsage={{ roundsUsed, maxRounds, incrementRoundsUsed, resetRounds }} />
 
-					<DialogFooter>
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Save Changes</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={requestClose}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -128,24 +146,147 @@ export function UpdateSummaryItemDialog({ data }: DialogProps<"resume.sections.s
 	);
 }
 
-function SummaryItemForm() {
+function SummaryItemForm({
+	aiUsage: _aiUsage,
+}: {
+	aiUsage: {
+		roundsUsed: number;
+		maxRounds: number;
+		incrementRoundsUsed: () => void;
+		resetRounds: () => void;
+	};
+}) {
 	const form = useFormContext<FormValues>();
+	const resumeData = useResumeStore((state) => state.resume.data);
+
+	const content = useWatch({ control: form.control, name: "content" });
+	const previousContentRef = useRef(content); // Track previous content
+
+	// const { roundsUsed, maxRounds, incrementRoundsUsed, resetRounds } = aiUsage;
+	const aiUpdateCountRef = useRef(0); // Count expected AI updates
+	const roundsUsed = useResumeStore((state) => state.summaryAIRoundsUsed);
+	const incrementRoundsUsed = useResumeStore((state) => state.incrementSummaryRounds);
+	const resetRounds = useResumeStore((state) => state.resetSummaryRounds);
+
+	const maxRounds = 2;
+	// Reset rounds when content changes (but not when AI updates)
+	useEffect(() => {
+		// If we're expecting AI updates, skip reset and decrement counter
+		if (aiUpdateCountRef.current > 0) {
+			aiUpdateCountRef.current -= 1;
+			previousContentRef.current = content;
+			return;
+		}
+
+		if (content !== previousContentRef.current) {
+			resetRounds();
+		}
+
+		previousContentRef.current = content;
+	}, [content, resetRounds]);
+
+	const isWordCountValid = (() => {
+		if (typeof content !== "string") return false;
+		return content.trim().split(/\s+/).filter(Boolean).length >= 5;
+	})();
+
+	const handleAIGenerated = (aiSummary: string) => {
+		if (aiSummary && aiSummary.length > 10) {
+			// Expect 2 content updates: plain text + RichInput wrapping in <p> tags
+			aiUpdateCountRef.current = 2;
+
+			form.setValue("content", aiSummary, {
+				shouldDirty: true,
+				shouldValidate: true,
+			});
+
+			incrementRoundsUsed();
+		}
+	};
 
 	return (
-		<FormField
-			control={form.control}
-			name="content"
-			render={({ field }) => (
-				<FormItem>
-					<FormLabel>
-						<Trans>Content</Trans>
-					</FormLabel>
-					<FormControl>
-						<RichInput {...field} value={field.value} onChange={field.onChange} />
-					</FormControl>
-					<FormMessage />
-				</FormItem>
-			)}
-		/>
+		<>
+			<FormField
+				control={form.control}
+				name="content"
+				render={({ field }) => {
+					return (
+						<FormItem>
+							<div className="flex flex-row items-center justify-between">
+								<FormLabel>
+									<Trans>Content</Trans>
+								</FormLabel>
+								<AIGenerateButton
+									resumeId={useResumeStore.getState().resume.id}
+									type="summary"
+									data={{
+										name: resumeData.basics.name,
+										headline: resumeData.basics.headline,
+										experience: resumeData.sections.experience.items.slice(0, 2),
+										skills: resumeData.sections.skills.items.slice(0, 5).map((skill) => skill.name),
+										currentSummary: typeof field.value === "string" ? field.value : "",
+									}}
+									onGenerated={handleAIGenerated}
+									roundsUsed={roundsUsed}
+									maxRounds={maxRounds}
+									isWordCountValid={isWordCountValid}
+									disabled={roundsUsed >= maxRounds || !isWordCountValid} // Disable button after maxRounds
+									className="scale-90 sm:scale-100"
+								/>
+							</div>
+							<FormControl>
+								<RichInput
+									{...field}
+									value={field.value}
+									onChange={(value) => {
+										field.onChange(value);
+									}}
+								/>
+							</FormControl>
+
+							{/* Status messages */}
+							{!isWordCountValid && field.value && field.value.trim().split(/\s+/).filter(Boolean).length < 5 && (
+								<p className="mt-1 text-amber-600 text-xs">
+									<Trans>Write at least 5 words to enable Ask Zoe</Trans>
+								</p>
+							)}
+
+							{roundsUsed === 1 && (
+								<p className="mt-1 text-blue-600 text-xs">
+									<Trans>You have 1 more AI suggestion left for this text.</Trans>
+								</p>
+							)}
+
+							{roundsUsed >= maxRounds && (
+								<p className="mt-1 font-medium text-red-600 text-xs">
+									<Trans>✓ You've used both AI suggestions. Edit the text to get new suggestions.</Trans>
+								</p>
+							)}
+
+							<FormMessage />
+						</FormItem>
+					);
+				}}
+			/>
+			<div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+				<h4 className="mb-2 font-semibold text-blue-900 text-sm">
+					<Trans>Summary Writing Tips</Trans>
+				</h4>
+				<ul className="space-y-1 text-blue-800 text-xs">
+					<li>
+						• <Trans>Start with your job title and years of experience</Trans>
+					</li>
+					<li>
+						• <Trans>Highlight 2-3 key skills or achievements</Trans>
+					</li>
+					<li>
+						• <Trans>Mention what makes you unique</Trans>
+					</li>
+					<li>
+						• <Trans>Keep it concise and relevant</Trans>
+					</li>
+				</ul>
+			</div>
+		</>
 	);
 }

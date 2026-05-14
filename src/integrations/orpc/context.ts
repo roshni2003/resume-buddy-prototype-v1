@@ -4,8 +4,20 @@ import { eq } from "drizzle-orm";
 import { env } from "@/utils/env";
 import type { Locale } from "@/utils/locale";
 import { auth } from "../auth/config";
-import { db } from "../drizzle/client";
 import { user } from "../drizzle/schema";
+
+// Lazy load db to avoid initialization errors
+function getDb() {
+	if (!env.DATABASE_URL) {
+		return null;
+	}
+	try {
+		const { db } = require("../drizzle/client");
+		return db;
+	} catch {
+		return null;
+	}
+}
 
 interface ORPCContext {
 	locale: Locale;
@@ -25,8 +37,15 @@ async function getUserFromHeaders(headers: Headers): Promise<User | null> {
 
 async function getUserFromApiKey(apiKey: string): Promise<User | null> {
 	try {
-		const result = await auth.api.verifyApiKey({ body: { key: apiKey } });
-		if (!result.key || !result.valid) return null;
+		const db = getDb();
+		if (!db) {
+			console.warn("Database not available for API key verification");
+			return null;
+		}
+
+		// @ts-expect-error
+		const result = await auth.api?.verifyApiKey?.({ body: { key: apiKey } });
+		if (!result || !result.key || !result.valid) return null;
 
 		const [userResult] = await db.select().from(user).where(eq(user.id, result.key.userId)).limit(1);
 		if (!userResult) return null;

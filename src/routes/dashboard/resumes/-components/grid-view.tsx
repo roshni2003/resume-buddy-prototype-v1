@@ -1,13 +1,11 @@
 import { AnimatePresence, motion } from "motion/react";
-import type { RouterOutput } from "@/integrations/orpc/client";
+import type { ResumeSummary } from "@/utils/api";
 import { CreateResumeCard } from "./cards/create-card";
-import { ImportResumeCard } from "./cards/import-card";
+// import { ImportResumeCard } from "./cards/import-card";
 import { ResumeCard } from "./cards/resume-card";
 
-type Resume = RouterOutput["resume"]["list"][number];
-
 type Props = {
-	resumes: Resume[];
+	resumes: ResumeSummary[];
 };
 
 export function GridView({ resumes }: Props) {
@@ -17,14 +15,14 @@ export function GridView({ resumes }: Props) {
 				<CreateResumeCard />
 			</motion.div>
 
-			<motion.div
+			{/* <motion.div
 				initial={{ opacity: 0, x: -50 }}
 				animate={{ opacity: 1, x: 0 }}
 				exit={{ opacity: 0, x: -50 }}
 				transition={{ delay: 0.05 }}
 			>
 				<ImportResumeCard />
-			</motion.div>
+			</motion.div> */}
 
 			<AnimatePresence>
 				{resumes?.map((resume, index) => (

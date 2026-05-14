@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import { PlusIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
@@ -7,7 +7,7 @@ import { CommandLoading } from "cmdk";
 import { CommandItem, CommandShortcut } from "@/components/ui/command";
 import { Kbd } from "@/components/ui/kbd";
 import { useDialogStore } from "@/dialogs/store";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { useCommandPaletteStore } from "../store";
 import { BaseCommandGroup } from "./base";
 
@@ -21,11 +21,11 @@ export function ResumesCommandGroup() {
 
 	const isResumesPage = peekPage() === "resumes";
 
-	const { data: resumes, isLoading } = useQuery(
-		orpc.resume.list.queryOptions({
-			enabled: !!session && isResumesPage,
-		}),
-	);
+	const { data: resumes, isLoading } = useQuery({
+		queryKey: ["resumes"],
+		queryFn: () => api.fetchResumes(),
+		enabled: !!session && isResumesPage,
+	});
 
 	const onCreate = () => {
 		navigate({ to: "/dashboard/resumes" });

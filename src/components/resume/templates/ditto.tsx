@@ -1,6 +1,7 @@
 import { EnvelopeIcon, GlobeIcon, MapPinIcon, PhoneIcon } from "@phosphor-icons/react";
 import { cn } from "@/utils/style";
-import { getSectionComponent } from "../shared/get-section-component";
+import { Section } from "../shared/get-section-component";
+import { InlineEditableText } from "../shared/inline-editable-text";
 import { PageIcon } from "../shared/page-icon";
 import { PageLink } from "../shared/page-link";
 import { PagePicture } from "../shared/page-picture";
@@ -30,18 +31,16 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 						data-layout="sidebar"
 						className="group page-sidebar w-(--page-sidebar-width) shrink-0 space-y-4 overflow-x-hidden ps-(--page-margin-x)"
 					>
-						{sidebar.map((section) => {
-							const Component = getSectionComponent(section, { sectionClassName });
-							return <Component key={section} id={section} />;
-						})}
+						{sidebar.map((section) => (
+							<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
+						))}
 					</aside>
 				)}
 
 				<main data-layout="main" className="group page-main space-y-4 px-(--page-margin-x)">
-					{main.map((section) => {
-						const Component = getSectionComponent(section, { sectionClassName });
-						return <Component key={section} id={section} />;
-					})}
+					{main.map((section) => (
+						<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
+					))}
 				</main>
 			</div>
 		</div>
@@ -52,75 +51,54 @@ function Header() {
 	const basics = useResumeStore((state) => state.resume.data.basics);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
-	const handleNameChange = (e: React.FocusEvent<HTMLHeadingElement>) => {
-		const newValue = e.currentTarget.textContent || "";
-		if (newValue !== basics.name) {
-			updateResumeData((draft) => {
-				draft.basics.name = newValue;
-			});
-		}
+	const handleEmailChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.email = value;
+		});
 	};
 
-	const handleHeadlineChange = (e: React.FocusEvent<HTMLParagraphElement>) => {
-		const newValue = e.currentTarget.textContent || "";
-		if (newValue !== basics.headline) {
-			updateResumeData((draft) => {
-				draft.basics.headline = newValue;
-			});
-		}
+	const handlePhoneChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.phone = value;
+		});
 	};
 
-	const handleEmailChange = (e: React.FocusEvent<HTMLSpanElement>) => {
-		const newValue = e.currentTarget.textContent || "";
-		if (newValue !== basics.email) {
-			updateResumeData((draft) => {
-				draft.basics.email = newValue;
-			});
-		}
+	const handleLocationChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.location = value;
+		});
 	};
 
-	const handlePhoneChange = (e: React.FocusEvent<HTMLSpanElement>) => {
-		const newValue = e.currentTarget.textContent || "";
-		if (newValue !== basics.phone) {
-			updateResumeData((draft) => {
-				draft.basics.phone = newValue;
-			});
-		}
+	const handleNameChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.name = value;
+		});
 	};
 
-	const handleLocationChange = (e: React.FocusEvent<HTMLSpanElement>) => {
-		const newValue = e.currentTarget.textContent || "";
-		if (newValue !== basics.location) {
-			updateResumeData((draft) => {
-				draft.basics.location = newValue;
-			});
-		}
+	const handleHeadlineChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.headline = value;
+		});
 	};
 
 	return (
 		<div className="page-header relative">
 			<div className="page-basics bg-(--page-primary-color) text-(--page-background-color)">
-				<div className="basics-header flex items-center">
+				<div data-section-id="header" className="basics-header flex items-center">
 					<div className="flex w-(--page-sidebar-width) shrink-0 justify-center ps-(--page-margin-x)">
 						<PagePicture className="absolute top-8" />
 					</div>
 
 					<div className="px-(--page-margin-x) py-(--page-margin-y)">
-						<h2 
-							className="basics-name cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-							contentEditable
-							suppressContentEditableWarning
-							onBlur={handleNameChange}
-						>
-							{basics.name}
+						<h2 className="basics-name">
+							<InlineEditableText value={basics.name} placeholder="Your Name" onChange={handleNameChange} />
 						</h2>
-						<p 
-							className="basics-headline cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-							contentEditable
-							suppressContentEditableWarning
-							onBlur={handleHeadlineChange}
-						>
-							{basics.headline}
+						<p className="basics-headline">
+							<InlineEditableText
+								value={basics.headline}
+								placeholder="Your Professional Title"
+								onChange={handleHeadlineChange}
+							/>
 						</p>
 					</div>
 				</div>
@@ -130,47 +108,32 @@ function Header() {
 				<div className="w-(--page-sidebar-width) shrink-0" />
 
 				<div className="basics-items flex flex-wrap gap-x-3 gap-y-1 px-(--page-margin-x) pt-3 *:flex *:items-center *:gap-x-1.5">
-					{basics.email && (
-						<div className="basics-item-email">
-							<EnvelopeIcon />
-							<span
-								contentEditable
-								suppressContentEditableWarning
-								onBlur={handleEmailChange}
-								className="cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-							>
-								{basics.email}
-							</span>
-						</div>
-					)}
+					<div className="basics-item-email">
+						<EnvelopeIcon />
+						<InlineEditableText
+							as="a"
+							href={basics.email ? `mailto:${basics.email}` : undefined}
+							value={basics.email}
+							placeholder="email@domain.com"
+							onChange={handleEmailChange}
+						/>
+					</div>
 
-					{basics.phone && (
-						<div className="basics-item-phone">
-							<PhoneIcon />
-							<span
-								contentEditable
-								suppressContentEditableWarning
-								onBlur={handlePhoneChange}
-								className="cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-							>
-								{basics.phone}
-							</span>
-						</div>
-					)}
+					<div className="basics-item-phone">
+						<PhoneIcon />
+						<InlineEditableText
+							as="a"
+							href={basics.phone ? `tel:${basics.phone}` : undefined}
+							value={basics.phone}
+							placeholder="+91 98765 43210"
+							onChange={handlePhoneChange}
+						/>
+					</div>
 
-					{basics.location && (
-						<div className="basics-item-location">
-							<MapPinIcon />
-							<span
-								contentEditable
-								suppressContentEditableWarning
-								onBlur={handleLocationChange}
-								className="cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-							>
-								{basics.location}
-							</span>
-						</div>
-					)}
+					<div className="basics-item-location">
+						<MapPinIcon />
+						<InlineEditableText value={basics.location} placeholder="City, Country" onChange={handleLocationChange} />
+					</div>
 
 					{basics.website.url && (
 						<div className="basics-item-website">

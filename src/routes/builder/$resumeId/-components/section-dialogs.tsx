@@ -1,13 +1,13 @@
 // Light-themed dialog wrappers for section forms (without SectionBase accordion)
 
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { CircleNotchIcon, DownloadIcon, FileDocIcon, FilePdfIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { orpc } from "@/integrations/orpc/client";
 import { CSSSectionBuilder } from "@/routes/builder/$resumeId/-sidebar/right/sections/css.tsx";
+import { api } from "@/utils/api";
 import { downloadFromUrl, generateFilename } from "@/utils/file";
 
 // Wrapper that applies light theme styling to section content
@@ -1337,8 +1337,8 @@ export function SharingDialog() {
 		try {
 			// Prepare email content
 			const subject = encodeURIComponent("Check out my resume!");
-			const bodyText = message 
-				? `${message}\n\nYou can view my resume here: ${publicUrl}` 
+			const bodyText = message
+				? `${message}\n\nYou can view my resume here: ${publicUrl}`
 				: `Hi,\n\nI wanted to share my professional resume with you.\n\nYou can view it here: ${publicUrl}\n\nBest regards`;
 			const body = encodeURIComponent(bodyText);
 
@@ -1347,9 +1347,9 @@ export function SharingDialog() {
 
 			// Open email client
 			window.location.href = mailtoLink;
-			
+
 			toast.success("Opening your email client...");
-			
+
 			// Reset form after a delay
 			setTimeout(() => {
 				setEmail("");
@@ -1403,7 +1403,7 @@ export function SharingDialog() {
 			try {
 				// Try to open in new window
 				const popup = window.open(url, "_blank", "width=600,height=400,menubar=no,toolbar=no,location=no");
-				
+
 				if (popup) {
 					toast.success(`Opening ${platformName} share dialog...`);
 				} else {
@@ -1756,9 +1756,9 @@ export function ExportDialog() {
 	const [selectedFormat, setSelectedFormat] = useState<"pdf" | "docx">("pdf");
 	const [fileName, setFileName] = useState(resume.data.basics.name || "resume");
 
-	const { mutateAsync: printResumeAsPDF, isPending: isPrintingPDF } = useMutation(
-		orpc.printer.printResumeAsPDF.mutationOptions(),
-	);
+	const { mutateAsync: exportResume, isPending: isPrinting } = useMutation({
+		mutationFn: (data: { id: string; format: "pdf" | "docx" }) => api.exportResume(data.id, data.format),
+	});
 
 	const formats = [
 		{
@@ -1776,25 +1776,23 @@ export function ExportDialog() {
 	];
 
 	const handleDownload = useCallback(async () => {
-		if (selectedFormat === "pdf") {
-			const filename = generateFilename(fileName, "pdf");
-			const toastId = toast.loading(t`Please wait while your PDF is being generated...`, {
-				description: t`This may take a while depending on the server capacity. Please do not close the window or refresh the page.`,
-			});
+		const format = selectedFormat;
+		const filename = generateFilename(fileName, format);
+		const toastId = toast.loading(t`Please wait while your ${format.toUpperCase()} is being generated...`, {
+			description: t`This may take a while depending on the server capacity. Please do not close the window or refresh the page.`,
+		});
 
-			try {
-				const { url } = await printResumeAsPDF({ id: resume.id });
-				downloadFromUrl(url, filename);
-				toast.success(t`Your PDF has been downloaded successfully!`);
-			} catch {
-				toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
-			} finally {
-				toast.dismiss(toastId);
-			}
-		} else {
-			toast.info(t`DOCX format is coming soon!`);
+		try {
+			const { url } = await exportResume({ id: resume.id, format });
+			downloadFromUrl(url, filename);
+
+			toast.success(t`Your ${format.toUpperCase()} has been downloaded successfully!`);
+		} catch {
+			toast.error(t`There was a problem while generating the ${format.toUpperCase()}, please try again in some time.`);
+		} finally {
+			toast.dismiss(toastId);
 		}
-	}, [selectedFormat, fileName, resume, printResumeAsPDF]);
+	}, [selectedFormat, fileName, resume, exportResume]);
 
 	return (
 		<div className="space-y-6 text-gray-900 **:text-gray-900">
@@ -1889,10 +1887,10 @@ export function ExportDialog() {
 			<div className="flex items-center justify-end gap-3 pt-2">
 				<button
 					onClick={handleDownload}
-					disabled={isPrintingPDF || !fileName.trim()}
+					disabled={isPrinting || !fileName.trim()}
 					className="flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-2.5 font-medium text-white transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300"
 				>
-					{isPrintingPDF ? (
+					{isPrinting ? (
 						<>
 							<CircleNotchIcon className="h-5 w-5 animate-spin" />
 							Generating...

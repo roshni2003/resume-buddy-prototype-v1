@@ -1,17 +1,18 @@
 import { Trans } from "@lingui/react/macro";
 import { ArrowRightIcon, IconContext, type IconProps, WarningIcon } from "@phosphor-icons/react";
-import { type RefObject, useMemo, useRef, useState } from "react";
+import { forwardRef, useMemo, useRef, useState } from "react";
 import { match } from "ts-pattern";
-import { useResizeObserver } from "usehooks-ts";
 import type z from "zod";
-import { pageDimensionsAsPixels } from "@/schema/page";
 import type { pageLayoutSchema } from "@/schema/resume/data";
 import type { Template } from "@/schema/templates";
 import { sanitizeCss } from "@/utils/sanitize";
 import { cn } from "@/utils/style";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useCSSVariables } from "./hooks/use-css-variables";
+import { useResumePagination } from "./hooks/use-resume-pagination";
 import { useWebfonts } from "./hooks/use-webfonts";
+import { ResumePageContext } from "./preview/context";
+import { ResumeMeasurer } from "./preview/resume-measurer";
 import styles from "./preview.module.css";
 import { useResumeStore } from "./store/resume";
 import { AzurillTemplate } from "./templates/azurill";
@@ -30,6 +31,7 @@ import { RhyhornTemplate } from "./templates/rhyhorn";
 
 export type ExtendedIconProps = IconProps & {
 	hidden?: boolean;
+	visibleItemIds?: string[];
 };
 
 const CSS_RULE_SPLIT_PATTERN = /\n(?=\s*[.#a-zA-Z])/;
@@ -58,91 +60,105 @@ type Props = React.ComponentProps<"div"> & {
 	showPageNumbers?: boolean;
 };
 
-export const ResumePreview = ({ showPageNumbers = false, pageClassName, className, ...props }: Props) => {
-	const picture = useResumeStore((state) => state.resume.data.picture);
-	const metadata = useResumeStore((state) => state.resume.data.metadata);
+export const ResumePreview = forwardRef<HTMLDivElement, Props>(
+	({ showPageNumbers = false, pageClassName, className, ...props }, ref) => {
+		const picture = useResumeStore((state) => state.resume.data.picture);
+		const metadata = useResumeStore((state) => state.resume.data.metadata);
+		const [measurements, setMeasurements] = useState<Record<string, number>>({});
 
-	useWebfonts(metadata.typography);
-	const style = useCSSVariables({ picture, metadata });
+		useWebfonts(metadata.typography);
+		const style = useCSSVariables({ picture, metadata });
 
-	const iconProps = useMemo<ExtendedIconProps>(() => {
-		return {
-			weight: "regular",
-			hidden: metadata.page.hideIcons,
-			color: "var(--page-primary-color)",
-			size: metadata.typography.body.fontSize * 1.5,
-		} satisfies ExtendedIconProps;
-	}, [metadata.typography.body.fontSize, metadata.page.hideIcons]);
+		const { pages, itemDistribution, isOverflowing } = useResumePagination(measurements);
 
-	const scopedCSS = useMemo(() => {
-		if (!metadata.css.enabled || !metadata.css.value.trim()) return null;
+		const iconProps = useMemo<ExtendedIconProps>(() => {
+			return {
+				weight: "regular",
+				hidden: metadata.page.hideIcons,
+				color: "var(--page-primary-color)",
+				size: metadata.typography.body.fontSize * 1.5,
+			} satisfies ExtendedIconProps;
+		}, [metadata.typography.body.fontSize, metadata.page.hideIcons]);
 
-		const sanitizedCss = sanitizeCss(metadata.css.value);
+		const scopedCSS = useMemo(() => {
+			if (!metadata.css.enabled || !metadata.css.value.trim()) return null;
 
-		const scoped = sanitizedCss
-			.split(CSS_RULE_SPLIT_PATTERN)
-			.map((rule) => {
-				const trimmed = rule.trim();
-				if (!trimmed || trimmed.startsWith("@")) return trimmed;
+			const sanitizedCss = sanitizeCss(metadata.css.value);
 
-				return trimmed.replace(CSS_SELECTOR_PATTERN, (_match, selectors, brace) => {
-					const prefixed = selectors
-						.split(",")
-						.map((selector: string) => `.resume-preview-container ${selector.trim()} `)
-						.join(", ");
-					return `${prefixed}${brace}`;
-				});
-			})
-			.join("\n");
+			const scoped = sanitizedCss
+				.split(CSS_RULE_SPLIT_PATTERN)
+				.map((rule) => {
+					const trimmed = rule.trim();
+					if (!trimmed || trimmed.startsWith("@")) return trimmed;
 
-		return scoped;
-	}, [metadata.css.enabled, metadata.css.value]);
+					return trimmed.replace(CSS_SELECTOR_PATTERN, (_match, selectors, brace) => {
+						const prefixed = selectors
+							.split(",")
+							.map((selector: string) => `.resume-preview-container ${selector.trim()} `)
+							.join(", ");
+						return `${prefixed}${brace}`;
+					});
+				})
+				.join("\n");
 
-	return (
-		<IconContext.Provider value={iconProps}>
-			{/** biome-ignore lint/security/noDangerouslySetInnerHtml: CSS is sanitized with sanitizeCss */}
-			{scopedCSS && <style dangerouslySetInnerHTML={{ __html: scopedCSS }} />}
+			return scoped;
+		}, [metadata.css.enabled, metadata.css.value]);
 
-			<div style={style} className={cn("resume-preview-container", className)} {...props}>
-				{metadata.layout.pages.map((pageLayout, pageIndex) => (
-					<PageContainer
-						key={pageIndex}
-						pageIndex={pageIndex}
-						pageLayout={pageLayout}
-						pageClassName={pageClassName}
-						showPageNumbers={showPageNumbers}
-					/>
-				))}
-			</div>
-		</IconContext.Provider>
-	);
-};
+		return (
+			<IconContext.Provider value={iconProps}>
+				<ResumeMeasurer onMeasure={setMeasurements} />
+				{/** biome-ignore lint/security/noDangerouslySetInnerHtml: CSS is sanitized with sanitizeCss */}
+				{scopedCSS && <style dangerouslySetInnerHTML={{ __html: scopedCSS }} />}
+
+				<div
+					ref={ref}
+					{...props}
+					style={{ ...style, ...props.style }}
+					className={cn("resume-preview-container", className)}
+				>
+					{pages.map((pageLayout, pageIndex) => (
+						<PageContainer
+							key={pageIndex}
+							pageIndex={pageIndex}
+							pageLayout={pageLayout}
+							pageClassName={pageClassName}
+							showPageNumbers={showPageNumbers}
+							itemDistribution={itemDistribution}
+							isOverflowing={isOverflowing}
+							totalNumberOfPages={pages.length}
+						/>
+					))}
+				</div>
+			</IconContext.Provider>
+		);
+	},
+);
 
 type PageContainerProps = {
 	pageIndex: number;
 	pageLayout: z.infer<typeof pageLayoutSchema>;
 	pageClassName?: string;
 	showPageNumbers?: boolean;
+	itemDistribution?: Record<string, string[][]>;
+	isOverflowing?: boolean;
+	totalNumberOfPages: number;
 };
 
-function PageContainer({ pageIndex, pageLayout, pageClassName, showPageNumbers = false }: PageContainerProps) {
+function PageContainer({
+	pageIndex,
+	pageLayout,
+	pageClassName,
+	showPageNumbers = false,
+	itemDistribution,
+	isOverflowing,
+	totalNumberOfPages,
+}: PageContainerProps) {
 	const pageRef = useRef<HTMLDivElement>(null);
-	const [pageHeight, setPageHeight] = useState<number>(0);
-
 	const metadata = useResumeStore((state) => state.resume.data.metadata);
+	const isReviewing = useResumeStore((state) => state.isReviewing);
 
 	const pageNumber = useMemo(() => pageIndex + 1, [pageIndex]);
-	const maxPageHeight = useMemo(() => pageDimensionsAsPixels[metadata.page.format].height, [metadata.page.format]);
-	const totalNumberOfPages = useMemo(() => metadata.layout.pages.length, [metadata.layout.pages]);
 	const TemplateComponent = useMemo(() => getTemplateComponent(metadata.template), [metadata.template]);
-
-	useResizeObserver({
-		ref: pageRef as RefObject<HTMLDivElement>,
-		onResize: (size) => {
-			if (!size.height) return;
-			setPageHeight(size.height);
-		},
-	});
 
 	return (
 		<div data-page-index={pageIndex} className="relative">
@@ -157,18 +173,21 @@ function PageContainer({ pageIndex, pageLayout, pageClassName, showPageNumbers =
 			)}
 
 			<div ref={pageRef} className={cn(`page page-${pageIndex}`, styles.page, pageClassName)}>
-				<TemplateComponent pageIndex={pageIndex} pageLayout={pageLayout} />
+				{isReviewing && <div className={styles.scanner} />}
+				<ResumePageContext.Provider value={{ pageIndex, itemDistribution }}>
+					<TemplateComponent pageIndex={pageIndex} pageLayout={pageLayout} />
+				</ResumePageContext.Provider>
 			</div>
 
-			{metadata.page.format !== "free-form" && pageHeight > maxPageHeight && (
-				<div className="absolute start-0 top-full mt-4 print:hidden">
+			{metadata.page.format !== "free-form" && isOverflowing && pageIndex === 1 && (
+				<div className="mt-4 print:hidden">
 					<a
 						rel="noopener"
 						target="_blank"
 						className="group/link"
 						href="https://docs.rxresu.me/guides/fitting-content-on-a-page"
 					>
-						<Alert className="max-w-sm text-yellow-600">
+						<Alert className="max-w-[calc(var(--page-width)*0.65)] text-yellow-600 sm:max-w-sm">
 							<WarningIcon color="currentColor" />
 							<AlertTitle>
 								<Trans>

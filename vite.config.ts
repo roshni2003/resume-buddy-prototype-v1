@@ -1,11 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { lingui } from "@lingui/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
+// TanStack Start Vite integration (required for SSR + file-based routing)
+// eslint-disable-next-line import/no-unresolved
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
-import { nitro } from "nitro/vite";
-import type { Plugin } from "vite";
-import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Polyfill for Reflect.getMetadata() (required by @better-auth/passkey)
@@ -14,7 +14,7 @@ const REFLECT_POLYFILL = `if("function"!=typeof Reflect.getMetadata){const e=new
 function reflectPolyfillPlugin(): Plugin {
 	return {
 		name: "reflect-polyfill",
-		renderChunk(code, chunk) {
+		renderChunk(code: string, chunk: { fileName: string }) {
 			if (chunk.fileName.includes("passkey")) return `${REFLECT_POLYFILL}\n${code}`;
 			return null;
 		},
@@ -29,6 +29,9 @@ const config = defineConfig({
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
+			"@better-auth/core/instrumentation": fileURLToPath(
+				new URL("./node_modules/@better-auth/core/dist/instrumentation/index.mjs", import.meta.url),
+			),
 		},
 	},
 
@@ -39,6 +42,14 @@ const config = defineConfig({
 			"@tanstack/react-start/server",
 			"@tanstack/start-server-core",
 		],
+	},
+
+	// Bundle all dependencies into the SSR build so the deployed server.js is
+	// self-contained (no node_modules required at runtime). Sharp is native and
+	// is loaded via dynamic import with its own try/catch; keep it external.
+	ssr: {
+		noExternal: process.env.NODE_ENV === "production" ? true : undefined,
+        external: ["sharp", "pg-native"],
 	},
 
 	build: {
@@ -68,9 +79,8 @@ const config = defineConfig({
 		reflectPolyfillPlugin(),
 		lingui(),
 		tailwindcss(),
-		nitro({ plugins: ["plugins/1.migrate.ts"] }),
 		tanstackStart({ router: { semicolons: true, quoteStyle: "double" } }),
-		viteReact({ babel: { plugins: ["@lingui/babel-plugin-lingui-macro"] } }),
+		react({ babel: { plugins: ["@lingui/babel-plugin-lingui-macro"] } }),
 		VitePWA({
 			outDir: "public",
 			useCredentials: true,
@@ -82,7 +92,7 @@ const config = defineConfig({
 				clientsClaim: true,
 				globPatterns: ["**/*"],
 				maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10mb
-				navigateFallback: null, // Disable navigation fallback for SSR
+				navigateFallback: null,
 			},
 			manifest: {
 				name: "Reactive Resume",

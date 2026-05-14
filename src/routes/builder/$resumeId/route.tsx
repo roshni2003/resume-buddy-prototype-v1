@@ -5,14 +5,14 @@ import { getCookie, setCookie } from "@tanstack/react-start/server";
 import type React from "react";
 import { useEffect } from "react";
 import { type Layout, usePanelRef } from "react-resizable-panels";
-import { useDebounceCallback } from "usehooks-ts";
+import { useDebounceCallback, useWindowSize } from "usehooks-ts";
 import z from "zod";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { useCSSVariables } from "@/components/resume/hooks/use-css-variables";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { ResizableGroup, ResizablePanel, ResizableSeparator } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { BuilderHeader } from "./-components/header";
 import { BuilderSidebarLeft } from "./-sidebar/left";
 import { useBuilderSidebar, useBuilderSidebarStore } from "./-store/sidebar";
@@ -34,7 +34,10 @@ export const Route = createFileRoute("/builder/$resumeId")({
 	loader: async ({ params, context }) => {
 		const [layout, resume] = await Promise.all([
 			getBuilderLayoutServerFn(),
-			context.queryClient.ensureQueryData(orpc.resume.getById.queryOptions({ input: { id: params.resumeId } })),
+			context.queryClient.ensureQueryData({
+				queryKey: ["resumes", params.resumeId],
+				queryFn: () => api.fetchResume(params.resumeId),
+			}),
 		]);
 
 		return { layout, name: resume.name };
@@ -48,9 +51,11 @@ function RouteComponent() {
 	const { layout: initialLayout } = Route.useLoaderData();
 
 	const { resumeId } = Route.useParams();
-	const { data: resume } = useSuspenseQuery(orpc.resume.getById.queryOptions({ input: { id: resumeId } }));
+	const { data: resume } = useSuspenseQuery({
+		queryKey: ["resumes", resumeId],
+		queryFn: () => api.fetchResume(resumeId),
+	});
 
-	const style = useCSSVariables(resume.data);
 	const isReady = useResumeStore((state) => state.isReady);
 	const initialize = useResumeStore((state) => state.initialize);
 
@@ -61,7 +66,7 @@ function RouteComponent() {
 
 	if (!isReady) return <LoadingScreen />;
 
-	return <BuilderLayout style={style} initialLayout={initialLayout} />;
+	return <BuilderLayout initialLayout={initialLayout} />;
 }
 
 type BuilderLayoutProps = React.ComponentProps<"div"> & {
@@ -69,15 +74,21 @@ type BuilderLayoutProps = React.ComponentProps<"div"> & {
 };
 
 function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
+	const resumeData = useResumeStore((state) => state.resume.data);
+	const style = useCSSVariables(resumeData);
 	const isMobile = useIsMobile();
 
 	const leftSidebarRef = usePanelRef();
 
 	const setLeftSidebar = useBuilderSidebarStore((state) => state.setLeftSidebar);
+	const isLeftSidebarCollapsed = useBuilderSidebarStore((state) => state.isLeftSidebarCollapsed);
+	const setLeftSidebarCollapsed = useBuilderSidebarStore((state) => state.setLeftSidebarCollapsed);
 
-	const { maxSidebarSize, collapsedSidebarSize } = useBuilderSidebar((state) => ({
+	// ✅ Get review drawer state to hide left sidebar when drawer is open
+	const showReviewDrawer = useResumeStore((state) => state.showReviewDrawer);
+
+	const { maxSidebarSize } = useBuilderSidebar((state) => ({
 		maxSidebarSize: state.maxSidebarSize,
-		collapsedSidebarSize: state.collapsedSidebarSize,
 	}));
 
 	const onLayoutChange = useDebounceCallback((layout: Layout) => {
@@ -85,32 +96,95 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 	}, 200);
 
 	useEffect(() => {
-		if (!leftSidebarRef) return;
+		if (!leftSidebarRef?.current) return;
 
 		setLeftSidebar(leftSidebarRef);
-	}, [leftSidebarRef, setLeftSidebar]);
+		setLeftSidebarCollapsed(leftSidebarRef.current.isCollapsed());
+	}, [leftSidebarRef, setLeftSidebar, setLeftSidebarCollapsed]);
 
-	const leftSidebarSize = isMobile ? 0 : initialLayout.left;
-	const artboardSize = isMobile ? 100 : initialLayout.artboard;
+	const { width: windowWidth } = useWindowSize();
+	const isTablet = !!(!isMobile && windowWidth && windowWidth >= 768 && windowWidth < 1024);
+
+	// Force sidebar expansion to at least 42% on tablet detection
+	useEffect(() => {
+		if (isTablet && leftSidebarRef.current && leftSidebarRef.current.getSize().asPercentage < 42) {
+			leftSidebarRef.current.resize(42);
+		}
+	}, [isTablet, leftSidebarRef]);
+
+	const leftSidebarSize = isTablet ? Math.max(initialLayout.left || 0, 42) : Math.max(initialLayout.left || 0, 30); // Ensure sidebar always has minimum 30% on desktop
+	const artboardSize = 100 - leftSidebarSize;
+
+	// On mobile, ensure sidebar is collapsed. On desktop, fix size if it was reset by mobile session.
+	useEffect(() => {
+		if (isMobile) {
+			setLeftSidebarCollapsed(true);
+		} else if (leftSidebarRef.current) {
+			// When transitioning from mobile to desktop, force panel to correct size
+			const currentPct = leftSidebarRef.current.getSize().asPercentage;
+			if (currentPct <= 0) {
+				leftSidebarRef.current.resize(leftSidebarSize);
+			}
+		}
+	}, [isMobile, setLeftSidebarCollapsed, leftSidebarRef, leftSidebarSize]);
+
+	if (isMobile) {
+		return (
+			<div className="flex h-svh flex-col" {...props}>
+				<BuilderHeader />
+
+				{/* Mobile Layout - Main content always visible */}
+				<div className="relative flex-1 overflow-hidden">
+					<div className="h-full">
+						<Outlet />
+					</div>
+
+					{/* Left Sidebar Drawer - only visible when toggled AND review drawer is closed */}
+					{!isLeftSidebarCollapsed && !showReviewDrawer && (
+						<>
+							{/* Backdrop */}
+							<div
+								className="fixed inset-0 top-14 z-40 bg-black/50 transition-opacity"
+								onClick={() => setLeftSidebarCollapsed(true)}
+								onKeyDown={(e) => e.key === "Escape" && setLeftSidebarCollapsed(true)}
+								role="button"
+								tabIndex={0}
+								aria-label="Close sidebar"
+							/>
+							{/* Drawer with slide animation */}
+							<div className="fixed inset-y-0 top-14 left-0 z-50 w-[85vw] max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out">
+								<BuilderSidebarLeft />
+							</div>
+						</>
+					)}
+				</div>
+			</div>
+		);
+	}
 
 	return (
-		<div className="flex h-svh flex-col" {...props}>
+		<div className="flex h-svh flex-col" style={style} {...props}>
 			<BuilderHeader />
 
 			<ResizableGroup orientation="horizontal" className="flex-1" onLayoutChange={onLayoutChange}>
-				<ResizablePanel
-					collapsible
-					id="left"
-					panelRef={leftSidebarRef}
-					maxSize={maxSidebarSize}
-					minSize={collapsedSidebarSize * 2}
-					collapsedSize={collapsedSidebarSize}
-					defaultSize={leftSidebarSize || 30}
-					className="z-20 h-[calc(100svh-3.5rem)]"
-				>
-					<BuilderSidebarLeft />
-				</ResizablePanel>
-				<ResizableSeparator withHandle className="z-20 border-s" />
+				{/* ✅ Only show left sidebar panel if review drawer is NOT open */}
+				{!showReviewDrawer && (
+					<>
+						<ResizablePanel
+							collapsible
+							id="left"
+							panelRef={leftSidebarRef}
+							maxSize={maxSidebarSize}
+							minSize={0}
+							collapsedSize={0}
+							defaultSize={leftSidebarSize}
+							className="z-20 h-[calc(100svh-3.5rem)]"
+						>
+							<BuilderSidebarLeft />
+						</ResizablePanel>
+						<ResizableSeparator withHandle className="z-20 border-s" />
+					</>
+				)}
 				<ResizablePanel id="artboard" defaultSize={artboardSize} className="h-[calc(100svh-3.5rem)]">
 					<Outlet />
 				</ResizablePanel>

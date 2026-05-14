@@ -76,8 +76,14 @@ export const customFieldSchema = z.object({
 });
 
 export const basicsSchema = z.object({
-	name: z.string().describe("The full name of the author of the resume."),
-	headline: z.string().describe("The headline of the author of the resume."),
+	name: z
+		.string()
+		.regex(/^[^0-9]*$/, "Name cannot contain numbers")
+		.describe("The full name of the author of the resume."),
+	headline: z
+		.string()
+		.regex(/^[^0-9]*$/, "Headline cannot contain numbers")
+		.describe("The headline of the author of the resume."),
 	email: z.string().describe("The email address of the author of the resume."),
 	phone: z.string().describe("The phone number of the author of the resume."),
 	location: z.string().describe("The location of the author of the resume."),
@@ -129,15 +135,19 @@ export const educationItemSchema = baseItemSchema.extend({
 	period: z.string().describe("The period of time the education was obtained over."),
 	website: urlSchema.describe("The website of the school or institution, if any."),
 	description: z.string().describe("The description of the education. This should be a HTML-formatted string."),
+	currentlyStudyingHere: z.boolean().describe("Indicates if the user is currently studying at this institution."),
 });
 
 export const experienceItemSchema = baseItemSchema.extend({
 	company: z.string().min(1).describe("The name of the company or organization."),
 	position: z.string().describe("The position held at the company or organization."),
 	location: z.string().describe("The location of the company or organization."),
-	period: z.string().describe("The period of time the author was employed at the company or organization."),
-	website: urlSchema.describe("The website of the company or organization, if any."),
+	startDate: z.string().optional().describe("The start date of the experience."),
+	endDate: z.string().optional().describe("The end date of the experience."),
+	currentlyWorkingHere: z.boolean().optional().describe("Whether the user is currently working here."),
 	description: z.string().describe("The description of the experience. This should be a HTML-formatted string."),
+	period: z.string().describe("The period of time the experience was obtained over."),
+	website: urlSchema.describe("The website of the company or organization, if any."),
 });
 
 export const interestItemSchema = baseItemSchema.extend({
@@ -404,6 +414,8 @@ export const pageLayoutSchema = z.object({
 		),
 });
 
+export type PageLayout = z.infer<typeof pageLayoutSchema>;
+
 export const layoutSchema = z.object({
 	sidebarWidth: z
 		.number()
@@ -646,7 +658,7 @@ export const defaultResumeData: ResumeData = {
 		typography: {
 			body: {
 				fontFamily: "IBM Plex Serif",
-				fontWeights: ["400", "500"],
+				fontWeights: ["400"],
 				fontSize: 10,
 				lineHeight: 1.5,
 			},

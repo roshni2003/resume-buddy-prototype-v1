@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { DownloadSimpleIcon } from "@phosphor-icons/react";
 import { useDialogStore } from "@/dialogs/store";
 import { BaseCard } from "./base-card";
@@ -11,11 +11,11 @@ export function ImportResumeCard() {
 			title={t`Import an existing resume`}
 			description={t`Continue where you left off`}
 			onClick={() => openDialog("resume.import", undefined)}
+			className="border-2 border-gray-400 border-dashed bg-transparent shadow-none hover:border-gray-600"
 		>
-			<div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-blue-50 to-blue-100">
-				<div className="flex size-16 items-center justify-center rounded-full bg-blue-600 shadow-lg">
-					<DownloadSimpleIcon weight="bold" className="size-8 text-white" />
-				</div>
+			<div className="absolute inset-0 flex flex-col items-center justify-center">
+				<DownloadSimpleIcon weight="bold" className="mb-2 size-10 text-gray-500" />
+				<span className="font-medium text-base text-gray-500">Import Resume</span>
 			</div>
 		</BaseCard>
 	);

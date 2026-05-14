@@ -6,6 +6,7 @@ import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import router from "@/integrations/orpc/router";
+import { getAuthToken } from "@/utils/auth-token";
 import { getLocale } from "@/utils/locale";
 
 export const getORPCClient = createIsomorphicFn()
@@ -31,7 +32,22 @@ export const getORPCClient = createIsomorphicFn()
 		const link = new RPCLink({
 			url: `${window.location.origin}/api/rpc`,
 			fetch: (request, init) => {
-				return fetch(request, { ...init, credentials: "include" });
+				const headers = new Headers(request instanceof Request ? request.headers : undefined);
+
+				const initReq = init as RequestInit | undefined;
+				if (initReq?.headers) {
+					const initHeaders = new Headers(initReq.headers);
+					initHeaders.forEach((value, key) => {
+						headers.set(key, value);
+					});
+				}
+
+				const token = getAuthToken();
+				if (token) {
+					headers.set("Authorization", `Bearer ${token}`);
+				}
+
+				return fetch(request, { ...init, headers, credentials: "include" });
 			},
 			// interceptors: [
 			// 	onError((error) => {

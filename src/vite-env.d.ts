@@ -14,13 +14,13 @@ declare namespace NodeJS {
 		PRINTER_APP_URL?: string;
 
 		// Authentication
-		AUTH_SECRET: string;
+		AUTH_SECRET?: string;
 
 		// Printer
 		PRINTER_ENDPOINT?: string;
 
 		// Database
-		DATABASE_URL: string;
+		DATABASE_URL?: string;
 
 		// Social Auth (Google)
 		GOOGLE_CLIENT_ID?: string;

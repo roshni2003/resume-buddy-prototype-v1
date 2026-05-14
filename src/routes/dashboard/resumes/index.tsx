@@ -1,8 +1,8 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { SortAscendingIcon, TagIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useEffect, useMemo } from "react";
@@ -12,7 +12,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { MultipleCombobox } from "@/components/ui/multiple-combobox";
 import { Separator } from "@/components/ui/separator";
 import { useDialogStore } from "@/dialogs/store";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { cn } from "@/utils/style";
 import { GridView } from "./-components/grid-view";
 
@@ -36,11 +36,35 @@ function RouteComponent() {
 	const { tags, sort } = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { openDialog } = useDialogStore();
+	const queryClient = useQueryClient();
 
-	const { data: allTags } = useQuery(orpc.resume.tags.list.queryOptions());
-	const { data: resumes } = useQuery(orpc.resume.list.queryOptions({ input: { tags, sort } }));
+	// Invalidate statistics when component mounts to ensure fresh data
+	useEffect(() => {
+		queryClient.invalidateQueries({ queryKey: ["statistics"] });
+		queryClient.invalidateQueries({ queryKey: ["resumes"] });
+	}, [queryClient]);
 
-	// Auto-open create resume dialog when user has no resumes (first time setup)
+	const { data: resumes } = useQuery({
+		queryKey: ["resumes", { tags, sort }],
+		queryFn: () => api.fetchResumes({ tags, sort }),
+	});
+
+	const { data: statistics } = useQuery({
+		queryKey: ["statistics"],
+		queryFn: api.fetchStatistics,
+	});
+
+	const allTags = useMemo(() => {
+		if (!resumes) return [];
+		const tags = new Set<string>();
+		for (const resume of resumes) {
+			for (const tag of resume.tags || []) {
+				tags.add(tag);
+			}
+		}
+		return Array.from(tags);
+	}, [resumes]);
+
 	useEffect(() => {
 		if (resumes && resumes.length === 0) {
 			openDialog("resume.create", undefined);
@@ -60,16 +84,11 @@ function RouteComponent() {
 		];
 	}, [i18n]);
 
-	const lastUpdatedResume = useMemo(() => {
-		if (!resumes || resumes.length === 0) return null;
-		const sorted = [...resumes].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
-		return sorted[0];
-	}, [resumes]);
-
 	const lastUpdateText = useMemo(() => {
-		if (!lastUpdatedResume) return "Never";
+		if (!statistics?.lastUpdated) return "Never";
 		const now = new Date();
-		const diff = now.getTime() - lastUpdatedResume.updatedAt.getTime();
+		const last = new Date(statistics.lastUpdated);
+		const diff = now.getTime() - last.getTime();
 		const minutes = Math.floor(diff / 60000);
 		const hours = Math.floor(diff / 3600000);
 		const days = Math.floor(diff / 86400000);
@@ -78,20 +97,18 @@ function RouteComponent() {
 		if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
 		if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
 		return `${days} day${days > 1 ? "s" : ""} ago`;
-	}, [lastUpdatedResume]);
+	}, [statistics]);
 
 	return (
 		<div className="space-y-6">
-			{/* Stats Cards */}
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				{/* Total Resumes */}
-				<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 					<div className="mb-3 flex items-start justify-between">
 						<div>
-							<p className="mb-2 text-gray-600 text-sm">
+							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Total Resumes</Trans>
 							</p>
-							<p className="font-bold text-2xl text-emerald-600">{resumes?.length ?? 0}</p>
+							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalResumes ?? 0}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,13 +124,13 @@ function RouteComponent() {
 				</div>
 
 				{/* Last Update */}
-				<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 					<div className="mb-3 flex items-start justify-between">
 						<div>
-							<p className="mb-2 text-gray-600 text-sm">
+							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Last Update</Trans>
 							</p>
-							<p className="font-semibold text-base text-emerald-600">{lastUpdateText}</p>
+							<p className="font-semibold text-emerald-600 text-sm sm:text-base">{lastUpdateText}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,16 +146,16 @@ function RouteComponent() {
 				</div>
 
 				{/* Total Downloads */}
-				<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 					<div className="mb-3 flex items-start justify-between">
 						<div>
-							<p className="mb-1 text-gray-600 text-sm">
+							<p className="mb-1 text-gray-600 text-xs sm:text-sm">
 								<Trans>Total Downloads</Trans>
 							</p>
 							<p className="mb-2 text-gray-500 text-xs">
 								<Trans>This month</Trans>
 							</p>
-							<p className="font-bold text-2xl text-emerald-600">0</p>
+							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalDownloads ?? 0}</p>
 						</div>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,13 +171,13 @@ function RouteComponent() {
 				</div>
 
 				{/* Total Submissions */}
-				<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 					<div className="mb-3 flex items-start justify-between">
 						<div>
-							<p className="mb-2 text-gray-600 text-sm">
+							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
 								<Trans>Total Submissions</Trans>
 							</p>
-							<p className="font-semibold text-amber-600 text-base">
+							<p className="font-semibold text-amber-600 text-sm sm:text-base">
 								<Trans>Coming Soon!</Trans>
 							</p>
 						</div>

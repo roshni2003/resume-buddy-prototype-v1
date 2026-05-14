@@ -1,5 +1,5 @@
 import type { MessageDescriptor } from "@lingui/core";
-import { msg } from "@lingui/core/macro";
+import { msg } from "@lingui/macro";
 import { createIsomorphicFn, createServerFn } from "@tanstack/react-start";
 import { getCookie, setCookie } from "@tanstack/react-start/server";
 import Cookies from "js-cookie";

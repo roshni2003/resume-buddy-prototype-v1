@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
 import { URLInput } from "@/components/input/url-input";
@@ -32,6 +33,15 @@ function BasicsSectionForm() {
 		mode: "onChange",
 	});
 
+	// Sync form with store changes (e.g. from preview)
+	const basicsRef = useRef(basics);
+	useEffect(() => {
+		if (basics !== basicsRef.current) {
+			form.reset(basics);
+			basicsRef.current = basics;
+		}
+	}, [basics, form]);
+
 	const onSubmit = (data: FormValues) => {
 		updateResumeData((draft) => {
 			draft.basics = data;
@@ -50,7 +60,13 @@ function BasicsSectionForm() {
 								<Trans>Name</Trans>
 							</FormLabel>
 							<FormControl>
-								<Input {...field} />
+								<Input
+									{...field}
+									onChange={(e) => {
+										const value = e.target.value.replace(/[0-9]/g, "");
+										field.onChange(value);
+									}}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -66,7 +82,13 @@ function BasicsSectionForm() {
 								<Trans>Headline</Trans>
 							</FormLabel>
 							<FormControl>
-								<Input {...field} />
+								<Input
+									{...field}
+									onChange={(e) => {
+										const value = e.target.value.replace(/[0-9]/g, "");
+										field.onChange(value);
+									}}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

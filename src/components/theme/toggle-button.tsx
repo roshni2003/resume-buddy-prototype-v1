@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { MoonIcon, SunIcon } from "@phosphor-icons/react";
 import { useCallback, useRef } from "react";
 import { flushSync } from "react-dom";

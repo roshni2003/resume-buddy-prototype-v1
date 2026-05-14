@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { ProhibitIcon } from "@phosphor-icons/react";
 import Fuse from "fuse.js";
 import { memo, useCallback, useMemo, useState } from "react";

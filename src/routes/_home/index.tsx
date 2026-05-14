@@ -1,9 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { templates } from "@/dialogs/resume/template/data";
 
 export const Route = createFileRoute("/_home/")({
-	component: RouteComponent,
+	beforeLoad: ({ location }) => {
+		// IMPORTANT: Do NOT use `search` here — TanStack Router strips unknown params
+		// (like ?token=) from the validated search object when there is no validateSearch.
+		// Use location.searchStr (raw query string) with href to safely forward
+		// the token through the SSR redirect to /dashboard/resumes.
+		throw redirect({ href: `/dashboard/resumes${location.searchStr}` });
+	},
+	component: () => null,
 });
 
 function RouteComponent() {
@@ -25,7 +32,7 @@ function RouteComponent() {
 		currentIndex * itemsPerPage + itemsPerPage,
 	);
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 font-sans">
+		<div className="min-h-screen bg-linear-to-b from-gray-50 to-blue-50 font-sans">
 			{/* Hero Section */}
 			<div className="mx-auto max-w-7xl px-6 py-16">
 				{/* Powered by Badge */}
@@ -34,7 +41,7 @@ function RouteComponent() {
 						className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-sm"
 						style={{ backgroundColor: "#E2E8F0" }}
 					>
-						<img src="/src/dialogs/resume/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full" />
+						<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full" />
 						<span className="font-medium text-gray-700 text-sm">Powered by Zoe AI Assistant</span>
 					</div>
 				</div>
@@ -94,7 +101,7 @@ function RouteComponent() {
 
 					{/* Right Content - Resume Preview */}
 					<div className="relative mt-8 lg:mt-0">
-						<div className="rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 p-8 shadow-2xl lg:p-12">
+						<div className="rounded-2xl bg-linear-to-br from-slate-800 via-slate-900 to-slate-800 p-8 shadow-2xl lg:p-12">
 							{/* Resume Document */}
 							<div className="rotate-3 transform rounded-lg bg-white shadow-xl transition-transform duration-300 hover:rotate-0">
 								<div className="p-6 lg:p-8">
@@ -132,7 +139,7 @@ function RouteComponent() {
 							{/* AI Assistant Tooltip */}
 							<div className="absolute -bottom-4 left-4 max-w-xs rounded-xl bg-white p-4 shadow-2xl lg:bottom-0 lg:left-0">
 								<div className="flex items-start gap-3">
-									<img src="/src/dialogs/resume/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full" />
+									<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full" />
 									<div>
 										<p className="mb-1 font-semibold text-gray-900 text-sm">Zoe says:</p>
 										<p className="text-gray-600 text-sm">"Great job! Your resume is 85% optimized."</p>

@@ -18,37 +18,84 @@ export const Route = createFileRoute("/uploads/$userId/$")({
  * - /uploads/{userId}/pdfs/{resumeId}/{timestamp}.pdf
  */
 async function handler({ request }: { request: Request }) {
-	const { userId, filePath } = parseRouteParams(request.url);
+	try {
+		const searchParams = new URL(request.url).searchParams;
+		const remoteUrl = searchParams.get("url");
 
-	if (!userId || !filePath) return new Response("Bad Request", { status: 400 });
+		const { userId, filePath } = parseRouteParams(request.url);
 
-	if (!isValidPath(userId) || !isValidPathSegments(filePath)) return new Response("Forbidden", { status: 403 });
+		if (!userId || !filePath) return new Response("Bad Request", { status: 400 });
 
-	// Build the full storage key: uploads/{userId}/{filePath}
-	const key = `uploads/${userId}/${filePath}`;
-	const storedFile = await storageService.read(key);
+		if (!isValidPath(userId) || !isValidPathSegments(filePath)) return new Response("Forbidden", { status: 403 });
 
-	if (!storedFile) return new Response("Not Found", { status: 404 });
+		let data: Uint8Array | undefined;
+		let contentType: string | undefined;
+		let size: number | undefined;
+		let etag: string | undefined;
 
-	const filename = filePath.split("/").pop() ?? filePath;
-	const ext = extname(filename).toLowerCase();
-	const contentType = storedFile.contentType ?? inferContentType(filename);
-	const etag = createEtag(storedFile);
+		// 1. Try to fetch from remote URL if provided (Server-side proxy mode)
+		// This bypasses CORS and handles missing local S3 credentials
+		if (remoteUrl) {
+			try {
+				// Security: Only allow trusted domains if necessary, or just proceed if it's our S3
+				const response = await fetch(remoteUrl);
+				if (response.ok) {
+					const buffer = await response.arrayBuffer();
+					data = new Uint8Array(buffer);
+					contentType = response.headers.get("Content-Type") ?? undefined;
+					size = data.length;
+					etag = createEtag({ data, size, etag: response.headers.get("ETag") ?? undefined });
+				}
+			} catch (error) {
+				console.error("[UploadProxy] Failed to fetch remote URL:", error);
+			}
+		}
 
-	if (isNotModified(request.headers, etag)) return makeNotModifiedResponse(etag);
+		// 2. Fallback to local storageService if remote fetch failed or wasn't requested
+		if (!data) {
+			// Build the full storage key.
+			// If the filePath already starts with a prefix (detected by containing 'uploads/'),
+			// use it as is, otherwise construct the standard uploads/{userId}/{filePath} key.
+			const key = filePath.includes("uploads/") ? filePath : `uploads/${userId}/${filePath}`;
+			const storedFile = await storageService.read(key);
 
-	const shouldForceDownload = [".pdf"].includes(ext);
-	const headers = buildResponseHeaders({
-		filename,
-		storedFile,
-		contentType,
-		etag,
-		shouldForceDownload,
-	});
+			if (!storedFile) return new Response(`Not Found: ${key}`, { status: 404 });
 
-	const buffer = toArrayBuffer(storedFile.data);
+			data = storedFile.data;
+			contentType = storedFile.contentType;
+			size = storedFile.size;
+			etag = storedFile.etag;
+		}
 
-	return new Response(buffer, { headers });
+		const filename = filePath.split("/").pop() ?? filePath;
+		const ext = extname(filename).toLowerCase();
+		contentType = contentType ?? inferContentType(filename);
+		const finalEtag = etag ?? `"${size}-${Date.now()}"`;
+
+		if (isNotModified(request.headers, finalEtag)) return makeNotModifiedResponse(finalEtag);
+
+		const shouldForceDownload = [".pdf"].includes(ext);
+		const headers = buildResponseHeaders({
+			filename,
+			storedFile: { size: size ?? 0 },
+			contentType,
+			etag: finalEtag,
+			shouldForceDownload,
+		});
+
+		const buffer = toArrayBuffer(data);
+
+		return new Response(buffer, { headers });
+	} catch (error) {
+		console.error("[UploadProxy] Error serving file:", error);
+		return new Response(
+			JSON.stringify({
+				message: error instanceof Error ? error.message : "Internal Server Error",
+				stack: error instanceof Error ? error.stack : undefined,
+			}),
+			{ status: 500, headers: { "Content-Type": "application/json" } },
+		);
+	}
 }
 
 /**

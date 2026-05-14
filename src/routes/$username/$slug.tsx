@@ -1,60 +1,57 @@
 import { Trans } from "@lingui/react/macro";
 import { DownloadSimpleIcon } from "@phosphor-icons/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useCallback, useEffect } from "react";
-import { LoadingScreen } from "@/components/layout/loading-screen";
+import { useCallback } from "react";
 import { ResumePreview } from "@/components/resume/preview";
-import { useResumeStore } from "@/components/resume/store/resume";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { downloadFromUrl } from "@/utils/file";
+
 import { cn } from "@/utils/style";
 
 export const Route = createFileRoute("/$username/$slug")({
-	component: RouteComponent,
-	loader: async ({ context, params: { username, slug } }) => {
+	component: PublicResumePage,
+	loader: async ({ params: { username, slug } }) => {
 		try {
 			// Ignore .well-known requests
 			if (username === ".well-known") throw notFound();
 
-			const resume = await context.queryClient.ensureQueryData(
-				orpc.resume.getBySlug.queryOptions({ input: { username, slug } }),
-			);
+			const resumes = await api.fetchResumes();
+			const resume = resumes.find((resume) => resume.slug === slug);
 
-		return { resume };
-	} catch {
-		throw notFound();
-	}
-},
-head: ({ loaderData }) => ({
-	meta: [{ title: loaderData ? `${loaderData.resume.name} - Zoe Resume Builder` : "Zoe Resume Builder" }],
-}),
-// Authentication and password-protected resumes are not supported in this build.
-});function RouteComponent() {
-	const { username, slug } = Route.useParams();
-	const isReady = useResumeStore((state) => state.isReady);
-	const initialize = useResumeStore((state) => state.initialize);
+			if (!resume) throw notFound();
 
-	const { data: resume } = useQuery(orpc.resume.getBySlug.queryOptions({ input: { username, slug } }));
-	const { mutateAsync: printResumeAsPDF, isPending: isPrinting } = useMutation(
-		orpc.printer.printResumeAsPDF.mutationOptions(),
-	);
+			return { resume };
+		} catch {
+			throw notFound();
+		}
+	},
+	head: ({ loaderData }) => ({
+		meta: [
+			{
+				title:
+					loaderData && "resume" in loaderData && loaderData.resume
+						? `${loaderData.resume.name} - Zoe Resume Builder`
+						: "Zoe Resume Builder",
+			},
+		],
+	}),
+	// Authentication and password-protected resumes are not supported in this build.
+});
+function PublicResumePage() {
+	const { resume } = Route.useLoaderData();
 
-	useEffect(() => {
-		if (!resume) return;
-		initialize(resume);
-		return () => initialize(null);
-	}, [resume, initialize]);
+	const { mutateAsync: exportResume, isPending: isPrinting } = useMutation({
+		mutationFn: (data: { id: string; format: "pdf" | "docx" }) => api.exportResume(data.id, data.format),
+	});
 
 	const handleDownload = useCallback(async () => {
 		if (!resume) return;
-		const { url } = await printResumeAsPDF({ id: resume.id });
+		const { url } = await exportResume({ id: resume.id, format: "pdf" });
 		downloadFromUrl(url, `resume-${resume.name}.pdf`);
-	}, [resume, printResumeAsPDF]);
-
-	if (!isReady) return <LoadingScreen />;
+	}, [resume, exportResume]);
 
 	return (
 		<>

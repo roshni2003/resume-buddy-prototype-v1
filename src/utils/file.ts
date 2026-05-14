@@ -34,8 +34,37 @@ export function downloadWithAnchor(blob: Blob, filename: string) {
 }
 
 export async function downloadFromUrl(url: string, filename: string) {
-	const response = await fetch(url);
-	const blob = await response.blob();
+	let downloadUrl = url;
 
-	downloadWithAnchor(blob, filename);
+	// If the URL is a direct S3 URL pointing to an internal upload,
+	// try to use the local proxy to bypass CORS entirely and force download headers.
+	if (url.includes(".amazonaws.com") && url.includes("/uploads/")) {
+		try {
+			const urlObj = new URL(url);
+			// We use the server-side fetch feature of our proxy by passing ?url=
+			downloadUrl = `/uploads/proxy${urlObj.pathname}?url=${encodeURIComponent(url)}`;
+		} catch {
+			// Fallback to original URL if URL parsing fails
+		}
+	}
+
+	try {
+		// Attempt to download using fetch (allows for custom filename via Blob)
+		const response = await fetch(downloadUrl);
+		if (!response.ok) throw new Error(`Fetch failed with status ${response.status}`);
+
+		const blob = await response.blob();
+		downloadWithAnchor(blob, filename);
+	} catch (error) {
+		console.warn("CORS or network error, falling back to direct download link:", error);
+
+		// Fallback: Direct download link via a hidden anchor
+		const a = document.createElement("a");
+		a.href = downloadUrl;
+		a.download = filename;
+		a.target = "_blank";
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
 }

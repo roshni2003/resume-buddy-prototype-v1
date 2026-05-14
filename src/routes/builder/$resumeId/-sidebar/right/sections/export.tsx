@@ -1,21 +1,22 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
-import { CircleNotchIcon, FilePdfIcon } from "@phosphor-icons/react";
+import { CircleNotchIcon, DownloadSimpleIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Button } from "@/components/ui/button";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { downloadFromUrl, generateFilename } from "@/utils/file";
+
 import { SectionBase } from "../shared/section-base";
 
 export function ExportSectionBuilder() {
 	const resume = useResumeStore((state) => state.resume);
 
-	const { mutateAsync: printResumeAsPDF, isPending: isPrinting } = useMutation(
-		orpc.printer.printResumeAsPDF.mutationOptions(),
-	);
+	const { mutateAsync: exportResume, isPending: isPrinting } = useMutation({
+		mutationFn: (data: { id: string; format: "pdf" | "docx" }) => api.exportResume(data.id, data.format),
+	});
 
 	// const onDownloadJSON = useCallback(() => {
 	// 	const filename = generateFilename(resume.data.basics.name, "json");
@@ -32,14 +33,14 @@ export function ExportSectionBuilder() {
 		});
 
 		try {
-			const { url } = await printResumeAsPDF({ id: resume.id });
+			const { url } = await exportResume({ id: resume.id, format: "pdf" });
 			downloadFromUrl(url, filename);
 		} catch {
 			toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
 		} finally {
 			toast.dismiss(toastId);
 		}
-	}, [resume, printResumeAsPDF]);
+	}, [resume, exportResume]);
 
 	return (
 		<SectionBase type="export" className="space-y-4">
@@ -69,7 +70,7 @@ export function ExportSectionBuilder() {
 				{isPrinting ? (
 					<CircleNotchIcon className="size-6 shrink-0 animate-spin" />
 				) : (
-					<FilePdfIcon className="size-6 shrink-0" />
+					<DownloadSimpleIcon className="size-6 shrink-0" />
 				)}
 
 				<div className="flex flex-1 flex-col gap-y-1">

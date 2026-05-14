@@ -1,17 +1,18 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import { InfoIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 
 export function StatisticsSectionBuilder() {
 	const params = useParams({ from: "/builder/$resumeId" });
-	const { data: statistics } = useQuery(
-		orpc.resume.statistics.getById.queryOptions({ input: { id: params.resumeId } }),
-	);
+	const { data: statistics } = useQuery({
+		queryKey: ["resumes", params.resumeId, "statistics"],
+		queryFn: () => api.fetchResumeStatistics(params.resumeId),
+	});
 
 	if (!statistics) return null;
 

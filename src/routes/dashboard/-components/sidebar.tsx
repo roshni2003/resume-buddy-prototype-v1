@@ -1,5 +1,5 @@
 import type { MessageDescriptor } from "@lingui/core";
-import { msg } from "@lingui/core/macro";
+import { msg } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { ReadCvLogoIcon, UserCircleIcon } from "@phosphor-icons/react";

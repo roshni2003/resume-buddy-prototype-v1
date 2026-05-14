@@ -1,41 +1,6 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import { Trans } from "@lingui/react/macro";
-import {
-	CodeBlockIcon,
-	CodeSimpleIcon,
-	ColumnsPlusLeftIcon,
-	ColumnsPlusRightIcon,
-	HighlighterCircleIcon,
-	KeyReturnIcon,
-	LinkBreakIcon,
-	LinkIcon,
-	ListBulletsIcon,
-	ListNumbersIcon,
-	MinusIcon,
-	ParagraphIcon,
-	PlusIcon,
-	RowsPlusBottomIcon,
-	RowsPlusTopIcon,
-	TableIcon,
-	TextAlignCenterIcon,
-	TextAlignJustifyIcon,
-	TextAlignLeftIcon,
-	TextAlignRightIcon,
-	TextBolderIcon,
-	TextHFiveIcon,
-	TextHFourIcon,
-	TextHOneIcon,
-	TextHSixIcon,
-	TextHThreeIcon,
-	TextHTwoIcon,
-	TextIndentIcon,
-	TextItalicIcon,
-	TextOutdentIcon,
-	TextStrikethroughIcon,
-	TextUnderlineIcon,
-	TrashSimpleIcon,
-} from "@phosphor-icons/react";
+import { LinkIcon, TextBolderIcon, TextItalicIcon, TextUnderlineIcon } from "@phosphor-icons/react";
 import Highlight from "@tiptap/extension-highlight";
 import { TableKit } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
@@ -49,20 +14,10 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { VisuallyHidden } from "radix-ui";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { match } from "ts-pattern";
 import z from "zod";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { usePrompt } from "@/hooks/use-prompt";
 import { isRTL } from "@/utils/locale";
 import { sanitizeHtml } from "@/utils/sanitize";
@@ -135,6 +90,16 @@ export function RichInput({ value, onChange, style, className, editorClassName, 
 			onChange(editor.getHTML());
 		},
 	});
+
+	// Sync editor content when value prop changes (e.g. from preview)
+	useEffect(() => {
+		if (editor && value !== editor.getHTML()) {
+			// Only update if not focused to avoid cursor jumping and focus loss
+			if (!editor.isFocused) {
+				editor.commands.setContent(value);
+			}
+		}
+	}, [editor, value]);
 
 	const providerValue = useMemo(() => ({ editor }), [editor]);
 
@@ -285,24 +250,25 @@ function EditorToolbar({ editor, isFullscreen }: { editor: Editor; isFullscreen:
 
 				// Link
 				isLink: ctx.editor.isActive("link") ?? false,
-				setLink: async () => {
-					const url = await prompt(t`Please enter the URL you want to link to:`, {
-						defaultValue: "https://",
-					});
-
-					if (!url || url.trim() === "") {
+				toggleLink: async () => {
+					if (ctx.editor.isActive("link")) {
 						ctx.editor.chain().focus().unsetLink().run();
-						return;
-					}
-
-					if (!z.url({ protocol: /^https?$/ }).safeParse(url).success) {
-						toast.error(t`The URL you entered is not valid.`, {
-							description: t`Valid URLs must start with http:// or https://.`,
+					} else {
+						const url = await prompt(t`Please enter the URL:`, {
+							defaultValue: "https://",
 						});
-						return;
-					}
 
-					ctx.editor.chain().focus().setLink({ href: url, target: "_blank", rel: "noopener nofollow" }).run();
+						if (!url || url.trim() === "") return;
+
+						if (!z.url({ protocol: /^https?$/ }).safeParse(url).success) {
+							toast.error(t`The URL you entered is not valid.`, {
+								description: t`Valid URLs must start with http:// or https://.`,
+							});
+							return;
+						}
+
+						ctx.editor.chain().focus().setLink({ href: url, target: "_blank" }).run();
+					}
 				},
 				unsetLink: () => ctx.editor.chain().focus().unsetLink().run(),
 
@@ -348,7 +314,7 @@ function EditorToolbar({ editor, isFullscreen }: { editor: Editor; isFullscreen:
 			<Toggle
 				size={isFullscreen ? "lg" : "sm"}
 				tabIndex={-1}
-				className="rounded-none"
+				className="rounded-none data-[state=on]:bg-muted-foreground/20"
 				title={t`Bold`}
 				pressed={state.isBold}
 				disabled={!state.canBold}
@@ -360,7 +326,7 @@ function EditorToolbar({ editor, isFullscreen }: { editor: Editor; isFullscreen:
 			<Toggle
 				size={isFullscreen ? "lg" : "sm"}
 				tabIndex={-1}
-				className="rounded-none"
+				className="rounded-none data-[state=on]:bg-muted-foreground/20"
 				title={t`Italic`}
 				pressed={state.isItalic}
 				disabled={!state.canItalic}
@@ -372,7 +338,7 @@ function EditorToolbar({ editor, isFullscreen }: { editor: Editor; isFullscreen:
 			<Toggle
 				size={isFullscreen ? "lg" : "sm"}
 				tabIndex={-1}
-				className="rounded-none"
+				className="rounded-none data-[state=on]:bg-muted-foreground/20"
 				title={t`Underline`}
 				pressed={state.isUnderline}
 				disabled={!state.canUnderline}
@@ -384,314 +350,13 @@ function EditorToolbar({ editor, isFullscreen }: { editor: Editor; isFullscreen:
 			<Toggle
 				size={isFullscreen ? "lg" : "sm"}
 				tabIndex={-1}
-				className="rounded-none"
-				title={t`Strike`}
-				pressed={state.isStrike}
-				disabled={!state.canStrike}
-				onPressedChange={state.toggleStrike}
+				className="rounded-none data-[state=on]:bg-muted-foreground/20"
+				title={t`Hyperlink`}
+				pressed={state.isLink}
+				onPressedChange={state.toggleLink}
 			>
-				<TextStrikethroughIcon className="size-3.5" />
+				<LinkIcon className="size-3.5" />
 			</Toggle>
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Highlight`}
-				pressed={state.isHighlight}
-				disabled={!state.canHighlight}
-				onPressedChange={state.toggleHighlight}
-			>
-				<HighlighterCircleIcon className="size-3.5" />
-			</Toggle>
-
-			<div className="mx-1 h-5 w-px bg-border" />
-
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button size={isFullscreen ? "lg" : "sm"} tabIndex={-1} variant="ghost" className="rounded-none">
-						{match(state)
-							.with({ isParagraph: true }, () => <ParagraphIcon className="size-3.5" />)
-							.with({ isHeading1: true }, () => <TextHOneIcon className="size-3.5" />)
-							.with({ isHeading2: true }, () => <TextHTwoIcon className="size-3.5" />)
-							.with({ isHeading3: true }, () => <TextHThreeIcon className="size-3.5" />)
-							.with({ isHeading4: true }, () => <TextHFourIcon className="size-3.5" />)
-							.with({ isHeading5: true }, () => <TextHFiveIcon className="size-3.5" />)
-							.with({ isHeading6: true }, () => <TextHSixIcon className="size-3.5" />)
-							.otherwise(() => (
-								<ParagraphIcon className="size-3.5" />
-							))}
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canParagraph}
-						checked={state.isParagraph}
-						onCheckedChange={state.setParagraph}
-					>
-						<Trans>Paragraph</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading1}
-						checked={state.isHeading1}
-						onCheckedChange={state.toggleHeading1}
-					>
-						<Trans>Heading 1</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading2}
-						checked={state.isHeading2}
-						onCheckedChange={state.toggleHeading2}
-					>
-						<Trans>Heading 2</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading3}
-						checked={state.isHeading3}
-						onCheckedChange={state.toggleHeading3}
-					>
-						<Trans>Heading 3</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading4}
-						checked={state.isHeading4}
-						onCheckedChange={state.toggleHeading4}
-					>
-						<Trans>Heading 4</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading5}
-						checked={state.isHeading5}
-						onCheckedChange={state.toggleHeading5}
-					>
-						<Trans>Heading 5</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading6}
-						checked={state.isHeading6}
-						onCheckedChange={state.toggleHeading6}
-					>
-						<Trans>Heading 6</Trans>
-					</DropdownMenuCheckboxItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button size={isFullscreen ? "lg" : "sm"} tabIndex={-1} variant="ghost" className="rounded-none">
-						{match(state)
-							.with({ isLeftAlign: true }, () => <TextAlignLeftIcon className="size-3.5" />)
-							.with({ isCenterAlign: true }, () => <TextAlignCenterIcon className="size-3.5" />)
-							.with({ isRightAlign: true }, () => <TextAlignRightIcon className="size-3.5" />)
-							.with({ isJustifyAlign: true }, () => <TextAlignJustifyIcon className="size-3.5" />)
-							.otherwise(() => (
-								<TextAlignLeftIcon className="size-3.5" />
-							))}
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canLeftAlign}
-						checked={state.isLeftAlign}
-						onCheckedChange={state.toggleLeftAlign}
-					>
-						<Trans>Left Align</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canCenterAlign}
-						checked={state.isCenterAlign}
-						onCheckedChange={state.toggleCenterAlign}
-					>
-						<Trans>Center Align</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canRightAlign}
-						checked={state.isRightAlign}
-						onCheckedChange={state.toggleRightAlign}
-					>
-						<Trans>Right Align</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canJustifyAlign}
-						checked={state.isJustifyAlign}
-						onCheckedChange={state.toggleJustifyAlign}
-					>
-						<Trans>Justify Align</Trans>
-					</DropdownMenuCheckboxItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-
-			<div className="mx-1 h-5 w-px bg-border" />
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Bullet List`}
-				pressed={state.isBulletList}
-				disabled={!state.canBulletList}
-				onPressedChange={state.toggleBulletList}
-			>
-				<ListBulletsIcon className="size-3.5" />
-			</Toggle>
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Ordered List`}
-				pressed={state.isOrderedList}
-				disabled={!state.canOrderedList}
-				onPressedChange={state.toggleOrderedList}
-			>
-				<ListNumbersIcon className="size-3.5" />
-			</Toggle>
-
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				disabled={!state.canLiftListItem}
-				onClick={state.liftListItem}
-			>
-				<TextOutdentIcon className="size-3.5" />
-			</Button>
-
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				disabled={!state.canSinkListItem}
-				onClick={state.sinkListItem}
-			>
-				<TextIndentIcon className="size-3.5" />
-			</Button>
-
-			<div className="mx-1 h-5 w-px bg-border" />
-
-			{state.isLink ? (
-				<Button
-					size={isFullscreen ? "lg" : "sm"}
-					tabIndex={-1}
-					variant="ghost"
-					className="rounded-none"
-					onClick={state.unsetLink}
-				>
-					<LinkBreakIcon className="size-3.5" />
-				</Button>
-			) : (
-				<Button
-					size={isFullscreen ? "lg" : "sm"}
-					tabIndex={-1}
-					variant="ghost"
-					className="rounded-none"
-					onClick={state.setLink}
-				>
-					<LinkIcon className="size-3.5" />
-				</Button>
-			)}
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Inline Code`}
-				pressed={state.isInlineCode}
-				disabled={!state.canInlineCode}
-				onPressedChange={state.toggleInlineCode}
-			>
-				<CodeSimpleIcon className="size-3.5" />
-			</Toggle>
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Code Block`}
-				pressed={state.isCodeBlock}
-				disabled={!state.canCodeBlock}
-				onPressedChange={state.toggleCodeBlock}
-			>
-				<CodeBlockIcon className="size-3.5" />
-			</Toggle>
-
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						size={isFullscreen ? "lg" : "sm"}
-						tabIndex={-1}
-						variant="ghost"
-						className="rounded-none"
-						title={t`Table`}
-					>
-						<TableIcon className="size-3.5" />
-					</Button>
-				</DropdownMenuTrigger>
-
-				<DropdownMenuContent>
-					<DropdownMenuItem disabled={!state.canInsertTable} onSelect={state.insertTable}>
-						<PlusIcon />
-						<Trans>Insert Table</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem disabled={!state.canAddColumnBefore} onSelect={state.addColumnBefore}>
-						<ColumnsPlusLeftIcon />
-						<Trans>Add Column Before</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuItem disabled={!state.canAddColumnAfter} onSelect={state.addColumnAfter}>
-						<ColumnsPlusRightIcon />
-						<Trans>Add Column After</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem disabled={!state.canAddRowBefore} onSelect={state.addRowBefore}>
-						<RowsPlusTopIcon />
-						<Trans>Add Row Before</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuItem disabled={!state.canAddRowAfter} onSelect={state.addRowAfter}>
-						<RowsPlusBottomIcon />
-						<Trans>Add Row After</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem disabled={!state.canDeleteColumn} onSelect={state.deleteColumn}>
-						<TrashSimpleIcon />
-						<Trans>Delete Column</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuItem disabled={!state.canDeleteRow} onSelect={state.deleteRow}>
-						<TrashSimpleIcon />
-						<Trans>Delete Row</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem variant="destructive" disabled={!state.canDeleteTable} onSelect={state.deleteTable}>
-						<TrashSimpleIcon />
-						<Trans>Delete Table</Trans>
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				title={t`New Line`}
-				onClick={state.setHardBreak}
-			>
-				<KeyReturnIcon className="size-3.5" />
-			</Button>
-
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				title={t`Separator`}
-				onClick={state.setHorizontalRule}
-			>
-				<MinusIcon className="size-3.5" />
-			</Button>
 		</div>
 	);
 }
@@ -707,7 +372,7 @@ export function TiptapContent({ content, className, ...props }: TiptapContentPro
 		<div
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
 			dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-			className={cn(styles.tiptap_content, className)}
+			className={cn("tiptap-content", className)}
 			{...props}
 		/>
 	);

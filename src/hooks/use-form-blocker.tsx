@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { useCallback } from "react";
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { useDialogStore } from "@/dialogs/store";

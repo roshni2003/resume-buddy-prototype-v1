@@ -1,6 +1,7 @@
 import { EnvelopeIcon, GlobeIcon, MapPinIcon, PhoneIcon } from "@phosphor-icons/react";
 import { cn } from "@/utils/style";
-import { getSectionComponent } from "../shared/get-section-component";
+import { Section } from "../shared/get-section-component";
+import { InlineEditableText } from "../shared/inline-editable-text";
 import { PageIcon } from "../shared/page-icon";
 import { PageLink } from "../shared/page-link";
 import { PagePicture } from "../shared/page-picture";
@@ -19,8 +20,10 @@ const sectionClassName = cn(
 	"group-data-[layout=sidebar]:[&_.section-item_i]:text-(--page-background-color)!",
 
 	// Level Display in Sidebar Layout
-	"group-data-[layout=sidebar]:[&_.section-item-level>div]:bg-(--page-background-color)",
-	"group-data-[layout=sidebar]:[&_.section-item-level>div]:text-(--page-background-color)",
+	"group-data-[layout=sidebar]:[&_.section-item-level_div]:border-(--page-background-color)",
+	"group-data-[layout=sidebar]:[&_.section-item-level_div[data-active=true]]:bg-(--page-background-color)",
+	"group-data-[layout=sidebar]:[&_.section-item-level_i[data-active=true]]:text-(--page-background-color)!",
+	"group-data-[layout=sidebar]:[&_.section-item-level_i[data-active=false]]:opacity-40",
 
 	// Section Item Header in Sidebar Layout
 	"group-data-[layout=sidebar]:[&_.section-item-header>div]:flex-col",
@@ -41,17 +44,15 @@ export function ChikoritaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 				<div className="page-sidebar-background pointer-events-none absolute inset-y-0 z-0 w-(--page-sidebar-width) shrink-0 bg-(--page-primary-color) ltr:end-0 rtl:start-0" />
 			)}
 
-			{isFirstPage && <Header />}
-
 			<div className="flex">
 				<main
 					data-layout="main"
 					className="group page-main z-10 flex-1 space-y-4 px-(--page-margin-x) pt-(--page-margin-y)"
 				>
-					{main.map((section) => {
-						const Component = getSectionComponent(section, { sectionClassName });
-						return <Component key={section} id={section} />;
-					})}
+					{isFirstPage && <Header />}
+					{main.map((section) => (
+						<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
+					))}
 				</main>
 
 				{!fullWidth && (
@@ -59,10 +60,9 @@ export function ChikoritaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 						data-layout="sidebar"
 						className="group page-sidebar z-10 w-(--page-sidebar-width) shrink-0 space-y-4 overflow-x-hidden px-(--page-margin-x) pt-(--page-margin-y) text-(--page-background-color)"
 					>
-						{sidebar.map((section) => {
-							const Component = getSectionComponent(section, { sectionClassName });
-							return <Component key={section} id={section} />;
-						})}
+						{sidebar.map((section) => (
+							<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
+						))}
 					</aside>
 				)}
 			</div>
@@ -72,39 +72,84 @@ export function ChikoritaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 function Header() {
 	const basics = useResumeStore((state) => state.resume.data.basics);
+	const updateResumeData = useResumeStore((state) => state.updateResumeData);
+
+	const handleEmailChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.email = value;
+		});
+	};
+
+	const handlePhoneChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.phone = value;
+		});
+	};
+
+	const handleLocationChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.location = value;
+		});
+	};
+
+	const handleNameChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.name = value;
+		});
+	};
+
+	const handleHeadlineChange = (value: string) => {
+		updateResumeData((draft) => {
+			draft.basics.headline = value;
+		});
+	};
 
 	return (
-		<div className="page-header relative flex">
-			<div className="flex flex-1 items-center ps-(--page-margin-x) pt-(--page-margin-y)">
+		<div data-section-id="header" className="page-header relative flex">
+			<div className="flex flex-1 items-start">
 				<PagePicture />
 
-				<div className="page-basics space-y-2 px-(--page-margin-x)">
+				<div className="page-basics space-y-2 ps-4">
 					<div>
-						<h2 className="basics-name">{basics.name}</h2>
-						<p className="basics-headline">{basics.headline}</p>
+						<h2 className="basics-name">
+							<InlineEditableText value={basics.name} placeholder="Your Name" onChange={handleNameChange} />
+						</h2>
+						<p className="basics-headline">
+							<InlineEditableText
+								value={basics.headline}
+								placeholder="Your Professional Title"
+								onChange={handleHeadlineChange}
+							/>
+						</p>
 					</div>
 
 					<div className="basics-items flex flex-wrap gap-x-2 gap-y-0.5 *:flex *:items-center *:gap-x-1.5">
-						{basics.email && (
-							<div className="basics-item-email">
-								<EnvelopeIcon />
-								<PageLink url={`mailto:${basics.email}`} label={basics.email} />
-							</div>
-						)}
+						<div className="basics-item-email break-anywhere min-w-0">
+							<EnvelopeIcon />
+							<InlineEditableText
+								as="a"
+								href={basics.email ? `mailto:${basics.email}` : undefined}
+								value={basics.email}
+								placeholder="email@domain.com"
+								onChange={handleEmailChange}
+							/>
+						</div>
 
-						{basics.phone && (
-							<div className="basics-item-phone">
-								<PhoneIcon />
-								<PageLink url={`tel:${basics.phone}`} label={basics.phone} />
-							</div>
-						)}
+						<div className="basics-item-phone">
+							<PhoneIcon />
+							<InlineEditableText
+								as="a"
+								href={basics.phone ? `tel:${basics.phone}` : undefined}
+								value={basics.phone}
+								placeholder="+91 98765 43210"
+								onChange={handlePhoneChange}
+							/>
+						</div>
 
-						{basics.location && (
-							<div className="basics-item-location">
-								<MapPinIcon />
-								<span>{basics.location}</span>
-							</div>
-						)}
+						<div className="basics-item-location">
+							<MapPinIcon />
+							<InlineEditableText value={basics.location} placeholder="City, Country" onChange={handleLocationChange} />
+						</div>
 
 						{basics.website.url && (
 							<div className="basics-item-website">
@@ -122,8 +167,6 @@ function Header() {
 					</div>
 				</div>
 			</div>
-
-			<div className="w-(--page-sidebar-width) shrink-0" />
 		</div>
 	);
 }

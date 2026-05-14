@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
 import { PencilSimpleLineIcon, PlusIcon } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
 import { useForm, useFormContext, useWatch } from "react-hook-form";
 import type z from "zod";
 import { RichInput } from "@/components/input/rich-input";
-import { URLInput } from "@/components/input/url-input";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { AIGenerateButton } from "@/components/ui/ai-generate-button";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import type { DialogProps } from "@/dialogs/store";
 import { useDialogStore } from "@/dialogs/store";
-import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { experienceItemSchema } from "@/schema/resume/data";
 import { generateId } from "@/utils/string";
 
@@ -35,9 +34,12 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 			company: data?.item?.company ?? "",
 			position: data?.item?.position ?? "",
 			location: data?.item?.location ?? "",
-			period: data?.item?.period ?? "",
-			website: data?.item?.website ?? { url: "", label: "" },
+			startDate: data?.item?.startDate ?? "",
+			endDate: data?.item?.endDate ?? "",
+			currentlyWorkingHere: data?.item?.currentlyWorkingHere ?? false,
 			description: data?.item?.description ?? "",
+			website: data?.item?.website ?? { url: "", label: "" },
+			period: data?.item?.period ?? "", // Ensure 'period' has a default value
 		},
 	});
 
@@ -45,7 +47,11 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 		updateResumeData((draft) => {
 			if (data?.customSectionId) {
 				const section = draft.customSections.find((s) => s.id === data.customSectionId);
-				if (section) section.items.push(formData);
+				if (section) {
+					section.items.push(formData);
+				} else {
+					console.error("Custom section not found for ID:", data.customSectionId);
+				}
 			} else {
 				draft.sections.experience.items.push(formData);
 			}
@@ -53,12 +59,10 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 		closeDialog();
 	};
 
-	const { blockEvents, requestClose } = useFormBlocker(form);
-
 	return (
-		<DialogContent {...blockEvents}>
+		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PlusIcon />
 					<Trans>Create a new experience</Trans>
 				</DialogTitle>
@@ -69,13 +73,12 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ExperienceForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Create</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -97,9 +100,12 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 			company: data.item.company,
 			position: data.item.position,
 			location: data.item.location,
-			period: data.item.period,
-			website: data.item.website,
+			startDate: data.item.startDate ?? "",
+			endDate: data.item.endDate ?? "",
+			currentlyWorkingHere: data.item.currentlyWorkingHere ?? false,
 			description: data.item.description,
+			website: data.item.website ?? { url: "", label: "" },
+			period: data?.item?.period ?? "", // Ensure 'period' has a default value
 		},
 	});
 
@@ -118,12 +124,10 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 		closeDialog();
 	};
 
-	const { blockEvents, requestClose } = useFormBlocker(form);
-
 	return (
-		<DialogContent {...blockEvents}>
+		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PencilSimpleLineIcon />
 					<Trans>Update an existing experience</Trans>
 				</DialogTitle>
@@ -134,13 +138,12 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ExperienceForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Save Changes</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -151,19 +154,58 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 
 function ExperienceForm() {
 	const form = useFormContext<FormValues>();
-
-	const company = useWatch({ control: form.control, name: "company" });
-	const position = useWatch({ control: form.control, name: "position" });
+	const experienceId = form.getValues("id");
+	// Watch the "description" field (was incorrectly watching "content")
 	const description = useWatch({ control: form.control, name: "description" });
+	const previousDescriptionRef = useRef(description); // Track previous description
 
-	const handleAIGenerated = (content: string) => {
-		form.setValue("description", content, { shouldDirty: true });
+	const aiUpdateCountRef = useRef(0); // Count expected AI updates
+	const roundsUsed = useResumeStore((state) => state.experienceAIRoundsUsed?.[experienceId] ?? 0);
+	const incrementRoundsUsed = useResumeStore((state) => state.incrementExperienceRounds);
+
+	const resetRounds = useResumeStore((state) => state.resetExperienceRounds);
+	const maxRounds = 2;
+
+	useEffect(() => {
+		// If we're expecting AI updates, skip reset and decrement counter
+		if (aiUpdateCountRef.current > 0) {
+			aiUpdateCountRef.current -= 1;
+			previousDescriptionRef.current = description;
+			return;
+		}
+
+		if (description !== previousDescriptionRef.current) {
+			resetRounds(experienceId);
+		}
+
+		previousDescriptionRef.current = description;
+	}, [description, resetRounds, experienceId]);
+
+	const isWordCountValid = (() => {
+		if (typeof description !== "string") return false;
+		return description.trim().split(/\s+/).filter(Boolean).length >= 5;
+	})();
+
+	const { control } = form;
+
+	const handleAIGenerated = (aiExperience: string) => {
+		if (aiExperience && aiExperience.length > 10) {
+			// Expect 2 content updates: plain text + RichInput wrapping in <p> tags
+			aiUpdateCountRef.current = 2;
+
+			form.setValue("description", aiExperience, {
+				shouldDirty: true,
+				shouldValidate: true,
+			});
+
+			incrementRoundsUsed(experienceId);
+		}
 	};
 
 	return (
 		<>
 			<FormField
-				control={form.control}
+				control={control}
 				name="company"
 				render={({ field }) => (
 					<FormItem>
@@ -179,7 +221,7 @@ function ExperienceForm() {
 			/>
 
 			<FormField
-				control={form.control}
+				control={control}
 				name="position"
 				render={({ field }) => (
 					<FormItem>
@@ -195,7 +237,7 @@ function ExperienceForm() {
 			/>
 
 			<FormField
-				control={form.control}
+				control={control}
 				name="location"
 				render={({ field }) => (
 					<FormItem>
@@ -211,15 +253,15 @@ function ExperienceForm() {
 			/>
 
 			<FormField
-				control={form.control}
-				name="period"
+				control={control}
+				name="startDate"
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel>
-							<Trans>Period</Trans>
+							<Trans>Start Date</Trans>
 						</FormLabel>
 						<FormControl>
-							<Input {...field} />
+							<Input type="date" {...field} />
 						</FormControl>
 						<FormMessage />
 					</FormItem>
@@ -227,20 +269,15 @@ function ExperienceForm() {
 			/>
 
 			<FormField
-				control={form.control}
-				name="website"
+				control={control}
+				name="endDate"
 				render={({ field }) => (
-					<FormItem className="sm:col-span-full">
+					<FormItem>
 						<FormLabel>
-							<Trans>Website</Trans>
+							<Trans>End Date</Trans>
 						</FormLabel>
 						<FormControl>
-							<URLInput
-								{...field}
-								value={field.value}
-								onChange={field.onChange}
-								hideLabelButton={form.watch("options.showLinkInTitle")}
-							/>
+							<Input type="date" {...field} disabled={form.watch("currentlyWorkingHere")} />
 						</FormControl>
 						<FormMessage />
 					</FormItem>
@@ -248,46 +285,67 @@ function ExperienceForm() {
 			/>
 
 			<FormField
-				control={form.control}
-				name="options.showLinkInTitle"
+				control={control}
+				name="currentlyWorkingHere"
 				render={({ field }) => (
-					<FormItem className="flex items-center gap-x-2 sm:col-span-full">
+					<FormItem className="flex items-center gap-x-2">
 						<FormControl>
 							<Switch checked={field.value} onCheckedChange={field.onChange} />
 						</FormControl>
-						<FormLabel className="!mt-0">
-							<Trans>Show link in title</Trans>
+						<FormLabel className="mt-0!">
+							<Trans>Currently working here</Trans>
 						</FormLabel>
 					</FormItem>
 				)}
 			/>
-
 			<FormField
-				control={form.control}
+				control={control}
 				name="description"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<div className="flex items-center justify-between">
-							<FormLabel>
-								<Trans>Description</Trans>
-							</FormLabel>
-							{(company || position) && (
-								<AIGenerateButton
-									type="experience"
-									data={{
-										company,
-										position,
-										title: position,
-										responsibilities: description,
-										projectDetails: "",
-									}}
-									onGenerated={handleAIGenerated}
-								/>
-							)}
+						<div className="flex flex-row items-center justify-between">
+							<FormLabel className="text-xs sm:text-base">Description</FormLabel>
+
+							<AIGenerateButton
+								resumeId={useResumeStore.getState().resume.id}
+								type="experience"
+								data={{
+									company: form.getValues("company"),
+									position: form.getValues("position"),
+									description: description,
+								}}
+								onGenerated={handleAIGenerated}
+								roundsUsed={roundsUsed}
+								maxRounds={maxRounds}
+								isWordCountValid={isWordCountValid}
+								disabled={roundsUsed >= maxRounds || !isWordCountValid} // Disable button after maxRounds
+								className="scale-85 sm:scale-100"
+							/>
 						</div>
+
 						<FormControl>
-							<RichInput {...field} value={field.value} onChange={field.onChange} />
+							<RichInput {...field} value={field.value || ""} onChange={field.onChange} />
 						</FormControl>
+
+						{/* Status messages */}
+						{!isWordCountValid && field.value && field.value.trim().split(/\s+/).filter(Boolean).length < 5 && (
+							<p className="mt-1 text-amber-600 text-xs">
+								<Trans>Write at least 5 words to enable Ask Zoe</Trans>
+							</p>
+						)}
+
+						{roundsUsed === 1 && (
+							<p className="mt-1 text-blue-600 text-xs">
+								<Trans>You have 1 more AI suggestion left for this text.</Trans>
+							</p>
+						)}
+
+						{roundsUsed >= maxRounds && (
+							<p className="mt-1 font-medium text-red-600 text-xs">
+								<Trans>✓ You've used both AI suggestions. Edit the text to get new suggestions.</Trans>
+							</p>
+						)}
+
 						<FormMessage />
 					</FormItem>
 				)}

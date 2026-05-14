@@ -2,6 +2,7 @@ import { CaretRightIcon } from "@phosphor-icons/react";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { DragHandle } from "@/components/ui/sortable-item";
 import type { SectionType } from "@/schema/resume/data";
 import { getSectionIcon, getSectionTitle, type LeftSidebarSection } from "@/utils/resume/section";
 import { cn } from "@/utils/style";
@@ -32,19 +33,21 @@ export function SectionBase({ type, className, ...props }: Props) {
 			id={`sidebar-${type}`}
 			value={collapsed ? "" : type}
 			onValueChange={() => toggleCollapsed(type)}
-			className={cn("space-y-4", isHidden && "opacity-50")}
+			className={cn("space-y-3 sm:space-y-4", isHidden && "opacity-50")}
 		>
-			<AccordionItem value={type} className="group/accordion space-y-4">
-				<div className="flex items-center">
-					<AccordionTrigger asChild className="me-2 items-center justify-center">
-						<Button size="icon" variant="ghost">
-							<CaretRightIcon />
+			<AccordionItem value={type} className="group/accordion space-y-3 sm:space-y-4">
+				<div className="flex items-center gap-1 lg:gap-2">
+					<DragHandle className="mr-1 lg:mr-2" />
+
+					<AccordionTrigger asChild className="me-1 items-center justify-center lg:me-2">
+						<Button size="icon" variant="ghost" className="h-8 w-8 lg:h-10 lg:w-10">
+							<CaretRightIcon className="h-4 w-4 transition-transform group-data-[state=open]/accordion:rotate-90 lg:h-5 lg:w-5" />
 						</Button>
 					</AccordionTrigger>
 
-					<div className="flex flex-1 items-center gap-x-4">
+					<div className="flex flex-1 items-center gap-x-1.5 lg:gap-x-4">
 						{getSectionIcon(type)}
-						<h2 className="line-clamp-1 font-bold text-2xl tracking-tight">
+						<h2 className="line-clamp-1 font-bold text-base tracking-tight lg:text-xl xl:text-2xl">
 							{("title" in section && section.title) || getSectionTitle(type)}
 						</h2>
 					</div>

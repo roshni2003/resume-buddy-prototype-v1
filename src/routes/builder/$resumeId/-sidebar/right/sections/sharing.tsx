@@ -1,8 +1,8 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import { ORPCError } from "@orpc/client";
 import { ClipboardIcon, LockSimpleIcon, LockSimpleOpenIcon } from "@phosphor-icons/react";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { useConfirm } from "@/hooks/use-confirm";
 import { usePrompt } from "@/hooks/use-prompt";
 import { authClient } from "@/integrations/auth/client";
-import { orpc } from "@/integrations/orpc/client";
+import { api } from "@/utils/api";
 import { SectionBase } from "../shared/section-base";
 
 export function SharingSectionBuilder() {
@@ -22,12 +22,31 @@ export function SharingSectionBuilder() {
 	const confirm = useConfirm();
 	const [_, copyToClipboard] = useCopyToClipboard();
 	const { data: session } = authClient.useSession();
+	const queryClient = useQueryClient();
 	const params = useParams({ from: "/builder/$resumeId" });
 
-	const { mutateAsync: updateResume } = useMutation(orpc.resume.update.mutationOptions());
-	const { mutateAsync: setPassword } = useMutation(orpc.resume.setPassword.mutationOptions());
-	const { mutateAsync: removePassword } = useMutation(orpc.resume.removePassword.mutationOptions());
-	const { data: resume } = useSuspenseQuery(orpc.resume.getById.queryOptions({ input: { id: params.resumeId } }));
+	const { mutateAsync: updateResume } = useMutation({
+		mutationFn: ({ id, ...data }: { id: string; isPublic: boolean }) => api.updateResume(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
+		},
+	});
+	const { mutateAsync: setPassword } = useMutation({
+		mutationFn: (args: { id: string; password: string }) => api.setPassword(args.id, args.password),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
+		},
+	});
+	const { mutateAsync: removePassword } = useMutation({
+		mutationFn: (args: { id: string }) => api.removePassword(args.id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["resumes", params.resumeId] });
+		},
+	});
+	const { data: resume } = useSuspenseQuery({
+		queryKey: ["resumes", params.resumeId],
+		queryFn: () => api.fetchResume(params.resumeId),
+	});
 
 	const publicUrl = useMemo(() => {
 		if (!session) return "";
@@ -72,7 +91,7 @@ export function SharingSectionBuilder() {
 			await setPassword({ id: resume.id, password });
 			toast.success(t`Password protection has been enabled.`, { id: toastId });
 		} catch (error) {
-			const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
+			const message = error instanceof Error ? error.message : t`Something went wrong. Please try again.`;
 			toast.error(message, { id: toastId });
 		}
 	}, [prompt, resume.id, setPassword]);
@@ -93,7 +112,7 @@ export function SharingSectionBuilder() {
 			await removePassword({ id: resume.id });
 			toast.success(t`Password protection has been disabled.`, { id: toastId });
 		} catch (error) {
-			const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
+			const message = error instanceof Error ? error.message : t`Something went wrong. Please try again.`;
 			toast.error(message, { id: toastId });
 		}
 	}, [confirm, resume.id, resume.hasPassword, removePassword]);

@@ -1,11 +1,27 @@
-import { useEffect, useRef } from "react";
+import { debounce } from "es-toolkit";
+import { useEffect, useMemo, useRef } from "react";
+import type z from "zod";
 import { useResumeStore } from "@/components/resume/store/resume";
-import type { SectionItem } from "@/schema/resume/data";
-import { stripHtml } from "@/utils/string";
+import type { experienceItemSchema } from "@/schema/resume/data";
+import { handleContentEditableLinkClick } from "@/utils/resume/event";
 import { cn } from "@/utils/style";
 import { PageLink } from "../page-link";
 
-type ExperienceItemProps = SectionItem<"experience"> & {
+// Function to format date as 'Sep/2026'
+function formatExperienceDate(dateString: string | undefined): string {
+	if (!dateString) return "";
+	
+	try {
+		const date = new Date(dateString);
+		const month = date.toLocaleString('en-US', { month: 'short' });
+		const year = date.getFullYear();
+		return `${month} ${year}`;
+	} catch {
+		return dateString;
+	}
+}
+
+type ExperienceItemProps = z.infer<typeof experienceItemSchema> & {
 	className?: string;
 };
 
@@ -16,9 +32,29 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 	// Update description content when item.description changes
 	useEffect(() => {
 		if (descriptionRef.current && descriptionRef.current.innerHTML !== item.description) {
-			descriptionRef.current.innerHTML = item.description;
+			if (document.activeElement !== descriptionRef.current) {
+				descriptionRef.current.innerHTML = item.description;
+			}
 		}
 	}, [item.description]);
+
+	const debouncedUpdate = useMemo(
+		() =>
+			debounce((newValue: string) => {
+				updateResumeData((draft) => {
+					const exp = draft.sections.experience.items.find((exp) => exp.id === item.id);
+					if (exp) exp.description = newValue;
+				});
+			}, 100),
+		[updateResumeData, item.id],
+	);
+
+	const handleDescriptionChange = (e: React.FormEvent<HTMLDivElement>) => {
+		const newValue = e.currentTarget.innerHTML || "";
+		if (newValue !== item.description) {
+			debouncedUpdate(newValue);
+		}
+	};
 
 	const handleCompanyChange = (e: React.FocusEvent<HTMLSpanElement>) => {
 		const newValue = e.currentTarget.textContent || "";
@@ -50,14 +86,55 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 		}
 	};
 
-	const handleDescriptionChange = (e: React.FocusEvent<HTMLDivElement>) => {
-		const newValue = e.currentTarget.innerHTML || "";
-		if (newValue !== item.description) {
-			updateResumeData((draft) => {
-				const exp = draft.sections.experience.items.find((exp) => exp.id === item.id);
-				if (exp) exp.description = newValue;
-			});
+	// Function to render description based on content
+	const renderDescription = () => {
+		if (!item.description) return null;
+
+		const text = item.description;
+
+		// Case 1: If it looks like HTML (contains <p>, <ul>, <li>, <strong>, or <b>), render it as HTML
+		if (
+			text.includes("<p>") ||
+			text.includes("<ul>") ||
+			text.includes("<li>") ||
+			text.includes("<strong>") ||
+			text.includes("<b>")
+		) {
+			return (
+				<div
+					className="section-item-description tiptap-content"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: This content is managed by Tiptap and sanitized before display
+					dangerouslySetInnerHTML={{ __html: text }}
+				/>
+			);
 		}
+
+		// Case 2: Check for bullet point markers in plain text (fallback)
+		const lines = text.split("\n").filter((line) => line.trim() !== "");
+		const hasBulletMarkers = lines.some((line) => line.trim().match(/^[*\-•]\s+/));
+
+		if (hasBulletMarkers) {
+			const listItems = lines.map((line) => line.replace(/^[*\-•]\s+/, "").trim());
+
+			return (
+				<ul className="list-disc pl-5">
+					{listItems.map((item, index) => (
+						<li key={index}>{item}</li>
+					))}
+				</ul>
+			);
+		}
+
+		// Case 3: Plain text with line breaks
+		return (
+			<div className="section-item-description whitespace-pre-wrap">
+				{lines.map((paragraph, index) => (
+					<p key={index} className="mb-2 last:mb-0">
+						{paragraph}
+					</p>
+				))}
+			</div>
+		);
 	};
 
 	return (
@@ -94,24 +171,28 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 					>
 						{item.position}
 					</span>
-					<span className="section-item-metadata experience-item-period shrink-0 text-end">{item.period}</span>
+					<span className="section-item-metadata experience-item-period shrink-0 text-end">
+						{formatExperienceDate(item.startDate)}
+						{item.startDate && " - "}
+						{item.currentlyWorkingHere ? "Present" : formatExperienceDate(item.endDate)}
+					</span>
 				</div>
 			</div>
 
-			{/* Description */}
+			{/* Description - Smart rendering based on content */}
 			<div
 				ref={descriptionRef}
 				contentEditable
 				suppressContentEditableWarning
-				onBlur={handleDescriptionChange}
-				className={cn(
-					"section-item-description experience-item-description cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
-					!stripHtml(item.description) && "hidden",
-				)}
-			/>
+				onInput={handleDescriptionChange}
+				onClick={handleContentEditableLinkClick}
+				className="tiptap-content cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+			>
+				{renderDescription()}
+			</div>
 
 			{/* Website */}
-			{!item.options?.showLinkInTitle && (
+			{item.website?.label && (
 				<div className="section-item-website experience-item-website">
 					<PageLink {...item.website} label={item.website.label} />
 				</div>

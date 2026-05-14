@@ -1,11 +1,10 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi, redirect } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { ResumePreview } from "@/components/resume/preview";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { getORPCClient } from "@/integrations/orpc/client";
 import { env } from "@/utils/env";
 import { verifyPrinterToken } from "@/utils/printer-token";
 
@@ -16,39 +15,119 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/printer/$resumeId")({
 	component: RouteComponent,
 	validateSearch: zodValidator(searchSchema),
+	head: ({ loaderData }) => {
+		if (loaderData?.token === "preview") {
+			return {
+				styles: [
+					{
+						children:
+							"html, body { background-color: white !important; color-scheme: light !important; } .dark { background-color: white !important; }",
+					},
+				],
+			};
+		}
+	},
 	beforeLoad: async ({ params, search }) => {
-		if (env.FLAG_DEBUG_PRINTER) return;
+		if (env.VITE_FLAG_DEBUG_PRINTER) return;
+
+		// Allow preview token for dashboard cards
+		if (search?.token === "preview") return;
 
 		try {
 			// Verify the token and ensure it matches the resume ID
-			const tokenResumeId = verifyPrinterToken(search.token);
+			const tokenResumeId = verifyPrinterToken(search?.token || "");
 			if (tokenResumeId !== params.resumeId) throw new Error();
 		} catch {
 			// Invalid or missing token - throw error to be caught by error handler
 			throw redirect({ to: "/", search: {}, throw: true });
 		}
 	},
-	loader: async ({ params }) => {
-		const client = getORPCClient();
-		const resume = await client.resume.getByIdForPrinter({ id: params.resumeId });
+	loader: async ({ params, search }: any) => {
+		try {
+			if (search?.token === "preview") {
+				// Preview mode: skip server-side loading, load on client only
+				if (typeof window === "undefined") {
+					return {
+						resume: { description: "Graduated with honors. Major in Computer Science.", currentlyStudyingHere: false },
+						token: search?.token,
+					};
+				}
+				const { api } = await import("@/utils/api");
+				const previewResume = await api.fetchResume(params.resumeId);
+				return { resume: previewResume, token: search?.token };
+			}
 
-		return { resume };
+			const { api } = await import("@/utils/api");
+			const resume = await api.fetchResume(params.resumeId);
+			return { resume, token: search?.token };
+		} catch (error) {
+			console.error(`[Printer] Failed to load resume ${params.resumeId}:`, error);
+			if (typeof window !== "undefined") {
+				window.parent.postMessage({ type: "PRINTER_ERROR", resumeId: params.resumeId, message: String(error) }, "*");
+			}
+			return { resume: null, token: search?.token };
+		}
 	},
 });
 
+const routeApi = getRouteApi("/printer/$resumeId");
+
 function RouteComponent() {
-	const { resume } = Route.useLoaderData();
+	const loaderData = routeApi.useLoaderData() as { resume: any; token: string } | undefined;
+	const { token: searchToken } = routeApi.useSearch();
+	const { resumeId } = routeApi.useParams();
 
 	const isReady = useResumeStore((state) => state.isReady);
 	const initialize = useResumeStore((state) => state.initialize);
 
-	useEffect(() => {
-		if (!resume) return;
-		initialize(resume);
-		return () => initialize(null);
-	}, [resume, initialize]);
+	const [clientResume, setClientResume] = useState<any>(loaderData?.resume ?? null);
+	const token = loaderData?.token ?? searchToken;
 
-	if (!isReady) return <LoadingScreen />;
+	// Client-side fetch for preview mode when server returned null
+	useEffect(() => {
+		if (clientResume) return;
+		if (token !== "preview" && searchToken !== "preview") return;
+
+		const fetchResume = async () => {
+			try {
+				const { api } = await import("@/utils/api");
+				const resume = await api.fetchResume(resumeId);
+				setClientResume(resume);
+			} catch (error) {
+				console.error(`[Printer] Client-side fetch failed for ${resumeId}:`, error);
+				window.parent.postMessage({ type: "PRINTER_ERROR", resumeId, message: String(error) }, "*");
+			}
+		};
+
+		fetchResume();
+	}, [clientResume, token, searchToken, resumeId]);
+
+	useEffect(() => {
+		if (!clientResume) return;
+		initialize(clientResume);
+	}, [clientResume, initialize]);
+
+	useEffect(() => {
+		if (isReady) {
+			document.body.setAttribute("data-wf-loaded", "true");
+		} else {
+			document.body.removeAttribute("data-wf-loaded");
+		}
+	}, [isReady]);
+
+	// Signal to parent window (dashboard card) that the resume is ready
+	useEffect(() => {
+		if (isReady && (token === "preview" || searchToken === "preview")) {
+			window.parent.postMessage({ type: "RESUME_READY", resumeId: clientResume?.id ?? resumeId }, "*");
+		}
+	}, [isReady, token, searchToken, clientResume?.id, resumeId]);
+
+	if (!isReady) {
+		if (token === "preview" || searchToken === "preview") {
+			return <div className="fixed inset-0 bg-white" />;
+		}
+		return <LoadingScreen />;
+	}
 
 	return <ResumePreview pageClassName="print:w-full!" />;
 }

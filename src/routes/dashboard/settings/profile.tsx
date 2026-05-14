@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import { CheckIcon, UserCircleIcon, WarningIcon } from "@phosphor-icons/react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
@@ -41,11 +41,11 @@ function RouteComponent() {
 
 	const defaultValues = useMemo(() => {
 		return {
-			name: session.user.name,
-			username: session.user.username,
-			email: session.user.email,
+			name: session?.user?.name ?? "",
+			username: session?.user?.username ?? "",
+			email: session?.user?.email ?? "",
 		};
-	}, [session.user]);
+	}, [session?.user]);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),

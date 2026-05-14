@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
 import { PencilSimpleLineIcon, PlusIcon } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
 import { useForm, useFormContext, useWatch } from "react-hook-form";
 import type z from "zod";
 import { RichInput } from "@/components/input/rich-input";
@@ -14,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import type { DialogProps } from "@/dialogs/store";
 import { useDialogStore } from "@/dialogs/store";
-import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { projectItemSchema } from "@/schema/resume/data";
 import { generateId } from "@/utils/string";
 
@@ -51,12 +51,10 @@ export function CreateProjectDialog({ data }: DialogProps<"resume.sections.proje
 		closeDialog();
 	};
 
-	const { blockEvents, requestClose } = useFormBlocker(form);
-
 	return (
-		<DialogContent {...blockEvents}>
+		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PlusIcon />
 					<Trans>Create a new project</Trans>
 				</DialogTitle>
@@ -67,13 +65,12 @@ export function CreateProjectDialog({ data }: DialogProps<"resume.sections.proje
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ProjectForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Create</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -114,12 +111,10 @@ export function UpdateProjectDialog({ data }: DialogProps<"resume.sections.proje
 		closeDialog();
 	};
 
-	const { blockEvents, requestClose } = useFormBlocker(form);
-
 	return (
-		<DialogContent {...blockEvents}>
+		<DialogContent>
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
+				<DialogTitle className="flex items-center gap-x-2 text-base sm:text-lg">
 					<PencilSimpleLineIcon />
 					<Trans>Update an existing project</Trans>
 				</DialogTitle>
@@ -130,13 +125,12 @@ export function UpdateProjectDialog({ data }: DialogProps<"resume.sections.proje
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
 					<ProjectForm />
 
-					<DialogFooter className="sm:col-span-full">
-						<Button variant="ghost" onClick={requestClose}>
-							<Trans>Cancel</Trans>
-						</Button>
-
+					<DialogFooter className="grid grid-cols-2 gap-x-2 sm:col-span-full sm:flex sm:flex-row sm:justify-end">
 						<Button type="submit" disabled={form.formState.isSubmitting}>
 							<Trans>Save Changes</Trans>
+						</Button>
+						<Button variant="ghost" className="border" onClick={closeDialog}>
+							<Trans>Cancel</Trans>
 						</Button>
 					</DialogFooter>
 				</form>
@@ -145,20 +139,47 @@ export function UpdateProjectDialog({ data }: DialogProps<"resume.sections.proje
 	);
 }
 
+// Update the ProjectForm component
 function ProjectForm() {
 	const form = useFormContext<FormValues>();
+	const { control } = form;
 
-	const name = useWatch({ control: form.control, name: "name" });
-	const description = useWatch({ control: form.control, name: "description" });
+	const name = useWatch({ control, name: "name" });
+	const description = useWatch({ control, name: "description" });
+	const isWordCountValid =
+		typeof description === "string" && description.trim().split(/\s+/).filter(Boolean).length >= 5;
+	// Use the AI usage hook
+	const projectId = form.getValues("id");
+	const aiUpdateCountRef = useRef(0); // Count expected AI updates
+	const roundsUsed = useResumeStore((state) => state.projectAIRoundsUsed?.[projectId] ?? 0);
 
-	const handleAIGenerated = (content: string) => {
-		form.setValue("description", content, { shouldDirty: true });
-	};
+	const incrementRoundsUsed = useResumeStore((state) => state.incrementProjectRounds);
+
+	const resetRounds = useResumeStore((state) => state.resetProjectRounds);
+
+	const maxRounds = 2;
+
+	const previousDescriptionRef = useRef(description);
+
+	useEffect(() => {
+		// If we're expecting AI updates, skip reset and decrement counter
+		if (aiUpdateCountRef.current > 0) {
+			aiUpdateCountRef.current -= 1;
+			previousDescriptionRef.current = description;
+			return;
+		}
+
+		if (description !== previousDescriptionRef.current) {
+			resetRounds(projectId);
+		}
+
+		previousDescriptionRef.current = description;
+	}, [description, projectId, resetRounds]);
 
 	return (
 		<>
 			<FormField
-				control={form.control}
+				control={control}
 				name="name"
 				render={({ field }) => (
 					<FormItem>
@@ -174,7 +195,7 @@ function ProjectForm() {
 			/>
 
 			<FormField
-				control={form.control}
+				control={control}
 				name="period"
 				render={({ field }) => (
 					<FormItem>
@@ -190,7 +211,7 @@ function ProjectForm() {
 			/>
 
 			<FormField
-				control={form.control}
+				control={control}
 				name="website"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
@@ -211,45 +232,70 @@ function ProjectForm() {
 			/>
 
 			<FormField
-				control={form.control}
+				control={control}
 				name="options.showLinkInTitle"
 				render={({ field }) => (
 					<FormItem className="flex items-center gap-x-2 sm:col-span-full">
 						<FormControl>
 							<Switch checked={field.value} onCheckedChange={field.onChange} />
 						</FormControl>
-						<FormLabel className="!mt-0">
+						<FormLabel className="mt-0!">
 							<Trans>Show link in title</Trans>
 						</FormLabel>
 					</FormItem>
 				)}
 			/>
-
 			<FormField
-				control={form.control}
+				control={control}
 				name="description"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<div className="flex items-center justify-between">
-							<FormLabel>
-								<Trans>Description</Trans>
-							</FormLabel>
-							{name && (
-								<AIGenerateButton
-									type="projects"
-									data={{
-										name,
-										technologies: "",
-										description,
-										highlights: "",
-									}}
-									onGenerated={handleAIGenerated}
-								/>
-							)}
+						<div className="flex flex-row items-center justify-between">
+							<FormLabel className="text-xs sm:text-base">Description</FormLabel>
+							<AIGenerateButton
+								type="projects"
+								data={{
+									name,
+									technologies: "",
+									description: field.value,
+									highlights: "",
+								}}
+								onGenerated={(content) => {
+									// Expect 2 content updates: plain text + RichInput wrapping in <p> tags
+									aiUpdateCountRef.current = 2;
+									form.setValue("description", content, { shouldDirty: true });
+									incrementRoundsUsed(projectId);
+								}}
+								roundsUsed={roundsUsed}
+								maxRounds={maxRounds}
+								isWordCountValid={isWordCountValid}
+								disabled={roundsUsed >= maxRounds || !isWordCountValid}
+								className="scale-85 sm:scale-100"
+							/>
 						</div>
 						<FormControl>
 							<RichInput {...field} value={field.value} onChange={field.onChange} />
 						</FormControl>
+
+						{/* Status messages */}
+						{!isWordCountValid && field.value && field.value.trim().split(/\s+/).filter(Boolean).length < 5 && (
+							<p className="mt-1 text-amber-600 text-xs">
+								<Trans>Write at least 5 words to enable Ask Zoe</Trans>
+							</p>
+						)}
+
+						{roundsUsed === 1 && (
+							<p className="mt-1 text-blue-600 text-xs">
+								<Trans>You have 1 more AI suggestion left for this text.</Trans>
+							</p>
+						)}
+
+						{roundsUsed >= maxRounds && (
+							<p className="mt-1 font-medium text-red-600 text-xs">
+								<Trans>✓ You've used both AI suggestions. Edit the text to get new suggestions.</Trans>
+							</p>
+						)}
+
 						<FormMessage />
 					</FormItem>
 				)}

@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import {
 	CopySimpleIcon,
@@ -8,7 +8,7 @@ import {
 	PencilSimpleLineIcon,
 	TrashSimpleIcon,
 } from "@phosphor-icons/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -20,19 +20,30 @@ import {
 } from "@/components/ui/context-menu";
 import { useDialogStore } from "@/dialogs/store";
 import { useConfirm } from "@/hooks/use-confirm";
-import { orpc, type RouterOutput } from "@/integrations/orpc/client";
+import type { ResumeSummary } from "@/utils/api";
+import { api } from "@/utils/api";
 
 type Props = {
-	resume: RouterOutput["resume"]["list"][number];
+	resume: ResumeSummary;
 	children: React.ReactNode;
 };
 
 export function ResumeContextMenu({ resume, children }: Props) {
 	const confirm = useConfirm();
 	const { openDialog } = useDialogStore();
-
-	const { mutate: deleteResume } = useMutation(orpc.resume.delete.mutationOptions());
-	const { mutate: setLockedResume } = useMutation(orpc.resume.setLocked.mutationOptions());
+	const queryClient = useQueryClient();
+	const { mutate: deleteResume } = useMutation({
+		mutationFn: (id: string) => api.deleteResume(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["resumes"] });
+		},
+	});
+	const { mutate: setLockedResume } = useMutation({
+		mutationFn: ({ id, ...data }: { id: string; isLocked: boolean }) => api.updateResume(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["resumes"] });
+		},
+	});
 
 	const handleUpdate = () => {
 		openDialog("resume.update", resume);
@@ -70,17 +81,14 @@ export function ResumeContextMenu({ resume, children }: Props) {
 
 		const toastId = toast.loading(t`Deleting your resume...`);
 
-		deleteResume(
-			{ id: resume.id },
-			{
-				onSuccess: () => {
-					toast.success(t`Your resume has been deleted successfully.`, { id: toastId });
-				},
-				onError: (error) => {
-					toast.error(error.message, { id: toastId });
-				},
+		deleteResume(resume.id, {
+			onSuccess: () => {
+				toast.success(t`Your resume has been deleted successfully.`, { id: toastId });
 			},
-		);
+			onError: (error) => {
+				toast.error(error.message, { id: toastId });
+			},
+		});
 	};
 
 	return (
@@ -109,7 +117,7 @@ export function ResumeContextMenu({ resume, children }: Props) {
 				>
 					<PencilSimpleLineIcon className="size-4" />
 					<span className="font-medium">
-						<Trans>Update</Trans>
+						<Trans>Rename</Trans>
 					</span>
 				</ContextMenuItem>
 
