@@ -1,13 +1,13 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
 import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
-import { redirectToZuvyLogin } from "@/utils/zuvy-redirect";
+import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
 // On some devices (iOS Safari private mode, Facebook/Instagram in-app browsers) the
 // localStorage write committed in beforeLoad doesn't reflect immediately on the next read.
@@ -20,42 +20,46 @@ const AUTH_GATE_POLL_MS = 500;
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
 	beforeLoad: async ({ context }) => {
-		if (typeof window === "undefined") return { session: context.session, needsAuth: false };
+		if (typeof window === "undefined") {
+			return { session: context.session, needsAuth: false, isAuthenticated: Boolean(context.session?.user) };
+		}
 
 		const url = new URL(window.location.href);
 		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
 
-		// If there's a token in the URL, await its persistence before reading back
 		const urlToken = getUrlToken();
 		if (urlToken) {
 			await persistAuthToken(urlToken);
 		}
 
 		const token = getAuthToken();
-		const hasZuvySession = Boolean(context.session?.user);
 		const hasToken = isValidToken(token);
+		const hasUrlToken = isValidToken(urlToken);
 
-		if (!hasToken && token) {
+		// If there's a token in storage but it's invalid/expired, wipe it.
+		// This prevents stale tokens (local/session/cookie) from blocking the "no token" redirect.
+		if (token && !hasToken) {
 			clearAuthToken();
 		}
 
-		const hasUrlToken = isValidToken(urlToken);
+		const tokenAfterClear = getAuthToken();
+		const hasTokenAfterClear = isValidToken(tokenAfterClear);
 
-		console.log("[auth-debug] dashboard.beforeLoad", {
-			hasUrlToken,
-			hasToken,
-			hasZuvySession,
-			devBypass,
-			willGate: !hasToken && !hasZuvySession && !hasUrlToken && !devBypass,
-		});
-
-		// Don't redirect to Zuvy immediately — render AuthGate which polls for up to 60s
-		// in case the storage write commits late on a slow/locked-down device.
-		if (!hasToken && !hasZuvySession && !hasUrlToken && !devBypass) {
-			return { session: context.session, needsAuth: true };
+		// If there's NO token in storage and NO token in the URL, user is not logged in.
+		// Redirect immediately to Zuvy so no dashboard content mounts (and no API calls fire).
+		if (!hasTokenAfterClear && !hasUrlToken && !devBypass) {
+			throw redirect({
+				href: buildZuvyLoginUrl(window.location.href),
+			});
 		}
 
-		return { session: context.session, needsAuth: false };
+		// At this point: either token is valid OR we have a URL token in-flight.
+		// If token isn't valid yet, render AuthGate to poll until storage commits.
+		if (!hasTokenAfterClear && hasUrlToken && !devBypass) {
+			return { session: context.session, needsAuth: true, isAuthenticated: false };
+		}
+
+		return { session: context.session, needsAuth: false, isAuthenticated: true };
 	},
 });
 
@@ -134,6 +138,14 @@ function AuthGate() {
 function RouteComponent() {
 	useLingui();
 	const { needsAuth } = Route.useRouteContext();
+
+	useEffect(() => {
+		const token = getAuthToken();
+		console.log("[auth-debug] dashboard.RouteComponent mounted", {
+			path: window.location.pathname + window.location.search + window.location.hash,
+			hasStoredToken: Boolean(token),
+		});
+	}, []);
 
 	if (needsAuth) {
 		return <AuthGate />;
