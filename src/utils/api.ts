@@ -30,20 +30,17 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	});
 
 	if (response.status === 401) {
-		// Don't wipe the token here. The 401 means the backend rejected this token,
-		// but that doesn't tell us *why* — it could be a backend misconfiguration
-		// (wrong signing secret, wrong audience, missing user) and the token may still
-		// be valid for other purposes. Clearing the storage destroys the only evidence
-		// the user successfully authenticated and makes the failure mode look like
-		// "storage is broken" when it isn't.
-		//
-		// Log the response body so the cause is visible in the console, then surface
-		// the error to the caller (React Query). The token stays put.
 		const bodyText = await response
 			.clone()
 			.text()
 			.catch(() => "<unreadable>");
 		console.log("[auth-debug] api.request: 401 — backend rejected token. Body:", bodyText);
+
+		// Dispatch a custom event so the UI can listen and show a user-friendly dialog
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("app:unauthorized"));
+		}
+
 		throw new Error("Unauthorized");
 	}
 

@@ -19,6 +19,7 @@ import { CreateSummaryItemDialog, UpdateSummaryItemDialog } from "./resume/secti
 import { CreateVolunteerDialog, UpdateVolunteerDialog } from "./resume/sections/volunteer";
 import { TemplateGalleryDialog } from "./resume/template/gallery";
 import { useDialogStore } from "./store";
+import { UnauthorizedDialog } from "./unauthorized-dialog";
 
 export function DialogManager() {
 	const { open, activeDialog, onOpenChange } = useDialogStore();
@@ -62,8 +63,11 @@ export function DialogManager() {
 		.otherwise(() => null);
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			{dialogContent}
-		</Dialog>
+		<>
+			<Dialog open={open} onOpenChange={onOpenChange}>
+				{dialogContent}
+			</Dialog>
+			<UnauthorizedDialog />
+		</>
 	);
 }
