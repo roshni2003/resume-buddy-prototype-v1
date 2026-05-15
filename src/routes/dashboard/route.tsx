@@ -49,7 +49,7 @@ export const Route = createFileRoute("/dashboard")({
 		// Redirect immediately to Zuvy so no dashboard content mounts (and no API calls fire).
 		if (!hasTokenAfterClear && !hasUrlToken && !devBypass) {
 			throw redirect({
-				href: buildZuvyLoginUrl(window.location.href),
+				href: buildZuvyLoginUrl(url.pathname + url.search + url.hash),
 			});
 		}
 
@@ -59,7 +59,7 @@ export const Route = createFileRoute("/dashboard")({
 			return { session: context.session, needsAuth: true, isAuthenticated: false };
 		}
 
-		return { session: context.session, needsAuth: false, isAuthenticated: true };
+		return { session: context.session, needsAuth: false, isAuthenticated: hasTokenAfterClear || devBypass };
 	},
 });
 
@@ -138,6 +138,18 @@ function AuthGate() {
 function RouteComponent() {
 	useLingui();
 	const { needsAuth } = Route.useRouteContext();
+
+	useEffect(() => {
+		// Safety net: if beforeLoad didn't redirect for some reason (stale cached context,
+		// in-app browser quirks, etc.), ensure we still send unauthenticated users to Zuvy.
+		const urlToken = getUrlToken();
+		const token = getAuthToken();
+		const devBypass = import.meta.env.DEV && new URL(window.location.href).searchParams.get("test") === "true";
+
+		if (!devBypass && !isValidToken(token) && !isValidToken(urlToken)) {
+			redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash);
+		}
+	}, []);
 
 	useEffect(() => {
 		const token = getAuthToken();
