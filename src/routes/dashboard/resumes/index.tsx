@@ -13,6 +13,7 @@ import { MultipleCombobox } from "@/components/ui/multiple-combobox";
 import { Separator } from "@/components/ui/separator";
 import { useDialogStore } from "@/dialogs/store";
 import { api } from "@/utils/api";
+import { getAuthToken, isValidToken } from "@/utils/auth-token";
 import { cn } from "@/utils/style";
 import { GridView } from "./-components/grid-view";
 
@@ -38,6 +39,10 @@ function RouteComponent() {
 	const { openDialog } = useDialogStore();
 	const queryClient = useQueryClient();
 
+	// Defensive: if auth redirect hasn't happened yet, don't fire queries.
+	// The /dashboard parent route is responsible for redirecting to Zuvy when unauthenticated.
+	const isAuthed = useMemo(() => isValidToken(getAuthToken()), []);
+
 	// Invalidate statistics when component mounts to ensure fresh data
 	useEffect(() => {
 		queryClient.invalidateQueries({ queryKey: ["statistics"] });
@@ -47,11 +52,13 @@ function RouteComponent() {
 	const { data: resumes } = useQuery({
 		queryKey: ["resumes", { tags, sort }],
 		queryFn: () => api.fetchResumes({ tags, sort }),
+		enabled: isAuthed,
 	});
 
 	const { data: statistics } = useQuery({
 		queryKey: ["statistics"],
 		queryFn: api.fetchStatistics,
+		enabled: isAuthed,
 	});
 
 	const allTags = useMemo(() => {
