@@ -1,13 +1,15 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
+import {ReadCvLogo, Users } from "@phosphor-icons/react";
+// import { ChartBar} from "@phosphor-icons/react";
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
 import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
-import { redirectToZuvyLogin } from "@/utils/zuvy-redirect";
+import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
 // On some devices (iOS Safari private mode, Facebook/Instagram in-app browsers) the
 // localStorage write committed in beforeLoad doesn't reflect immediately on the next read.
@@ -20,42 +22,46 @@ const AUTH_GATE_POLL_MS = 500;
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
 	beforeLoad: async ({ context }) => {
-		if (typeof window === "undefined") return { session: context.session, needsAuth: false };
+		if (typeof window === "undefined") {
+			return { session: context.session, needsAuth: false, isAuthenticated: Boolean(context.session?.user) };
+		}
 
 		const url = new URL(window.location.href);
 		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
 
-		// If there's a token in the URL, await its persistence before reading back
 		const urlToken = getUrlToken();
 		if (urlToken) {
 			await persistAuthToken(urlToken);
 		}
 
 		const token = getAuthToken();
-		const hasZuvySession = Boolean(context.session?.user);
 		const hasToken = isValidToken(token);
+		const hasUrlToken = isValidToken(urlToken);
 
-		if (!hasToken && token) {
+		// If there's a token in storage but it's invalid/expired, wipe it.
+		// This prevents stale tokens (local/session/cookie) from blocking the "no token" redirect.
+		if (token && !hasToken) {
 			clearAuthToken();
 		}
 
-		const hasUrlToken = isValidToken(urlToken);
+		const tokenAfterClear = getAuthToken();
+		const hasTokenAfterClear = isValidToken(tokenAfterClear);
 
-		console.log("[auth-debug] dashboard.beforeLoad", {
-			hasUrlToken,
-			hasToken,
-			hasZuvySession,
-			devBypass,
-			willGate: !hasToken && !hasZuvySession && !hasUrlToken && !devBypass,
-		});
-
-		// Don't redirect to Zuvy immediately — render AuthGate which polls for up to 60s
-		// in case the storage write commits late on a slow/locked-down device.
-		if (!hasToken && !hasZuvySession && !hasUrlToken && !devBypass) {
-			return { session: context.session, needsAuth: true };
+		// If there's NO token in storage and NO token in the URL, user is not logged in.
+		// Redirect immediately to Zuvy so no dashboard content mounts (and no API calls fire).
+		if (!hasTokenAfterClear && !hasUrlToken && !devBypass) {
+			throw redirect({
+				href: buildZuvyLoginUrl(url.pathname + url.search + url.hash),
+			});
 		}
 
-		return { session: context.session, needsAuth: false };
+		// At this point: either token is valid OR we have a URL token in-flight.
+		// If token isn't valid yet, render AuthGate to poll until storage commits.
+		if (!hasTokenAfterClear && hasUrlToken && !devBypass) {
+			return { session: context.session, needsAuth: true, isAuthenticated: false };
+		}
+
+		return { session: context.session, needsAuth: false, isAuthenticated: hasTokenAfterClear || devBypass };
 	},
 });
 
@@ -135,6 +141,26 @@ function RouteComponent() {
 	useLingui();
 	const { needsAuth } = Route.useRouteContext();
 
+	useEffect(() => {
+		// Safety net: if beforeLoad didn't redirect for some reason (stale cached context,
+		// in-app browser quirks, etc.), ensure we still send unauthenticated users to Zuvy.
+		const urlToken = getUrlToken();
+		const token = getAuthToken();
+		const devBypass = import.meta.env.DEV && new URL(window.location.href).searchParams.get("test") === "true";
+
+		if (!devBypass && !isValidToken(token) && !isValidToken(urlToken)) {
+			redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash);
+		}
+	}, []);
+
+	useEffect(() => {
+		const token = getAuthToken();
+		console.log("[auth-debug] dashboard.RouteComponent mounted", {
+			path: window.location.pathname + window.location.search + window.location.hash,
+			hasStoredToken: Boolean(token),
+		});
+	}, []);
+
 	if (needsAuth) {
 		return <AuthGate />;
 	}
@@ -150,16 +176,32 @@ function RouteComponent() {
 						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Resume Buddy</h1>
 					</div>{" "}
 					{/* Center: Navigation */}
-					{/* <nav className="flex items-center gap-2">
+					<nav className="hidden items-center gap-1 md:flex lg:gap-2">
 						<Link
 							to="/dashboard/resumes"
-							activeProps={{ className: "bg-emerald-50 text-emerald-700" }}
-							className="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-gray-700 text-sm transition-all hover:bg-gray-100 sm:px-4"
+							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
 						>
-							<ReadCvLogoIcon className="size-5" />
-							<span>{i18n._(t`Resumes`)}</span>
+							<ReadCvLogo size={18} weight="bold" />
+							<span>Resumes</span>
 						</Link>
-					</nav> */}
+						{/* <Link
+							to="/dashboard/admin/mixpanel"
+							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
+						>
+							<ChartBar size={18} weight="bold" />
+							<span>Insights</span>
+						</Link> */}
+						<Link
+							to="/dashboard/admin/analytics"
+							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
+						>
+							<Users size={18} weight="bold" />
+							<span>User Analytics</span>
+						</Link>
+					</nav>
 					{/* Right: User Menu */}
 					<UserDropdownMenu>
 						{({ session }) => (

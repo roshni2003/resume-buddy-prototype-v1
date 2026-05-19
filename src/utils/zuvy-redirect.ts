@@ -10,8 +10,8 @@ const getAppBaseUrl = (): string => {
 
 export const buildZuvyLoginUrl = (returnUrl: string) => {
 	const appBaseUrl = getAppBaseUrl();
-	// Strip the origin from returnUrl so only the path+search is passed.
-	// Zuvy will prepend the app URL itself when redirecting back.
+	// We always pass a full absolute URL back to Zuvy.
+	// Keep the original returnUrl's path/search/hash, but force our own origin.
 	let relativeReturnUrl = returnUrl;
 	try {
 		const parsed = new URL(returnUrl);
@@ -19,9 +19,13 @@ export const buildZuvyLoginUrl = (returnUrl: string) => {
 	} catch {
 		// keep as-is if not a full URL
 	}
+	if (!relativeReturnUrl.startsWith("/")) {
+		relativeReturnUrl = `/${relativeReturnUrl}`;
+	}
 	const fullReturnUrl = `${appBaseUrl}${relativeReturnUrl}`;
-	const encoded = encodeURIComponent(fullReturnUrl);
-	return `https://app.zuvy.org/?zoeRedirectUrl=${encodeURIComponent(`${appBaseUrl}?returnUrl=${encoded}`)}`;
+
+	// Zuvy expects the callback URL in `zoeRedirectUrl`. Avoid double-encoding.
+	return `https://app.zuvy.org/?zoeRedirectUrl=${encodeURIComponent(fullReturnUrl)}`;
 };
 
 export const redirectToZuvyLogin = (returnUrl?: string) => {

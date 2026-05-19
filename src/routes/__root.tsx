@@ -20,6 +20,7 @@ import { client, type orpc } from "@/integrations/orpc/client";
 import type { FeatureFlags } from "@/integrations/orpc/services/flags";
 import { persistAuthToken } from "@/utils/auth-token";
 import { getLocale, isRTL, type Locale, loadLocale } from "@/utils/locale";
+import { mixpanelService } from "@/utils/mixpanel";
 import { getTheme, type Theme } from "@/utils/theme";
 import appCss from "../styles/globals.css?url";
 
@@ -150,6 +151,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			getSession().catch(() => null),
 			client.flags.get().catch(() => ({ disableSignups: false, disableEmailAuth: false })),
 		]);
+
+		// Always identify the user in mixpanel when we have a valid session
+		if (session?.user?.id) {
+			mixpanelService.identify(session.user.id, session.user);
+		}
 
 		return { theme, locale, session, flags };
 	},
