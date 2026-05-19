@@ -1,18 +1,60 @@
 import type { ResumeData } from "@/schema/resume/data";
+import { getAuthToken } from "@/utils/auth-token";
 
 const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
-const AUTH_TOKEN = import.meta.env.VITE_AUTH_TOKEN as string;
+
+export const UNAUTHORIZED_EVENT = "app:unauthorized";
+export const UNAUTHORIZED_FLAG_KEY = "app:unauthorized:pending";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const url = path.startsWith("http") ? path : `${VITE_AI_BASE_URL_DEV}${path}`;
+	const token = getAuthToken();
+
+	console.log("[auth-debug] api.request: sending", {
+		method: options.method ?? "GET",
+		url,
+		hasAuthHeader: Boolean(token),
+		tokenTail: token ? `…${token.slice(-8)}` : null,
+	});
+
 	const response = await fetch(url, {
 		...options,
 		headers: {
 			"Content-Type": "application/json",
-			Authorization: `Bearer ${AUTH_TOKEN}`,
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
 			...options.headers,
 		},
 	});
+
+	console.log("[auth-debug] api.request: response", {
+		url,
+		status: response.status,
+		ok: response.ok,
+	});
+
+	if (response.status === 401) {
+		const bodyText = await response
+			.clone()
+			.text()
+			.catch(() => "<unreadable>");
+		console.log("[auth-debug] api.request: 401 — backend rejected token. Body:", bodyText);
+
+		// ONLY show the user-friendly dialog if we actually sent a token that was rejected.
+		// If no token was sent (token is null/empty), it's a silent failure that should
+		// be handled by the route's redirect logic, not a popup.
+		if (typeof window !== "undefined" && token) {
+			// Sticky marker so we don't miss the dialog if the event fires before the UI mounts.
+			try {
+				window.sessionStorage.setItem(UNAUTHORIZED_FLAG_KEY, "1");
+			} catch {
+				// ignore
+			}
+
+			window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT, { detail: { url, bodyText } }));
+		}
+
+		throw new Error("Unauthorized");
+	}
 
 	if (!response.ok) {
 		const errorBody = await response.json().catch(() => ({}));

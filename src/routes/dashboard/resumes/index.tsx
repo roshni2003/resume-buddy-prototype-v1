@@ -13,6 +13,7 @@ import { MultipleCombobox } from "@/components/ui/multiple-combobox";
 import { Separator } from "@/components/ui/separator";
 import { useDialogStore } from "@/dialogs/store";
 import { api } from "@/utils/api";
+import { getAuthToken, isValidToken } from "@/utils/auth-token";
 import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
 import { GridView } from "./-components/grid-view";
@@ -39,6 +40,11 @@ function RouteComponent() {
 	const { openDialog } = useDialogStore();
 
 	// Track page view immediately
+	// Defensive: if auth redirect hasn't happened yet, don't fire queries.
+	// The /dashboard parent route is responsible for redirecting to Zuvy when unauthenticated.
+	const isAuthed = useMemo(() => isValidToken(getAuthToken()), []);
+
+	// Invalidate statistics when component mounts to ensure fresh data
 	useEffect(() => {
 		mixpanelService.track("Page View", {
 			page: "resumes",
@@ -49,11 +55,13 @@ function RouteComponent() {
 	const { data: resumes } = useQuery({
 		queryKey: ["resumes", { tags, sort }],
 		queryFn: () => api.fetchResumes({ tags, sort }),
+		enabled: isAuthed,
 	});
 
 	const { data: statistics } = useQuery({
 		queryKey: ["statistics"],
 		queryFn: api.fetchStatistics,
+		enabled: isAuthed,
 	});
 
 	// Track User Resumes Count (Metric #2)
@@ -82,14 +90,13 @@ function RouteComponent() {
 			mixpanelService.track("Resume Data Loaded", {
 				"number of resumes": resumes.length,
 				"number of downloads": statistics.totalDownloads,
-				"lastUpdated": statistics.lastUpdated,
-				"avg_downloads_per_resume": statistics.totalResumes > 0 
-					? (statistics.totalDownloads / statistics.totalResumes).toFixed(2) 
-					: 0,
-				"has_active_filters": tags.length > 0,
-				"filter_count": tags.length,
-				"sort_method": sort,
-				"timestamp": new Date().toISOString(),
+				lastUpdated: statistics.lastUpdated,
+				avg_downloads_per_resume:
+					statistics.totalResumes > 0 ? (statistics.totalDownloads / statistics.totalResumes).toFixed(2) : 0,
+				has_active_filters: tags.length > 0,
+				filter_count: tags.length,
+				sort_method: sort,
+				timestamp: new Date().toISOString(),
 			});
 		}
 	}, [resumes, statistics, tags, sort]);
@@ -141,7 +148,7 @@ function RouteComponent() {
 
 	const handleSortChange = (value: string | null, _option: unknown | null) => {
 		const v = value ?? "lastUpdatedAt";
-		mixpanelService.track("Sort Changed", { 
+		mixpanelService.track("Sort Changed", {
 			sort_by: v,
 			current_filter_count: tags.length,
 		});

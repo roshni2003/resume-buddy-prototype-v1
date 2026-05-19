@@ -86,10 +86,6 @@ export function BuilderTopTray() {
 	const [reviewStartTime, setReviewStartTime] = useState<number>(0);
 	const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	const provider = import.meta.env.VITE_AI_PROVIDER || "gemini";
-	const model = import.meta.env.VITE_AI_MODEL || "gemini-2.0-flash-exp";
-	const apiKey = import.meta.env.VITE_AI_API_KEY || "";
-	const baseURL = import.meta.env.VITE_AI_BASE_URL || undefined;
 	const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 	const [showLastAttemptConfirm, setShowLastAttemptConfirm] = useState(false);
 	useEffect(() => {

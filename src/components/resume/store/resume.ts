@@ -1,4 +1,8 @@
-import { t } from "@lingui/macro";
+// Local stub for the `t` template tag (used for simple string passthrough)
+// This avoids a hard dependency on @lingui/macro when its types/module aren't available.
+const t = (strings: TemplateStringsArray, ...args: any[]) =>
+	strings.map((s, i) => s + (args[i] ?? "")).join("");
+
 import { debounce } from "es-toolkit";
 import isDeepEqual from "fast-deep-equal";
 import type { WritableDraft } from "immer";

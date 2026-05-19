@@ -4,7 +4,7 @@ import { BetterAuthError } from "@better-auth/core/error";
 import { passkey } from "@better-auth/passkey";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth/minimal";
-import { apiKey, type GenericOAuthConfig, genericOAuth, twoFactor } from "better-auth/plugins";
+import { type GenericOAuthConfig, genericOAuth, twoFactor } from "better-auth/plugins";
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { and, eq, or } from "drizzle-orm";
@@ -241,14 +241,6 @@ const getAuthConfig = () => {
 		},
 
 		plugins: [
-			apiKey({
-				enableSessionForAPIKeys: true,
-				rateLimit: {
-					enabled: true,
-					timeWindow: 1000 * 60 * 60 * 24, // 1 day
-					maxRequests: 500, // 500 requests per day
-				},
-			}),
 			username({
 				minUsernameLength: 3,
 				maxUsernameLength: 64,

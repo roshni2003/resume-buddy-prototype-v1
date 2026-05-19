@@ -8,10 +8,6 @@ export const env = createEnv({
 	runtimeEnv: {
 		...process.env,
 		VITE_FLAG_DEBUG_PRINTER: import.meta.env.VITE_FLAG_DEBUG_PRINTER,
-		AI_PROVIDER: process.env.AI_PROVIDER || process.env.VITE_AI_PROVIDER,
-		AI_MODEL: process.env.AI_MODEL || process.env.VITE_AI_MODEL,
-		AI_API_KEY: process.env.AI_API_KEY || process.env.VITE_AI_API_KEY,
-		AI_BASE_URL: process.env.AI_BASE_URL || process.env.VITE_AI_BASE_URL,
 	},
 	emptyStringAsUndefined: true,
 
@@ -22,6 +18,8 @@ export const env = createEnv({
 	server: {
 		// Server
 		TZ: z.string().default("Etc/UTC"),
+		APP_URL: z.string().url().default("http://localhost:3000"),
+		PRINTER_ENDPOINT: z.string().url().optional(),
 
 		// Database
 		DATABASE_URL: z.url({ protocol: /postgres(ql)?/ }).optional(),
@@ -73,11 +71,5 @@ export const env = createEnv({
 		FLAG_DEBUG_PRINTER: stringbool.default(false),
 		FLAG_DISABLE_SIGNUPS: stringbool.default(false),
 		FLAG_DISABLE_EMAIL_AUTH: stringbool.default(false),
-
-		// AI
-		AI_PROVIDER: z.enum(["ollama", "openai", "gemini", "anthropic", "vercel-ai-gateway"]).default("gemini"),
-		AI_MODEL: z.string().min(1).optional(),
-		AI_API_KEY: z.string().min(1).optional(),
-		AI_BASE_URL: z.string().url().optional(),
 	},
 });

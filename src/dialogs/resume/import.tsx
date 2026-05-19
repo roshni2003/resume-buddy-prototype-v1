@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,11 +14,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
-import type { AIProvider } from "@/integrations/ai/types";
 import { JSONResumeImporter } from "@/integrations/import/json-resume";
 import { ReactiveResumeJSONImporter } from "@/integrations/import/reactive-resume-json";
 import { ReactiveResumeV4JSONImporter } from "@/integrations/import/reactive-resume-v4-json";
-import { client } from "@/integrations/orpc/client";
 import type { ResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 import { generateRandomName, slugify } from "@/utils/string";
@@ -66,14 +63,7 @@ const formSchema = z.discriminatedUnion("type", [
 type FormValues = z.infer<typeof formSchema>;
 
 export function ImportResumeDialog(_: DialogProps<"resume.import">) {
-  // Use environment variables for AI configuration
-  const provider = (import.meta.env.VITE_AI_PROVIDER || "gemini") as AIProvider;
-  const model = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash";
-  const apiKey = import.meta.env.VITE_AI_API_KEY || "";
-  const baseURL = import.meta.env.VITE_AI_BASE_URL;
-  const isAIEnabled = !!apiKey && !!model;
-
-  const closeDialog = useDialogStore((state) => state.closeDialog);
+	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const prevTypeRef = useRef<string>("");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -141,40 +131,12 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 				data = importer.parse(json);
 			}
 
-		if (values.type === "pdf") {
-			if (!isAIEnabled)
-				throw new Error(t`This feature requires AI Integration to be enabled. Please enable it in the settings.`);
-
-			const arrayBuffer = await values.file.arrayBuffer();
-			const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-
-			data = await client.ai.parsePdf({
-				...(provider && { provider }),
-				...(model && { model }),
-				...(apiKey && { apiKey }),
-				...(baseURL && { baseURL }),
-				file: { name: values.file.name, data: base64 },
-			});
-		}			if (values.type === "docx") {
-			if (!isAIEnabled)
-				throw new Error(t`This feature requires AI Integration to be enabled. Please enable it in the settings.`);
-
-			const arrayBuffer = await values.file.arrayBuffer();
-			const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-			const mediaType =
-				values.file.type === "application/msword"
-					? ("application/msword" as const)
-					: ("application/vnd.openxmlformats-officedocument.wordprocessingml.document" as const);
-
-			data = await client.ai.parseDocx({
-				...(provider && { provider }),
-				...(model && { model }),
-				...(apiKey && { apiKey }),
-				...(baseURL && { baseURL }),
-				mediaType,
-				file: { name: values.file.name, data: base64 },
-			});
-		}			if (!data) throw new Error("No data was returned from the AI provider.");
+			if (values.type === "pdf" || values.type === "docx") {
+				throw new Error(
+					t`AI-powered import for PDF and Word documents is currently being moved to the backend. Please try again later or use JSON import.`,
+				);
+			}
+			if (!data) throw new Error("No data was returned from the importer.");
 
 			const name = data.basics.name || generateRandomName();
 			await createResume({
@@ -231,19 +193,11 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 											{ value: "json-resume-json", label: "JSON Resume" },
 											{
 												value: "pdf",
-												label: (
-													<div className="flex items-center gap-x-2">
-														PDF <Badge>{t`AI`}</Badge>
-													</div>
-												),
+												label: "PDF",
 											},
 											{
 												value: "docx",
-												label: (
-													<div className="flex items-center gap-x-2">
-														Microsoft Word <Badge>{t`AI`}</Badge>
-													</div>
-												),
+												label: "Microsoft Word",
 											},
 										]}
 									/>
