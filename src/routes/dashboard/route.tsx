@@ -1,6 +1,7 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import { ChartBar, ReadCvLogo, Users } from "@phosphor-icons/react";
+import {ReadCvLogo, Users } from "@phosphor-icons/react";
+// import { ChartBar} from "@phosphor-icons/react";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
@@ -184,14 +185,14 @@ function RouteComponent() {
 							<ReadCvLogo size={18} weight="bold" />
 							<span>Resumes</span>
 						</Link>
-						<Link
+						{/* <Link
 							to="/dashboard/admin/mixpanel"
 							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
 							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
 						>
 							<ChartBar size={18} weight="bold" />
 							<span>Insights</span>
-						</Link>
+						</Link> */}
 						<Link
 							to="/dashboard/admin/analytics"
 							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
