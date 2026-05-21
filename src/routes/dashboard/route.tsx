@@ -1,7 +1,9 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
+import {ReadCvLogo, Users } from "@phosphor-icons/react";
+// import { ChartBar} from "@phosphor-icons/react";
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
@@ -174,16 +176,32 @@ function RouteComponent() {
 						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Resume Buddy</h1>
 					</div>{" "}
 					{/* Center: Navigation */}
-					{/* <nav className="flex items-center gap-2">
+					<nav className="hidden items-center gap-1 md:flex lg:gap-2">
 						<Link
 							to="/dashboard/resumes"
-							activeProps={{ className: "bg-emerald-50 text-emerald-700" }}
-							className="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-gray-700 text-sm transition-all hover:bg-gray-100 sm:px-4"
+							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
 						>
-							<ReadCvLogoIcon className="size-5" />
-							<span>{i18n._(t`Resumes`)}</span>
+							<ReadCvLogo size={18} weight="bold" />
+							<span>Resumes</span>
 						</Link>
-					</nav> */}
+						{/* <Link
+							to="/dashboard/admin/mixpanel"
+							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
+						>
+							<ChartBar size={18} weight="bold" />
+							<span>Insights</span>
+						</Link> */}
+						<Link
+							to="/dashboard/admin/analytics"
+							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
+						>
+							<Users size={18} weight="bold" />
+							<span>User Analytics</span>
+						</Link>
+					</nav>
 					{/* Right: User Menu */}
 					<UserDropdownMenu>
 						{({ session }) => (

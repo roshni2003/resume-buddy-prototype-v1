@@ -37,15 +37,12 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 	useEffect(() => {
 		const handleMessage = (event: MessageEvent) => {
 			if (event.data?.type === "RESUME_READY") {
-				console.log(`[ResumeCard] Received RESUME_READY for id=${event.data.resumeId}, expected id=${resume.id}`);
 				if (event.data.resumeId === resume.id) {
-					console.log(`[ResumeCard] Match found for ${resume.id}, setting ready.`);
 					setIsIframeReady(true);
 				}
 			}
 
 			if (event.data?.type === "PRINTER_ERROR") {
-				console.error(`[ResumeCard] Received PRINTER_ERROR for id=${event.data.resumeId}:`, event.data.message);
 				if (event.data.resumeId === resume.id) {
 					// Even on error, maybe we show it to see what failed
 					setIsIframeReady(true);
@@ -56,7 +53,6 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 		// Safety timeout: if iframe doesn't signal in 10s, show it anyway
 		const timeoutId = setTimeout(() => {
 			if (!isIframeReady) {
-				console.warn(`[ResumeCard] Preview timeout for ${resume.id}, forcing visibility.`);
 				setIsIframeReady(true);
 			}
 		}, 10000);

@@ -2,7 +2,7 @@ import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { SortAscendingIcon, TagIcon } from "@phosphor-icons/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useEffect, useMemo } from "react";
@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useDialogStore } from "@/dialogs/store";
 import { api } from "@/utils/api";
 import { getAuthToken, isValidToken } from "@/utils/auth-token";
+import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
 import { GridView } from "./-components/grid-view";
 
@@ -37,17 +38,19 @@ function RouteComponent() {
 	const { tags, sort } = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { openDialog } = useDialogStore();
-	const queryClient = useQueryClient();
 
+	// Track page view immediately
 	// Defensive: if auth redirect hasn't happened yet, don't fire queries.
 	// The /dashboard parent route is responsible for redirecting to Zuvy when unauthenticated.
 	const isAuthed = useMemo(() => isValidToken(getAuthToken()), []);
 
 	// Invalidate statistics when component mounts to ensure fresh data
 	useEffect(() => {
-		queryClient.invalidateQueries({ queryKey: ["statistics"] });
-		queryClient.invalidateQueries({ queryKey: ["resumes"] });
-	}, [queryClient]);
+		mixpanelService.track("Page View", {
+			page: "resumes",
+			timestamp: new Date().toISOString(),
+		});
+	}, []);
 
 	const { data: resumes } = useQuery({
 		queryKey: ["resumes", { tags, sort }],
@@ -61,15 +64,52 @@ function RouteComponent() {
 		enabled: isAuthed,
 	});
 
+	// Track User Resumes Count (Metric #2)
+	useEffect(() => {
+		if (resumes) {
+			mixpanelService.track("User Resumes Count", {
+				total_resumes: resumes.length,
+				timestamp: new Date().toISOString(),
+			});
+		}
+	}, [resumes]);
+
+	// Track Users Who Created Resumes (Metric #1)
+	useEffect(() => {
+		if (resumes && resumes.length > 0) {
+			mixpanelService.track("Resume Created", {
+				resume_count: resumes.length,
+				timestamp: new Date().toISOString(),
+			});
+		}
+	}, [resumes]);
+
+	// Track resume data loaded with all metrics
+	useEffect(() => {
+		if (resumes && statistics) {
+			mixpanelService.track("Resume Data Loaded", {
+				"number of resumes": resumes.length,
+				"number of downloads": statistics.totalDownloads,
+				lastUpdated: statistics.lastUpdated,
+				avg_downloads_per_resume:
+					statistics.totalResumes > 0 ? (statistics.totalDownloads / statistics.totalResumes).toFixed(2) : 0,
+				has_active_filters: tags.length > 0,
+				filter_count: tags.length,
+				sort_method: sort,
+				timestamp: new Date().toISOString(),
+			});
+		}
+	}, [resumes, statistics, tags, sort]);
+
 	const allTags = useMemo(() => {
 		if (!resumes) return [];
-		const tags = new Set<string>();
+		const tagsSet = new Set<string>();
 		for (const resume of resumes) {
 			for (const tag of resume.tags || []) {
-				tags.add(tag);
+				tagsSet.add(tag);
 			}
 		}
-		return Array.from(tags);
+		return Array.from(tagsSet);
 	}, [resumes]);
 
 	useEffect(() => {
@@ -106,6 +146,23 @@ function RouteComponent() {
 		return `${days} day${days > 1 ? "s" : ""} ago`;
 	}, [statistics]);
 
+	const handleSortChange = (value: string | null, _option: unknown | null) => {
+		const v = value ?? "lastUpdatedAt";
+		mixpanelService.track("Sort Changed", {
+			sort_by: v,
+			current_filter_count: tags.length,
+		});
+		navigate({ search: { tags, sort: v as SortOption } });
+	};
+
+	const handleFilterChange = (value: string[]) => {
+		mixpanelService.track("Filter Applied", {
+			tags_selected: value.length,
+			tags_count: value.length,
+			current_sort: sort,
+		});
+		navigate({ search: { tags: value, sort } });
+	};
 	return (
 		<div className="space-y-6">
 			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
@@ -208,10 +265,7 @@ function RouteComponent() {
 				<Combobox
 					value={sort}
 					options={sortOptions}
-					onValueChange={(value) => {
-						if (!value) return;
-						navigate({ search: { tags, sort: value as SortOption } });
-					}}
+					onValueChange={handleSortChange} // Use only this one
 					buttonProps={{
 						title: t`Sort by`,
 						variant: "ghost",
@@ -227,9 +281,7 @@ function RouteComponent() {
 				<MultipleCombobox
 					value={tags}
 					options={tagOptions}
-					onValueChange={(value) => {
-						navigate({ search: { tags: value, sort } });
-					}}
+					onValueChange={handleFilterChange} // Use only this one
 					buttonProps={{
 						variant: "ghost",
 						title: t`Filter by`,

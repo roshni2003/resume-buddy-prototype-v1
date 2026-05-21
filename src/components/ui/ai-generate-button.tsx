@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { api } from "@/utils/api";
+import { mixpanelService } from "@/utils/mixpanel";
 import { stripHtml } from "@/utils/string";
 import { Button } from "./button";
 
@@ -108,6 +109,16 @@ export function AIGenerateButton({
 					const content = Object.values(response)[0];
 					console.log("Generation successful, content length:", content?.length);
 
+					// ✅ ADD THIS MIXPANEL TRACKING
+					mixpanelService.track("AI Token Usage", {
+						tokens_used: 500, // Estimated tokens for content generation
+						feature: type, // "experience", "projects", "summary", etc.
+						success: true,
+						round: roundsUsed + 1,
+						timestamp: new Date().toISOString(),
+						date: new Date().toISOString().split("T")[0],
+					});
+
 					// Check if content is valid
 					if (!content || content.length < 10) {
 						toast.error(t`Generated content is too short. Please try again.`, { id: toastId });
@@ -125,6 +136,18 @@ export function AIGenerateButton({
 				},
 				onError: (error: any) => {
 					console.error("Generation error:", error);
+
+					// ✅ ADD THIS MIXPANEL TRACKING
+					mixpanelService.track("AI Token Usage", {
+						tokens_used: 0,
+						feature: type,
+						success: false,
+						error_message: error.message || "Unknown error",
+						round: roundsUsed + 1,
+						timestamp: new Date().toISOString(),
+						date: new Date().toISOString().split("T")[0],
+					});
+
 					toast.error(error.message || t`Failed to generate content`, { id: toastId });
 				},
 			},

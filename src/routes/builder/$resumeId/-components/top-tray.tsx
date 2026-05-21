@@ -46,8 +46,17 @@ import { useDialogStore } from "@/dialogs/store";
 import type { ResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 import { downloadFromUrl, generateFilename } from "@/utils/file";
+import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
 import { AnimatedEyes, DeadEyes } from "./animated-eyes";
+
+function getWeekNumber(date: Date) {
+	const d = new Date(date);
+	d.setHours(0, 0, 0, 0);
+	d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+	const week1 = new Date(d.getFullYear(), 0, 4);
+	return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+}
 
 export function BuilderTopTray() {
 	const { i18n } = useLingui();
@@ -140,6 +149,7 @@ export function BuilderTopTray() {
 			const reviewRaw = response.FinalReview || Object.values(response)[0];
 			if (!reviewRaw) throw new Error("No review result received from AI");
 
+			// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 			let result;
 			if (typeof reviewRaw === "string") {
 				try {
@@ -168,6 +178,17 @@ export function BuilderTopTray() {
 			setReviewResult(result);
 			setShowReviewDrawer(true);
 
+			mixpanelService.track("AI Token Usage", {
+				tokens_used: result.tokens_used || 1500, // Fallback if not in API response
+				feature: "FinalReview",
+				success: true,
+				timestamp: new Date().toISOString(),
+				date: new Date().toISOString().split("T")[0],
+				week: getWeekNumber(new Date()),
+				month: new Date().getMonth() + 1,
+				year: new Date().getFullYear(),
+			});
+
 			toast.success(t`Review complete!`, {
 				id: toastId,
 				description: t`Score: ${result.overall_score}/100 - ${result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"}`,
@@ -179,6 +200,17 @@ export function BuilderTopTray() {
 
 			setReviewing(false);
 			console.error("Final Review Error:", error);
+
+			mixpanelService.track("AI Token Usage", {
+				tokens_used: 0,
+				feature: "FinalReview",
+				success: false,
+				timestamp: new Date().toISOString(),
+				date: new Date().toISOString().split("T")[0],
+				week: getWeekNumber(new Date()),
+				month: new Date().getMonth() + 1,
+				year: new Date().getFullYear(),
+			});
 
 			toast.error(i18n._(t({ id: "ai.review.error", message: "Review failed. Please try again." })), {
 				id: toastId,
@@ -204,7 +236,19 @@ export function BuilderTopTray() {
 		try {
 			const { url } = await exportResume({ id: resume.id, format: "pdf" });
 			downloadFromUrl(url, filename);
-		} catch {
+
+			mixpanelService.track("Resume Downloaded", {
+				format: "pdf",
+				status: "success",
+				timestamp: new Date().toISOString(),
+			});
+		} catch (error: any) {
+			mixpanelService.track("Resume Downloaded", {
+				format: "pdf",
+				status: "error",
+				error_message: error.message,
+				timestamp: new Date().toISOString(),
+			});
 			toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
 		} finally {
 			toast.dismiss(toastId);
@@ -221,7 +265,19 @@ export function BuilderTopTray() {
 		try {
 			const { url } = await exportResume({ id: resume.id, format: "docx" });
 			downloadFromUrl(url, filename);
-		} catch {
+
+			mixpanelService.track("Resume Downloaded", {
+				format: "docx",
+				status: "success",
+				timestamp: new Date().toISOString(),
+			});
+		} catch (error: any) {
+			mixpanelService.track("Resume Downloaded", {
+				format: "docx",
+				status: "error",
+				error_message: error.message,
+				timestamp: new Date().toISOString(),
+			});
 			toast.error(t`There was a problem while generating the DOCX, please try again in some time.`);
 		} finally {
 			toast.dismiss(toastId);
