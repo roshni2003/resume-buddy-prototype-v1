@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { CheckCircleIcon, LightbulbIcon, ShieldWarningIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+// import { useState } from "react";
 import type { FinalReviewResult } from "@/components/resume/store/resume";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,7 @@ type ReviewDrawerProps = {
 export function ReviewDrawer({ result }: ReviewDrawerProps) {
 	const showDrawer = useResumeStore((state) => state.showReviewDrawer);
 	const setShowDrawer = useResumeStore((state) => state.setShowReviewDrawer);
-	const [showDetails, setShowDetails] = useState(false);
+	// const [showDetails, setShowDetails] = useState(false);
 
 	const getStatusColor = () => {
 		if (result.final_verdict === "READY") return "text-green-600 bg-green-50 border-green-200";
@@ -179,7 +179,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 									)}
 
 									{/* Detailed Checks - Collapsible */}
-									<div className="space-y-2">
+									{/* <div className="space-y-2">
 										<Button
 											variant="outline"
 											size="sm"
@@ -232,7 +232,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 												</motion.div>
 											)}
 										</AnimatePresence>
-									</div>
+									</div> */}
 								</div>
 							</div>
 
