@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useResumeStore } from "@/components/resume/store/resume";
+import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/utils/api";
 import { mixpanelService } from "@/utils/mixpanel";
 import { stripHtml } from "@/utils/string";
@@ -36,6 +37,7 @@ export function AIGenerateButton({
 	const isMounted = useRef(true);
 	const storeResumeId = useResumeStore((state) => state.resume.id);
 	const effectiveResumeId = resumeId || storeResumeId;
+	const { user } = useAuth();
 
 	const { mutate: generateContent, isPending } = useMutation({
 		mutationFn: api.generateAIContent,
@@ -105,19 +107,43 @@ export function AIGenerateButton({
 				value: value,
 			},
 			{
-				onSuccess: (response) => {
+				onSuccess: async (response) => {
 					const content = Object.values(response)[0];
 					console.log("Generation successful, content length:", content?.length);
 
-					// ✅ ADD THIS MIXPANEL TRACKING
-					mixpanelService.track("AI Token Usage", {
-						tokens_used: 500, // Estimated tokens for content generation
-						feature: type, // "experience", "projects", "summary", etc.
-						success: true,
-						round: roundsUsed + 1,
-						timestamp: new Date().toISOString(),
-						date: new Date().toISOString().split("T")[0],
-					});
+					// Fetch recent usage from GET API to sync with Mixpanel
+					// Since backend might take a moment to record it, you could fetch the last page and get the most recent one
+					if (user?.id) {
+						try {
+							// Fetching the user AI invocations (latest one on page 1)
+							const invocationsResponse = await api.fetchUserAIInvocations(user.id, 1, 1);
+
+							// Make sure we have invocations
+							if (invocationsResponse?.invocations?.length > 0) {
+								const latestInvocation = invocationsResponse.invocations[0];
+
+								mixpanelService.track("AI Token Usage", {
+									tokens_used:
+										latestInvocation.totalTokens || latestInvocation.inputTokens + latestInvocation.outputTokens,
+									total_cost: latestInvocation.dollarUsed,
+									feature: type,
+									success: true,
+									round: roundsUsed + 1,
+									timestamp: new Date().toISOString(),
+									date: new Date().toISOString().split("T")[0],
+								});
+							} else {
+								// Fallback
+								mixpanelService.track("AI Token Usage", {
+									feature: type,
+									success: true,
+									round: roundsUsed + 1,
+								});
+							}
+						} catch (err) {
+							console.error("Failed to fetch recent invocation data", err);
+						}
+					}
 
 					// Check if content is valid
 					if (!content || content.length < 10) {
@@ -134,7 +160,7 @@ export function AIGenerateButton({
 						onRoundComplete?.();
 					}
 				},
-				onError: (error: any) => {
+				onError: (error: Error) => {
 					console.error("Generation error:", error);
 
 					// ✅ ADD THIS MIXPANEL TRACKING

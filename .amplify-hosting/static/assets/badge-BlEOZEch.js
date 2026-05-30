@@ -1,1 +1,3129 @@
-import{o as e,t}from"./jsx-runtime-D7jARjhZ.js";import{t as n}from"./react-BZSX5Bs9.js";import{$ as r,D as i,E as a,F as o,G as s,H as c,I as l,J as u,K as d,M as f,S as p,T as m,V as h,i as g,w as _,x as v,y,z as b}from"./preload-helper-DwC0sqXt.js";import{A as x,D as S,F as C,M as ee,N as te,O as w,P as T,S as E,T as D,_ as O,a as k,c as ne,d as A,j as re,k as j,o as ie,p as ae,r as oe,s as se,u as ce,x as le}from"./useMutation-CUlWnMMx.js";import{t as ue}from"./Check.es-BCVTpq-8.js";import{i as de,n as fe,t as pe}from"./input-DIek8tFf.js";import{C as me,D as he,S as ge,T as M,_ as _e,g as ve,h as ye,m as be,n as xe,v as Se,x as N,y as Ce}from"./get-strict-context-DJn2x5wH.js";import{_ as we,a as Te,b as Ee,c as De,i as Oe,l as ke,n as Ae,o as je,r as Me,s as Ne,t as Pe,v as Fe,y as Ie}from"./alert-dialog-B7DDo-NI.js";import{a as Le,i as Re,n as ze,r as Be,t as Ve}from"./dist-DKdYDXPR.js";var He=class extends k{#e;#t;#n;#r;#i;#a;#o;constructor(e){super(),this.#o=!1,this.#a=e.defaultOptions,this.setOptions(e.options),this.observers=[],this.#r=e.client,this.#n=this.#r.getQueryCache(),this.queryKey=e.queryKey,this.queryHash=e.queryHash,this.#e=Ge(this.options),this.state=e.state??this.#e,this.scheduleGc()}get meta(){return this.options.meta}get promise(){return this.#i?.promise}setOptions(e){if(this.options={...this.#a,...e},this.updateGcTime(this.options.gcTime),this.state&&this.state.data===void 0){let e=Ge(this.options);e.data!==void 0&&(this.setState(We(e.data,e.dataUpdatedAt)),this.#e=e)}}optionalRemove(){!this.observers.length&&this.state.fetchStatus===`idle`&&this.#n.remove(this)}setData(e,t){let n=S(this.state.data,e,this.options);return this.#s({data:n,type:`success`,dataUpdatedAt:t?.updatedAt,manual:t?.manual}),n}setState(e,t){this.#s({type:`setState`,state:e,setStateOptions:t})}cancel(e){let t=this.#i?.promise;return this.#i?.cancel(e),t?t.then(D).catch(D):Promise.resolve()}destroy(){super.destroy(),this.cancel({silent:!0})}reset(){this.destroy(),this.setState(this.#e)}isActive(){return this.observers.some(e=>w(e.options.enabled,this)!==!1)}isDisabled(){return this.getObserversCount()>0?!this.isActive():this.options.queryFn===ee||this.state.dataUpdateCount+this.state.errorUpdateCount===0}isStatic(){return this.getObserversCount()>0?this.observers.some(e=>j(e.options.staleTime,this)===`static`):!1}isStale(){return this.getObserversCount()>0?this.observers.some(e=>e.getCurrentResult().isStale):this.state.data===void 0||this.state.isInvalidated}isStaleByTime(e=0){return this.state.data===void 0?!0:e===`static`?!1:this.state.isInvalidated?!0:!te(this.state.dataUpdatedAt,e)}onFocus(){this.observers.find(e=>e.shouldFetchOnWindowFocus())?.refetch({cancelRefetch:!1}),this.#i?.continue()}onOnline(){this.observers.find(e=>e.shouldFetchOnReconnect())?.refetch({cancelRefetch:!1}),this.#i?.continue()}addObserver(e){this.observers.includes(e)||(this.observers.push(e),this.clearGcTimeout(),this.#n.notify({type:`observerAdded`,query:this,observer:e}))}removeObserver(e){this.observers.includes(e)&&(this.observers=this.observers.filter(t=>t!==e),this.observers.length||(this.#i&&(this.#o?this.#i.cancel({revert:!0}):this.#i.cancelRetry()),this.scheduleGc()),this.#n.notify({type:`observerRemoved`,query:this,observer:e}))}getObserversCount(){return this.observers.length}invalidate(){this.state.isInvalidated||this.#s({type:`invalidate`})}async fetch(e,t){if(this.state.fetchStatus!==`idle`&&this.#i?.status()!==`rejected`){if(this.state.data!==void 0&&t?.cancelRefetch)this.cancel({silent:!0});else if(this.#i)return this.#i.continueRetry(),this.#i.promise}if(e&&this.setOptions(e),!this.options.queryFn){let e=this.observers.find(e=>e.options.queryFn);e&&this.setOptions(e.options)}let n=new AbortController,r=e=>{Object.defineProperty(e,`signal`,{enumerable:!0,get:()=>(this.#o=!0,n.signal)})},i=()=>{let e=O(this.options,t),n=(()=>{let e={client:this.#r,queryKey:this.queryKey,meta:this.meta};return r(e),e})();return this.#o=!1,this.options.persister?this.options.persister(e,n,this):e(n)},a=(()=>{let e={fetchOptions:t,options:this.options,queryKey:this.queryKey,client:this.#r,state:this.state,fetchFn:i};return r(e),e})();this.options.behavior?.onFetch(a,this),this.#t=this.state,(this.state.fetchStatus===`idle`||this.state.fetchMeta!==a.fetchOptions?.meta)&&this.#s({type:`fetch`,meta:a.fetchOptions?.meta}),this.#i=ne({initialPromise:t?.initialPromise,fn:a.fetchFn,onCancel:e=>{e instanceof ie&&e.revert&&this.setState({...this.#t,fetchStatus:`idle`}),n.abort()},onFail:(e,t)=>{this.#s({type:`failed`,failureCount:e,error:t})},onPause:()=>{this.#s({type:`pause`})},onContinue:()=>{this.#s({type:`continue`})},retry:a.options.retry,retryDelay:a.options.retryDelay,networkMode:a.options.networkMode,canRun:()=>!0});try{let e=await this.#i.start();if(e===void 0)throw Error(`${this.queryHash} data is undefined`);return this.setData(e),this.#n.config.onSuccess?.(e,this),this.#n.config.onSettled?.(e,this.state.error,this),e}catch(e){if(e instanceof ie){if(e.silent)return this.#i.promise;if(e.revert){if(this.state.data===void 0)throw e;return this.state.data}}throw this.#s({type:`error`,error:e}),this.#n.config.onError?.(e,this),this.#n.config.onSettled?.(this.state.data,e,this),e}finally{this.scheduleGc()}}#s(e){this.state=(t=>{switch(e.type){case`failed`:return{...t,fetchFailureCount:e.failureCount,fetchFailureReason:e.error};case`pause`:return{...t,fetchStatus:`paused`};case`continue`:return{...t,fetchStatus:`fetching`};case`fetch`:return{...t,...Ue(t.data,this.options),fetchMeta:e.meta??null};case`success`:let n={...t,...We(e.data,e.dataUpdatedAt),dataUpdateCount:t.dataUpdateCount+1,...!e.manual&&{fetchStatus:`idle`,fetchFailureCount:0,fetchFailureReason:null}};return this.#t=e.manual?n:void 0,n;case`error`:let r=e.error;return{...t,error:r,errorUpdateCount:t.errorUpdateCount+1,errorUpdatedAt:Date.now(),fetchFailureCount:t.fetchFailureCount+1,fetchFailureReason:r,fetchStatus:`idle`,status:`error`,isInvalidated:!0};case`invalidate`:return{...t,isInvalidated:!0};case`setState`:return{...t,...e.state}}})(this.state),ce.batch(()=>{this.observers.forEach(e=>{e.onQueryUpdate()}),this.#n.notify({query:this,type:`updated`,action:e})})}};function Ue(e,t){return{fetchFailureCount:0,fetchFailureReason:null,fetchStatus:se(t.networkMode)?`fetching`:`paused`,...e===void 0&&{error:null,status:`pending`}}}function We(e,t){return{data:e,dataUpdatedAt:t??Date.now(),error:null,isInvalidated:!1,status:`success`}}function Ge(e){let t=typeof e.initialData==`function`?e.initialData():e.initialData,n=t!==void 0,r=n?typeof e.initialDataUpdatedAt==`function`?e.initialDataUpdatedAt():e.initialDataUpdatedAt:0;return{data:t,dataUpdateCount:0,dataUpdatedAt:n?r??Date.now():0,error:null,errorUpdateCount:0,errorUpdatedAt:0,fetchFailureCount:0,fetchFailureReason:null,fetchMeta:null,isInvalidated:!1,status:n?`success`:`pending`,fetchStatus:`idle`}}var Ke=class extends C{constructor(e,t){super(),this.options=t,this.#e=e,this.#s=null,this.#o=A(),this.bindMethods(),this.setOptions(t)}#e;#t=void 0;#n=void 0;#r=void 0;#i;#a;#o;#s;#c;#l;#u;#d;#f;#p;#m=new Set;bindMethods(){this.refetch=this.refetch.bind(this)}onSubscribe(){this.listeners.size===1&&(this.#t.addObserver(this),Je(this.#t,this.options)?this.#h():this.updateResult(),this.#y())}onUnsubscribe(){this.hasListeners()||this.destroy()}shouldFetchOnReconnect(){return Ye(this.#t,this.options,this.options.refetchOnReconnect)}shouldFetchOnWindowFocus(){return Ye(this.#t,this.options,this.options.refetchOnWindowFocus)}destroy(){this.listeners=new Set,this.#b(),this.#x(),this.#t.removeObserver(this)}setOptions(e){let t=this.options,n=this.#t;if(this.options=this.#e.defaultQueryOptions(e),this.options.enabled!==void 0&&typeof this.options.enabled!=`boolean`&&typeof this.options.enabled!=`function`&&typeof w(this.options.enabled,this.#t)!=`boolean`)throw Error(`Expected enabled to be a boolean or a callback that returns a boolean`);this.#S(),this.#t.setOptions(this.options),t._defaulted&&!x(this.options,t)&&this.#e.getQueryCache().notify({type:`observerOptionsUpdated`,query:this.#t,observer:this});let r=this.hasListeners();r&&Xe(this.#t,n,this.options,t)&&this.#h(),this.updateResult(),r&&(this.#t!==n||w(this.options.enabled,this.#t)!==w(t.enabled,this.#t)||j(this.options.staleTime,this.#t)!==j(t.staleTime,this.#t))&&this.#g();let i=this.#_();r&&(this.#t!==n||w(this.options.enabled,this.#t)!==w(t.enabled,this.#t)||i!==this.#p)&&this.#v(i)}getOptimisticResult(e){let t=this.#e.getQueryCache().build(this.#e,e),n=this.createResult(t,e);return Qe(this,n)&&(this.#r=n,this.#a=this.options,this.#i=this.#t.state),n}getCurrentResult(){return this.#r}trackResult(e,t){return new Proxy(e,{get:(e,n)=>(this.trackProp(n),t?.(n),n===`promise`&&(this.trackProp(`data`),!this.options.experimental_prefetchInRender&&this.#o.status===`pending`&&this.#o.reject(Error(`experimental_prefetchInRender feature flag is not enabled`))),Reflect.get(e,n))})}trackProp(e){this.#m.add(e)}getCurrentQuery(){return this.#t}refetch({...e}={}){return this.fetch({...e})}fetchOptimistic(e){let t=this.#e.defaultQueryOptions(e),n=this.#e.getQueryCache().build(this.#e,t);return n.fetch().then(()=>this.createResult(n,t))}fetch(e){return this.#h({...e,cancelRefetch:e.cancelRefetch??!0}).then(()=>(this.updateResult(),this.#r))}#h(e){this.#S();let t=this.#t.fetch(this.options,e);return e?.throwOnError||(t=t.catch(D)),t}#g(){this.#b();let e=j(this.options.staleTime,this.#t);if(le||this.#r.isStale||!E(e))return;let t=te(this.#r.dataUpdatedAt,e)+1;this.#d=T.setTimeout(()=>{this.#r.isStale||this.updateResult()},t)}#_(){return(typeof this.options.refetchInterval==`function`?this.options.refetchInterval(this.#t):this.options.refetchInterval)??!1}#v(e){this.#x(),this.#p=e,!(le||w(this.options.enabled,this.#t)===!1||!E(this.#p)||this.#p===0)&&(this.#f=T.setInterval(()=>{(this.options.refetchIntervalInBackground||ae.isFocused())&&this.#h()},this.#p))}#y(){this.#g(),this.#v(this.#_())}#b(){this.#d&&=(T.clearTimeout(this.#d),void 0)}#x(){this.#f&&=(T.clearInterval(this.#f),void 0)}createResult(e,t){let n=this.#t,r=this.options,i=this.#r,a=this.#i,o=this.#a,s=e===n?this.#n:e.state,{state:c}=e,l={...c},u=!1,d;if(t._optimisticResults){let i=this.hasListeners(),a=!i&&Je(e,t),o=i&&Xe(e,n,t,r);(a||o)&&(l={...l,...Ue(c.data,e.options)}),t._optimisticResults===`isRestoring`&&(l.fetchStatus=`idle`)}let{error:f,errorUpdatedAt:p,status:m}=l;d=l.data;let h=!1;if(t.placeholderData!==void 0&&d===void 0&&m===`pending`){let e;i?.isPlaceholderData&&t.placeholderData===o?.placeholderData?(e=i.data,h=!0):e=typeof t.placeholderData==`function`?t.placeholderData(this.#u?.state.data,this.#u):t.placeholderData,e!==void 0&&(m=`success`,d=S(i?.data,e,t),u=!0)}if(t.select&&d!==void 0&&!h)if(i&&d===a?.data&&t.select===this.#c)d=this.#l;else try{this.#c=t.select,d=t.select(d),d=S(i?.data,d,t),this.#l=d,this.#s=null}catch(e){this.#s=e}this.#s&&(f=this.#s,d=this.#l,p=Date.now(),m=`error`);let g=l.fetchStatus===`fetching`,_=m===`pending`,v=m===`error`,y=_&&g,b=d!==void 0,x={status:m,fetchStatus:l.fetchStatus,isPending:_,isSuccess:m===`success`,isError:v,isInitialLoading:y,isLoading:y,data:d,dataUpdatedAt:l.dataUpdatedAt,error:f,errorUpdatedAt:p,failureCount:l.fetchFailureCount,failureReason:l.fetchFailureReason,errorUpdateCount:l.errorUpdateCount,isFetched:l.dataUpdateCount>0||l.errorUpdateCount>0,isFetchedAfterMount:l.dataUpdateCount>s.dataUpdateCount||l.errorUpdateCount>s.errorUpdateCount,isFetching:g,isRefetching:g&&!_,isLoadingError:v&&!b,isPaused:l.fetchStatus===`paused`,isPlaceholderData:u,isRefetchError:v&&b,isStale:Ze(e,t),refetch:this.refetch,promise:this.#o,isEnabled:w(t.enabled,e)!==!1};if(this.options.experimental_prefetchInRender){let t=x.data!==void 0,r=x.status===`error`&&!t,i=e=>{r?e.reject(x.error):t&&e.resolve(x.data)},a=()=>{i(this.#o=x.promise=A())},o=this.#o;switch(o.status){case`pending`:e.queryHash===n.queryHash&&i(o);break;case`fulfilled`:(r||x.data!==o.value)&&a();break;case`rejected`:(!r||x.error!==o.reason)&&a();break}}return x}updateResult(){let e=this.#r,t=this.createResult(this.#t,this.options);this.#i=this.#t.state,this.#a=this.options,this.#i.data!==void 0&&(this.#u=this.#t),!x(t,e)&&(this.#r=t,this.#C({listeners:(()=>{if(!e)return!0;let{notifyOnChangeProps:t}=this.options,n=typeof t==`function`?t():t;if(n===`all`||!n&&!this.#m.size)return!0;let r=new Set(n??this.#m);return this.options.throwOnError&&r.add(`error`),Object.keys(this.#r).some(t=>{let n=t;return this.#r[n]!==e[n]&&r.has(n)})})()}))}#S(){let e=this.#e.getQueryCache().build(this.#e,this.options);if(e===this.#t)return;let t=this.#t;this.#t=e,this.#n=e.state,this.hasListeners()&&(t?.removeObserver(this),e.addObserver(this))}onQueryUpdate(){this.updateResult(),this.hasListeners()&&this.#y()}#C(e){ce.batch(()=>{e.listeners&&this.listeners.forEach(e=>{e(this.#r)}),this.#e.getQueryCache().notify({query:this.#t,type:`observerResultsUpdated`})})}};function qe(e,t){return w(t.enabled,e)!==!1&&e.state.data===void 0&&!(e.state.status===`error`&&t.retryOnMount===!1)}function Je(e,t){return qe(e,t)||e.state.data!==void 0&&Ye(e,t,t.refetchOnMount)}function Ye(e,t,n){if(w(t.enabled,e)!==!1&&j(t.staleTime,e)!==`static`){let r=typeof n==`function`?n(e):n;return r===`always`||r!==!1&&Ze(e,t)}return!1}function Xe(e,t,n,r){return(e!==t||w(r.enabled,e)===!1)&&(!n.suspense||e.state.status!==`error`)&&Ze(e,n)}function Ze(e,t){return w(t.enabled,e)!==!1&&e.isStaleByTime(j(t.staleTime,e))}function Qe(e,t){return!x(e.getCurrentResult(),t)}var P=e(n(),1),$e=P.createContext(!1),et=()=>P.useContext($e);$e.Provider;var F=e(t(),1);function tt(){let e=!1;return{clearReset:()=>{e=!1},reset:()=>{e=!0},isReset:()=>e}}var nt=P.createContext(tt()),rt=()=>P.useContext(nt),it=(e,t,n)=>{let r=n?.state.error&&typeof e.throwOnError==`function`?re(e.throwOnError,[n.state.error,n]):e.throwOnError;(e.suspense||e.experimental_prefetchInRender||r)&&(t.isReset()||(e.retryOnMount=!1))},at=e=>{P.useEffect(()=>{e.clearReset()},[e])},ot=({result:e,errorResetBoundary:t,throwOnError:n,query:r,suspense:i})=>e.isError&&!t.isReset()&&!e.isFetching&&r&&(i&&e.data===void 0||re(n,[e.error,r])),st=(e,t)=>t.state.data===void 0,ct=e=>{if(e.suspense){let t=1e3,n=e=>e===`static`?e:Math.max(e??t,t),r=e.staleTime;e.staleTime=typeof r==`function`?(...e)=>n(r(...e)):n(r),typeof e.gcTime==`number`&&(e.gcTime=Math.max(e.gcTime,t))}},lt=(e,t)=>e.isLoading&&e.isFetching&&!t,ut=(e,t)=>e?.suspense&&t.isPending,dt=(e,t,n)=>t.fetchOptimistic(e).catch(()=>{n.clearReset()});function ft(e,t,n){let r=et(),i=rt(),a=oe(n),o=a.defaultQueryOptions(e);a.getDefaultOptions().queries?._experimental_beforeQuery?.(o);let s=a.getQueryCache().get(o.queryHash);o._optimisticResults=r?`isRestoring`:`optimistic`,ct(o),it(o,i,s),at(i);let c=!a.getQueryCache().get(o.queryHash),[l]=P.useState(()=>new t(a,o)),u=l.getOptimisticResult(o),d=!r&&e.subscribed!==!1;if(P.useSyncExternalStore(P.useCallback(e=>{let t=d?l.subscribe(ce.batchCalls(e)):D;return l.updateResult(),t},[l,d]),()=>l.getCurrentResult(),()=>l.getCurrentResult()),P.useEffect(()=>{l.setOptions(o)},[o,l]),ut(o,u))throw dt(o,l,i);if(ot({result:u,errorResetBoundary:i,throwOnError:o.throwOnError,query:s,suspense:o.suspense}))throw u.error;return a.getDefaultOptions().queries?._experimental_afterQuery?.(o,u),o.experimental_prefetchInRender&&!le&&lt(u,r)&&(c?dt(o,l,i):s?.promise)?.catch(D).finally(()=>{l.updateResult()}),o.notifyOnChangeProps?u:l.trackResult(u)}function pt(e,t){return ft(e,Ke,t)}var mt=new Map([[`bold`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M184.49,167.51a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-48-48a12,12,0,0,1,17-17L128,207l39.51-39.52A12,12,0,0,1,184.49,167.51Zm-96-79L128,49l39.51,39.52a12,12,0,0,0,17-17l-48-48a12,12,0,0,0-17,0l-48,48a12,12,0,0,0,17,17Z`}))],[`duotone`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M80,176h96l-48,48ZM128,32,80,80h96Z`,opacity:`0.2`}),P.createElement(`path`,{d:`M176,168H80a8,8,0,0,0-5.66,13.66l48,48a8,8,0,0,0,11.32,0l48-48A8,8,0,0,0,176,168Zm-48,44.69L99.31,184h57.38ZM80,88h96a8,8,0,0,0,5.66-13.66l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,80,88Zm48-44.69L156.69,72H99.31Z`}))],[`fill`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M72.61,83.06a8,8,0,0,1,1.73-8.72l48-48a8,8,0,0,1,11.32,0l48,48A8,8,0,0,1,176,88H80A8,8,0,0,1,72.61,83.06ZM176,168H80a8,8,0,0,0-5.66,13.66l48,48a8,8,0,0,0,11.32,0l48-48A8,8,0,0,0,176,168Z`}))],[`light`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M180.24,171.76a6,6,0,0,1,0,8.48l-48,48a6,6,0,0,1-8.48,0l-48-48a6,6,0,0,1,8.48-8.48L128,215.51l43.76-43.75A6,6,0,0,1,180.24,171.76Zm-96-87.52L128,40.49l43.76,43.75a6,6,0,0,0,8.48-8.48l-48-48a6,6,0,0,0-8.48,0l-48,48a6,6,0,0,0,8.48,8.48Z`}))],[`regular`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z`}))],[`thin`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M178.83,173.17a4,4,0,0,1,0,5.66l-48,48a4,4,0,0,1-5.66,0l-48-48a4,4,0,0,1,5.66-5.66L128,218.34l45.17-45.17A4,4,0,0,1,178.83,173.17Zm-96-90.34L128,37.66l45.17,45.17a4,4,0,1,0,5.66-5.66l-48-48a4,4,0,0,0-5.66,0l-48,48a4,4,0,0,0,5.66,5.66Z`}))]]),ht=new Map([[`bold`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z`}))],[`duotone`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z`,opacity:`0.2`}),P.createElement(`path`,{d:`M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z`}))],[`fill`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M168,112a56,56,0,1,1-56-56A56,56,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88,88,0,1,1,11.32-11.31l50.06,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z`}))],[`light`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M228.24,219.76l-51.38-51.38a86.15,86.15,0,1,0-8.48,8.48l51.38,51.38a6,6,0,0,0,8.48-8.48ZM38,112a74,74,0,1,1,74,74A74.09,74.09,0,0,1,38,112Z`}))],[`regular`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z`}))],[`thin`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M226.83,221.17l-52.7-52.7a84.1,84.1,0,1,0-5.66,5.66l52.7,52.7a4,4,0,0,0,5.66-5.66ZM36,112a76,76,0,1,1,76,76A76.08,76.08,0,0,1,36,112Z`}))]]),gt=new Map([[`bold`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M230.15,70.54,185.46,25.86a20,20,0,0,0-28.28,0L33.86,149.17A19.86,19.86,0,0,0,28,163.31V208a20,20,0,0,0,20,20H216a12,12,0,0,0,0-24H125L230.15,98.83A20,20,0,0,0,230.15,70.54ZM91,204H52V165l84-84,39,39ZM192,103,153,64l18.34-18.34,39,39Z`}))],[`duotone`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M221.66,90.34,192,120,136,64l29.66-29.66a8,8,0,0,1,11.31,0L221.66,79A8,8,0,0,1,221.66,90.34Z`,opacity:`0.2`}),P.createElement(`path`,{d:`M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM48,163.31l88-88L180.69,120l-88,88H48Zm144-54.62L147.32,64l24-24L216,84.69Z`}))],[`fill`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM192,108.69,147.32,64l24-24L216,84.69Z`}))],[`light`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M225.91,74.79,181.22,30.1a14,14,0,0,0-19.8,0L38.1,153.41a13.94,13.94,0,0,0-4.1,9.9V208a14,14,0,0,0,14,14H216a6,6,0,0,0,0-12H110.49L225.91,94.59A14,14,0,0,0,225.91,74.79ZM93.52,210H48a2,2,0,0,1-2-2V163.31a2,2,0,0,1,.59-1.41L136,72.49,183.52,120ZM217.42,86.1,192,111.52,144.49,64,169.9,38.59a2,2,0,0,1,2.83,0l44.69,44.68A2,2,0,0,1,217.42,86.1Z`}))],[`regular`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z`}))],[`thin`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M224.49,76.2,179.8,31.51a12,12,0,0,0-17,0L39.51,154.83A12,12,0,0,0,36,163.31V208a12,12,0,0,0,12,12H216a4,4,0,0,0,0-8H105.66L224.49,93.17A12,12,0,0,0,224.49,76.2ZM94.34,212H48a4,4,0,0,1-4-4V163.31a4,4,0,0,1,1.17-2.82L136,69.66,186.35,120ZM218.83,87.51,192,114.34,141.66,64l26.83-26.83a4,4,0,0,1,5.66,0l44.68,44.69A4,4,0,0,1,218.83,87.51Z`}))]]),_t=new Map([[`bold`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M228,128a12,12,0,0,1-12,12H140v76a12,12,0,0,1-24,0V140H40a12,12,0,0,1,0-24h76V40a12,12,0,0,1,24,0v76h76A12,12,0,0,1,228,128Z`}))],[`duotone`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M216,56V200a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V56A16,16,0,0,1,56,40H200A16,16,0,0,1,216,56Z`,opacity:`0.2`}),P.createElement(`path`,{d:`M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z`}))],[`fill`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM184,136H136v48a8,8,0,0,1-16,0V136H72a8,8,0,0,1,0-16h48V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z`}))],[`light`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M222,128a6,6,0,0,1-6,6H134v82a6,6,0,0,1-12,0V134H40a6,6,0,0,1,0-12h82V40a6,6,0,0,1,12,0v82h82A6,6,0,0,1,222,128Z`}))],[`regular`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z`}))],[`thin`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M220,128a4,4,0,0,1-4,4H132v84a4,4,0,0,1-8,0V132H40a4,4,0,0,1,0-8h84V40a4,4,0,0,1,8,0v84h84A4,4,0,0,1,220,128Z`}))]]),vt=new Map([[`bold`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M246.15,133.18,146.83,33.86A19.85,19.85,0,0,0,132.69,28H40A12,12,0,0,0,28,40v92.69a19.85,19.85,0,0,0,5.86,14.14l99.32,99.32a20,20,0,0,0,28.28,0l84.69-84.69A20,20,0,0,0,246.15,133.18Zm-98.83,93.17L52,131V52h79l95.32,95.32ZM104,88A16,16,0,1,1,88,72,16,16,0,0,1,104,88Z`}))],[`duotone`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M237.66,153,153,237.66a8,8,0,0,1-11.31,0L42.34,138.34A8,8,0,0,1,40,132.69V40h92.69a8,8,0,0,1,5.65,2.34l99.32,99.32A8,8,0,0,1,237.66,153Z`,opacity:`0.2`}),P.createElement(`path`,{d:`M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63Zm-96,96L48,132.69V48h84.69L232,147.31ZM96,84A12,12,0,1,1,84,72,12,12,0,0,1,96,84Z`}))],[`fill`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z`}))],[`light`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M241.91,137.42,142.59,38.1a13.94,13.94,0,0,0-9.9-4.1H40a6,6,0,0,0-6,6v92.69a13.94,13.94,0,0,0,4.1,9.9l99.32,99.32a14,14,0,0,0,19.8,0l84.69-84.69A14,14,0,0,0,241.91,137.42Zm-8.49,11.31-84.69,84.69a2,2,0,0,1-2.83,0L46.59,134.1a2,2,0,0,1-.59-1.41V46h86.69a2,2,0,0,1,1.41.59l99.32,99.31A2,2,0,0,1,233.42,148.73ZM94,84A10,10,0,1,1,84,74,10,10,0,0,1,94,84Z`}))],[`regular`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63Zm-96,96L48,132.69V48h84.69L232,147.31ZM96,84A12,12,0,1,1,84,72,12,12,0,0,1,96,84Z`}))],[`thin`,P.createElement(P.Fragment,null,P.createElement(`path`,{d:`M240.49,138.83,141.17,39.51A11.93,11.93,0,0,0,132.69,36H40a4,4,0,0,0-4,4v92.69a11.93,11.93,0,0,0,3.51,8.48l99.32,99.32a12,12,0,0,0,17,0l84.69-84.69a12,12,0,0,0,0-17Zm-5.66,11.31-84.69,84.69a4,4,0,0,1-5.65,0L45.17,135.51A4,4,0,0,1,44,132.69V44h88.69a4,4,0,0,1,2.82,1.17l99.32,99.32A4,4,0,0,1,234.83,150.14ZM92,84a8,8,0,1,1-8-8A8,8,0,0,1,92,84Z`}))]]),yt=P.forwardRef((e,t)=>P.createElement(u,{ref:t,...e,weights:mt}));yt.displayName=`CaretUpDownIcon`;var bt=P.forwardRef((e,t)=>P.createElement(u,{ref:t,...e,weights:ht}));bt.displayName=`MagnifyingGlassIcon`;var xt=P.forwardRef((e,t)=>P.createElement(u,{ref:t,...e,weights:gt}));xt.displayName=`PencilSimpleLineIcon`;var St=P.forwardRef((e,t)=>P.createElement(u,{ref:t,...e,weights:_t}));St.displayName=`PlusIcon`;var Ct=P.forwardRef((e,t)=>P.createElement(u,{ref:t,...e,weights:vt}));Ct.displayName=`TagIcon`;function wt(...e){let t=!Array.isArray(e[0]),n=t?0:-1,r=e[0+n],i=e[1+n],a=e[2+n],o=e[3+n],s=b(i,a,o);return t?s(r):s}function Tt(e){let t=d(()=>l(e)),{isStatic:n}=(0,P.useContext)(f);if(n){let[,n]=(0,P.useState)(e);(0,P.useEffect)(()=>t.on(`change`,n),[])}return t}function Et(e,t){let n=Tt(t()),r=()=>n.set(t());return r(),s(()=>{let t=()=>c.preRender(r,!1,!0),n=e.map(e=>e.on(`change`,t));return()=>{n.forEach(e=>e()),h(r)}}),n}function Dt(e){o.current=[],e();let t=Et(o.current,e);return o.current=void 0,t}function Ot(e,t,n,r){if(typeof e==`function`)return Dt(e);if(n!==void 0&&!Array.isArray(n)&&typeof t!=`function`)return At(e,t,n,r);let i=typeof t==`function`?t:wt(t,n,r),a=Array.isArray(e)?kt(e,i):kt([e],([e])=>i(e)),o=Array.isArray(e)?void 0:e.accelerate;return o&&!o.isTransformed&&typeof t!=`function`&&Array.isArray(n)&&r?.clamp!==!1&&(a.accelerate={...o,times:t,keyframes:n,isTransformed:!0,...r?.ease?{ease:r.ease}:{}}),a}function kt(e,t){let n=d(()=>[]);return Et(e,()=>{n.length=0;let r=e.length;for(let t=0;t<r;t++)n[t]=e[t].get();return t(n)})}function At(e,t,n,r){let i=d(()=>Object.keys(n)),a=d(()=>({}));for(let o of i)a[o]=Ot(e,t,n[o],r);return a}var jt=`Popover`,[Mt,Nt]=he(jt,[Le]),I=Le(),[Pt,L]=Mt(jt),Ft=e=>{let{__scopePopover:t,children:n,open:r,defaultOpen:i,onOpenChange:a,modal:o=!1}=e,s=I(t),c=P.useRef(null),[l,u]=P.useState(!1),[d,f]=me({prop:r,defaultProp:i??!1,onChange:a,caller:jt});return(0,F.jsx)(Re,{...s,children:(0,F.jsx)(Pt,{scope:t,contentId:N(),triggerRef:c,open:d,onOpenChange:f,onOpenToggle:P.useCallback(()=>f(e=>!e),[f]),hasCustomAnchor:l,onCustomAnchorAdd:P.useCallback(()=>u(!0),[]),onCustomAnchorRemove:P.useCallback(()=>u(!1),[]),modal:o,children:n})})};Ft.displayName=jt;var It=`PopoverAnchor`,Lt=P.forwardRef((e,t)=>{let{__scopePopover:n,...r}=e,i=L(It,n),a=I(n),{onCustomAnchorAdd:o,onCustomAnchorRemove:s}=i;return P.useEffect(()=>(o(),()=>s()),[o,s]),(0,F.jsx)(Ve,{...a,...r,ref:t})});Lt.displayName=It;var Rt=`PopoverTrigger`,zt=P.forwardRef((e,t)=>{let{__scopePopover:n,...r}=e,i=L(Rt,n),a=I(n),o=m(t,i.triggerRef),s=(0,F.jsx)(y.button,{type:`button`,"aria-haspopup":`dialog`,"aria-expanded":i.open,"aria-controls":i.contentId,"data-state":$t(i.open),...r,ref:o,onClick:M(e.onClick,i.onOpenToggle)});return i.hasCustomAnchor?s:(0,F.jsx)(Ve,{asChild:!0,...a,children:s})});zt.displayName=Rt;var Bt=`PopoverPortal`,[Vt,Ht]=Mt(Bt,{forceMount:void 0}),Ut=e=>{let{__scopePopover:t,forceMount:n,children:r,container:i}=e,a=L(Bt,t);return(0,F.jsx)(Vt,{scope:t,forceMount:n,children:(0,F.jsx)(ge,{present:n||a.open,children:(0,F.jsx)(_e,{asChild:!0,container:i,children:r})})})};Ut.displayName=Bt;var R=`PopoverContent`,Wt=P.forwardRef((e,t)=>{let n=Ht(R,e.__scopePopover),{forceMount:r=n.forceMount,...i}=e,a=L(R,e.__scopePopover);return(0,F.jsx)(ge,{present:r||a.open,children:a.modal?(0,F.jsx)(Kt,{...i,ref:t}):(0,F.jsx)(qt,{...i,ref:t})})});Wt.displayName=R;var Gt=p(`PopoverContent.RemoveScroll`),Kt=P.forwardRef((e,t)=>{let n=L(R,e.__scopePopover),r=P.useRef(null),i=m(t,r),a=P.useRef(!1);return P.useEffect(()=>{let e=r.current;if(e)return be(e)},[]),(0,F.jsx)(ye,{as:Gt,allowPinchZoom:!0,children:(0,F.jsx)(Jt,{...e,ref:i,trapFocus:n.open,disableOutsidePointerEvents:!0,onCloseAutoFocus:M(e.onCloseAutoFocus,e=>{e.preventDefault(),a.current||n.triggerRef.current?.focus()}),onPointerDownOutside:M(e.onPointerDownOutside,e=>{let t=e.detail.originalEvent,n=t.button===0&&t.ctrlKey===!0;a.current=t.button===2||n},{checkForDefaultPrevented:!1}),onFocusOutside:M(e.onFocusOutside,e=>e.preventDefault(),{checkForDefaultPrevented:!1})})})}),qt=P.forwardRef((e,t)=>{let n=L(R,e.__scopePopover),r=P.useRef(!1),i=P.useRef(!1);return(0,F.jsx)(Jt,{...e,ref:t,trapFocus:!1,disableOutsidePointerEvents:!1,onCloseAutoFocus:t=>{e.onCloseAutoFocus?.(t),t.defaultPrevented||(r.current||n.triggerRef.current?.focus(),t.preventDefault()),r.current=!1,i.current=!1},onInteractOutside:t=>{e.onInteractOutside?.(t),t.defaultPrevented||(r.current=!0,t.detail.originalEvent.type===`pointerdown`&&(i.current=!0));let a=t.target;n.triggerRef.current?.contains(a)&&t.preventDefault(),t.detail.originalEvent.type===`focusin`&&i.current&&t.preventDefault()}})}),Jt=P.forwardRef((e,t)=>{let{__scopePopover:n,trapFocus:r,onOpenAutoFocus:i,onCloseAutoFocus:a,disableOutsidePointerEvents:o,onEscapeKeyDown:s,onPointerDownOutside:c,onFocusOutside:l,onInteractOutside:u,...d}=e,f=L(R,n),p=I(n);return ve(),(0,F.jsx)(Se,{asChild:!0,loop:!0,trapped:r,onMountAutoFocus:i,onUnmountAutoFocus:a,children:(0,F.jsx)(Ce,{asChild:!0,disableOutsidePointerEvents:o,onInteractOutside:u,onEscapeKeyDown:s,onPointerDownOutside:c,onFocusOutside:l,onDismiss:()=>f.onOpenChange(!1),children:(0,F.jsx)(Be,{"data-state":$t(f.open),role:`dialog`,id:f.contentId,...p,...d,ref:t,style:{...d.style,"--radix-popover-content-transform-origin":`var(--radix-popper-transform-origin)`,"--radix-popover-content-available-width":`var(--radix-popper-available-width)`,"--radix-popover-content-available-height":`var(--radix-popper-available-height)`,"--radix-popover-trigger-width":`var(--radix-popper-anchor-width)`,"--radix-popover-trigger-height":`var(--radix-popper-anchor-height)`}})})})}),Yt=`PopoverClose`,Xt=P.forwardRef((e,t)=>{let{__scopePopover:n,...r}=e,i=L(Yt,n);return(0,F.jsx)(y.button,{type:`button`,...r,ref:t,onClick:M(e.onClick,()=>i.onOpenChange(!1))})});Xt.displayName=Yt;var Zt=`PopoverArrow`,Qt=P.forwardRef((e,t)=>{let{__scopePopover:n,...r}=e,i=I(n);return(0,F.jsx)(ze,{...i,...r,ref:t})});Qt.displayName=Zt;function $t(e){return e?`open`:`closed`}var en=Ft,tn=zt,nn=Ut,rn=Wt,an=1,on=.9,sn=.8,cn=.17,ln=.1,un=.999,dn=.9999,fn=.99,pn=/[\\\/_+.#"@\[\(\{&]/,mn=/[\\\/_+.#"@\[\(\{&]/g,hn=/[\s-]/,gn=/[\s-]/g;function _n(e,t,n,r,i,a,o){if(a===t.length)return i===e.length?an:fn;var s=`${i},${a}`;if(o[s]!==void 0)return o[s];for(var c=r.charAt(a),l=n.indexOf(c,i),u=0,d,f,p,m;l>=0;)d=_n(e,t,n,r,l+1,a+1,o),d>u&&(l===i?d*=an:pn.test(e.charAt(l-1))?(d*=sn,p=e.slice(i,l-1).match(mn),p&&i>0&&(d*=un**+p.length)):hn.test(e.charAt(l-1))?(d*=on,m=e.slice(i,l-1).match(gn),m&&i>0&&(d*=un**+m.length)):(d*=cn,i>0&&(d*=un**+(l-i))),e.charAt(l)!==t.charAt(a)&&(d*=dn)),(d<ln&&n.charAt(l-1)===r.charAt(a+1)||r.charAt(a+1)===r.charAt(a)&&n.charAt(l-1)!==r.charAt(a))&&(f=_n(e,t,n,r,l+1,a+2,o),f*ln>d&&(d=f*ln)),d>u&&(u=d),l=n.indexOf(c,l+1);return o[s]=u,u}function vn(e){return e.toLowerCase().replace(gn,` `)}function yn(e,t,n){return e=n&&n.length>0?`${e+` `+n.join(` `)}`:e,_n(e,t,vn(e),vn(t),0,0,{})}var bn=Symbol.for(`react.lazy`),xn=P.use;function Sn(e){return typeof e==`object`&&!!e&&`then`in e}function Cn(e){return typeof e==`object`&&!!e&&`$$typeof`in e&&e.$$typeof===bn&&`_payload`in e&&Sn(e._payload)}function wn(e){let t=Tn(e),n=P.forwardRef((e,n)=>{let{children:r,...i}=e;Cn(r)&&typeof xn==`function`&&(r=xn(r._payload));let a=P.Children.toArray(r),o=a.find(Dn);if(o){let e=o.props.children,r=a.map(t=>t===o?P.Children.count(e)>1?P.Children.only(null):P.isValidElement(e)?e.props.children:null:t);return(0,F.jsx)(t,{...i,ref:n,children:P.isValidElement(e)?P.cloneElement(e,void 0,r):null})}return(0,F.jsx)(t,{...i,ref:n,children:r})});return n.displayName=`${e}.Slot`,n}function Tn(e){let t=P.forwardRef((e,t)=>{let{children:n,...r}=e;if(Cn(n)&&typeof xn==`function`&&(n=xn(n._payload)),P.isValidElement(n)){let e=kn(n),i=On(r,n.props);return n.type!==P.Fragment&&(i.ref=t?_(t,e):e),P.cloneElement(n,i)}return P.Children.count(n)>1?P.Children.only(null):null});return t.displayName=`${e}.SlotClone`,t}var En=Symbol(`radix.slottable`);function Dn(e){return P.isValidElement(e)&&typeof e.type==`function`&&`__radixId`in e.type&&e.type.__radixId===En}function On(e,t){let n={...t};for(let r in t){let i=e[r],a=t[r];/^on[A-Z]/.test(r)?i&&a?n[r]=(...e)=>{let t=a(...e);return i(...e),t}:i&&(n[r]=i):r===`style`?n[r]={...i,...a}:r===`className`&&(n[r]=[i,a].filter(Boolean).join(` `))}return{...e,...n}}function kn(e){let t=Object.getOwnPropertyDescriptor(e.props,`ref`)?.get,n=t&&`isReactWarning`in t&&t.isReactWarning;return n?e.ref:(t=Object.getOwnPropertyDescriptor(e,`ref`)?.get,n=t&&`isReactWarning`in t&&t.isReactWarning,n?e.props.ref:e.props.ref||e.ref)}r();var z=[`a`,`button`,`div`,`form`,`h2`,`h3`,`img`,`input`,`label`,`li`,`nav`,`ol`,`p`,`select`,`span`,`svg`,`ul`].reduce((e,t)=>{let n=wn(`Primitive.${t}`),r=P.forwardRef((e,r)=>{let{asChild:i,...a}=e,o=i?n:t;return typeof window<`u`&&(window[Symbol.for(`radix-ui`)]=!0),(0,F.jsx)(o,{...a,ref:r})});return r.displayName=`Primitive.${t}`,{...e,[t]:r}},{}),B=`[cmdk-group=""]`,An=`[cmdk-group-items=""]`,jn=`[cmdk-group-heading=""]`,Mn=`[cmdk-item=""]`,Nn=`${Mn}:not([aria-disabled="true"])`,Pn=`cmdk-item-select`,V=`data-value`,Fn=(e,t,n)=>yn(e,t,n),In=P.createContext(void 0),H=()=>P.useContext(In),Ln=P.createContext(void 0),Rn=()=>P.useContext(Ln),zn=P.createContext(void 0),Bn=P.forwardRef((e,t)=>{let n=G(()=>({search:``,value:e.value??e.defaultValue??``,selectedItemId:void 0,filtered:{count:0,items:new Map,groups:new Set}})),r=G(()=>new Set),i=G(()=>new Map),a=G(()=>new Map),o=G(()=>new Set),s=Zn(e),{label:c,children:l,value:u,onValueChange:d,filter:f,shouldFilter:p,loop:m,disablePointerSelection:h=!1,vimBindings:g=!0,..._}=e,v=N(),y=N(),b=N(),x=P.useRef(null),S=$n();W(()=>{if(u!==void 0){let e=u.trim();n.current.value=e,C.emit()}},[u]),W(()=>{S(6,D)},[]);let C=P.useMemo(()=>({subscribe:e=>(o.current.add(e),()=>o.current.delete(e)),snapshot:()=>n.current,setState:(e,t,r)=>{var i,a,o;if(!Object.is(n.current[e],t)){if(n.current[e]=t,e===`search`)E(),w(),S(1,T);else if(e===`value`){if(document.activeElement.hasAttribute(`cmdk-input`)||document.activeElement.hasAttribute(`cmdk-root`)){let e=document.getElementById(b);e?e.focus():(i=document.getElementById(v))==null||i.focus()}if(S(7,()=>{n.current.selectedItemId=O()?.id,C.emit()}),r||S(5,D),s.current?.value!==void 0){let e=t??``;(o=(a=s.current).onValueChange)==null||o.call(a,e);return}}C.emit()}},emit:()=>{o.current.forEach(e=>e())}}),[]),ee=P.useMemo(()=>({value:(e,t,r)=>{t!==a.current.get(e)?.value&&(a.current.set(e,{value:t,keywords:r}),n.current.filtered.items.set(e,te(t,r)),S(2,()=>{w(),C.emit()}))},item:(e,t)=>(r.current.add(e),t&&(i.current.has(t)?i.current.get(t).add(e):i.current.set(t,new Set([e]))),S(3,()=>{E(),w(),n.current.value||T(),C.emit()}),()=>{a.current.delete(e),r.current.delete(e),n.current.filtered.items.delete(e);let t=O();S(4,()=>{E(),t?.getAttribute(`id`)===e&&T(),C.emit()})}),group:e=>(i.current.has(e)||i.current.set(e,new Set),()=>{a.current.delete(e),i.current.delete(e)}),filter:()=>s.current.shouldFilter,label:c||e[`aria-label`],getDisablePointerSelection:()=>s.current.disablePointerSelection,listId:v,inputId:b,labelId:y,listInnerRef:x}),[]);function te(e,t){let r=s.current?.filter??Fn;return e?r(e,n.current.search,t):0}function w(){if(!n.current.search||s.current.shouldFilter===!1)return;let e=n.current.filtered.items,t=[];n.current.filtered.groups.forEach(n=>{let r=i.current.get(n),a=0;r.forEach(t=>{let n=e.get(t);a=Math.max(n,a)}),t.push([n,a])});let r=x.current;k().sort((t,n)=>{let r=t.getAttribute(`id`),i=n.getAttribute(`id`);return(e.get(i)??0)-(e.get(r)??0)}).forEach(e=>{let t=e.closest(An);t?t.appendChild(e.parentElement===t?e:e.closest(`${An} > *`)):r.appendChild(e.parentElement===r?e:e.closest(`${An} > *`))}),t.sort((e,t)=>t[1]-e[1]).forEach(e=>{let t=x.current?.querySelector(`${B}[${V}="${encodeURIComponent(e[0])}"]`);t?.parentElement.appendChild(t)})}function T(){let e=k().find(e=>e.getAttribute(`aria-disabled`)!==`true`)?.getAttribute(V);C.setState(`value`,e||void 0)}function E(){if(!n.current.search||s.current.shouldFilter===!1){n.current.filtered.count=r.current.size;return}n.current.filtered.groups=new Set;let e=0;for(let t of r.current){let r=te(a.current.get(t)?.value??``,a.current.get(t)?.keywords??[]);n.current.filtered.items.set(t,r),r>0&&e++}for(let[e,t]of i.current)for(let r of t)if(n.current.filtered.items.get(r)>0){n.current.filtered.groups.add(e);break}n.current.filtered.count=e}function D(){var e;let t=O();t&&(t.parentElement?.firstChild===t&&((e=t.closest(B)?.querySelector(jn))==null||e.scrollIntoView({block:`nearest`})),t.scrollIntoView({block:`nearest`}))}function O(){return x.current?.querySelector(`${Mn}[aria-selected="true"]`)}function k(){return Array.from(x.current?.querySelectorAll(Nn)||[])}function ne(e){let t=k()[e];t&&C.setState(`value`,t.getAttribute(V))}function A(e){var t;let n=O(),r=k(),i=r.findIndex(e=>e===n),a=r[i+e];(t=s.current)!=null&&t.loop&&(a=i+e<0?r[r.length-1]:i+e===r.length?r[0]:r[i+e]),a&&C.setState(`value`,a.getAttribute(V))}function re(e){let t=O()?.closest(B),n;for(;t&&!n;)t=e>0?Yn(t,B):Xn(t,B),n=t?.querySelector(Nn);n?C.setState(`value`,n.getAttribute(V)):A(e)}let j=()=>ne(k().length-1),ie=e=>{e.preventDefault(),e.metaKey?j():e.altKey?re(1):A(1)},ae=e=>{e.preventDefault(),e.metaKey?ne(0):e.altKey?re(-1):A(-1)};return P.createElement(z.div,{ref:t,tabIndex:-1,..._,"cmdk-root":``,onKeyDown:e=>{var t;(t=_.onKeyDown)==null||t.call(_,e);let n=e.nativeEvent.isComposing||e.keyCode===229;if(!(e.defaultPrevented||n))switch(e.key){case`n`:case`j`:g&&e.ctrlKey&&ie(e);break;case`ArrowDown`:ie(e);break;case`p`:case`k`:g&&e.ctrlKey&&ae(e);break;case`ArrowUp`:ae(e);break;case`Home`:e.preventDefault(),ne(0);break;case`End`:e.preventDefault(),j();break;case`Enter`:{e.preventDefault();let t=O();if(t){let e=new Event(Pn);t.dispatchEvent(e)}}}}},P.createElement(`label`,{"cmdk-label":``,htmlFor:ee.inputId,id:ee.labelId,style:nr},c),tr(e,e=>P.createElement(Ln.Provider,{value:C},P.createElement(In.Provider,{value:ee},e))))}),Vn=P.forwardRef((e,t)=>{let n=N(),r=P.useRef(null),i=P.useContext(zn),a=H(),o=Zn(e),s=o.current?.forceMount??i?.forceMount;W(()=>{if(!s)return a.item(n,i?.id)},[s]);let c=Qn(n,r,[e.value,e.children,r],e.keywords),l=Rn(),u=K(e=>e.value&&e.value===c.current),d=K(e=>s||a.filter()===!1?!0:e.search?e.filtered.items.get(n)>0:!0);P.useEffect(()=>{let t=r.current;if(!(!t||e.disabled))return t.addEventListener(Pn,f),()=>t.removeEventListener(Pn,f)},[d,e.onSelect,e.disabled]);function f(){var e,t;p(),(t=(e=o.current).onSelect)==null||t.call(e,c.current)}function p(){l.setState(`value`,c.current,!0)}if(!d)return null;let{disabled:m,value:h,onSelect:g,forceMount:v,keywords:y,...b}=e;return P.createElement(z.div,{ref:_(r,t),...b,id:n,"cmdk-item":``,role:`option`,"aria-disabled":!!m,"aria-selected":!!u,"data-disabled":!!m,"data-selected":!!u,onPointerMove:m||a.getDisablePointerSelection()?void 0:p,onClick:m?void 0:f},e.children)}),Hn=P.forwardRef((e,t)=>{let{heading:n,children:r,forceMount:i,...a}=e,o=N(),s=P.useRef(null),c=P.useRef(null),l=N(),u=H(),d=K(e=>i||u.filter()===!1?!0:e.search?e.filtered.groups.has(o):!0);W(()=>u.group(o),[]),Qn(o,s,[e.value,e.heading,c]);let f=P.useMemo(()=>({id:o,forceMount:i}),[i]);return P.createElement(z.div,{ref:_(s,t),...a,"cmdk-group":``,role:`presentation`,hidden:d?void 0:!0},n&&P.createElement(`div`,{ref:c,"cmdk-group-heading":``,"aria-hidden":!0,id:l},n),tr(e,e=>P.createElement(`div`,{"cmdk-group-items":``,role:`group`,"aria-labelledby":n?l:void 0},P.createElement(zn.Provider,{value:f},e))))}),Un=P.forwardRef((e,t)=>{let{alwaysRender:n,...r}=e,i=P.useRef(null),a=K(e=>!e.search);return!n&&!a?null:P.createElement(z.div,{ref:_(i,t),...r,"cmdk-separator":``,role:`separator`})}),Wn=P.forwardRef((e,t)=>{let{onValueChange:n,...r}=e,i=e.value!=null,a=Rn(),o=K(e=>e.search),s=K(e=>e.selectedItemId),c=H();return P.useEffect(()=>{e.value!=null&&a.setState(`search`,e.value)},[e.value]),P.createElement(z.input,{ref:t,...r,"cmdk-input":``,autoComplete:`off`,autoCorrect:`off`,spellCheck:!1,"aria-autocomplete":`list`,role:`combobox`,"aria-expanded":!0,"aria-controls":c.listId,"aria-labelledby":c.labelId,"aria-activedescendant":s,id:c.inputId,type:`text`,value:i?e.value:o,onChange:e=>{i||a.setState(`search`,e.target.value),n?.(e.target.value)}})}),Gn=P.forwardRef((e,t)=>{let{children:n,label:r=`Suggestions`,...i}=e,a=P.useRef(null),o=P.useRef(null),s=K(e=>e.selectedItemId),c=H();return P.useEffect(()=>{if(o.current&&a.current){let e=o.current,t=a.current,n,r=new ResizeObserver(()=>{n=requestAnimationFrame(()=>{let n=e.offsetHeight;t.style.setProperty(`--cmdk-list-height`,n.toFixed(1)+`px`)})});return r.observe(e),()=>{cancelAnimationFrame(n),r.unobserve(e)}}},[]),P.createElement(z.div,{ref:_(a,t),...i,"cmdk-list":``,role:`listbox`,tabIndex:-1,"aria-activedescendant":s,"aria-label":r,id:c.listId},tr(e,e=>P.createElement(`div`,{ref:_(o,c.listInnerRef),"cmdk-list-sizer":``},e)))}),Kn=P.forwardRef((e,t)=>{let{open:n,onOpenChange:r,overlayClassName:i,contentClassName:a,container:o,...s}=e;return P.createElement(Ee,{open:n,onOpenChange:r},P.createElement(Ie,{container:o},P.createElement(Fe,{"cmdk-overlay":``,className:i}),P.createElement(we,{"aria-label":e.label,"cmdk-dialog":``,className:a},P.createElement(Bn,{ref:t,...s}))))}),qn=P.forwardRef((e,t)=>K(e=>e.filtered.count===0)?P.createElement(z.div,{ref:t,...e,"cmdk-empty":``,role:`presentation`}):null),Jn=P.forwardRef((e,t)=>{let{progress:n,children:r,label:i=`Loading...`,...a}=e;return P.createElement(z.div,{ref:t,...a,"cmdk-loading":``,role:`progressbar`,"aria-valuenow":n,"aria-valuemin":0,"aria-valuemax":100,"aria-label":i},tr(e,e=>P.createElement(`div`,{"aria-hidden":!0},e)))}),U=Object.assign(Bn,{List:Gn,Item:Vn,Input:Wn,Group:Hn,Separator:Un,Dialog:Kn,Empty:qn,Loading:Jn});function Yn(e,t){let n=e.nextElementSibling;for(;n;){if(n.matches(t))return n;n=n.nextElementSibling}}function Xn(e,t){let n=e.previousElementSibling;for(;n;){if(n.matches(t))return n;n=n.previousElementSibling}}function Zn(e){let t=P.useRef(e);return W(()=>{t.current=e}),t}var W=typeof window>`u`?P.useEffect:P.useLayoutEffect;function G(e){let t=P.useRef();return t.current===void 0&&(t.current=e()),t}function K(e){let t=Rn(),n=()=>e(t.snapshot());return P.useSyncExternalStore(t.subscribe,n,n)}function Qn(e,t,n,r=[]){let i=P.useRef(),a=H();return W(()=>{var o;let s=(()=>{for(let e of n){if(typeof e==`string`)return e.trim();if(typeof e==`object`&&`current`in e)return e.current?e.current.textContent?.trim():i.current}})(),c=r.map(e=>e.trim());a.value(e,s,c),(o=t.current)==null||o.setAttribute(V,s),i.current=s}),i}var $n=()=>{let[e,t]=P.useState(),n=G(()=>new Map);return W(()=>{n.current.forEach(e=>e()),n.current=new Map},[e]),(e,r)=>{n.current.set(e,r),t({})}};function er(e){let t=e.type;return typeof t==`function`?t(e.props):`render`in t?t.render(e.props):e}function tr({asChild:e,children:t},n){return e&&P.isValidElement(t)?P.cloneElement(er(t),{ref:t.ref},n(t.props.children)):n(t)}var nr={position:`absolute`,width:`1px`,height:`1px`,padding:`0`,margin:`-1px`,overflow:`hidden`,clip:`rect(0, 0, 0, 0)`,whiteSpace:`nowrap`,borderWidth:`0`};function rr({className:e,...t}){return(0,F.jsx)(`div`,{"data-slot":`input-group`,role:`group`,className:i(`group/input-group relative flex h-9 w-full min-w-0 items-center rounded-md border border-input shadow-xs outline-none transition-[color,box-shadow] in-data-[slot=combobox-content]:focus-within:border-ring has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-start]]:h-auto has-[>textarea]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:flex-col has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-destructive/20 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=inline-start]]:[&>input]:ps-1.5 has-[>[data-align=inline-end]]:[&>input]:pe-1.5 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3`,e),...t})}var ir=de(`flex h-auto cursor-text select-none items-center justify-center gap-2 py-1.5 font-medium text-muted-foreground text-sm group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4`,{variants:{align:{"inline-start":`order-first ps-2 has-[>button]:-ms-1 has-[>kbd]:ms-[-0.15rem]`,"inline-end":`order-last pe-2 has-[>button]:-me-1 has-[>kbd]:me-[-0.15rem]`,"block-start":`order-first w-full justify-start px-2.5 pt-2 group-has-[>input]/input-group:pt-2 [.border-b]:pb-2`,"block-end":`order-last w-full justify-start px-2.5 pb-2 group-has-[>input]/input-group:pb-2 [.border-t]:pt-2`}},defaultVariants:{align:`inline-start`}});function ar({className:e,align:t=`inline-start`,...n}){return(0,F.jsx)(`div`,{role:`group`,"data-slot":`input-group-addon`,"data-align":t,className:i(ir({align:t}),e),onClick:e=>{e.target.closest(`button`)||e.currentTarget.parentElement?.querySelector(`input`)?.focus()},...n})}var or=de(`flex items-center gap-2 text-sm shadow-none`,{variants:{size:{xs:`h-6 gap-1 rounded-[calc(var(--radius)-5px)] px-1.5 [&>svg:not([class*='size-'])]:size-3.5`,sm:``,"icon-xs":`size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0`,"icon-sm":`size-8 p-0 has-[>svg]:p-0`}},defaultVariants:{size:`xs`}});function sr({className:e,type:t=`button`,variant:n=`ghost`,size:r=`xs`,...a}){return(0,F.jsx)(fe,{...a,type:t,asChild:!1,"data-size":r,variant:n,className:i(or({size:r}),e)})}function cr({className:e,...t}){return(0,F.jsx)(`span`,{className:i(`flex items-center gap-2 text-muted-foreground text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none`,e),...t})}function lr({className:e,...t}){return(0,F.jsx)(pe,{"data-slot":`input-group-control`,className:i(`flex-1 rounded-none border-0 bg-transparent shadow-none hover:bg-secondary/40 focus-visible:bg-secondary/40 aria-invalid:ring-0`,e),...t})}function ur({className:e,...t}){return(0,F.jsx)(U,{"data-slot":`command`,className:i(`flex size-full flex-col gap-y-1 overflow-hidden rounded-xl! bg-popover p-1 text-popover-foreground`,e),...t})}function dr({className:e,...t}){return(0,F.jsx)(`div`,{"data-slot":`command-input-wrapper`,className:`p-1 pb-0`,children:(0,F.jsxs)(rr,{className:`h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:ps-2!`,children:[(0,F.jsx)(U.Input,{"data-slot":`command-input`,className:i(`w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50`,e),...t}),(0,F.jsx)(ar,{children:(0,F.jsx)(bt,{className:`size-4 shrink-0 opacity-50`})})]})})}function fr({className:e,...t}){return(0,F.jsx)(U.List,{"data-slot":`command-list`,className:i(`no-scrollbar max-h-72 scroll-py-1 overflow-y-auto overflow-x-hidden outline-none`,e),...t})}function pr({className:e,...t}){return(0,F.jsx)(U.Empty,{"data-slot":`command-empty`,className:i(`py-6 text-center text-sm`,e),...t})}function mr({className:e,...t}){return(0,F.jsx)(U.Group,{"data-slot":`command-group`,className:i(`overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:text-xs`,e),...t})}function hr({className:e,...t}){return(0,F.jsx)(U.Separator,{"data-slot":`command-separator`,className:i(`-mx-1 h-px w-auto bg-border`,e),...t})}function gr({className:e,children:t,...n}){return(0,F.jsxs)(U.Item,{"data-slot":`command-item`,className:i(`group/command-item relative flex cursor-default select-none items-center gap-2 in-data-[slot=dialog-content]:rounded-lg! rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-selected:bg-muted data-selected:text-foreground data-[disabled=true]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-selected:**:[svg]:text-foreground`,e),...n,children:[t,(0,F.jsx)(ue,{className:`ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100`})]})}function _r({className:e,...t}){return(0,F.jsx)(`span`,{"data-slot":`command-shortcut`,className:i(`ml-auto text-muted-foreground text-xs tracking-widest group-data-selected/command-item:text-foreground`,e),...t})}const vr=g.enum([`azurill`,`bronzor`,`chikorita`,`ditgar`,`ditto`,`gengar`,`glalie`,`kakuna`,`lapras`,`leafish`,`onyx`,`pikachu`,`rhyhorn`]),q=g.string().describe(`The icon to display for the custom field. Must be a valid icon name from @phosphor-icons/web icon set, or an empty string to hide. Default to '' (empty string) when unsure which icons are available.`),yr=g.object({showLinkInTitle:g.boolean().catch(!1).describe(`If true, the website URL is rendered as a hyperlink on the title instead of a separate link at the bottom.`)}).catch({showLinkInTitle:!1}),J=g.object({url:g.string().describe(`The URL to show as a link. Must be a valid URL with a protocol (http:// or https://).`),label:g.string().describe(`The label to display for the URL. Leave blank to display the URL as-is.`)}),br=g.object({hidden:g.boolean().describe(`Whether to hide the picture from the resume.`),url:g.string().describe(`The URL to the picture to display on the resume. Must be a valid URL with a protocol (http:// or https://).`),size:g.number().min(32).max(512).describe(`The size of the picture to display on the resume, defined in points (pt).`),rotation:g.number().min(0).max(360).describe(`The rotation of the picture to display on the resume, defined in degrees (°).`),aspectRatio:g.number().min(.5).max(2.5).describe(`The aspect ratio of the picture to display on the resume, defined as width / height (e.g. 1.5 for 1.5:1 or 0.5 for 1:2).`),borderRadius:g.number().min(0).max(100).describe(`The border radius of the picture to display on the resume, defined in points (pt).`),borderColor:g.string().describe(`The color of the border of the picture to display on the resume, defined as rgba(r, g, b, a).`),borderWidth:g.number().min(0).describe(`The width of the border of the picture to display on the resume, defined in points (pt).`),shadowColor:g.string().describe(`The color of the shadow of the picture to display on the resume, defined as rgba(r, g, b, a).`),shadowWidth:g.number().min(0).describe(`The width of the shadow of the picture to display on the resume, defined in points (pt).`)}),xr=g.object({id:g.string().describe(`The unique identifier for the custom field. Usually generated as a UUID.`),icon:q,text:g.string().describe(`The text to display for the custom field.`),link:g.string().describe(`If the custom field should be a link, the URL to link to.`).catch(``)}),Sr=g.object({name:g.string().regex(/^[^0-9]*$/,`Name cannot contain numbers`).describe(`The full name of the author of the resume.`),headline:g.string().regex(/^[^0-9]*$/,`Headline cannot contain numbers`).describe(`The headline of the author of the resume.`),email:g.string().describe(`The email address of the author of the resume.`),phone:g.string().describe(`The phone number of the author of the resume.`),location:g.string().describe(`The location of the author of the resume.`),website:J.describe(`The website of the author of the resume.`),customFields:g.array(xr).describe(`The custom fields to display on the resume.`)}),Cr=g.object({title:g.string().describe(`The title of the summary of the resume.`),columns:g.number().describe(`The number of columns the summary should span across.`),hidden:g.boolean().describe(`Whether to hide the summary from the resume.`),content:g.string().describe(`The content of the summary of the resume. This should be a HTML-formatted string.`)}),Y=g.object({id:g.string().describe(`The unique identifier for the item. Usually generated as a UUID.`),hidden:g.boolean().describe(`Whether to hide the item from the resume.`),options:yr.optional().describe(`Display options for this item.`)}),wr=Y.extend({content:g.string().describe(`The rich text content of the summary item. This should be a HTML-formatted string.`)}),X=Y.extend({title:g.string().min(1).describe(`The title of the award.`),awarder:g.string().describe(`The awarder of the award.`),date:g.string().describe(`The date when the award was received.`),website:J.describe(`The website of the award, if any.`),description:g.string().describe(`The description of the award. This should be a HTML-formatted string.`)}),Z=Y.extend({title:g.string().min(1).describe(`The title of the certification.`),issuer:g.string().describe(`The issuer of the certification.`),date:g.string().describe(`The date when the certification was received.`),website:J.describe(`The website of the certification, if any.`),description:g.string().describe(`The description of the certification. This should be a HTML-formatted string.`)}),Tr=Y.extend({school:g.string().min(1).describe(`The name of the school or institution.`),degree:g.string().describe(`The degree or qualification obtained.`),area:g.string().describe(`The area of study or specialization.`),grade:g.string().describe(`The grade or score achieved.`),location:g.string().describe(`The location of the school or institution.`),period:g.string().describe(`The period of time the education was obtained over.`),website:J.describe(`The website of the school or institution, if any.`),description:g.string().describe(`The description of the education. This should be a HTML-formatted string.`),currentlyStudyingHere:g.boolean().describe(`Indicates if the user is currently studying at this institution.`)}),Er=Y.extend({company:g.string().min(1).describe(`The name of the company or organization.`),position:g.string().describe(`The position held at the company or organization.`),location:g.string().describe(`The location of the company or organization.`),startDate:g.string().optional().describe(`The start date of the experience.`),endDate:g.string().optional().describe(`The end date of the experience.`),currentlyWorkingHere:g.boolean().optional().describe(`Whether the user is currently working here.`),description:g.string().describe(`The description of the experience. This should be a HTML-formatted string.`),period:g.string().describe(`The period of time the experience was obtained over.`),website:J.describe(`The website of the company or organization, if any.`)}),Dr=Y.extend({icon:q,name:g.string().min(1).describe(`The name of the interest/hobby.`),keywords:g.array(g.string()).catch([]).describe(`The keywords associated with the interest/hobby, if any. These are displayed as tags below the name.`)}),Or=Y.extend({language:g.string().min(1).describe(`The name of the language the author knows.`),fluency:g.string().describe(`The fluency level of the language. Can be any text, such as 'Native', 'Fluent', 'Conversational', etc. or can also be a CEFR level (A1, A2, B1, B2, C1, C2).`),level:g.number().min(0).max(5).catch(0).describe(`The proficiency level of the language, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden.`)}),Q=Y.extend({icon:q,network:g.string().min(1).describe(`The name of the network or platform.`),username:g.string().describe(`The username of the author on the network or platform.`),website:J.describe(`The link to the profile of the author on the network or platform, if any.`)}),kr=Y.extend({name:g.string().min(1).describe(`The name of the project.`),period:g.string().describe(`The period of time the project was worked on.`),website:J.describe(`The link to the project, if any.`),description:g.string().describe(`The description of the project. This should be a HTML-formatted string.`)}),Ar=Y.extend({title:g.string().min(1).describe(`The title of the publication.`),publisher:g.string().describe(`The publisher of the publication.`),date:g.string().describe(`The date when the publication was published.`),website:J.describe(`The link to the publication, if any.`),description:g.string().describe(`The description of the publication. This should be a HTML-formatted string.`)}),jr=Y.extend({name:g.string().min(1).describe(`The name of the reference, or a note such as 'Available upon request'.`),position:g.string().describe(`The position or job title of the reference.`),website:J.describe(`The website or LinkedIn profile of the reference, if any.`),phone:g.string().describe(`The phone number of the reference.`),description:g.string().describe(`The description of the reference. Can be used to display a quote, a testimonial, etc. This should be a HTML-formatted string.`)}),Mr=Y.extend({icon:q,name:g.string().min(1).describe(`The name of the skill.`),proficiency:g.string().describe(`The proficiency level of the skill. Can be any text, such as 'Beginner', 'Intermediate', 'Advanced', etc.`),level:g.number().min(0).max(5).catch(0).describe(`The proficiency level of the skill, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden.`),keywords:g.array(g.string()).catch([]).describe(`The keywords associated with the skill, if any. These are displayed as tags below the name.`)}),Nr=Y.extend({organization:g.string().min(1).describe(`The name of the organization or company.`),location:g.string().describe(`The location of the organization or company.`),period:g.string().describe(`The period of time the author was volunteered at the organization or company.`),website:J.describe(`The link to the organization or company, if any.`),description:g.string().describe(`The description of the volunteer experience. This should be a HTML-formatted string.`)}),Pr=Y.extend({recipient:g.string().describe(`The recipient's address block as HTML (name, title, company, address, email).`),content:g.string().describe(`The cover letter body as HTML (salutation, paragraphs, closing, signature).`)}),$=g.object({title:g.string().describe(`The title of the section.`),columns:g.number().describe(`The number of columns the section should span across.`),hidden:g.boolean().describe(`Whether to hide the section from the resume.`)}),Fr=$.extend({items:g.array(X).describe(`The items to display in the awards section.`)}),Ir=$.extend({items:g.array(Z).describe(`The items to display in the certifications section.`)}),Lr=$.extend({items:g.array(Tr).describe(`The items to display in the education section.`)}),Rr=$.extend({items:g.array(Er).describe(`The items to display in the experience section.`)}),zr=$.extend({items:g.array(Dr).describe(`The items to display in the interests section.`)}),Br=$.extend({items:g.array(Or).describe(`The items to display in the languages section.`)}),Vr=$.extend({items:g.array(Q).describe(`The items to display in the profiles section.`)}),Hr=$.extend({items:g.array(kr).describe(`The items to display in the projects section.`)}),Ur=$.extend({items:g.array(Ar).describe(`The items to display in the publications section.`)}),Wr=$.extend({items:g.array(jr).describe(`The items to display in the references section.`)}),Gr=$.extend({items:g.array(Mr).describe(`The items to display in the skills section.`)}),Kr=$.extend({items:g.array(Nr).describe(`The items to display in the volunteer section.`)}),qr=g.object({profiles:Vr.describe(`The section to display the profiles of the author.`),experience:Rr.describe(`The section to display the experience of the author.`),education:Lr.describe(`The section to display the education of the author.`),projects:Hr.describe(`The section to display the projects of the author.`),skills:Gr.describe(`The section to display the skills of the author.`),languages:Br.describe(`The section to display the languages of the author.`),interests:zr.describe(`The section to display the interests of the author.`),awards:Fr.describe(`The section to display the awards of the author.`),certifications:Ir.describe(`The section to display the certifications of the author.`),publications:Ur.describe(`The section to display the publications of the author.`),volunteer:Kr.describe(`The section to display the volunteer experience of the author.`),references:Wr.describe(`The section to display the references of the author.`)}),Jr=g.enum([`summary`,`profiles`,`experience`,`education`,`projects`,`skills`,`languages`,`interests`,`awards`,`certifications`,`publications`,`volunteer`,`references`,`cover-letter`]),Yr=g.union([Pr,wr,Q,Er,Tr,kr,Mr,Or,Dr,X,Z,Ar,Nr,jr]),Xr=$.extend({id:g.string().describe(`The unique identifier for the custom section. Usually generated as a UUID.`),type:Jr.describe(`The type of items this custom section contains. Determines which item schema and form fields to use.`),items:g.array(Yr).describe(`The items to display in the custom section. Items follow the schema of the section type.`)}),Zr=g.array(Xr),Qr=g.enum([`100`,`200`,`300`,`400`,`500`,`600`,`700`,`800`,`900`]),$r=g.object({fontFamily:g.string().describe(`The family of the font to use. Must be a font that is available on Google Fonts.`),fontWeights:g.array(Qr).catch([`400`]).describe(`The weight of the font, defined as a number between 100 and 900. Default to 400 when unsure if the weight is available in the font.`),fontSize:g.number().min(6).max(24).catch(11).describe(`The size of the font to use, defined in points (pt).`),lineHeight:g.number().min(.5).max(4).catch(1.5).describe(`The line height of the font to use, defined as a multiplier of the font size (e.g. 1.5 for 1.5x).`)}),ei=g.object({fullWidth:g.boolean().describe(`Whether the layout of the page should be full width. If true, the main column will span the entire width of the page. This means that there should be no items in the sidebar column.`),main:g.array(g.string()).describe(`The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections).`),sidebar:g.array(g.string()).describe(`The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections).`)}),ti=g.object({sidebarWidth:g.number().min(10).max(50).catch(35).describe(`The width of the sidebar column, defined as a percentage of the page width.`),pages:g.array(ei).describe(`The pages to display in the layout.`)}),ni=g.object({enabled:g.boolean().describe(`Whether to enable custom CSS for the resume.`),value:g.string().describe(`The custom CSS to apply to the resume. This should be a valid CSS string.`)}),ri=g.object({gapX:g.number().min(0).describe(`The horizontal gap between the sections of the page, defined in points (pt).`),gapY:g.number().min(0).describe(`The vertical gap between the sections of the page, defined in points (pt).`),marginX:g.number().min(0).describe(`The horizontal margin of the page, defined in points (pt).`),marginY:g.number().min(0).describe(`The vertical margin of the page, defined in points (pt).`),format:g.enum([`a4`,`letter`,`free-form`]).describe(`The format of the page. Can be 'a4', 'letter' or 'free-form'.`).catch(`a4`),locale:g.string().describe(`The locale of the page. Used for displaying pre-translated section headings, if not overridden.`).catch(`en-US`),hideIcons:g.boolean().describe(`Whether to hide the icons of the sections.`).catch(!1)}),ii=g.object({icon:q,type:g.enum([`hidden`,`circle`,`square`,`rectangle`,`rectangle-full`,`progress-bar`,`icon`]).describe(`The type of the level design. 'hidden' will hide the level design, 'circle' will display a circle, 'square' will display a square, 'rectangle' will display a rectangle, 'rectangle-full' will display a full rectangle, 'progress-bar' will display a progress bar, and 'icon' will display an icon. If 'icon' is selected, the icon to display should be specified in the 'icon' field.`)}),ai=g.object({primary:g.string().describe(`The primary color of the design, defined as rgba(r, g, b, a).`),text:g.string().describe(`The text color of the design, defined as rgba(r, g, b, a). Usually set to black: rgba(0, 0, 0, 1).`),background:g.string().describe(`The background color of the design, defined as rgba(r, g, b, a). Usually set to white: rgba(255, 255, 255, 1).`)}),oi=g.object({level:ii,colors:ai}),si=g.object({body:$r.describe(`The typography for the body of the resume.`),heading:$r.describe(`The typography for the headings of the resume.`)}),ci=g.object({template:vr.catch(`onyx`).describe(`The template to use for the resume. Determines the overall design and appearance of the resume.`),layout:ti.describe(`The layout of the resume. Determines the structure and arrangement of the sections on the resume.`),css:ni.describe(`Custom CSS to apply to the resume. Can be used to override the default styles of the template.`),page:ri.describe(`The page settings of the resume. Determines the margins, format, and locale of the resume.`),design:oi.describe(`The design settings of the resume. Determines the colors, level designs, and typography of the resume.`),typography:si.describe(`The typography settings of the resume. Determines the fonts and sizes of the body and headings of the resume.`),notes:g.string().describe(`Personal notes for the resume. Can be used to add any additional information or instructions for the resume. These notes are not displayed on the resume, they are only visible to the author of the resume when editing the resume. This should be a HTML-formatted string.`),coverLetter:g.string().optional().describe(`Cover letter accompanying the resume. This will be included when exporting the resume. Supports rich text formatting.`)}),li=g.object({picture:br.describe(`Configuration for photograph displayed on the resume`),basics:Sr.describe(`Basic information about the author, such as name, email, phone, location, and website`),summary:Cr.describe(`Summary section of the resume, useful for a short bio or introduction`),sections:qr.describe(`Various sections of the resume, such as experience, education, projects, etc.`),customSections:Zr.describe(`Custom sections of the resume, such as a custom section for notes, etc.`),metadata:ci.describe(`Metadata for the resume, such as template, layout, typography, etc. This section describes the overall design and appearance of the resume.`)}),ui={picture:{hidden:!1,url:``,size:80,rotation:0,aspectRatio:1,borderRadius:0,borderColor:`rgba(0, 0, 0, 0.5)`,borderWidth:0,shadowColor:`rgba(0, 0, 0, 0.5)`,shadowWidth:0},basics:{name:``,headline:``,email:``,phone:``,location:``,website:{url:``,label:``},customFields:[]},summary:{title:``,columns:1,hidden:!1,content:``},sections:{profiles:{title:``,columns:1,hidden:!1,items:[]},experience:{title:``,columns:1,hidden:!1,items:[]},education:{title:``,columns:1,hidden:!1,items:[]},projects:{title:``,columns:1,hidden:!1,items:[]},skills:{title:``,columns:1,hidden:!1,items:[]},languages:{title:``,columns:1,hidden:!1,items:[]},interests:{title:``,columns:1,hidden:!1,items:[]},awards:{title:``,columns:1,hidden:!1,items:[]},certifications:{title:``,columns:1,hidden:!1,items:[]},publications:{title:``,columns:1,hidden:!1,items:[]},volunteer:{title:``,columns:1,hidden:!1,items:[]},references:{title:``,columns:1,hidden:!1,items:[]}},customSections:[],metadata:{template:`onyx`,layout:{sidebarWidth:35,pages:[{fullWidth:!1,main:[`profiles`,`summary`,`education`,`experience`,`projects`,`volunteer`,`references`],sidebar:[`skills`,`certifications`,`awards`,`languages`,`interests`,`publications`]}]},css:{enabled:!1,value:``},page:{gapX:4,gapY:6,marginX:14,marginY:12,format:`a4`,locale:`en-US`,hideIcons:!1},design:{colors:{primary:`rgba(220, 38, 38, 1)`,text:`rgba(0, 0, 0, 1)`,background:`rgba(255, 255, 255, 1)`},level:{icon:`star`,type:`circle`}},typography:{body:{fontFamily:`IBM Plex Serif`,fontWeights:[`400`],fontSize:10,lineHeight:1.5},heading:{fontFamily:`IBM Plex Serif`,fontWeights:[`600`],fontSize:14,lineHeight:1.5}},notes:``,coverLetter:``}};g.discriminatedUnion(`type`,[g.object({type:g.literal(`resume.create`),data:g.undefined()}),g.object({type:g.literal(`resume.update`),data:g.object({id:g.string(),name:g.string(),slug:g.string(),tags:g.array(g.string())})}),g.object({type:g.literal(`resume.import`),data:g.undefined()}),g.object({type:g.literal(`resume.duplicate`),data:g.object({id:g.string(),name:g.string(),slug:g.string(),tags:g.array(g.string()),shouldRedirect:g.boolean().optional()})}),g.object({type:g.literal(`resume.template.gallery`),data:g.undefined()}),g.object({type:g.literal(`resume.sections.profiles.create`),data:g.object({item:Q.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.profiles.update`),data:g.object({item:Q,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.experience.create`),data:g.object({item:Er.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.experience.update`),data:g.object({item:Er,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.education.create`),data:g.object({item:Tr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.education.update`),data:g.object({item:Tr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.projects.create`),data:g.object({item:kr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.projects.update`),data:g.object({item:kr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.skills.create`),data:g.object({item:Mr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.skills.update`),data:g.object({item:Mr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.languages.create`),data:g.object({item:Or.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.languages.update`),data:g.object({item:Or,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.awards.create`),data:g.object({item:X.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.awards.update`),data:g.object({item:X,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.certifications.create`),data:g.object({item:Z.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.certifications.update`),data:g.object({item:Z,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.publications.create`),data:g.object({item:Ar.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.publications.update`),data:g.object({item:Ar,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.interests.create`),data:g.object({item:Dr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.interests.update`),data:g.object({item:Dr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.volunteer.create`),data:g.object({item:Nr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.volunteer.update`),data:g.object({item:Nr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.references.create`),data:g.object({item:jr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.references.update`),data:g.object({item:jr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.summary.create`),data:g.object({item:wr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.summary.update`),data:g.object({item:wr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.cover-letter.create`),data:g.object({item:Pr.optional(),customSectionId:g.string().optional()}).optional()}),g.object({type:g.literal(`resume.sections.cover-letter.update`),data:g.object({item:Pr,customSectionId:g.string().optional()})}),g.object({type:g.literal(`resume.sections.custom.create`),data:Xr.optional()}),g.object({type:g.literal(`resume.sections.custom.update`),data:Xr})]);const di=ke(e=>({open:!1,activeDialog:null,onOpenChange:t=>{e({open:t}),t||setTimeout(()=>{e({activeDialog:null})},300)},openDialog:(t,n)=>e({open:!0,activeDialog:{type:t,data:n}}),closeDialog:()=>{e({open:!1}),setTimeout(()=>{e({activeDialog:null})},300)}}));var fi=P.createContext(null);function pi({children:e}){let[t,n]=P.useState({open:!1,resolve:null,title:``,description:void 0,confirmText:void 0,cancelText:void 0}),r=P.useCallback(async(e,t)=>new Promise(r=>{n({open:!0,resolve:r,title:e,description:t?.description,confirmText:t?.confirmText,cancelText:t?.cancelText})}),[]),a=P.useCallback(()=>{t.resolve&&t.resolve(!0),n(e=>({...e,open:!1,resolve:null}))},[t.resolve]),o=P.useCallback(()=>{t.resolve&&t.resolve(!1),n(e=>({...e,open:!1,resolve:null}))},[t.resolve]);return(0,F.jsxs)(fi.Provider,{value:{confirm:r},children:[e,(0,F.jsx)(Pe,{open:t.open,onOpenChange:e=>!e&&o(),children:(0,F.jsxs)(Oe,{children:[(0,F.jsxs)(Ne,{children:[(0,F.jsx)(De,{children:t.title}),(0,F.jsx)(Te,{className:i(!t.description&&`sr-only`),children:t.description})]}),(0,F.jsxs)(je,{children:[(0,F.jsx)(Me,{onClick:o,children:t.cancelText??`Cancel`}),(0,F.jsx)(Ae,{onClick:a,children:t.confirmText??`Confirm`})]})]})})]})}function mi(){let e=P.useContext(fi);if(!e)throw Error(`useConfirm must be used within a <ConfirmDialogProvider />.`);return e.confirm}function hi({...e}){return(0,F.jsx)(en,{"data-slot":`popover`,...e})}function gi({...e}){return(0,F.jsx)(tn,{"data-slot":`popover-trigger`,...e})}function _i({className:e,align:t=`center`,sideOffset:n=4,...r}){return(0,F.jsx)(nn,{children:(0,F.jsx)(rn,{"data-slot":`popover-content`,align:t,sideOffset:n,className:i(`data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-end-2 data-[side=right]:slide-in-from-start-2 data-[side=top]:slide-in-from-bottom-2 z-50 flex min-w-72 origin-(--radix-popover-content-transform-origin) flex-col gap-4 rounded-md bg-popover p-4 text-popover-foreground text-sm shadow-md outline-hidden ring-1 ring-foreground/10 duration-100 data-closed:animate-out data-open:animate-in`,e),...r})})}function vi({className:e,...t}){return(0,F.jsx)(`div`,{"data-slot":`popover-header`,className:i(`flex flex-col gap-1 text-sm`,e),...t})}function yi({className:e,...t}){return(0,F.jsx)(`div`,{"data-slot":`popover-title`,className:i(`font-medium`,e),...t})}function bi({disabled:e=!1,clearable:t=!0,options:n,value:r,defaultValue:o=null,placeholder:s=a._({id:`O/7I0o`}),searchPlaceholder:c=a._({id:`YIix5Y`}),emptyMessage:l=a._({id:`MZbQHL`}),className:u,buttonProps:d,onValueChange:f,...p}){let{className:m,children:h,...g}=d??{},[_,v]=P.useState(!1),[y,b]=xe({value:r,defaultValue:o,onChange:e=>f?.(e,n.find(t=>t.value===e)??null)}),x=P.useMemo(()=>n.find(e=>e.value===y)??null,[n,y]),S=x?.label,C=P.useCallback(e=>{let n=e??null;if(!t&&y===n){v(!1);return}b(y===n?null:n),v(!1)},[t,y,b]);return(0,F.jsxs)(hi,{open:_,onOpenChange:P.useCallback(t=>{e||v(t)},[e]),children:[(0,F.jsx)(gi,{asChild:!0,children:(0,F.jsx)(fe,{role:`combobox`,variant:`outline`,"aria-expanded":_,disabled:e,"aria-disabled":e,tapScale:1,className:i(`min-w-0 font-normal active:scale-100`,typeof h==`function`?``:`justify-between`,e&&`pointer-events-none opacity-60`,m),...g,children:typeof h==`function`?h(y,x):(0,F.jsxs)(F.Fragment,{children:[(0,F.jsx)(`span`,{className:`flex-1 truncate text-left`,children:S??s}),(0,F.jsx)(yt,{className:`ms-2 shrink-0 opacity-50`})]})})}),(0,F.jsx)(_i,{align:`start`,"aria-disabled":e,tabIndex:e?-1:void 0,className:i(`min-w-[200px] p-0`,u,e&&`pointer-events-none select-none opacity-60`),...p,children:(0,F.jsxs)(ur,{children:[(0,F.jsx)(dr,{placeholder:c,disabled:e}),(0,F.jsxs)(fr,{children:[(0,F.jsx)(pr,{children:l}),(0,F.jsx)(mr,{children:n.map(t=>{let n=y===t.value,r=t.disabled??e;return(0,F.jsxs)(gr,{value:String(t.value),keywords:t.keywords,disabled:r,onSelect:r?void 0:C,"aria-disabled":r,className:i(r&&`pointer-events-none opacity-60`),children:[(0,F.jsx)(ue,{"aria-hidden":!0,className:i(`size-4 shrink-0 transition-opacity`,n?`opacity-100`:`opacity-0`)}),(0,F.jsx)(`span`,{className:i(`truncate`,r&&`opacity-60`),children:t.label})]},String(t.value))})})]})]})})]})}var xi=de(`group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-4xl border border-transparent px-2 py-0.5 font-medium text-xs transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-start]:ps-1.5 has-data-[icon=inline-end]:pe-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!`,{variants:{variant:{default:`bg-primary text-primary-foreground [a]:hover:bg-primary/80`,secondary:`bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80`,destructive:`bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20`,outline:`border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground`,ghost:`hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50`,link:`text-primary underline-offset-4 hover:underline`}},defaultVariants:{variant:`default`}});function Si({className:e,variant:t=`default`,asChild:n=!1,...r}){return(0,F.jsx)(n?v:`span`,{"data-slot":`badge`,"data-variant":t,className:i(xi({variant:t}),e),...r})}export{ft as $,vr as A,ar as B,kr as C,Mr as D,li as E,gr as F,Ot as G,lr as H,fr as I,Ct as J,Et as K,hr as L,pr as M,mr as N,wr as O,dr as P,pt as Q,_r as R,Q as S,jr as T,cr as U,sr as V,Jn as W,xt as X,St as Y,yt as Z,Tr as _,vi as a,Or as b,pi as c,X as d,st as et,Sr as f,ui as g,Xr as h,_i as i,ur as j,Nr as k,mi as l,Pr as m,bi as n,He as nt,yi as o,Z as p,Tt as q,hi as r,gi as s,Si as t,Ke as tt,di as u,Er as v,Ar as w,br as x,Dr as y,rr as z};
+import {
+	n as Ae,
+	c as De,
+	b as Ee,
+	v as Fe,
+	y as Ie,
+	o as je,
+	l as ke,
+	r as Me,
+	s as Ne,
+	i as Oe,
+	t as Pe,
+	a as Te,
+	_ as we,
+} from "./alert-dialog-B7DDo-NI.js";
+import { t as ue } from "./Check.es-BCVTpq-8.js";
+import { r as Be, a as Le, i as Re, t as Ve, n as ze } from "./dist-DKdYDXPR.js";
+import {
+	_ as _e,
+	m as be,
+	y as Ce,
+	S as ge,
+	D as he,
+	T as M,
+	C as me,
+	x as N,
+	v as Se,
+	g as ve,
+	n as xe,
+	h as ye,
+} from "./get-strict-context-DJn2x5wH.js";
+import { i as de, n as fe, t as pe } from "./input-DIek8tFf.js";
+import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
+import {
+	w as _,
+	E as a,
+	z as b,
+	H as c,
+	K as d,
+	M as f,
+	i as g,
+	V as h,
+	D as i,
+	I as l,
+	T as m,
+	F as o,
+	S as p,
+	$ as r,
+	G as s,
+	J as u,
+	x as v,
+	y,
+} from "./preload-helper-DwC0sqXt.js";
+import { t as n } from "./react-BZSX5Bs9.js";
+import {
+	d as A,
+	p as ae,
+	F as C,
+	u as ce,
+	T as D,
+	S as E,
+	M as ee,
+	o as ie,
+	k as j,
+	a as k,
+	x as le,
+	c as ne,
+	_ as O,
+	r as oe,
+	j as re,
+	D as S,
+	s as se,
+	P as T,
+	N as te,
+	O as w,
+	A as x,
+} from "./useMutation-CUlWnMMx.js";
+var He = class extends k {
+	#e;
+	#t;
+	#n;
+	#r;
+	#i;
+	#a;
+	#o;
+	constructor(e) {
+		super(),
+			(this.#o = !1),
+			(this.#a = e.defaultOptions),
+			this.setOptions(e.options),
+			(this.observers = []),
+			(this.#r = e.client),
+			(this.#n = this.#r.getQueryCache()),
+			(this.queryKey = e.queryKey),
+			(this.queryHash = e.queryHash),
+			(this.#e = Ge(this.options)),
+			(this.state = e.state ?? this.#e),
+			this.scheduleGc();
+	}
+	get meta() {
+		return this.options.meta;
+	}
+	get promise() {
+		return this.#i?.promise;
+	}
+	setOptions(e) {
+		if (
+			((this.options = { ...this.#a, ...e }),
+			this.updateGcTime(this.options.gcTime),
+			this.state && this.state.data === void 0)
+		) {
+			const e = Ge(this.options);
+			e.data !== void 0 && (this.setState(We(e.data, e.dataUpdatedAt)), (this.#e = e));
+		}
+	}
+	optionalRemove() {
+		!this.observers.length && this.state.fetchStatus === `idle` && this.#n.remove(this);
+	}
+	setData(e, t) {
+		const n = S(this.state.data, e, this.options);
+		return this.#s({ data: n, type: `success`, dataUpdatedAt: t?.updatedAt, manual: t?.manual }), n;
+	}
+	setState(e, t) {
+		this.#s({ type: `setState`, state: e, setStateOptions: t });
+	}
+	cancel(e) {
+		const t = this.#i?.promise;
+		return this.#i?.cancel(e), t ? t.then(D).catch(D) : Promise.resolve();
+	}
+	destroy() {
+		super.destroy(), this.cancel({ silent: !0 });
+	}
+	reset() {
+		this.destroy(), this.setState(this.#e);
+	}
+	isActive() {
+		return this.observers.some((e) => w(e.options.enabled, this) !== !1);
+	}
+	isDisabled() {
+		return this.getObserversCount() > 0
+			? !this.isActive()
+			: this.options.queryFn === ee || this.state.dataUpdateCount + this.state.errorUpdateCount === 0;
+	}
+	isStatic() {
+		return this.getObserversCount() > 0 ? this.observers.some((e) => j(e.options.staleTime, this) === `static`) : !1;
+	}
+	isStale() {
+		return this.getObserversCount() > 0
+			? this.observers.some((e) => e.getCurrentResult().isStale)
+			: this.state.data === void 0 || this.state.isInvalidated;
+	}
+	isStaleByTime(e = 0) {
+		return this.state.data === void 0
+			? !0
+			: e === `static`
+				? !1
+				: this.state.isInvalidated
+					? !0
+					: !te(this.state.dataUpdatedAt, e);
+	}
+	onFocus() {
+		this.observers.find((e) => e.shouldFetchOnWindowFocus())?.refetch({ cancelRefetch: !1 }), this.#i?.continue();
+	}
+	onOnline() {
+		this.observers.find((e) => e.shouldFetchOnReconnect())?.refetch({ cancelRefetch: !1 }), this.#i?.continue();
+	}
+	addObserver(e) {
+		this.observers.includes(e) ||
+			(this.observers.push(e),
+			this.clearGcTimeout(),
+			this.#n.notify({ type: `observerAdded`, query: this, observer: e }));
+	}
+	removeObserver(e) {
+		this.observers.includes(e) &&
+			((this.observers = this.observers.filter((t) => t !== e)),
+			this.observers.length ||
+				(this.#i && (this.#o ? this.#i.cancel({ revert: !0 }) : this.#i.cancelRetry()), this.scheduleGc()),
+			this.#n.notify({ type: `observerRemoved`, query: this, observer: e }));
+	}
+	getObserversCount() {
+		return this.observers.length;
+	}
+	invalidate() {
+		this.state.isInvalidated || this.#s({ type: `invalidate` });
+	}
+	async fetch(e, t) {
+		if (this.state.fetchStatus !== `idle` && this.#i?.status() !== `rejected`) {
+			if (this.state.data !== void 0 && t?.cancelRefetch) this.cancel({ silent: !0 });
+			else if (this.#i) return this.#i.continueRetry(), this.#i.promise;
+		}
+		if ((e && this.setOptions(e), !this.options.queryFn)) {
+			const e = this.observers.find((e) => e.options.queryFn);
+			e && this.setOptions(e.options);
+		}
+		const n = new AbortController(),
+			r = (e) => {
+				Object.defineProperty(e, `signal`, { enumerable: !0, get: () => ((this.#o = !0), n.signal) });
+			},
+			i = () => {
+				const e = O(this.options, t),
+					n = (() => {
+						const e = { client: this.#r, queryKey: this.queryKey, meta: this.meta };
+						return r(e), e;
+					})();
+				return (this.#o = !1), this.options.persister ? this.options.persister(e, n, this) : e(n);
+			},
+			a = (() => {
+				const e = {
+					fetchOptions: t,
+					options: this.options,
+					queryKey: this.queryKey,
+					client: this.#r,
+					state: this.state,
+					fetchFn: i,
+				};
+				return r(e), e;
+			})();
+		this.options.behavior?.onFetch(a, this),
+			(this.#t = this.state),
+			(this.state.fetchStatus === `idle` || this.state.fetchMeta !== a.fetchOptions?.meta) &&
+				this.#s({ type: `fetch`, meta: a.fetchOptions?.meta }),
+			(this.#i = ne({
+				initialPromise: t?.initialPromise,
+				fn: a.fetchFn,
+				onCancel: (e) => {
+					e instanceof ie && e.revert && this.setState({ ...this.#t, fetchStatus: `idle` }), n.abort();
+				},
+				onFail: (e, t) => {
+					this.#s({ type: `failed`, failureCount: e, error: t });
+				},
+				onPause: () => {
+					this.#s({ type: `pause` });
+				},
+				onContinue: () => {
+					this.#s({ type: `continue` });
+				},
+				retry: a.options.retry,
+				retryDelay: a.options.retryDelay,
+				networkMode: a.options.networkMode,
+				canRun: () => !0,
+			}));
+		try {
+			const e = await this.#i.start();
+			if (e === void 0) throw Error(`${this.queryHash} data is undefined`);
+			return (
+				this.setData(e), this.#n.config.onSuccess?.(e, this), this.#n.config.onSettled?.(e, this.state.error, this), e
+			);
+		} catch (e) {
+			if (e instanceof ie) {
+				if (e.silent) return this.#i.promise;
+				if (e.revert) {
+					if (this.state.data === void 0) throw e;
+					return this.state.data;
+				}
+			}
+			throw (
+				(this.#s({ type: `error`, error: e }),
+				this.#n.config.onError?.(e, this),
+				this.#n.config.onSettled?.(this.state.data, e, this),
+				e)
+			);
+		} finally {
+			this.scheduleGc();
+		}
+	}
+	#s(e) {
+		(this.state = ((t) => {
+			switch (e.type) {
+				case `failed`:
+					return { ...t, fetchFailureCount: e.failureCount, fetchFailureReason: e.error };
+				case `pause`:
+					return { ...t, fetchStatus: `paused` };
+				case `continue`:
+					return { ...t, fetchStatus: `fetching` };
+				case `fetch`:
+					return { ...t, ...Ue(t.data, this.options), fetchMeta: e.meta ?? null };
+				case `success`: {
+					const n = {
+						...t,
+						...We(e.data, e.dataUpdatedAt),
+						dataUpdateCount: t.dataUpdateCount + 1,
+						...(!e.manual && { fetchStatus: `idle`, fetchFailureCount: 0, fetchFailureReason: null }),
+					};
+					return (this.#t = e.manual ? n : void 0), n;
+				}
+				case `error`: {
+					const r = e.error;
+					return {
+						...t,
+						error: r,
+						errorUpdateCount: t.errorUpdateCount + 1,
+						errorUpdatedAt: Date.now(),
+						fetchFailureCount: t.fetchFailureCount + 1,
+						fetchFailureReason: r,
+						fetchStatus: `idle`,
+						status: `error`,
+						isInvalidated: !0,
+					};
+				}
+				case `invalidate`:
+					return { ...t, isInvalidated: !0 };
+				case `setState`:
+					return { ...t, ...e.state };
+			}
+		})(this.state)),
+			ce.batch(() => {
+				this.observers.forEach((e) => {
+					e.onQueryUpdate();
+				}),
+					this.#n.notify({ query: this, type: `updated`, action: e });
+			});
+	}
+};
+function Ue(e, t) {
+	return {
+		fetchFailureCount: 0,
+		fetchFailureReason: null,
+		fetchStatus: se(t.networkMode) ? `fetching` : `paused`,
+		...(e === void 0 && { error: null, status: `pending` }),
+	};
+}
+function We(e, t) {
+	return { data: e, dataUpdatedAt: t ?? Date.now(), error: null, isInvalidated: !1, status: `success` };
+}
+function Ge(e) {
+	const t = typeof e.initialData == `function` ? e.initialData() : e.initialData,
+		n = t !== void 0,
+		r = n ? (typeof e.initialDataUpdatedAt == `function` ? e.initialDataUpdatedAt() : e.initialDataUpdatedAt) : 0;
+	return {
+		data: t,
+		dataUpdateCount: 0,
+		dataUpdatedAt: n ? (r ?? Date.now()) : 0,
+		error: null,
+		errorUpdateCount: 0,
+		errorUpdatedAt: 0,
+		fetchFailureCount: 0,
+		fetchFailureReason: null,
+		fetchMeta: null,
+		isInvalidated: !1,
+		status: n ? `success` : `pending`,
+		fetchStatus: `idle`,
+	};
+}
+var Ke = class extends C {
+	constructor(e, t) {
+		super(),
+			(this.options = t),
+			(this.#e = e),
+			(this.#s = null),
+			(this.#o = A()),
+			this.bindMethods(),
+			this.setOptions(t);
+	}
+	#e;
+	#t = void 0;
+	#n = void 0;
+	#r = void 0;
+	#i;
+	#a;
+	#o;
+	#s;
+	#c;
+	#l;
+	#u;
+	#d;
+	#f;
+	#p;
+	#m = new Set();
+	bindMethods() {
+		this.refetch = this.refetch.bind(this);
+	}
+	onSubscribe() {
+		this.listeners.size === 1 &&
+			(this.#t.addObserver(this), Je(this.#t, this.options) ? this.#h() : this.updateResult(), this.#y());
+	}
+	onUnsubscribe() {
+		this.hasListeners() || this.destroy();
+	}
+	shouldFetchOnReconnect() {
+		return Ye(this.#t, this.options, this.options.refetchOnReconnect);
+	}
+	shouldFetchOnWindowFocus() {
+		return Ye(this.#t, this.options, this.options.refetchOnWindowFocus);
+	}
+	destroy() {
+		(this.listeners = new Set()), this.#b(), this.#x(), this.#t.removeObserver(this);
+	}
+	setOptions(e) {
+		const t = this.options,
+			n = this.#t;
+		if (
+			((this.options = this.#e.defaultQueryOptions(e)),
+			this.options.enabled !== void 0 &&
+				typeof this.options.enabled != `boolean` &&
+				typeof this.options.enabled != `function` &&
+				typeof w(this.options.enabled, this.#t) != `boolean`)
+		)
+			throw Error(`Expected enabled to be a boolean or a callback that returns a boolean`);
+		this.#S(),
+			this.#t.setOptions(this.options),
+			t._defaulted &&
+				!x(this.options, t) &&
+				this.#e.getQueryCache().notify({ type: `observerOptionsUpdated`, query: this.#t, observer: this });
+		const r = this.hasListeners();
+		r && Xe(this.#t, n, this.options, t) && this.#h(),
+			this.updateResult(),
+			r &&
+				(this.#t !== n ||
+					w(this.options.enabled, this.#t) !== w(t.enabled, this.#t) ||
+					j(this.options.staleTime, this.#t) !== j(t.staleTime, this.#t)) &&
+				this.#g();
+		const i = this.#_();
+		r && (this.#t !== n || w(this.options.enabled, this.#t) !== w(t.enabled, this.#t) || i !== this.#p) && this.#v(i);
+	}
+	getOptimisticResult(e) {
+		const t = this.#e.getQueryCache().build(this.#e, e),
+			n = this.createResult(t, e);
+		return Qe(this, n) && ((this.#r = n), (this.#a = this.options), (this.#i = this.#t.state)), n;
+	}
+	getCurrentResult() {
+		return this.#r;
+	}
+	trackResult(e, t) {
+		return new Proxy(e, {
+			get: (e, n) => (
+				this.trackProp(n),
+				t?.(n),
+				n === `promise` &&
+					(this.trackProp(`data`),
+					!this.options.experimental_prefetchInRender &&
+						this.#o.status === `pending` &&
+						this.#o.reject(Error(`experimental_prefetchInRender feature flag is not enabled`))),
+				Reflect.get(e, n)
+			),
+		});
+	}
+	trackProp(e) {
+		this.#m.add(e);
+	}
+	getCurrentQuery() {
+		return this.#t;
+	}
+	refetch({ ...e } = {}) {
+		return this.fetch({ ...e });
+	}
+	fetchOptimistic(e) {
+		const t = this.#e.defaultQueryOptions(e),
+			n = this.#e.getQueryCache().build(this.#e, t);
+		return n.fetch().then(() => this.createResult(n, t));
+	}
+	fetch(e) {
+		return this.#h({ ...e, cancelRefetch: e.cancelRefetch ?? !0 }).then(() => (this.updateResult(), this.#r));
+	}
+	#h(e) {
+		this.#S();
+		let t = this.#t.fetch(this.options, e);
+		return e?.throwOnError || (t = t.catch(D)), t;
+	}
+	#g() {
+		this.#b();
+		const e = j(this.options.staleTime, this.#t);
+		if (le || this.#r.isStale || !E(e)) return;
+		const t = te(this.#r.dataUpdatedAt, e) + 1;
+		this.#d = T.setTimeout(() => {
+			this.#r.isStale || this.updateResult();
+		}, t);
+	}
+	#_() {
+		return (
+			(typeof this.options.refetchInterval == `function`
+				? this.options.refetchInterval(this.#t)
+				: this.options.refetchInterval) ?? !1
+		);
+	}
+	#v(e) {
+		this.#x(),
+			(this.#p = e),
+			!(le || w(this.options.enabled, this.#t) === !1 || !E(this.#p) || this.#p === 0) &&
+				(this.#f = T.setInterval(() => {
+					(this.options.refetchIntervalInBackground || ae.isFocused()) && this.#h();
+				}, this.#p));
+	}
+	#y() {
+		this.#g(), this.#v(this.#_());
+	}
+	#b() {
+		this.#d &&= (T.clearTimeout(this.#d), void 0);
+	}
+	#x() {
+		this.#f &&= (T.clearInterval(this.#f), void 0);
+	}
+	createResult(e, t) {
+		let n = this.#t,
+			r = this.options,
+			i = this.#r,
+			a = this.#i,
+			o = this.#a,
+			s = e === n ? this.#n : e.state,
+			{ state: c } = e,
+			l = { ...c },
+			u = !1,
+			d;
+		if (t._optimisticResults) {
+			const i = this.hasListeners(),
+				a = !i && Je(e, t),
+				o = i && Xe(e, n, t, r);
+			(a || o) && (l = { ...l, ...Ue(c.data, e.options) }),
+				t._optimisticResults === `isRestoring` && (l.fetchStatus = `idle`);
+		}
+		let { error: f, errorUpdatedAt: p, status: m } = l;
+		d = l.data;
+		let h = !1;
+		if (t.placeholderData !== void 0 && d === void 0 && m === `pending`) {
+			let e;
+			i?.isPlaceholderData && t.placeholderData === o?.placeholderData
+				? ((e = i.data), (h = !0))
+				: (e =
+						typeof t.placeholderData == `function`
+							? t.placeholderData(this.#u?.state.data, this.#u)
+							: t.placeholderData),
+				e !== void 0 && ((m = `success`), (d = S(i?.data, e, t)), (u = !0));
+		}
+		if (t.select && d !== void 0 && !h)
+			if (i && d === a?.data && t.select === this.#c) d = this.#l;
+			else
+				try {
+					(this.#c = t.select), (d = t.select(d)), (d = S(i?.data, d, t)), (this.#l = d), (this.#s = null);
+				} catch (e) {
+					this.#s = e;
+				}
+		this.#s && ((f = this.#s), (d = this.#l), (p = Date.now()), (m = `error`));
+		const g = l.fetchStatus === `fetching`,
+			_ = m === `pending`,
+			v = m === `error`,
+			y = _ && g,
+			b = d !== void 0,
+			x = {
+				status: m,
+				fetchStatus: l.fetchStatus,
+				isPending: _,
+				isSuccess: m === `success`,
+				isError: v,
+				isInitialLoading: y,
+				isLoading: y,
+				data: d,
+				dataUpdatedAt: l.dataUpdatedAt,
+				error: f,
+				errorUpdatedAt: p,
+				failureCount: l.fetchFailureCount,
+				failureReason: l.fetchFailureReason,
+				errorUpdateCount: l.errorUpdateCount,
+				isFetched: l.dataUpdateCount > 0 || l.errorUpdateCount > 0,
+				isFetchedAfterMount: l.dataUpdateCount > s.dataUpdateCount || l.errorUpdateCount > s.errorUpdateCount,
+				isFetching: g,
+				isRefetching: g && !_,
+				isLoadingError: v && !b,
+				isPaused: l.fetchStatus === `paused`,
+				isPlaceholderData: u,
+				isRefetchError: v && b,
+				isStale: Ze(e, t),
+				refetch: this.refetch,
+				promise: this.#o,
+				isEnabled: w(t.enabled, e) !== !1,
+			};
+		if (this.options.experimental_prefetchInRender) {
+			const t = x.data !== void 0,
+				r = x.status === `error` && !t,
+				i = (e) => {
+					r ? e.reject(x.error) : t && e.resolve(x.data);
+				},
+				a = () => {
+					i((this.#o = x.promise = A()));
+				},
+				o = this.#o;
+			switch (o.status) {
+				case `pending`:
+					e.queryHash === n.queryHash && i(o);
+					break;
+				case `fulfilled`:
+					(r || x.data !== o.value) && a();
+					break;
+				case `rejected`:
+					(!r || x.error !== o.reason) && a();
+					break;
+			}
+		}
+		return x;
+	}
+	updateResult() {
+		const e = this.#r,
+			t = this.createResult(this.#t, this.options);
+		(this.#i = this.#t.state),
+			(this.#a = this.options),
+			this.#i.data !== void 0 && (this.#u = this.#t),
+			!x(t, e) &&
+				((this.#r = t),
+				this.#C({
+					listeners: (() => {
+						if (!e) return !0;
+						const { notifyOnChangeProps: t } = this.options,
+							n = typeof t == `function` ? t() : t;
+						if (n === `all` || (!n && !this.#m.size)) return !0;
+						const r = new Set(n ?? this.#m);
+						return (
+							this.options.throwOnError && r.add(`error`),
+							Object.keys(this.#r).some((t) => {
+								const n = t;
+								return this.#r[n] !== e[n] && r.has(n);
+							})
+						);
+					})(),
+				}));
+	}
+	#S() {
+		const e = this.#e.getQueryCache().build(this.#e, this.options);
+		if (e === this.#t) return;
+		const t = this.#t;
+		(this.#t = e), (this.#n = e.state), this.hasListeners() && (t?.removeObserver(this), e.addObserver(this));
+	}
+	onQueryUpdate() {
+		this.updateResult(), this.hasListeners() && this.#y();
+	}
+	#C(e) {
+		ce.batch(() => {
+			e.listeners &&
+				this.listeners.forEach((e) => {
+					e(this.#r);
+				}),
+				this.#e.getQueryCache().notify({ query: this.#t, type: `observerResultsUpdated` });
+		});
+	}
+};
+function qe(e, t) {
+	return w(t.enabled, e) !== !1 && e.state.data === void 0 && !(e.state.status === `error` && t.retryOnMount === !1);
+}
+function Je(e, t) {
+	return qe(e, t) || (e.state.data !== void 0 && Ye(e, t, t.refetchOnMount));
+}
+function Ye(e, t, n) {
+	if (w(t.enabled, e) !== !1 && j(t.staleTime, e) !== `static`) {
+		const r = typeof n == `function` ? n(e) : n;
+		return r === `always` || (r !== !1 && Ze(e, t));
+	}
+	return !1;
+}
+function Xe(e, t, n, r) {
+	return (e !== t || w(r.enabled, e) === !1) && (!n.suspense || e.state.status !== `error`) && Ze(e, n);
+}
+function Ze(e, t) {
+	return w(t.enabled, e) !== !1 && e.isStaleByTime(j(t.staleTime, e));
+}
+function Qe(e, t) {
+	return !x(e.getCurrentResult(), t);
+}
+var P = e(n(), 1),
+	$e = P.createContext(!1),
+	et = () => P.useContext($e);
+$e.Provider;
+var F = e(t(), 1);
+function tt() {
+	let e = !1;
+	return {
+		clearReset: () => {
+			e = !1;
+		},
+		reset: () => {
+			e = !0;
+		},
+		isReset: () => e,
+	};
+}
+var nt = P.createContext(tt()),
+	rt = () => P.useContext(nt),
+	it = (e, t, n) => {
+		const r =
+			n?.state.error && typeof e.throwOnError == `function` ? re(e.throwOnError, [n.state.error, n]) : e.throwOnError;
+		(e.suspense || e.experimental_prefetchInRender || r) && (t.isReset() || (e.retryOnMount = !1));
+	},
+	at = (e) => {
+		P.useEffect(() => {
+			e.clearReset();
+		}, [e]);
+	},
+	ot = ({ result: e, errorResetBoundary: t, throwOnError: n, query: r, suspense: i }) =>
+		e.isError && !t.isReset() && !e.isFetching && r && ((i && e.data === void 0) || re(n, [e.error, r])),
+	st = (e, t) => t.state.data === void 0,
+	ct = (e) => {
+		if (e.suspense) {
+			const t = 1e3,
+				n = (e) => (e === `static` ? e : Math.max(e ?? t, t)),
+				r = e.staleTime;
+			(e.staleTime = typeof r == `function` ? (...e) => n(r(...e)) : n(r)),
+				typeof e.gcTime == `number` && (e.gcTime = Math.max(e.gcTime, t));
+		}
+	},
+	lt = (e, t) => e.isLoading && e.isFetching && !t,
+	ut = (e, t) => e?.suspense && t.isPending,
+	dt = (e, t, n) =>
+		t.fetchOptimistic(e).catch(() => {
+			n.clearReset();
+		});
+function ft(e, t, n) {
+	const r = et(),
+		i = rt(),
+		a = oe(n),
+		o = a.defaultQueryOptions(e);
+	a.getDefaultOptions().queries?._experimental_beforeQuery?.(o);
+	const s = a.getQueryCache().get(o.queryHash);
+	(o._optimisticResults = r ? `isRestoring` : `optimistic`), ct(o), it(o, i, s), at(i);
+	const c = !a.getQueryCache().get(o.queryHash),
+		[l] = P.useState(() => new t(a, o)),
+		u = l.getOptimisticResult(o),
+		d = !r && e.subscribed !== !1;
+	if (
+		(P.useSyncExternalStore(
+			P.useCallback(
+				(e) => {
+					const t = d ? l.subscribe(ce.batchCalls(e)) : D;
+					return l.updateResult(), t;
+				},
+				[l, d],
+			),
+			() => l.getCurrentResult(),
+			() => l.getCurrentResult(),
+		),
+		P.useEffect(() => {
+			l.setOptions(o);
+		}, [o, l]),
+		ut(o, u))
+	)
+		throw dt(o, l, i);
+	if (ot({ result: u, errorResetBoundary: i, throwOnError: o.throwOnError, query: s, suspense: o.suspense }))
+		throw u.error;
+	return (
+		a.getDefaultOptions().queries?._experimental_afterQuery?.(o, u),
+		o.experimental_prefetchInRender &&
+			!le &&
+			lt(u, r) &&
+			(c ? dt(o, l, i) : s?.promise)?.catch(D).finally(() => {
+				l.updateResult();
+			}),
+		o.notifyOnChangeProps ? u : l.trackResult(u)
+	);
+}
+function pt(e, t) {
+	return ft(e, Ke, t);
+}
+var mt = new Map([
+		[
+			`bold`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M184.49,167.51a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-48-48a12,12,0,0,1,17-17L128,207l39.51-39.52A12,12,0,0,1,184.49,167.51Zm-96-79L128,49l39.51,39.52a12,12,0,0,0,17-17l-48-48a12,12,0,0,0-17,0l-48,48a12,12,0,0,0,17,17Z`,
+				}),
+			),
+		],
+		[
+			`duotone`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, { d: `M80,176h96l-48,48ZM128,32,80,80h96Z`, opacity: `0.2` }),
+				P.createElement(`path`, {
+					d: `M176,168H80a8,8,0,0,0-5.66,13.66l48,48a8,8,0,0,0,11.32,0l48-48A8,8,0,0,0,176,168Zm-48,44.69L99.31,184h57.38ZM80,88h96a8,8,0,0,0,5.66-13.66l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,80,88Zm48-44.69L156.69,72H99.31Z`,
+				}),
+			),
+		],
+		[
+			`fill`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M72.61,83.06a8,8,0,0,1,1.73-8.72l48-48a8,8,0,0,1,11.32,0l48,48A8,8,0,0,1,176,88H80A8,8,0,0,1,72.61,83.06ZM176,168H80a8,8,0,0,0-5.66,13.66l48,48a8,8,0,0,0,11.32,0l48-48A8,8,0,0,0,176,168Z`,
+				}),
+			),
+		],
+		[
+			`light`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M180.24,171.76a6,6,0,0,1,0,8.48l-48,48a6,6,0,0,1-8.48,0l-48-48a6,6,0,0,1,8.48-8.48L128,215.51l43.76-43.75A6,6,0,0,1,180.24,171.76Zm-96-87.52L128,40.49l43.76,43.75a6,6,0,0,0,8.48-8.48l-48-48a6,6,0,0,0-8.48,0l-48,48a6,6,0,0,0,8.48,8.48Z`,
+				}),
+			),
+		],
+		[
+			`regular`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z`,
+				}),
+			),
+		],
+		[
+			`thin`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M178.83,173.17a4,4,0,0,1,0,5.66l-48,48a4,4,0,0,1-5.66,0l-48-48a4,4,0,0,1,5.66-5.66L128,218.34l45.17-45.17A4,4,0,0,1,178.83,173.17Zm-96-90.34L128,37.66l45.17,45.17a4,4,0,1,0,5.66-5.66l-48-48a4,4,0,0,0-5.66,0l-48,48a4,4,0,0,0,5.66,5.66Z`,
+				}),
+			),
+		],
+	]),
+	ht = new Map([
+		[
+			`bold`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z`,
+				}),
+			),
+		],
+		[
+			`duotone`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, { d: `M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z`, opacity: `0.2` }),
+				P.createElement(`path`, {
+					d: `M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z`,
+				}),
+			),
+		],
+		[
+			`fill`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M168,112a56,56,0,1,1-56-56A56,56,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88,88,0,1,1,11.32-11.31l50.06,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z`,
+				}),
+			),
+		],
+		[
+			`light`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M228.24,219.76l-51.38-51.38a86.15,86.15,0,1,0-8.48,8.48l51.38,51.38a6,6,0,0,0,8.48-8.48ZM38,112a74,74,0,1,1,74,74A74.09,74.09,0,0,1,38,112Z`,
+				}),
+			),
+		],
+		[
+			`regular`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z`,
+				}),
+			),
+		],
+		[
+			`thin`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M226.83,221.17l-52.7-52.7a84.1,84.1,0,1,0-5.66,5.66l52.7,52.7a4,4,0,0,0,5.66-5.66ZM36,112a76,76,0,1,1,76,76A76.08,76.08,0,0,1,36,112Z`,
+				}),
+			),
+		],
+	]),
+	gt = new Map([
+		[
+			`bold`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M230.15,70.54,185.46,25.86a20,20,0,0,0-28.28,0L33.86,149.17A19.86,19.86,0,0,0,28,163.31V208a20,20,0,0,0,20,20H216a12,12,0,0,0,0-24H125L230.15,98.83A20,20,0,0,0,230.15,70.54ZM91,204H52V165l84-84,39,39ZM192,103,153,64l18.34-18.34,39,39Z`,
+				}),
+			),
+		],
+		[
+			`duotone`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M221.66,90.34,192,120,136,64l29.66-29.66a8,8,0,0,1,11.31,0L221.66,79A8,8,0,0,1,221.66,90.34Z`,
+					opacity: `0.2`,
+				}),
+				P.createElement(`path`, {
+					d: `M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM48,163.31l88-88L180.69,120l-88,88H48Zm144-54.62L147.32,64l24-24L216,84.69Z`,
+				}),
+			),
+		],
+		[
+			`fill`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM192,108.69,147.32,64l24-24L216,84.69Z`,
+				}),
+			),
+		],
+		[
+			`light`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M225.91,74.79,181.22,30.1a14,14,0,0,0-19.8,0L38.1,153.41a13.94,13.94,0,0,0-4.1,9.9V208a14,14,0,0,0,14,14H216a6,6,0,0,0,0-12H110.49L225.91,94.59A14,14,0,0,0,225.91,74.79ZM93.52,210H48a2,2,0,0,1-2-2V163.31a2,2,0,0,1,.59-1.41L136,72.49,183.52,120ZM217.42,86.1,192,111.52,144.49,64,169.9,38.59a2,2,0,0,1,2.83,0l44.69,44.68A2,2,0,0,1,217.42,86.1Z`,
+				}),
+			),
+		],
+		[
+			`regular`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z`,
+				}),
+			),
+		],
+		[
+			`thin`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M224.49,76.2,179.8,31.51a12,12,0,0,0-17,0L39.51,154.83A12,12,0,0,0,36,163.31V208a12,12,0,0,0,12,12H216a4,4,0,0,0,0-8H105.66L224.49,93.17A12,12,0,0,0,224.49,76.2ZM94.34,212H48a4,4,0,0,1-4-4V163.31a4,4,0,0,1,1.17-2.82L136,69.66,186.35,120ZM218.83,87.51,192,114.34,141.66,64l26.83-26.83a4,4,0,0,1,5.66,0l44.68,44.69A4,4,0,0,1,218.83,87.51Z`,
+				}),
+			),
+		],
+	]),
+	_t = new Map([
+		[
+			`bold`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M228,128a12,12,0,0,1-12,12H140v76a12,12,0,0,1-24,0V140H40a12,12,0,0,1,0-24h76V40a12,12,0,0,1,24,0v76h76A12,12,0,0,1,228,128Z`,
+				}),
+			),
+		],
+		[
+			`duotone`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M216,56V200a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V56A16,16,0,0,1,56,40H200A16,16,0,0,1,216,56Z`,
+					opacity: `0.2`,
+				}),
+				P.createElement(`path`, {
+					d: `M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z`,
+				}),
+			),
+		],
+		[
+			`fill`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM184,136H136v48a8,8,0,0,1-16,0V136H72a8,8,0,0,1,0-16h48V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z`,
+				}),
+			),
+		],
+		[
+			`light`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M222,128a6,6,0,0,1-6,6H134v82a6,6,0,0,1-12,0V134H40a6,6,0,0,1,0-12h82V40a6,6,0,0,1,12,0v82h82A6,6,0,0,1,222,128Z`,
+				}),
+			),
+		],
+		[
+			`regular`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z`,
+				}),
+			),
+		],
+		[
+			`thin`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M220,128a4,4,0,0,1-4,4H132v84a4,4,0,0,1-8,0V132H40a4,4,0,0,1,0-8h84V40a4,4,0,0,1,8,0v84h84A4,4,0,0,1,220,128Z`,
+				}),
+			),
+		],
+	]),
+	vt = new Map([
+		[
+			`bold`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M246.15,133.18,146.83,33.86A19.85,19.85,0,0,0,132.69,28H40A12,12,0,0,0,28,40v92.69a19.85,19.85,0,0,0,5.86,14.14l99.32,99.32a20,20,0,0,0,28.28,0l84.69-84.69A20,20,0,0,0,246.15,133.18Zm-98.83,93.17L52,131V52h79l95.32,95.32ZM104,88A16,16,0,1,1,88,72,16,16,0,0,1,104,88Z`,
+				}),
+			),
+		],
+		[
+			`duotone`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M237.66,153,153,237.66a8,8,0,0,1-11.31,0L42.34,138.34A8,8,0,0,1,40,132.69V40h92.69a8,8,0,0,1,5.65,2.34l99.32,99.32A8,8,0,0,1,237.66,153Z`,
+					opacity: `0.2`,
+				}),
+				P.createElement(`path`, {
+					d: `M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63Zm-96,96L48,132.69V48h84.69L232,147.31ZM96,84A12,12,0,1,1,84,72,12,12,0,0,1,96,84Z`,
+				}),
+			),
+		],
+		[
+			`fill`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z`,
+				}),
+			),
+		],
+		[
+			`light`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M241.91,137.42,142.59,38.1a13.94,13.94,0,0,0-9.9-4.1H40a6,6,0,0,0-6,6v92.69a13.94,13.94,0,0,0,4.1,9.9l99.32,99.32a14,14,0,0,0,19.8,0l84.69-84.69A14,14,0,0,0,241.91,137.42Zm-8.49,11.31-84.69,84.69a2,2,0,0,1-2.83,0L46.59,134.1a2,2,0,0,1-.59-1.41V46h86.69a2,2,0,0,1,1.41.59l99.32,99.31A2,2,0,0,1,233.42,148.73ZM94,84A10,10,0,1,1,84,74,10,10,0,0,1,94,84Z`,
+				}),
+			),
+		],
+		[
+			`regular`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63Zm-96,96L48,132.69V48h84.69L232,147.31ZM96,84A12,12,0,1,1,84,72,12,12,0,0,1,96,84Z`,
+				}),
+			),
+		],
+		[
+			`thin`,
+			P.createElement(
+				P.Fragment,
+				null,
+				P.createElement(`path`, {
+					d: `M240.49,138.83,141.17,39.51A11.93,11.93,0,0,0,132.69,36H40a4,4,0,0,0-4,4v92.69a11.93,11.93,0,0,0,3.51,8.48l99.32,99.32a12,12,0,0,0,17,0l84.69-84.69a12,12,0,0,0,0-17Zm-5.66,11.31-84.69,84.69a4,4,0,0,1-5.65,0L45.17,135.51A4,4,0,0,1,44,132.69V44h88.69a4,4,0,0,1,2.82,1.17l99.32,99.32A4,4,0,0,1,234.83,150.14ZM92,84a8,8,0,1,1-8-8A8,8,0,0,1,92,84Z`,
+				}),
+			),
+		],
+	]),
+	yt = P.forwardRef((e, t) => P.createElement(u, { ref: t, ...e, weights: mt }));
+yt.displayName = `CaretUpDownIcon`;
+var bt = P.forwardRef((e, t) => P.createElement(u, { ref: t, ...e, weights: ht }));
+bt.displayName = `MagnifyingGlassIcon`;
+var xt = P.forwardRef((e, t) => P.createElement(u, { ref: t, ...e, weights: gt }));
+xt.displayName = `PencilSimpleLineIcon`;
+var St = P.forwardRef((e, t) => P.createElement(u, { ref: t, ...e, weights: _t }));
+St.displayName = `PlusIcon`;
+var Ct = P.forwardRef((e, t) => P.createElement(u, { ref: t, ...e, weights: vt }));
+Ct.displayName = `TagIcon`;
+function wt(...e) {
+	const t = !Array.isArray(e[0]),
+		n = t ? 0 : -1,
+		r = e[0 + n],
+		i = e[1 + n],
+		a = e[2 + n],
+		o = e[3 + n],
+		s = b(i, a, o);
+	return t ? s(r) : s;
+}
+function Tt(e) {
+	const t = d(() => l(e)),
+		{ isStatic: n } = (0, P.useContext)(f);
+	if (n) {
+		const [, n] = (0, P.useState)(e);
+		(0, P.useEffect)(() => t.on(`change`, n), []);
+	}
+	return t;
+}
+function Et(e, t) {
+	const n = Tt(t()),
+		r = () => n.set(t());
+	return (
+		r(),
+		s(() => {
+			const t = () => c.preRender(r, !1, !0),
+				n = e.map((e) => e.on(`change`, t));
+			return () => {
+				n.forEach((e) => e()), h(r);
+			};
+		}),
+		n
+	);
+}
+function Dt(e) {
+	(o.current = []), e();
+	const t = Et(o.current, e);
+	return (o.current = void 0), t;
+}
+function Ot(e, t, n, r) {
+	if (typeof e == `function`) return Dt(e);
+	if (n !== void 0 && !Array.isArray(n) && typeof t != `function`) return At(e, t, n, r);
+	const i = typeof t == `function` ? t : wt(t, n, r),
+		a = Array.isArray(e) ? kt(e, i) : kt([e], ([e]) => i(e)),
+		o = Array.isArray(e) ? void 0 : e.accelerate;
+	return (
+		o &&
+			!o.isTransformed &&
+			typeof t != `function` &&
+			Array.isArray(n) &&
+			r?.clamp !== !1 &&
+			(a.accelerate = { ...o, times: t, keyframes: n, isTransformed: !0, ...(r?.ease ? { ease: r.ease } : {}) }),
+		a
+	);
+}
+function kt(e, t) {
+	const n = d(() => []);
+	return Et(e, () => {
+		n.length = 0;
+		const r = e.length;
+		for (let t = 0; t < r; t++) n[t] = e[t].get();
+		return t(n);
+	});
+}
+function At(e, t, n, r) {
+	const i = d(() => Object.keys(n)),
+		a = d(() => ({}));
+	for (const o of i) a[o] = Ot(e, t, n[o], r);
+	return a;
+}
+var jt = `Popover`,
+	[Mt, Nt] = he(jt, [Le]),
+	I = Le(),
+	[Pt, L] = Mt(jt),
+	Ft = (e) => {
+		const { __scopePopover: t, children: n, open: r, defaultOpen: i, onOpenChange: a, modal: o = !1 } = e,
+			s = I(t),
+			c = P.useRef(null),
+			[l, u] = P.useState(!1),
+			[d, f] = me({ prop: r, defaultProp: i ?? !1, onChange: a, caller: jt });
+		return (0, F.jsx)(Re, {
+			...s,
+			children: (0, F.jsx)(Pt, {
+				scope: t,
+				contentId: N(),
+				triggerRef: c,
+				open: d,
+				onOpenChange: f,
+				onOpenToggle: P.useCallback(() => f((e) => !e), [f]),
+				hasCustomAnchor: l,
+				onCustomAnchorAdd: P.useCallback(() => u(!0), []),
+				onCustomAnchorRemove: P.useCallback(() => u(!1), []),
+				modal: o,
+				children: n,
+			}),
+		});
+	};
+Ft.displayName = jt;
+var It = `PopoverAnchor`,
+	Lt = P.forwardRef((e, t) => {
+		const { __scopePopover: n, ...r } = e,
+			i = L(It, n),
+			a = I(n),
+			{ onCustomAnchorAdd: o, onCustomAnchorRemove: s } = i;
+		return P.useEffect(() => (o(), () => s()), [o, s]), (0, F.jsx)(Ve, { ...a, ...r, ref: t });
+	});
+Lt.displayName = It;
+var Rt = `PopoverTrigger`,
+	zt = P.forwardRef((e, t) => {
+		const { __scopePopover: n, ...r } = e,
+			i = L(Rt, n),
+			a = I(n),
+			o = m(t, i.triggerRef),
+			s = (0, F.jsx)(y.button, {
+				type: `button`,
+				"aria-haspopup": `dialog`,
+				"aria-expanded": i.open,
+				"aria-controls": i.contentId,
+				"data-state": $t(i.open),
+				...r,
+				ref: o,
+				onClick: M(e.onClick, i.onOpenToggle),
+			});
+		return i.hasCustomAnchor ? s : (0, F.jsx)(Ve, { asChild: !0, ...a, children: s });
+	});
+zt.displayName = Rt;
+var Bt = `PopoverPortal`,
+	[Vt, Ht] = Mt(Bt, { forceMount: void 0 }),
+	Ut = (e) => {
+		const { __scopePopover: t, forceMount: n, children: r, container: i } = e,
+			a = L(Bt, t);
+		return (0, F.jsx)(Vt, {
+			scope: t,
+			forceMount: n,
+			children: (0, F.jsx)(ge, {
+				present: n || a.open,
+				children: (0, F.jsx)(_e, { asChild: !0, container: i, children: r }),
+			}),
+		});
+	};
+Ut.displayName = Bt;
+var R = `PopoverContent`,
+	Wt = P.forwardRef((e, t) => {
+		const n = Ht(R, e.__scopePopover),
+			{ forceMount: r = n.forceMount, ...i } = e,
+			a = L(R, e.__scopePopover);
+		return (0, F.jsx)(ge, {
+			present: r || a.open,
+			children: a.modal ? (0, F.jsx)(Kt, { ...i, ref: t }) : (0, F.jsx)(qt, { ...i, ref: t }),
+		});
+	});
+Wt.displayName = R;
+var Gt = p(`PopoverContent.RemoveScroll`),
+	Kt = P.forwardRef((e, t) => {
+		const n = L(R, e.__scopePopover),
+			r = P.useRef(null),
+			i = m(t, r),
+			a = P.useRef(!1);
+		return (
+			P.useEffect(() => {
+				const e = r.current;
+				if (e) return be(e);
+			}, []),
+			(0, F.jsx)(ye, {
+				as: Gt,
+				allowPinchZoom: !0,
+				children: (0, F.jsx)(Jt, {
+					...e,
+					ref: i,
+					trapFocus: n.open,
+					disableOutsidePointerEvents: !0,
+					onCloseAutoFocus: M(e.onCloseAutoFocus, (e) => {
+						e.preventDefault(), a.current || n.triggerRef.current?.focus();
+					}),
+					onPointerDownOutside: M(
+						e.onPointerDownOutside,
+						(e) => {
+							const t = e.detail.originalEvent,
+								n = t.button === 0 && t.ctrlKey === !0;
+							a.current = t.button === 2 || n;
+						},
+						{ checkForDefaultPrevented: !1 },
+					),
+					onFocusOutside: M(e.onFocusOutside, (e) => e.preventDefault(), { checkForDefaultPrevented: !1 }),
+				}),
+			})
+		);
+	}),
+	qt = P.forwardRef((e, t) => {
+		const n = L(R, e.__scopePopover),
+			r = P.useRef(!1),
+			i = P.useRef(!1);
+		return (0, F.jsx)(Jt, {
+			...e,
+			ref: t,
+			trapFocus: !1,
+			disableOutsidePointerEvents: !1,
+			onCloseAutoFocus: (t) => {
+				e.onCloseAutoFocus?.(t),
+					t.defaultPrevented || (r.current || n.triggerRef.current?.focus(), t.preventDefault()),
+					(r.current = !1),
+					(i.current = !1);
+			},
+			onInteractOutside: (t) => {
+				e.onInteractOutside?.(t),
+					t.defaultPrevented || ((r.current = !0), t.detail.originalEvent.type === `pointerdown` && (i.current = !0));
+				const a = t.target;
+				n.triggerRef.current?.contains(a) && t.preventDefault(),
+					t.detail.originalEvent.type === `focusin` && i.current && t.preventDefault();
+			},
+		});
+	}),
+	Jt = P.forwardRef((e, t) => {
+		const {
+				__scopePopover: n,
+				trapFocus: r,
+				onOpenAutoFocus: i,
+				onCloseAutoFocus: a,
+				disableOutsidePointerEvents: o,
+				onEscapeKeyDown: s,
+				onPointerDownOutside: c,
+				onFocusOutside: l,
+				onInteractOutside: u,
+				...d
+			} = e,
+			f = L(R, n),
+			p = I(n);
+		return (
+			ve(),
+			(0, F.jsx)(Se, {
+				asChild: !0,
+				loop: !0,
+				trapped: r,
+				onMountAutoFocus: i,
+				onUnmountAutoFocus: a,
+				children: (0, F.jsx)(Ce, {
+					asChild: !0,
+					disableOutsidePointerEvents: o,
+					onInteractOutside: u,
+					onEscapeKeyDown: s,
+					onPointerDownOutside: c,
+					onFocusOutside: l,
+					onDismiss: () => f.onOpenChange(!1),
+					children: (0, F.jsx)(Be, {
+						"data-state": $t(f.open),
+						role: `dialog`,
+						id: f.contentId,
+						...p,
+						...d,
+						ref: t,
+						style: {
+							...d.style,
+							"--radix-popover-content-transform-origin": `var(--radix-popper-transform-origin)`,
+							"--radix-popover-content-available-width": `var(--radix-popper-available-width)`,
+							"--radix-popover-content-available-height": `var(--radix-popper-available-height)`,
+							"--radix-popover-trigger-width": `var(--radix-popper-anchor-width)`,
+							"--radix-popover-trigger-height": `var(--radix-popper-anchor-height)`,
+						},
+					}),
+				}),
+			})
+		);
+	}),
+	Yt = `PopoverClose`,
+	Xt = P.forwardRef((e, t) => {
+		const { __scopePopover: n, ...r } = e,
+			i = L(Yt, n);
+		return (0, F.jsx)(y.button, { type: `button`, ...r, ref: t, onClick: M(e.onClick, () => i.onOpenChange(!1)) });
+	});
+Xt.displayName = Yt;
+var Zt = `PopoverArrow`,
+	Qt = P.forwardRef((e, t) => {
+		const { __scopePopover: n, ...r } = e,
+			i = I(n);
+		return (0, F.jsx)(ze, { ...i, ...r, ref: t });
+	});
+Qt.displayName = Zt;
+function $t(e) {
+	return e ? `open` : `closed`;
+}
+var en = Ft,
+	tn = zt,
+	nn = Ut,
+	rn = Wt,
+	an = 1,
+	on = 0.9,
+	sn = 0.8,
+	cn = 0.17,
+	ln = 0.1,
+	un = 0.999,
+	dn = 0.9999,
+	fn = 0.99,
+	pn = /[\\/_+.#"@[({&]/,
+	mn = /[\\/_+.#"@[({&]/g,
+	hn = /[\s-]/,
+	gn = /[\s-]/g;
+function _n(e, t, n, r, i, a, o) {
+	if (a === t.length) return i === e.length ? an : fn;
+	var s = `${i},${a}`;
+	if (o[s] !== void 0) return o[s];
+	for (var c = r.charAt(a), l = n.indexOf(c, i), u = 0, d, f, p, m; l >= 0; )
+		(d = _n(e, t, n, r, l + 1, a + 1, o)),
+			d > u &&
+				(l === i
+					? (d *= an)
+					: pn.test(e.charAt(l - 1))
+						? ((d *= sn), (p = e.slice(i, l - 1).match(mn)), p && i > 0 && (d *= un ** +p.length))
+						: hn.test(e.charAt(l - 1))
+							? ((d *= on), (m = e.slice(i, l - 1).match(gn)), m && i > 0 && (d *= un ** +m.length))
+							: ((d *= cn), i > 0 && (d *= un ** +(l - i))),
+				e.charAt(l) !== t.charAt(a) && (d *= dn)),
+			((d < ln && n.charAt(l - 1) === r.charAt(a + 1)) ||
+				(r.charAt(a + 1) === r.charAt(a) && n.charAt(l - 1) !== r.charAt(a))) &&
+				((f = _n(e, t, n, r, l + 1, a + 2, o)), f * ln > d && (d = f * ln)),
+			d > u && (u = d),
+			(l = n.indexOf(c, l + 1));
+	return (o[s] = u), u;
+}
+function vn(e) {
+	return e.toLowerCase().replace(gn, ` `);
+}
+function yn(e, t, n) {
+	return (e = n && n.length > 0 ? `${e + ` ` + n.join(` `)}` : e), _n(e, t, vn(e), vn(t), 0, 0, {});
+}
+var bn = Symbol.for(`react.lazy`),
+	xn = P.use;
+function Sn(e) {
+	return typeof e == `object` && !!e && `then` in e;
+}
+function Cn(e) {
+	return typeof e == `object` && !!e && `$$typeof` in e && e.$$typeof === bn && `_payload` in e && Sn(e._payload);
+}
+function wn(e) {
+	const t = Tn(e),
+		n = P.forwardRef((e, n) => {
+			let { children: r, ...i } = e;
+			Cn(r) && typeof xn == `function` && (r = xn(r._payload));
+			const a = P.Children.toArray(r),
+				o = a.find(Dn);
+			if (o) {
+				const e = o.props.children,
+					r = a.map((t) =>
+						t === o
+							? P.Children.count(e) > 1
+								? P.Children.only(null)
+								: P.isValidElement(e)
+									? e.props.children
+									: null
+							: t,
+					);
+				return (0, F.jsx)(t, { ...i, ref: n, children: P.isValidElement(e) ? P.cloneElement(e, void 0, r) : null });
+			}
+			return (0, F.jsx)(t, { ...i, ref: n, children: r });
+		});
+	return (n.displayName = `${e}.Slot`), n;
+}
+function Tn(e) {
+	const t = P.forwardRef((e, t) => {
+		let { children: n, ...r } = e;
+		if ((Cn(n) && typeof xn == `function` && (n = xn(n._payload)), P.isValidElement(n))) {
+			const e = kn(n),
+				i = On(r, n.props);
+			return n.type !== P.Fragment && (i.ref = t ? _(t, e) : e), P.cloneElement(n, i);
+		}
+		return P.Children.count(n) > 1 ? P.Children.only(null) : null;
+	});
+	return (t.displayName = `${e}.SlotClone`), t;
+}
+var En = Symbol(`radix.slottable`);
+function Dn(e) {
+	return P.isValidElement(e) && typeof e.type == `function` && `__radixId` in e.type && e.type.__radixId === En;
+}
+function On(e, t) {
+	const n = { ...t };
+	for (const r in t) {
+		const i = e[r],
+			a = t[r];
+		/^on[A-Z]/.test(r)
+			? i && a
+				? (n[r] = (...e) => {
+						const t = a(...e);
+						return i(...e), t;
+					})
+				: i && (n[r] = i)
+			: r === `style`
+				? (n[r] = { ...i, ...a })
+				: r === `className` && (n[r] = [i, a].filter(Boolean).join(` `));
+	}
+	return { ...e, ...n };
+}
+function kn(e) {
+	let t = Object.getOwnPropertyDescriptor(e.props, `ref`)?.get,
+		n = t && `isReactWarning` in t && t.isReactWarning;
+	return n
+		? e.ref
+		: ((t = Object.getOwnPropertyDescriptor(e, `ref`)?.get),
+			(n = t && `isReactWarning` in t && t.isReactWarning),
+			n ? e.props.ref : e.props.ref || e.ref);
+}
+r();
+var z = [
+		`a`,
+		`button`,
+		`div`,
+		`form`,
+		`h2`,
+		`h3`,
+		`img`,
+		`input`,
+		`label`,
+		`li`,
+		`nav`,
+		`ol`,
+		`p`,
+		`select`,
+		`span`,
+		`svg`,
+		`ul`,
+	].reduce((e, t) => {
+		const n = wn(`Primitive.${t}`),
+			r = P.forwardRef((e, r) => {
+				const { asChild: i, ...a } = e,
+					o = i ? n : t;
+				return typeof window < `u` && (window[Symbol.for(`radix-ui`)] = !0), (0, F.jsx)(o, { ...a, ref: r });
+			});
+		return (r.displayName = `Primitive.${t}`), { ...e, [t]: r };
+	}, {}),
+	B = `[cmdk-group=""]`,
+	An = `[cmdk-group-items=""]`,
+	jn = `[cmdk-group-heading=""]`,
+	Mn = `[cmdk-item=""]`,
+	Nn = `${Mn}:not([aria-disabled="true"])`,
+	Pn = `cmdk-item-select`,
+	V = `data-value`,
+	Fn = (e, t, n) => yn(e, t, n),
+	In = P.createContext(void 0),
+	H = () => P.useContext(In),
+	Ln = P.createContext(void 0),
+	Rn = () => P.useContext(Ln),
+	zn = P.createContext(void 0),
+	Bn = P.forwardRef((e, t) => {
+		const n = G(() => ({
+				search: ``,
+				value: e.value ?? e.defaultValue ?? ``,
+				selectedItemId: void 0,
+				filtered: { count: 0, items: new Map(), groups: new Set() },
+			})),
+			r = G(() => new Set()),
+			i = G(() => new Map()),
+			a = G(() => new Map()),
+			o = G(() => new Set()),
+			s = Zn(e),
+			{
+				label: c,
+				children: l,
+				value: u,
+				onValueChange: d,
+				filter: f,
+				shouldFilter: p,
+				loop: m,
+				disablePointerSelection: h = !1,
+				vimBindings: g = !0,
+				..._
+			} = e,
+			v = N(),
+			y = N(),
+			b = N(),
+			x = P.useRef(null),
+			S = $n();
+		W(() => {
+			if (u !== void 0) {
+				const e = u.trim();
+				(n.current.value = e), C.emit();
+			}
+		}, [u]),
+			W(() => {
+				S(6, D);
+			}, []);
+		const C = P.useMemo(
+				() => ({
+					subscribe: (e) => (o.current.add(e), () => o.current.delete(e)),
+					snapshot: () => n.current,
+					setState: (e, t, r) => {
+						var i, a, o;
+						if (!Object.is(n.current[e], t)) {
+							if (((n.current[e] = t), e === `search`)) E(), w(), S(1, T);
+							else if (e === `value`) {
+								if (
+									document.activeElement.hasAttribute(`cmdk-input`) ||
+									document.activeElement.hasAttribute(`cmdk-root`)
+								) {
+									const e = document.getElementById(b);
+									e ? e.focus() : (i = document.getElementById(v)) == null || i.focus();
+								}
+								if (
+									(S(7, () => {
+										(n.current.selectedItemId = O()?.id), C.emit();
+									}),
+									r || S(5, D),
+									s.current?.value !== void 0)
+								) {
+									const e = t ?? ``;
+									(o = (a = s.current).onValueChange) == null || o.call(a, e);
+									return;
+								}
+							}
+							C.emit();
+						}
+					},
+					emit: () => {
+						o.current.forEach((e) => e());
+					},
+				}),
+				[],
+			),
+			ee = P.useMemo(
+				() => ({
+					value: (e, t, r) => {
+						t !== a.current.get(e)?.value &&
+							(a.current.set(e, { value: t, keywords: r }),
+							n.current.filtered.items.set(e, te(t, r)),
+							S(2, () => {
+								w(), C.emit();
+							}));
+					},
+					item: (e, t) => (
+						r.current.add(e),
+						t && (i.current.has(t) ? i.current.get(t).add(e) : i.current.set(t, new Set([e]))),
+						S(3, () => {
+							E(), w(), n.current.value || T(), C.emit();
+						}),
+						() => {
+							a.current.delete(e), r.current.delete(e), n.current.filtered.items.delete(e);
+							const t = O();
+							S(4, () => {
+								E(), t?.getAttribute(`id`) === e && T(), C.emit();
+							});
+						}
+					),
+					group: (e) => (
+						i.current.has(e) || i.current.set(e, new Set()),
+						() => {
+							a.current.delete(e), i.current.delete(e);
+						}
+					),
+					filter: () => s.current.shouldFilter,
+					label: c || e[`aria-label`],
+					getDisablePointerSelection: () => s.current.disablePointerSelection,
+					listId: v,
+					inputId: b,
+					labelId: y,
+					listInnerRef: x,
+				}),
+				[],
+			);
+		function te(e, t) {
+			const r = s.current?.filter ?? Fn;
+			return e ? r(e, n.current.search, t) : 0;
+		}
+		function w() {
+			if (!n.current.search || s.current.shouldFilter === !1) return;
+			const e = n.current.filtered.items,
+				t = [];
+			n.current.filtered.groups.forEach((n) => {
+				let r = i.current.get(n),
+					a = 0;
+				r.forEach((t) => {
+					const n = e.get(t);
+					a = Math.max(n, a);
+				}),
+					t.push([n, a]);
+			});
+			const r = x.current;
+			k()
+				.sort((t, n) => {
+					const r = t.getAttribute(`id`),
+						i = n.getAttribute(`id`);
+					return (e.get(i) ?? 0) - (e.get(r) ?? 0);
+				})
+				.forEach((e) => {
+					const t = e.closest(An);
+					t
+						? t.appendChild(e.parentElement === t ? e : e.closest(`${An} > *`))
+						: r.appendChild(e.parentElement === r ? e : e.closest(`${An} > *`));
+				}),
+				t
+					.sort((e, t) => t[1] - e[1])
+					.forEach((e) => {
+						const t = x.current?.querySelector(`${B}[${V}="${encodeURIComponent(e[0])}"]`);
+						t?.parentElement.appendChild(t);
+					});
+		}
+		function T() {
+			const e = k()
+				.find((e) => e.getAttribute(`aria-disabled`) !== `true`)
+				?.getAttribute(V);
+			C.setState(`value`, e || void 0);
+		}
+		function E() {
+			if (!n.current.search || s.current.shouldFilter === !1) {
+				n.current.filtered.count = r.current.size;
+				return;
+			}
+			n.current.filtered.groups = new Set();
+			let e = 0;
+			for (const t of r.current) {
+				const r = te(a.current.get(t)?.value ?? ``, a.current.get(t)?.keywords ?? []);
+				n.current.filtered.items.set(t, r), r > 0 && e++;
+			}
+			for (const [e, t] of i.current)
+				for (const r of t)
+					if (n.current.filtered.items.get(r) > 0) {
+						n.current.filtered.groups.add(e);
+						break;
+					}
+			n.current.filtered.count = e;
+		}
+		function D() {
+			var e;
+			const t = O();
+			t &&
+				(t.parentElement?.firstChild === t &&
+					((e = t.closest(B)?.querySelector(jn)) == null || e.scrollIntoView({ block: `nearest` })),
+				t.scrollIntoView({ block: `nearest` }));
+		}
+		function O() {
+			return x.current?.querySelector(`${Mn}[aria-selected="true"]`);
+		}
+		function k() {
+			return Array.from(x.current?.querySelectorAll(Nn) || []);
+		}
+		function ne(e) {
+			const t = k()[e];
+			t && C.setState(`value`, t.getAttribute(V));
+		}
+		function A(e) {
+			var t;
+			let n = O(),
+				r = k(),
+				i = r.findIndex((e) => e === n),
+				a = r[i + e];
+			(t = s.current) != null && t.loop && (a = i + e < 0 ? r[r.length - 1] : i + e === r.length ? r[0] : r[i + e]),
+				a && C.setState(`value`, a.getAttribute(V));
+		}
+		function re(e) {
+			let t = O()?.closest(B),
+				n;
+			for (; t && !n; ) (t = e > 0 ? Yn(t, B) : Xn(t, B)), (n = t?.querySelector(Nn));
+			n ? C.setState(`value`, n.getAttribute(V)) : A(e);
+		}
+		const j = () => ne(k().length - 1),
+			ie = (e) => {
+				e.preventDefault(), e.metaKey ? j() : e.altKey ? re(1) : A(1);
+			},
+			ae = (e) => {
+				e.preventDefault(), e.metaKey ? ne(0) : e.altKey ? re(-1) : A(-1);
+			};
+		return P.createElement(
+			z.div,
+			{
+				ref: t,
+				tabIndex: -1,
+				..._,
+				"cmdk-root": ``,
+				onKeyDown: (e) => {
+					var t;
+					(t = _.onKeyDown) == null || t.call(_, e);
+					const n = e.nativeEvent.isComposing || e.keyCode === 229;
+					if (!(e.defaultPrevented || n))
+						switch (e.key) {
+							case `n`:
+							case `j`:
+								g && e.ctrlKey && ie(e);
+								break;
+							case `ArrowDown`:
+								ie(e);
+								break;
+							case `p`:
+							case `k`:
+								g && e.ctrlKey && ae(e);
+								break;
+							case `ArrowUp`:
+								ae(e);
+								break;
+							case `Home`:
+								e.preventDefault(), ne(0);
+								break;
+							case `End`:
+								e.preventDefault(), j();
+								break;
+							case `Enter`: {
+								e.preventDefault();
+								const t = O();
+								if (t) {
+									const e = new Event(Pn);
+									t.dispatchEvent(e);
+								}
+							}
+						}
+				},
+			},
+			P.createElement(`label`, { "cmdk-label": ``, htmlFor: ee.inputId, id: ee.labelId, style: nr }, c),
+			tr(e, (e) => P.createElement(Ln.Provider, { value: C }, P.createElement(In.Provider, { value: ee }, e))),
+		);
+	}),
+	Vn = P.forwardRef((e, t) => {
+		const n = N(),
+			r = P.useRef(null),
+			i = P.useContext(zn),
+			a = H(),
+			o = Zn(e),
+			s = o.current?.forceMount ?? i?.forceMount;
+		W(() => {
+			if (!s) return a.item(n, i?.id);
+		}, [s]);
+		const c = Qn(n, r, [e.value, e.children, r], e.keywords),
+			l = Rn(),
+			u = K((e) => e.value && e.value === c.current),
+			d = K((e) => (s || a.filter() === !1 ? !0 : e.search ? e.filtered.items.get(n) > 0 : !0));
+		P.useEffect(() => {
+			const t = r.current;
+			if (!(!t || e.disabled)) return t.addEventListener(Pn, f), () => t.removeEventListener(Pn, f);
+		}, [d, e.onSelect, e.disabled]);
+		function f() {
+			var e, t;
+			p(), (t = (e = o.current).onSelect) == null || t.call(e, c.current);
+		}
+		function p() {
+			l.setState(`value`, c.current, !0);
+		}
+		if (!d) return null;
+		const { disabled: m, value: h, onSelect: g, forceMount: v, keywords: y, ...b } = e;
+		return P.createElement(
+			z.div,
+			{
+				ref: _(r, t),
+				...b,
+				id: n,
+				"cmdk-item": ``,
+				role: `option`,
+				"aria-disabled": !!m,
+				"aria-selected": !!u,
+				"data-disabled": !!m,
+				"data-selected": !!u,
+				onPointerMove: m || a.getDisablePointerSelection() ? void 0 : p,
+				onClick: m ? void 0 : f,
+			},
+			e.children,
+		);
+	}),
+	Hn = P.forwardRef((e, t) => {
+		const { heading: n, children: r, forceMount: i, ...a } = e,
+			o = N(),
+			s = P.useRef(null),
+			c = P.useRef(null),
+			l = N(),
+			u = H(),
+			d = K((e) => (i || u.filter() === !1 ? !0 : e.search ? e.filtered.groups.has(o) : !0));
+		W(() => u.group(o), []), Qn(o, s, [e.value, e.heading, c]);
+		const f = P.useMemo(() => ({ id: o, forceMount: i }), [i]);
+		return P.createElement(
+			z.div,
+			{ ref: _(s, t), ...a, "cmdk-group": ``, role: `presentation`, hidden: d ? void 0 : !0 },
+			n && P.createElement(`div`, { ref: c, "cmdk-group-heading": ``, "aria-hidden": !0, id: l }, n),
+			tr(e, (e) =>
+				P.createElement(
+					`div`,
+					{ "cmdk-group-items": ``, role: `group`, "aria-labelledby": n ? l : void 0 },
+					P.createElement(zn.Provider, { value: f }, e),
+				),
+			),
+		);
+	}),
+	Un = P.forwardRef((e, t) => {
+		const { alwaysRender: n, ...r } = e,
+			i = P.useRef(null),
+			a = K((e) => !e.search);
+		return !n && !a ? null : P.createElement(z.div, { ref: _(i, t), ...r, "cmdk-separator": ``, role: `separator` });
+	}),
+	Wn = P.forwardRef((e, t) => {
+		const { onValueChange: n, ...r } = e,
+			i = e.value != null,
+			a = Rn(),
+			o = K((e) => e.search),
+			s = K((e) => e.selectedItemId),
+			c = H();
+		return (
+			P.useEffect(() => {
+				e.value != null && a.setState(`search`, e.value);
+			}, [e.value]),
+			P.createElement(z.input, {
+				ref: t,
+				...r,
+				"cmdk-input": ``,
+				autoComplete: `off`,
+				autoCorrect: `off`,
+				spellCheck: !1,
+				"aria-autocomplete": `list`,
+				role: `combobox`,
+				"aria-expanded": !0,
+				"aria-controls": c.listId,
+				"aria-labelledby": c.labelId,
+				"aria-activedescendant": s,
+				id: c.inputId,
+				type: `text`,
+				value: i ? e.value : o,
+				onChange: (e) => {
+					i || a.setState(`search`, e.target.value), n?.(e.target.value);
+				},
+			})
+		);
+	}),
+	Gn = P.forwardRef((e, t) => {
+		const { children: n, label: r = `Suggestions`, ...i } = e,
+			a = P.useRef(null),
+			o = P.useRef(null),
+			s = K((e) => e.selectedItemId),
+			c = H();
+		return (
+			P.useEffect(() => {
+				if (o.current && a.current) {
+					let e = o.current,
+						t = a.current,
+						n,
+						r = new ResizeObserver(() => {
+							n = requestAnimationFrame(() => {
+								const n = e.offsetHeight;
+								t.style.setProperty(`--cmdk-list-height`, n.toFixed(1) + `px`);
+							});
+						});
+					return (
+						r.observe(e),
+						() => {
+							cancelAnimationFrame(n), r.unobserve(e);
+						}
+					);
+				}
+			}, []),
+			P.createElement(
+				z.div,
+				{
+					ref: _(a, t),
+					...i,
+					"cmdk-list": ``,
+					role: `listbox`,
+					tabIndex: -1,
+					"aria-activedescendant": s,
+					"aria-label": r,
+					id: c.listId,
+				},
+				tr(e, (e) => P.createElement(`div`, { ref: _(o, c.listInnerRef), "cmdk-list-sizer": `` }, e)),
+			)
+		);
+	}),
+	Kn = P.forwardRef((e, t) => {
+		const { open: n, onOpenChange: r, overlayClassName: i, contentClassName: a, container: o, ...s } = e;
+		return P.createElement(
+			Ee,
+			{ open: n, onOpenChange: r },
+			P.createElement(
+				Ie,
+				{ container: o },
+				P.createElement(Fe, { "cmdk-overlay": ``, className: i }),
+				P.createElement(
+					we,
+					{ "aria-label": e.label, "cmdk-dialog": ``, className: a },
+					P.createElement(Bn, { ref: t, ...s }),
+				),
+			),
+		);
+	}),
+	qn = P.forwardRef((e, t) =>
+		K((e) => e.filtered.count === 0)
+			? P.createElement(z.div, { ref: t, ...e, "cmdk-empty": ``, role: `presentation` })
+			: null,
+	),
+	Jn = P.forwardRef((e, t) => {
+		const { progress: n, children: r, label: i = `Loading...`, ...a } = e;
+		return P.createElement(
+			z.div,
+			{
+				ref: t,
+				...a,
+				"cmdk-loading": ``,
+				role: `progressbar`,
+				"aria-valuenow": n,
+				"aria-valuemin": 0,
+				"aria-valuemax": 100,
+				"aria-label": i,
+			},
+			tr(e, (e) => P.createElement(`div`, { "aria-hidden": !0 }, e)),
+		);
+	}),
+	U = Object.assign(Bn, {
+		List: Gn,
+		Item: Vn,
+		Input: Wn,
+		Group: Hn,
+		Separator: Un,
+		Dialog: Kn,
+		Empty: qn,
+		Loading: Jn,
+	});
+function Yn(e, t) {
+	let n = e.nextElementSibling;
+	for (; n; ) {
+		if (n.matches(t)) return n;
+		n = n.nextElementSibling;
+	}
+}
+function Xn(e, t) {
+	let n = e.previousElementSibling;
+	for (; n; ) {
+		if (n.matches(t)) return n;
+		n = n.previousElementSibling;
+	}
+}
+function Zn(e) {
+	const t = P.useRef(e);
+	return (
+		W(() => {
+			t.current = e;
+		}),
+		t
+	);
+}
+var W = typeof window > `u` ? P.useEffect : P.useLayoutEffect;
+function G(e) {
+	const t = P.useRef();
+	return t.current === void 0 && (t.current = e()), t;
+}
+function K(e) {
+	const t = Rn(),
+		n = () => e(t.snapshot());
+	return P.useSyncExternalStore(t.subscribe, n, n);
+}
+function Qn(e, t, n, r = []) {
+	const i = P.useRef(),
+		a = H();
+	return (
+		W(() => {
+			var o;
+			const s = (() => {
+					for (const e of n) {
+						if (typeof e == `string`) return e.trim();
+						if (typeof e == `object` && `current` in e) return e.current ? e.current.textContent?.trim() : i.current;
+					}
+				})(),
+				c = r.map((e) => e.trim());
+			a.value(e, s, c), (o = t.current) == null || o.setAttribute(V, s), (i.current = s);
+		}),
+		i
+	);
+}
+var $n = () => {
+	const [e, t] = P.useState(),
+		n = G(() => new Map());
+	return (
+		W(() => {
+			n.current.forEach((e) => e()), (n.current = new Map());
+		}, [e]),
+		(e, r) => {
+			n.current.set(e, r), t({});
+		}
+	);
+};
+function er(e) {
+	const t = e.type;
+	return typeof t == `function` ? t(e.props) : `render` in t ? t.render(e.props) : e;
+}
+function tr({ asChild: e, children: t }, n) {
+	return e && P.isValidElement(t) ? P.cloneElement(er(t), { ref: t.ref }, n(t.props.children)) : n(t);
+}
+var nr = {
+	position: `absolute`,
+	width: `1px`,
+	height: `1px`,
+	padding: `0`,
+	margin: `-1px`,
+	overflow: `hidden`,
+	clip: `rect(0, 0, 0, 0)`,
+	whiteSpace: `nowrap`,
+	borderWidth: `0`,
+};
+function rr({ className: e, ...t }) {
+	return (0, F.jsx)(`div`, {
+		"data-slot": `input-group`,
+		role: `group`,
+		className: i(
+			`group/input-group relative flex h-9 w-full min-w-0 items-center rounded-md border border-input shadow-xs outline-none transition-[color,box-shadow] in-data-[slot=combobox-content]:focus-within:border-ring has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-start]]:h-auto has-[>textarea]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:flex-col has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-destructive/20 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=inline-start]]:[&>input]:ps-1.5 has-[>[data-align=inline-end]]:[&>input]:pe-1.5 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3`,
+			e,
+		),
+		...t,
+	});
+}
+var ir = de(
+	`flex h-auto cursor-text select-none items-center justify-center gap-2 py-1.5 font-medium text-muted-foreground text-sm group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4`,
+	{
+		variants: {
+			align: {
+				"inline-start": `order-first ps-2 has-[>button]:-ms-1 has-[>kbd]:ms-[-0.15rem]`,
+				"inline-end": `order-last pe-2 has-[>button]:-me-1 has-[>kbd]:me-[-0.15rem]`,
+				"block-start": `order-first w-full justify-start px-2.5 pt-2 group-has-[>input]/input-group:pt-2 [.border-b]:pb-2`,
+				"block-end": `order-last w-full justify-start px-2.5 pb-2 group-has-[>input]/input-group:pb-2 [.border-t]:pt-2`,
+			},
+		},
+		defaultVariants: { align: `inline-start` },
+	},
+);
+function ar({ className: e, align: t = `inline-start`, ...n }) {
+	return (0, F.jsx)(`div`, {
+		role: `group`,
+		"data-slot": `input-group-addon`,
+		"data-align": t,
+		className: i(ir({ align: t }), e),
+		onClick: (e) => {
+			e.target.closest(`button`) || e.currentTarget.parentElement?.querySelector(`input`)?.focus();
+		},
+		...n,
+	});
+}
+var or = de(`flex items-center gap-2 text-sm shadow-none`, {
+	variants: {
+		size: {
+			xs: `h-6 gap-1 rounded-[calc(var(--radius)-5px)] px-1.5 [&>svg:not([class*='size-'])]:size-3.5`,
+			sm: ``,
+			"icon-xs": `size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0`,
+			"icon-sm": `size-8 p-0 has-[>svg]:p-0`,
+		},
+	},
+	defaultVariants: { size: `xs` },
+});
+function sr({ className: e, type: t = `button`, variant: n = `ghost`, size: r = `xs`, ...a }) {
+	return (0, F.jsx)(fe, { ...a, type: t, asChild: !1, "data-size": r, variant: n, className: i(or({ size: r }), e) });
+}
+function cr({ className: e, ...t }) {
+	return (0, F.jsx)(`span`, {
+		className: i(
+			`flex items-center gap-2 text-muted-foreground text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none`,
+			e,
+		),
+		...t,
+	});
+}
+function lr({ className: e, ...t }) {
+	return (0, F.jsx)(pe, {
+		"data-slot": `input-group-control`,
+		className: i(
+			`flex-1 rounded-none border-0 bg-transparent shadow-none hover:bg-secondary/40 focus-visible:bg-secondary/40 aria-invalid:ring-0`,
+			e,
+		),
+		...t,
+	});
+}
+function ur({ className: e, ...t }) {
+	return (0, F.jsx)(U, {
+		"data-slot": `command`,
+		className: i(
+			`flex size-full flex-col gap-y-1 overflow-hidden rounded-xl! bg-popover p-1 text-popover-foreground`,
+			e,
+		),
+		...t,
+	});
+}
+function dr({ className: e, ...t }) {
+	return (0, F.jsx)(`div`, {
+		"data-slot": `command-input-wrapper`,
+		className: `p-1 pb-0`,
+		children: (0, F.jsxs)(rr, {
+			className: `h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:ps-2!`,
+			children: [
+				(0, F.jsx)(U.Input, {
+					"data-slot": `command-input`,
+					className: i(`w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50`, e),
+					...t,
+				}),
+				(0, F.jsx)(ar, { children: (0, F.jsx)(bt, { className: `size-4 shrink-0 opacity-50` }) }),
+			],
+		}),
+	});
+}
+function fr({ className: e, ...t }) {
+	return (0, F.jsx)(U.List, {
+		"data-slot": `command-list`,
+		className: i(`no-scrollbar max-h-72 scroll-py-1 overflow-y-auto overflow-x-hidden outline-none`, e),
+		...t,
+	});
+}
+function pr({ className: e, ...t }) {
+	return (0, F.jsx)(U.Empty, { "data-slot": `command-empty`, className: i(`py-6 text-center text-sm`, e), ...t });
+}
+function mr({ className: e, ...t }) {
+	return (0, F.jsx)(U.Group, {
+		"data-slot": `command-group`,
+		className: i(
+			`overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:text-xs`,
+			e,
+		),
+		...t,
+	});
+}
+function hr({ className: e, ...t }) {
+	return (0, F.jsx)(U.Separator, {
+		"data-slot": `command-separator`,
+		className: i(`-mx-1 h-px w-auto bg-border`, e),
+		...t,
+	});
+}
+function gr({ className: e, children: t, ...n }) {
+	return (0, F.jsxs)(U.Item, {
+		"data-slot": `command-item`,
+		className: i(
+			`group/command-item relative flex cursor-default select-none items-center gap-2 in-data-[slot=dialog-content]:rounded-lg! rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-selected:bg-muted data-selected:text-foreground data-[disabled=true]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-selected:**:[svg]:text-foreground`,
+			e,
+		),
+		...n,
+		children: [
+			t,
+			(0, F.jsx)(ue, {
+				className: `ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100`,
+			}),
+		],
+	});
+}
+function _r({ className: e, ...t }) {
+	return (0, F.jsx)(`span`, {
+		"data-slot": `command-shortcut`,
+		className: i(
+			`ml-auto text-muted-foreground text-xs tracking-widest group-data-selected/command-item:text-foreground`,
+			e,
+		),
+		...t,
+	});
+}
+const vr = g.enum([
+		`azurill`,
+		`bronzor`,
+		`chikorita`,
+		`ditgar`,
+		`ditto`,
+		`gengar`,
+		`glalie`,
+		`kakuna`,
+		`lapras`,
+		`leafish`,
+		`onyx`,
+		`pikachu`,
+		`rhyhorn`,
+	]),
+	q = g
+		.string()
+		.describe(
+			`The icon to display for the custom field. Must be a valid icon name from @phosphor-icons/web icon set, or an empty string to hide. Default to '' (empty string) when unsure which icons are available.`,
+		),
+	yr = g
+		.object({
+			showLinkInTitle: g
+				.boolean()
+				.catch(!1)
+				.describe(
+					`If true, the website URL is rendered as a hyperlink on the title instead of a separate link at the bottom.`,
+				),
+		})
+		.catch({ showLinkInTitle: !1 }),
+	J = g.object({
+		url: g.string().describe(`The URL to show as a link. Must be a valid URL with a protocol (http:// or https://).`),
+		label: g.string().describe(`The label to display for the URL. Leave blank to display the URL as-is.`),
+	}),
+	br = g.object({
+		hidden: g.boolean().describe(`Whether to hide the picture from the resume.`),
+		url: g
+			.string()
+			.describe(
+				`The URL to the picture to display on the resume. Must be a valid URL with a protocol (http:// or https://).`,
+			),
+		size: g
+			.number()
+			.min(32)
+			.max(512)
+			.describe(`The size of the picture to display on the resume, defined in points (pt).`),
+		rotation: g
+			.number()
+			.min(0)
+			.max(360)
+			.describe(`The rotation of the picture to display on the resume, defined in degrees (°).`),
+		aspectRatio: g
+			.number()
+			.min(0.5)
+			.max(2.5)
+			.describe(
+				`The aspect ratio of the picture to display on the resume, defined as width / height (e.g. 1.5 for 1.5:1 or 0.5 for 1:2).`,
+			),
+		borderRadius: g
+			.number()
+			.min(0)
+			.max(100)
+			.describe(`The border radius of the picture to display on the resume, defined in points (pt).`),
+		borderColor: g
+			.string()
+			.describe(`The color of the border of the picture to display on the resume, defined as rgba(r, g, b, a).`),
+		borderWidth: g
+			.number()
+			.min(0)
+			.describe(`The width of the border of the picture to display on the resume, defined in points (pt).`),
+		shadowColor: g
+			.string()
+			.describe(`The color of the shadow of the picture to display on the resume, defined as rgba(r, g, b, a).`),
+		shadowWidth: g
+			.number()
+			.min(0)
+			.describe(`The width of the shadow of the picture to display on the resume, defined in points (pt).`),
+	}),
+	xr = g.object({
+		id: g.string().describe(`The unique identifier for the custom field. Usually generated as a UUID.`),
+		icon: q,
+		text: g.string().describe(`The text to display for the custom field.`),
+		link: g.string().describe(`If the custom field should be a link, the URL to link to.`).catch(``),
+	}),
+	Sr = g.object({
+		name: g
+			.string()
+			.regex(/^[^0-9]*$/, `Name cannot contain numbers`)
+			.describe(`The full name of the author of the resume.`),
+		headline: g
+			.string()
+			.regex(/^[^0-9]*$/, `Headline cannot contain numbers`)
+			.describe(`The headline of the author of the resume.`),
+		email: g.string().describe(`The email address of the author of the resume.`),
+		phone: g.string().describe(`The phone number of the author of the resume.`),
+		location: g.string().describe(`The location of the author of the resume.`),
+		website: J.describe(`The website of the author of the resume.`),
+		customFields: g.array(xr).describe(`The custom fields to display on the resume.`),
+	}),
+	Cr = g.object({
+		title: g.string().describe(`The title of the summary of the resume.`),
+		columns: g.number().describe(`The number of columns the summary should span across.`),
+		hidden: g.boolean().describe(`Whether to hide the summary from the resume.`),
+		content: g.string().describe(`The content of the summary of the resume. This should be a HTML-formatted string.`),
+	}),
+	Y = g.object({
+		id: g.string().describe(`The unique identifier for the item. Usually generated as a UUID.`),
+		hidden: g.boolean().describe(`Whether to hide the item from the resume.`),
+		options: yr.optional().describe(`Display options for this item.`),
+	}),
+	wr = Y.extend({
+		content: g.string().describe(`The rich text content of the summary item. This should be a HTML-formatted string.`),
+	}),
+	X = Y.extend({
+		title: g.string().min(1).describe(`The title of the award.`),
+		awarder: g.string().describe(`The awarder of the award.`),
+		date: g.string().describe(`The date when the award was received.`),
+		website: J.describe(`The website of the award, if any.`),
+		description: g.string().describe(`The description of the award. This should be a HTML-formatted string.`),
+	}),
+	Z = Y.extend({
+		title: g.string().min(1).describe(`The title of the certification.`),
+		issuer: g.string().describe(`The issuer of the certification.`),
+		date: g.string().describe(`The date when the certification was received.`),
+		website: J.describe(`The website of the certification, if any.`),
+		description: g.string().describe(`The description of the certification. This should be a HTML-formatted string.`),
+	}),
+	Tr = Y.extend({
+		school: g.string().min(1).describe(`The name of the school or institution.`),
+		degree: g.string().describe(`The degree or qualification obtained.`),
+		area: g.string().describe(`The area of study or specialization.`),
+		grade: g.string().describe(`The grade or score achieved.`),
+		location: g.string().describe(`The location of the school or institution.`),
+		period: g.string().describe(`The period of time the education was obtained over.`),
+		website: J.describe(`The website of the school or institution, if any.`),
+		description: g.string().describe(`The description of the education. This should be a HTML-formatted string.`),
+		currentlyStudyingHere: g.boolean().describe(`Indicates if the user is currently studying at this institution.`),
+	}),
+	Er = Y.extend({
+		company: g.string().min(1).describe(`The name of the company or organization.`),
+		position: g.string().describe(`The position held at the company or organization.`),
+		location: g.string().describe(`The location of the company or organization.`),
+		startDate: g.string().optional().describe(`The start date of the experience.`),
+		endDate: g.string().optional().describe(`The end date of the experience.`),
+		currentlyWorkingHere: g.boolean().optional().describe(`Whether the user is currently working here.`),
+		description: g.string().describe(`The description of the experience. This should be a HTML-formatted string.`),
+		period: g.string().describe(`The period of time the experience was obtained over.`),
+		website: J.describe(`The website of the company or organization, if any.`),
+	}),
+	Dr = Y.extend({
+		icon: q,
+		name: g.string().min(1).describe(`The name of the interest/hobby.`),
+		keywords: g
+			.array(g.string())
+			.catch([])
+			.describe(`The keywords associated with the interest/hobby, if any. These are displayed as tags below the name.`),
+	}),
+	Or = Y.extend({
+		language: g.string().min(1).describe(`The name of the language the author knows.`),
+		fluency: g
+			.string()
+			.describe(
+				`The fluency level of the language. Can be any text, such as 'Native', 'Fluent', 'Conversational', etc. or can also be a CEFR level (A1, A2, B1, B2, C1, C2).`,
+			),
+		level: g
+			.number()
+			.min(0)
+			.max(5)
+			.catch(0)
+			.describe(
+				`The proficiency level of the language, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden.`,
+			),
+	}),
+	Q = Y.extend({
+		icon: q,
+		network: g.string().min(1).describe(`The name of the network or platform.`),
+		username: g.string().describe(`The username of the author on the network or platform.`),
+		website: J.describe(`The link to the profile of the author on the network or platform, if any.`),
+	}),
+	kr = Y.extend({
+		name: g.string().min(1).describe(`The name of the project.`),
+		period: g.string().describe(`The period of time the project was worked on.`),
+		website: J.describe(`The link to the project, if any.`),
+		description: g.string().describe(`The description of the project. This should be a HTML-formatted string.`),
+	}),
+	Ar = Y.extend({
+		title: g.string().min(1).describe(`The title of the publication.`),
+		publisher: g.string().describe(`The publisher of the publication.`),
+		date: g.string().describe(`The date when the publication was published.`),
+		website: J.describe(`The link to the publication, if any.`),
+		description: g.string().describe(`The description of the publication. This should be a HTML-formatted string.`),
+	}),
+	jr = Y.extend({
+		name: g.string().min(1).describe(`The name of the reference, or a note such as 'Available upon request'.`),
+		position: g.string().describe(`The position or job title of the reference.`),
+		website: J.describe(`The website or LinkedIn profile of the reference, if any.`),
+		phone: g.string().describe(`The phone number of the reference.`),
+		description: g
+			.string()
+			.describe(
+				`The description of the reference. Can be used to display a quote, a testimonial, etc. This should be a HTML-formatted string.`,
+			),
+	}),
+	Mr = Y.extend({
+		icon: q,
+		name: g.string().min(1).describe(`The name of the skill.`),
+		proficiency: g
+			.string()
+			.describe(
+				`The proficiency level of the skill. Can be any text, such as 'Beginner', 'Intermediate', 'Advanced', etc.`,
+			),
+		level: g
+			.number()
+			.min(0)
+			.max(5)
+			.catch(0)
+			.describe(
+				`The proficiency level of the skill, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden.`,
+			),
+		keywords: g
+			.array(g.string())
+			.catch([])
+			.describe(`The keywords associated with the skill, if any. These are displayed as tags below the name.`),
+	}),
+	Nr = Y.extend({
+		organization: g.string().min(1).describe(`The name of the organization or company.`),
+		location: g.string().describe(`The location of the organization or company.`),
+		period: g.string().describe(`The period of time the author was volunteered at the organization or company.`),
+		website: J.describe(`The link to the organization or company, if any.`),
+		description: g
+			.string()
+			.describe(`The description of the volunteer experience. This should be a HTML-formatted string.`),
+	}),
+	Pr = Y.extend({
+		recipient: g.string().describe(`The recipient's address block as HTML (name, title, company, address, email).`),
+		content: g.string().describe(`The cover letter body as HTML (salutation, paragraphs, closing, signature).`),
+	}),
+	$ = g.object({
+		title: g.string().describe(`The title of the section.`),
+		columns: g.number().describe(`The number of columns the section should span across.`),
+		hidden: g.boolean().describe(`Whether to hide the section from the resume.`),
+	}),
+	Fr = $.extend({ items: g.array(X).describe(`The items to display in the awards section.`) }),
+	Ir = $.extend({ items: g.array(Z).describe(`The items to display in the certifications section.`) }),
+	Lr = $.extend({ items: g.array(Tr).describe(`The items to display in the education section.`) }),
+	Rr = $.extend({ items: g.array(Er).describe(`The items to display in the experience section.`) }),
+	zr = $.extend({ items: g.array(Dr).describe(`The items to display in the interests section.`) }),
+	Br = $.extend({ items: g.array(Or).describe(`The items to display in the languages section.`) }),
+	Vr = $.extend({ items: g.array(Q).describe(`The items to display in the profiles section.`) }),
+	Hr = $.extend({ items: g.array(kr).describe(`The items to display in the projects section.`) }),
+	Ur = $.extend({ items: g.array(Ar).describe(`The items to display in the publications section.`) }),
+	Wr = $.extend({ items: g.array(jr).describe(`The items to display in the references section.`) }),
+	Gr = $.extend({ items: g.array(Mr).describe(`The items to display in the skills section.`) }),
+	Kr = $.extend({ items: g.array(Nr).describe(`The items to display in the volunteer section.`) }),
+	qr = g.object({
+		profiles: Vr.describe(`The section to display the profiles of the author.`),
+		experience: Rr.describe(`The section to display the experience of the author.`),
+		education: Lr.describe(`The section to display the education of the author.`),
+		projects: Hr.describe(`The section to display the projects of the author.`),
+		skills: Gr.describe(`The section to display the skills of the author.`),
+		languages: Br.describe(`The section to display the languages of the author.`),
+		interests: zr.describe(`The section to display the interests of the author.`),
+		awards: Fr.describe(`The section to display the awards of the author.`),
+		certifications: Ir.describe(`The section to display the certifications of the author.`),
+		publications: Ur.describe(`The section to display the publications of the author.`),
+		volunteer: Kr.describe(`The section to display the volunteer experience of the author.`),
+		references: Wr.describe(`The section to display the references of the author.`),
+	}),
+	Jr = g.enum([
+		`summary`,
+		`profiles`,
+		`experience`,
+		`education`,
+		`projects`,
+		`skills`,
+		`languages`,
+		`interests`,
+		`awards`,
+		`certifications`,
+		`publications`,
+		`volunteer`,
+		`references`,
+		`cover-letter`,
+	]),
+	Yr = g.union([Pr, wr, Q, Er, Tr, kr, Mr, Or, Dr, X, Z, Ar, Nr, jr]),
+	Xr = $.extend({
+		id: g.string().describe(`The unique identifier for the custom section. Usually generated as a UUID.`),
+		type: Jr.describe(
+			`The type of items this custom section contains. Determines which item schema and form fields to use.`,
+		),
+		items: g
+			.array(Yr)
+			.describe(`The items to display in the custom section. Items follow the schema of the section type.`),
+	}),
+	Zr = g.array(Xr),
+	Qr = g.enum([`100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900`]),
+	$r = g.object({
+		fontFamily: g.string().describe(`The family of the font to use. Must be a font that is available on Google Fonts.`),
+		fontWeights: g
+			.array(Qr)
+			.catch([`400`])
+			.describe(
+				`The weight of the font, defined as a number between 100 and 900. Default to 400 when unsure if the weight is available in the font.`,
+			),
+		fontSize: g.number().min(6).max(24).catch(11).describe(`The size of the font to use, defined in points (pt).`),
+		lineHeight: g
+			.number()
+			.min(0.5)
+			.max(4)
+			.catch(1.5)
+			.describe(`The line height of the font to use, defined as a multiplier of the font size (e.g. 1.5 for 1.5x).`),
+	}),
+	ei = g.object({
+		fullWidth: g
+			.boolean()
+			.describe(
+				`Whether the layout of the page should be full width. If true, the main column will span the entire width of the page. This means that there should be no items in the sidebar column.`,
+			),
+		main: g
+			.array(g.string())
+			.describe(
+				`The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections).`,
+			),
+		sidebar: g
+			.array(g.string())
+			.describe(
+				`The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections).`,
+			),
+	}),
+	ti = g.object({
+		sidebarWidth: g
+			.number()
+			.min(10)
+			.max(50)
+			.catch(35)
+			.describe(`The width of the sidebar column, defined as a percentage of the page width.`),
+		pages: g.array(ei).describe(`The pages to display in the layout.`),
+	}),
+	ni = g.object({
+		enabled: g.boolean().describe(`Whether to enable custom CSS for the resume.`),
+		value: g.string().describe(`The custom CSS to apply to the resume. This should be a valid CSS string.`),
+	}),
+	ri = g.object({
+		gapX: g.number().min(0).describe(`The horizontal gap between the sections of the page, defined in points (pt).`),
+		gapY: g.number().min(0).describe(`The vertical gap between the sections of the page, defined in points (pt).`),
+		marginX: g.number().min(0).describe(`The horizontal margin of the page, defined in points (pt).`),
+		marginY: g.number().min(0).describe(`The vertical margin of the page, defined in points (pt).`),
+		format: g
+			.enum([`a4`, `letter`, `free-form`])
+			.describe(`The format of the page. Can be 'a4', 'letter' or 'free-form'.`)
+			.catch(`a4`),
+		locale: g
+			.string()
+			.describe(`The locale of the page. Used for displaying pre-translated section headings, if not overridden.`)
+			.catch(`en-US`),
+		hideIcons: g.boolean().describe(`Whether to hide the icons of the sections.`).catch(!1),
+	}),
+	ii = g.object({
+		icon: q,
+		type: g
+			.enum([`hidden`, `circle`, `square`, `rectangle`, `rectangle-full`, `progress-bar`, `icon`])
+			.describe(
+				`The type of the level design. 'hidden' will hide the level design, 'circle' will display a circle, 'square' will display a square, 'rectangle' will display a rectangle, 'rectangle-full' will display a full rectangle, 'progress-bar' will display a progress bar, and 'icon' will display an icon. If 'icon' is selected, the icon to display should be specified in the 'icon' field.`,
+			),
+	}),
+	ai = g.object({
+		primary: g.string().describe(`The primary color of the design, defined as rgba(r, g, b, a).`),
+		text: g
+			.string()
+			.describe(`The text color of the design, defined as rgba(r, g, b, a). Usually set to black: rgba(0, 0, 0, 1).`),
+		background: g
+			.string()
+			.describe(
+				`The background color of the design, defined as rgba(r, g, b, a). Usually set to white: rgba(255, 255, 255, 1).`,
+			),
+	}),
+	oi = g.object({ level: ii, colors: ai }),
+	si = g.object({
+		body: $r.describe(`The typography for the body of the resume.`),
+		heading: $r.describe(`The typography for the headings of the resume.`),
+	}),
+	ci = g.object({
+		template: vr
+			.catch(`onyx`)
+			.describe(`The template to use for the resume. Determines the overall design and appearance of the resume.`),
+		layout: ti.describe(
+			`The layout of the resume. Determines the structure and arrangement of the sections on the resume.`,
+		),
+		css: ni.describe(`Custom CSS to apply to the resume. Can be used to override the default styles of the template.`),
+		page: ri.describe(`The page settings of the resume. Determines the margins, format, and locale of the resume.`),
+		design: oi.describe(
+			`The design settings of the resume. Determines the colors, level designs, and typography of the resume.`,
+		),
+		typography: si.describe(
+			`The typography settings of the resume. Determines the fonts and sizes of the body and headings of the resume.`,
+		),
+		notes: g
+			.string()
+			.describe(
+				`Personal notes for the resume. Can be used to add any additional information or instructions for the resume. These notes are not displayed on the resume, they are only visible to the author of the resume when editing the resume. This should be a HTML-formatted string.`,
+			),
+		coverLetter: g
+			.string()
+			.optional()
+			.describe(
+				`Cover letter accompanying the resume. This will be included when exporting the resume. Supports rich text formatting.`,
+			),
+	}),
+	li = g.object({
+		picture: br.describe(`Configuration for photograph displayed on the resume`),
+		basics: Sr.describe(`Basic information about the author, such as name, email, phone, location, and website`),
+		summary: Cr.describe(`Summary section of the resume, useful for a short bio or introduction`),
+		sections: qr.describe(`Various sections of the resume, such as experience, education, projects, etc.`),
+		customSections: Zr.describe(`Custom sections of the resume, such as a custom section for notes, etc.`),
+		metadata: ci.describe(
+			`Metadata for the resume, such as template, layout, typography, etc. This section describes the overall design and appearance of the resume.`,
+		),
+	}),
+	ui = {
+		picture: {
+			hidden: !1,
+			url: ``,
+			size: 80,
+			rotation: 0,
+			aspectRatio: 1,
+			borderRadius: 0,
+			borderColor: `rgba(0, 0, 0, 0.5)`,
+			borderWidth: 0,
+			shadowColor: `rgba(0, 0, 0, 0.5)`,
+			shadowWidth: 0,
+		},
+		basics: {
+			name: ``,
+			headline: ``,
+			email: ``,
+			phone: ``,
+			location: ``,
+			website: { url: ``, label: `` },
+			customFields: [],
+		},
+		summary: { title: ``, columns: 1, hidden: !1, content: `` },
+		sections: {
+			profiles: { title: ``, columns: 1, hidden: !1, items: [] },
+			experience: { title: ``, columns: 1, hidden: !1, items: [] },
+			education: { title: ``, columns: 1, hidden: !1, items: [] },
+			projects: { title: ``, columns: 1, hidden: !1, items: [] },
+			skills: { title: ``, columns: 1, hidden: !1, items: [] },
+			languages: { title: ``, columns: 1, hidden: !1, items: [] },
+			interests: { title: ``, columns: 1, hidden: !1, items: [] },
+			awards: { title: ``, columns: 1, hidden: !1, items: [] },
+			certifications: { title: ``, columns: 1, hidden: !1, items: [] },
+			publications: { title: ``, columns: 1, hidden: !1, items: [] },
+			volunteer: { title: ``, columns: 1, hidden: !1, items: [] },
+			references: { title: ``, columns: 1, hidden: !1, items: [] },
+		},
+		customSections: [],
+		metadata: {
+			template: `onyx`,
+			layout: {
+				sidebarWidth: 35,
+				pages: [
+					{
+						fullWidth: !1,
+						main: [`profiles`, `summary`, `education`, `experience`, `projects`, `volunteer`, `references`],
+						sidebar: [`skills`, `certifications`, `awards`, `languages`, `interests`, `publications`],
+					},
+				],
+			},
+			css: { enabled: !1, value: `` },
+			page: { gapX: 4, gapY: 6, marginX: 14, marginY: 12, format: `a4`, locale: `en-US`, hideIcons: !1 },
+			design: {
+				colors: { primary: `rgba(220, 38, 38, 1)`, text: `rgba(0, 0, 0, 1)`, background: `rgba(255, 255, 255, 1)` },
+				level: { icon: `star`, type: `circle` },
+			},
+			typography: {
+				body: { fontFamily: `IBM Plex Serif`, fontWeights: [`400`], fontSize: 10, lineHeight: 1.5 },
+				heading: { fontFamily: `IBM Plex Serif`, fontWeights: [`600`], fontSize: 14, lineHeight: 1.5 },
+			},
+			notes: ``,
+			coverLetter: ``,
+		},
+	};
+g.discriminatedUnion(`type`, [
+	g.object({ type: g.literal(`resume.create`), data: g.undefined() }),
+	g.object({
+		type: g.literal(`resume.update`),
+		data: g.object({ id: g.string(), name: g.string(), slug: g.string(), tags: g.array(g.string()) }),
+	}),
+	g.object({ type: g.literal(`resume.import`), data: g.undefined() }),
+	g.object({
+		type: g.literal(`resume.duplicate`),
+		data: g.object({
+			id: g.string(),
+			name: g.string(),
+			slug: g.string(),
+			tags: g.array(g.string()),
+			shouldRedirect: g.boolean().optional(),
+		}),
+	}),
+	g.object({ type: g.literal(`resume.template.gallery`), data: g.undefined() }),
+	g.object({
+		type: g.literal(`resume.sections.profiles.create`),
+		data: g.object({ item: Q.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.profiles.update`),
+		data: g.object({ item: Q, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.experience.create`),
+		data: g.object({ item: Er.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.experience.update`),
+		data: g.object({ item: Er, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.education.create`),
+		data: g.object({ item: Tr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.education.update`),
+		data: g.object({ item: Tr, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.projects.create`),
+		data: g.object({ item: kr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.projects.update`),
+		data: g.object({ item: kr, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.skills.create`),
+		data: g.object({ item: Mr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.skills.update`),
+		data: g.object({ item: Mr, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.languages.create`),
+		data: g.object({ item: Or.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.languages.update`),
+		data: g.object({ item: Or, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.awards.create`),
+		data: g.object({ item: X.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.awards.update`),
+		data: g.object({ item: X, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.certifications.create`),
+		data: g.object({ item: Z.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.certifications.update`),
+		data: g.object({ item: Z, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.publications.create`),
+		data: g.object({ item: Ar.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.publications.update`),
+		data: g.object({ item: Ar, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.interests.create`),
+		data: g.object({ item: Dr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.interests.update`),
+		data: g.object({ item: Dr, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.volunteer.create`),
+		data: g.object({ item: Nr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.volunteer.update`),
+		data: g.object({ item: Nr, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.references.create`),
+		data: g.object({ item: jr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.references.update`),
+		data: g.object({ item: jr, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.summary.create`),
+		data: g.object({ item: wr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.summary.update`),
+		data: g.object({ item: wr, customSectionId: g.string().optional() }),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.cover-letter.create`),
+		data: g.object({ item: Pr.optional(), customSectionId: g.string().optional() }).optional(),
+	}),
+	g.object({
+		type: g.literal(`resume.sections.cover-letter.update`),
+		data: g.object({ item: Pr, customSectionId: g.string().optional() }),
+	}),
+	g.object({ type: g.literal(`resume.sections.custom.create`), data: Xr.optional() }),
+	g.object({ type: g.literal(`resume.sections.custom.update`), data: Xr }),
+]);
+const di = ke((e) => ({
+	open: !1,
+	activeDialog: null,
+	onOpenChange: (t) => {
+		e({ open: t }),
+			t ||
+				setTimeout(() => {
+					e({ activeDialog: null });
+				}, 300);
+	},
+	openDialog: (t, n) => e({ open: !0, activeDialog: { type: t, data: n } }),
+	closeDialog: () => {
+		e({ open: !1 }),
+			setTimeout(() => {
+				e({ activeDialog: null });
+			}, 300);
+	},
+}));
+var fi = P.createContext(null);
+function pi({ children: e }) {
+	const [t, n] = P.useState({
+			open: !1,
+			resolve: null,
+			title: ``,
+			description: void 0,
+			confirmText: void 0,
+			cancelText: void 0,
+		}),
+		r = P.useCallback(
+			async (e, t) =>
+				new Promise((r) => {
+					n({
+						open: !0,
+						resolve: r,
+						title: e,
+						description: t?.description,
+						confirmText: t?.confirmText,
+						cancelText: t?.cancelText,
+					});
+				}),
+			[],
+		),
+		a = P.useCallback(() => {
+			t.resolve && t.resolve(!0), n((e) => ({ ...e, open: !1, resolve: null }));
+		}, [t.resolve]),
+		o = P.useCallback(() => {
+			t.resolve && t.resolve(!1), n((e) => ({ ...e, open: !1, resolve: null }));
+		}, [t.resolve]);
+	return (0, F.jsxs)(fi.Provider, {
+		value: { confirm: r },
+		children: [
+			e,
+			(0, F.jsx)(Pe, {
+				open: t.open,
+				onOpenChange: (e) => !e && o(),
+				children: (0, F.jsxs)(Oe, {
+					children: [
+						(0, F.jsxs)(Ne, {
+							children: [
+								(0, F.jsx)(De, { children: t.title }),
+								(0, F.jsx)(Te, { className: i(!t.description && `sr-only`), children: t.description }),
+							],
+						}),
+						(0, F.jsxs)(je, {
+							children: [
+								(0, F.jsx)(Me, { onClick: o, children: t.cancelText ?? `Cancel` }),
+								(0, F.jsx)(Ae, { onClick: a, children: t.confirmText ?? `Confirm` }),
+							],
+						}),
+					],
+				}),
+			}),
+		],
+	});
+}
+function mi() {
+	const e = P.useContext(fi);
+	if (!e) throw Error(`useConfirm must be used within a <ConfirmDialogProvider />.`);
+	return e.confirm;
+}
+function hi({ ...e }) {
+	return (0, F.jsx)(en, { "data-slot": `popover`, ...e });
+}
+function gi({ ...e }) {
+	return (0, F.jsx)(tn, { "data-slot": `popover-trigger`, ...e });
+}
+function _i({ className: e, align: t = `center`, sideOffset: n = 4, ...r }) {
+	return (0, F.jsx)(nn, {
+		children: (0, F.jsx)(rn, {
+			"data-slot": `popover-content`,
+			align: t,
+			sideOffset: n,
+			className: i(
+				`data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-end-2 data-[side=right]:slide-in-from-start-2 data-[side=top]:slide-in-from-bottom-2 z-50 flex min-w-72 origin-(--radix-popover-content-transform-origin) flex-col gap-4 rounded-md bg-popover p-4 text-popover-foreground text-sm shadow-md outline-hidden ring-1 ring-foreground/10 duration-100 data-closed:animate-out data-open:animate-in`,
+				e,
+			),
+			...r,
+		}),
+	});
+}
+function vi({ className: e, ...t }) {
+	return (0, F.jsx)(`div`, { "data-slot": `popover-header`, className: i(`flex flex-col gap-1 text-sm`, e), ...t });
+}
+function yi({ className: e, ...t }) {
+	return (0, F.jsx)(`div`, { "data-slot": `popover-title`, className: i(`font-medium`, e), ...t });
+}
+function bi({
+	disabled: e = !1,
+	clearable: t = !0,
+	options: n,
+	value: r,
+	defaultValue: o = null,
+	placeholder: s = a._({ id: `O/7I0o` }),
+	searchPlaceholder: c = a._({ id: `YIix5Y` }),
+	emptyMessage: l = a._({ id: `MZbQHL` }),
+	className: u,
+	buttonProps: d,
+	onValueChange: f,
+	...p
+}) {
+	const { className: m, children: h, ...g } = d ?? {},
+		[_, v] = P.useState(!1),
+		[y, b] = xe({ value: r, defaultValue: o, onChange: (e) => f?.(e, n.find((t) => t.value === e) ?? null) }),
+		x = P.useMemo(() => n.find((e) => e.value === y) ?? null, [n, y]),
+		S = x?.label,
+		C = P.useCallback(
+			(e) => {
+				const n = e ?? null;
+				if (!t && y === n) {
+					v(!1);
+					return;
+				}
+				b(y === n ? null : n), v(!1);
+			},
+			[t, y, b],
+		);
+	return (0, F.jsxs)(hi, {
+		open: _,
+		onOpenChange: P.useCallback(
+			(t) => {
+				e || v(t);
+			},
+			[e],
+		),
+		children: [
+			(0, F.jsx)(gi, {
+				asChild: !0,
+				children: (0, F.jsx)(fe, {
+					role: `combobox`,
+					variant: `outline`,
+					"aria-expanded": _,
+					disabled: e,
+					"aria-disabled": e,
+					tapScale: 1,
+					className: i(
+						`min-w-0 font-normal active:scale-100`,
+						typeof h == `function` ? `` : `justify-between`,
+						e && `pointer-events-none opacity-60`,
+						m,
+					),
+					...g,
+					children:
+						typeof h == `function`
+							? h(y, x)
+							: (0, F.jsxs)(F.Fragment, {
+									children: [
+										(0, F.jsx)(`span`, { className: `flex-1 truncate text-left`, children: S ?? s }),
+										(0, F.jsx)(yt, { className: `ms-2 shrink-0 opacity-50` }),
+									],
+								}),
+				}),
+			}),
+			(0, F.jsx)(_i, {
+				align: `start`,
+				"aria-disabled": e,
+				tabIndex: e ? -1 : void 0,
+				className: i(`min-w-[200px] p-0`, u, e && `pointer-events-none select-none opacity-60`),
+				...p,
+				children: (0, F.jsxs)(ur, {
+					children: [
+						(0, F.jsx)(dr, { placeholder: c, disabled: e }),
+						(0, F.jsxs)(fr, {
+							children: [
+								(0, F.jsx)(pr, { children: l }),
+								(0, F.jsx)(mr, {
+									children: n.map((t) => {
+										const n = y === t.value,
+											r = t.disabled ?? e;
+										return (0, F.jsxs)(
+											gr,
+											{
+												value: String(t.value),
+												keywords: t.keywords,
+												disabled: r,
+												onSelect: r ? void 0 : C,
+												"aria-disabled": r,
+												className: i(r && `pointer-events-none opacity-60`),
+												children: [
+													(0, F.jsx)(ue, {
+														"aria-hidden": !0,
+														className: i(`size-4 shrink-0 transition-opacity`, n ? `opacity-100` : `opacity-0`),
+													}),
+													(0, F.jsx)(`span`, { className: i(`truncate`, r && `opacity-60`), children: t.label }),
+												],
+											},
+											String(t.value),
+										);
+									}),
+								}),
+							],
+						}),
+					],
+				}),
+			}),
+		],
+	});
+}
+var xi = de(
+	`group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-4xl border border-transparent px-2 py-0.5 font-medium text-xs transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-start]:ps-1.5 has-data-[icon=inline-end]:pe-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!`,
+	{
+		variants: {
+			variant: {
+				default: `bg-primary text-primary-foreground [a]:hover:bg-primary/80`,
+				secondary: `bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80`,
+				destructive: `bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20`,
+				outline: `border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground`,
+				ghost: `hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50`,
+				link: `text-primary underline-offset-4 hover:underline`,
+			},
+		},
+		defaultVariants: { variant: `default` },
+	},
+);
+function Si({ className: e, variant: t = `default`, asChild: n = !1, ...r }) {
+	return (0, F.jsx)(n ? v : `span`, {
+		"data-slot": `badge`,
+		"data-variant": t,
+		className: i(xi({ variant: t }), e),
+		...r,
+	});
+}
+export {
+	ft as $,
+	vr as A,
+	ar as B,
+	kr as C,
+	Mr as D,
+	li as E,
+	gr as F,
+	Ot as G,
+	lr as H,
+	fr as I,
+	Ct as J,
+	Et as K,
+	hr as L,
+	pr as M,
+	mr as N,
+	wr as O,
+	dr as P,
+	pt as Q,
+	_r as R,
+	Q as S,
+	jr as T,
+	cr as U,
+	sr as V,
+	Jn as W,
+	xt as X,
+	St as Y,
+	yt as Z,
+	Tr as _,
+	vi as a,
+	Or as b,
+	pi as c,
+	X as d,
+	st as et,
+	Sr as f,
+	ui as g,
+	Xr as h,
+	_i as i,
+	ur as j,
+	Nr as k,
+	mi as l,
+	Pr as m,
+	bi as n,
+	He as nt,
+	yi as o,
+	Z as p,
+	Tt as q,
+	hi as r,
+	gi as s,
+	Si as t,
+	Ke as tt,
+	di as u,
+	Er as v,
+	Ar as w,
+	br as x,
+	Dr as y,
+	rr as z,
+};

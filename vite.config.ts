@@ -49,7 +49,7 @@ const config = defineConfig({
 	// is loaded via dynamic import with its own try/catch; keep it external.
 	ssr: {
 		noExternal: process.env.NODE_ENV === "production" ? true : undefined,
-        external: ["sharp", "pg-native"],
+		external: ["sharp", "pg-native"],
 	},
 
 	build: {

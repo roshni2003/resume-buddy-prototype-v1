@@ -1,7 +1,8 @@
-import { o as setCookie$1 } from "./server-Ck__86By.js";
+import z from "zod";
 import { t as createServerFn } from "./createServerFn-Ch6eBU8Y.js";
 import { t as createServerRpc } from "./createServerRpc-D6AcG1Bm.js";
-import z from "zod";
+import { o as setCookie$1 } from "./server-Ck__86By.js";
+
 var localeSchema = z.union([
 	z.literal("af-ZA"),
 	z.literal("am-ET"),
@@ -55,15 +56,20 @@ var localeSchema = z.union([
 	z.literal("vi-VN"),
 	z.literal("zh-CN"),
 	z.literal("zh-TW"),
-	z.literal("zu-ZA")
+	z.literal("zu-ZA"),
 ]);
 var storageKey = "locale";
-var setLocaleServerFn_createServerFn_handler = createServerRpc({
-	id: "14080f89ae495ac5a5d573b2a10df3d783b0f8d025c02f37771c42e9f7e4faa7",
-	name: "setLocaleServerFn",
-	filename: "src/utils/locale.ts"
-}, (opts) => setLocaleServerFn.__executeServer(opts));
-var setLocaleServerFn = createServerFn({ method: "POST" }).inputValidator(localeSchema).handler(setLocaleServerFn_createServerFn_handler, async ({ data }) => {
-	setCookie$1(storageKey, data);
-});
+var setLocaleServerFn_createServerFn_handler = createServerRpc(
+	{
+		id: "14080f89ae495ac5a5d573b2a10df3d783b0f8d025c02f37771c42e9f7e4faa7",
+		name: "setLocaleServerFn",
+		filename: "src/utils/locale.ts",
+	},
+	(opts) => setLocaleServerFn.__executeServer(opts),
+);
+var setLocaleServerFn = createServerFn({ method: "POST" })
+	.inputValidator(localeSchema)
+	.handler(setLocaleServerFn_createServerFn_handler, async ({ data }) => {
+		setCookie$1(storageKey, data);
+	});
 export { setLocaleServerFn_createServerFn_handler };

@@ -1,1 +1,268 @@
-import{E as e,i as t,t as n}from"./preload-helper-DwC0sqXt.js";import{o as r,s as i}from"./string-_Z1c2EAS.js";function a(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];for(var r in n)e[r]=n[r]}return e}var o={read:function(e){return e[0]===`"`&&(e=e.slice(1,-1)),e.replace(/(%[\dA-F]{2})+/gi,decodeURIComponent)},write:function(e){return encodeURIComponent(e).replace(/%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g,decodeURIComponent)}};function s(e,t){function n(n,r,i){if(!(typeof document>`u`)){i=a({},t,i),typeof i.expires==`number`&&(i.expires=new Date(Date.now()+i.expires*864e5)),i.expires&&=i.expires.toUTCString(),n=encodeURIComponent(n).replace(/%(2[346B]|5E|60|7C)/g,decodeURIComponent).replace(/[()]/g,escape);var o=``;for(var s in i)i[s]&&(o+=`; `+s,i[s]!==!0&&(o+=`=`+i[s].split(`;`)[0]));return document.cookie=n+`=`+e.write(r,n)+o}}function r(t){if(!(typeof document>`u`||arguments.length&&!t)){for(var n=document.cookie?document.cookie.split(`; `):[],r={},i=0;i<n.length;i++){var a=n[i].split(`=`),o=a.slice(1).join(`=`);try{var s=decodeURIComponent(a[0]);if(r[s]=e.read(o,s),t===s)break}catch{}}return t?r[t]:r}}return Object.create({set:n,get:r,remove:function(e,t){n(e,``,a({},t,{expires:-1}))},withAttributes:function(e){return s(this.converter,a({},this.attributes,e))},withConverter:function(e){return s(a({},this.converter,e),this.attributes)}},{attributes:{value:Object.freeze(t)},converter:{value:Object.freeze(e)}})}var c=s(o,{path:`/`}),l=(e,t,n)=>{let r=t.lastIndexOf(`?`),i=e[r===-1||r<t.lastIndexOf(`/`)?t:t.slice(0,r)];return i?typeof i==`function`?i():Promise.resolve(i):new Promise((e,r)=>{(typeof queueMicrotask==`function`?queueMicrotask:setTimeout)(r.bind(null,Error(`Unknown variable dynamic import: `+t+(t.split(`/`).length===n?``:`. Note that variables only represent file names one level deep.`))))})},u=t.union([t.literal(`af-ZA`),t.literal(`am-ET`),t.literal(`ar-SA`),t.literal(`az-AZ`),t.literal(`bg-BG`),t.literal(`bn-BD`),t.literal(`ca-ES`),t.literal(`cs-CZ`),t.literal(`da-DK`),t.literal(`de-DE`),t.literal(`el-GR`),t.literal(`en-US`),t.literal(`es-ES`),t.literal(`fa-IR`),t.literal(`fi-FI`),t.literal(`fr-FR`),t.literal(`he-IL`),t.literal(`hi-IN`),t.literal(`hu-HU`),t.literal(`id-ID`),t.literal(`it-IT`),t.literal(`ja-JP`),t.literal(`km-KH`),t.literal(`kn-IN`),t.literal(`ko-KR`),t.literal(`lt-LT`),t.literal(`lv-LV`),t.literal(`ml-IN`),t.literal(`mr-IN`),t.literal(`ms-MY`),t.literal(`ne-NP`),t.literal(`nl-NL`),t.literal(`no-NO`),t.literal(`or-IN`),t.literal(`pl-PL`),t.literal(`pt-BR`),t.literal(`pt-PT`),t.literal(`ro-RO`),t.literal(`ru-RU`),t.literal(`sk-SK`),t.literal(`sq-AL`),t.literal(`sr-SP`),t.literal(`sv-SE`),t.literal(`ta-IN`),t.literal(`te-IN`),t.literal(`th-TH`),t.literal(`tr-TR`),t.literal(`uk-UA`),t.literal(`uz-UZ`),t.literal(`vi-VN`),t.literal(`zh-CN`),t.literal(`zh-TW`),t.literal(`zu-ZA`)]),d=`locale`,f=`en-US`;const p={"af-ZA":{id:`1Cox/a`},"am-ET":{id:`UV0J8D`},"ar-SA":{id:`8HV3WN`},"az-AZ":{id:`/IkoRr`},"bg-BG":{id:`KhEBDR`},"bn-BD":{id:`Hds3Bq`},"ca-ES":{id:`M1RLfx`},"cs-CZ":{id:`w9VTXG`},"da-DK":{id:`Fo2vDn`},"de-DE":{id:`DDcvSo`},"el-GR":{id:`CZXzs4`},"en-US":{id:`lYGfRP`},"es-ES":{id:`65A04M`},"fa-IR":{id:`JFI3iH`},"fi-FI":{id:`USZ2N6`},"fr-FR":{id:`nLC6tu`},"he-IL":{id:`3oTCgM`},"hi-IN":{id:`tGjibo`},"hu-HU":{id:`mkWad2`},"id-ID":{id:`BQukYF`},"it-IT":{id:`Lj7sBL`},"ja-JP":{id:`dFtidv`},"km-KH":{id:`Fb6WVr`},"kn-IN":{id:`ffJEXe`},"ko-KR":{id:`h6S9Yz`},"lt-LT":{id:`Ot2qtY`},"lv-LV":{id:`/0YsGP`},"ml-IN":{id:`WQrafy`},"mr-IN":{id:`vKSpmV`},"ms-MY":{id:`tF97tn`},"ne-NP":{id:`3v9KAT`},"nl-NL":{id:`KIjvtr`},"no-NO":{id:`1IipHp`},"or-IN":{id:`S8nPbQ`},"pl-PL":{id:`trnWaw`},"pt-BR":{id:`R7+D0/`},"pt-PT":{id:`512Uma`},"ro-RO":{id:`uJc01W`},"ru-RU":{id:`nji0/X`},"sk-SK":{id:`paESr6`},"sq-AL":{id:`pVxf7b`},"sr-SP":{id:`9aBtdW`},"sv-SE":{id:`UaISq3`},"ta-IN":{id:`fb427h`},"te-IN":{id:`2SnOmG`},"th-TH":{id:`SUr44j`},"tr-TR":{id:`Kz91g/`},"uk-UA":{id:`V9+2pH`},"uz-UZ":{id:`b1dG47`},"vi-VN":{id:`fROFIL`},"zh-CN":{id:`6imsQS`},"zh-TW":{id:`DM4gBB`},"zu-ZA":{id:`+v7Dt7`}};function m(e){return u.safeParse(e).success}var h=new Set([`ar`,`ckb`,`dv`,`fa`,`he`,`ps`,`sd`,`ug`,`ur`,`yi`]);function g(e){let t=e.split(`-`)[0].toLowerCase();return h.has(t)}const _=()=>{let e=c.get(d);return!e||!m(e)?f:e},v=r({method:`POST`}).handler(i(`14080f89ae495ac5a5d573b2a10df3d783b0f8d025c02f37771c42e9f7e4faa7`)),y=async t=>{m(t)||(t=f);let{messages:r}=await l({"../../locales/af-ZA.po":()=>n(()=>import(`./af-ZA-D3W8zGiL.js`),[]),"../../locales/am-ET.po":()=>n(()=>import(`./am-ET-7AEuxlLm.js`),[]),"../../locales/ar-SA.po":()=>n(()=>import(`./ar-SA-B30ugE2m.js`),[]),"../../locales/az-AZ.po":()=>n(()=>import(`./az-AZ-B53-PQgX.js`),[]),"../../locales/bg-BG.po":()=>n(()=>import(`./bg-BG-BUeqE2YS.js`),[]),"../../locales/bn-BD.po":()=>n(()=>import(`./bn-BD--2NdM6nQ.js`),[]),"../../locales/ca-ES.po":()=>n(()=>import(`./ca-ES-B2fz-99_.js`),[]),"../../locales/cs-CZ.po":()=>n(()=>import(`./cs-CZ-DMZp_UHb.js`),[]),"../../locales/da-DK.po":()=>n(()=>import(`./da-DK-C_J6Ih_K.js`),[]),"../../locales/de-DE.po":()=>n(()=>import(`./de-DE-D4XCHvHt.js`),[]),"../../locales/el-GR.po":()=>n(()=>import(`./el-GR-CMP7TXFY.js`),[]),"../../locales/en-US.po":()=>n(()=>import(`./en-US-BblKOqz0.js`),[]),"../../locales/es-ES.po":()=>n(()=>import(`./es-ES-DA2fOXLI.js`),[]),"../../locales/fa-IR.po":()=>n(()=>import(`./fa-IR-DaSFf4iU.js`),[]),"../../locales/fi-FI.po":()=>n(()=>import(`./fi-FI-CXanI1OO.js`),[]),"../../locales/fr-FR.po":()=>n(()=>import(`./fr-FR-BfYKg7U7.js`),[]),"../../locales/he-IL.po":()=>n(()=>import(`./he-IL-BxDubj3f.js`),[]),"../../locales/hi-IN.po":()=>n(()=>import(`./hi-IN-D6WekUWt.js`),[]),"../../locales/hu-HU.po":()=>n(()=>import(`./hu-HU-CYIeuDKL.js`),[]),"../../locales/id-ID.po":()=>n(()=>import(`./id-ID-Bs9tZhPD.js`),[]),"../../locales/it-IT.po":()=>n(()=>import(`./it-IT-CgxxFIl2.js`),[]),"../../locales/ja-JP.po":()=>n(()=>import(`./ja-JP-5bVj4yVq.js`),[]),"../../locales/km-KH.po":()=>n(()=>import(`./km-KH-C3g7YT5C.js`),[]),"../../locales/kn-IN.po":()=>n(()=>import(`./kn-IN-oCYaVvtE.js`),[]),"../../locales/ko-KR.po":()=>n(()=>import(`./ko-KR-GmLCXZqF.js`),[]),"../../locales/lt-LT.po":()=>n(()=>import(`./lt-LT-Js8ChwiD.js`),[]),"../../locales/lv-LV.po":()=>n(()=>import(`./lv-LV-CeTeCO3i.js`),[]),"../../locales/ml-IN.po":()=>n(()=>import(`./ml-IN-DLHbNg4a.js`),[]),"../../locales/mr-IN.po":()=>n(()=>import(`./mr-IN-B4NcR-Hs.js`),[]),"../../locales/ms-MY.po":()=>n(()=>import(`./ms-MY-0jlN_MvC.js`),[]),"../../locales/ne-NP.po":()=>n(()=>import(`./ne-NP-CPnF7zpE.js`),[]),"../../locales/nl-NL.po":()=>n(()=>import(`./nl-NL-d_GZkSz4.js`),[]),"../../locales/no-NO.po":()=>n(()=>import(`./no-NO-vTdrnWQi.js`),[]),"../../locales/or-IN.po":()=>n(()=>import(`./or-IN-BgKARd0V.js`),[]),"../../locales/pl-PL.po":()=>n(()=>import(`./pl-PL-4aCyCdcq.js`),[]),"../../locales/pt-BR.po":()=>n(()=>import(`./pt-BR-CZwNB82C.js`),[]),"../../locales/pt-PT.po":()=>n(()=>import(`./pt-PT-BOlWersM.js`),[]),"../../locales/ro-RO.po":()=>n(()=>import(`./ro-RO-BYQtCrBR.js`),[]),"../../locales/ru-RU.po":()=>n(()=>import(`./ru-RU-DqCelKw3.js`),[]),"../../locales/sk-SK.po":()=>n(()=>import(`./sk-SK-RlSFyknT.js`),[]),"../../locales/sl-SI.po":()=>n(()=>import(`./sl-SI-CEiNhKqW.js`),[]),"../../locales/sq-AL.po":()=>n(()=>import(`./sq-AL-Cn0vfwdP.js`),[]),"../../locales/sr-SP.po":()=>n(()=>import(`./sr-SP-BiYaGeLQ.js`),[]),"../../locales/sv-SE.po":()=>n(()=>import(`./sv-SE-CEJM7zxS.js`),[]),"../../locales/ta-IN.po":()=>n(()=>import(`./ta-IN-FUg6yWIl.js`),[]),"../../locales/te-IN.po":()=>n(()=>import(`./te-IN-CMXgeKYA.js`),[]),"../../locales/th-TH.po":()=>n(()=>import(`./th-TH-azZvCogO.js`),[]),"../../locales/tr-TR.po":()=>n(()=>import(`./tr-TR-CdQ4zXxs.js`),[]),"../../locales/uk-UA.po":()=>n(()=>import(`./uk-UA-BEcA1jAv.js`),[]),"../../locales/uz-UZ.po":()=>n(()=>import(`./uz-UZ-Us5aJWLH.js`),[]),"../../locales/vi-VN.po":()=>n(()=>import(`./vi-VN-DUpVCQAe.js`),[]),"../../locales/zh-CN.po":()=>n(()=>import(`./zh-CN-BZ5tukqf.js`),[]),"../../locales/zh-TW.po":()=>n(()=>import(`./zh-TW-QfcUHYl9.js`),[]),"../../locales/zu-ZA.po":()=>n(()=>import(`./zu-ZA-BTBoIFGo.js`),[])},`../../locales/${t}.po`,4);e.loadAndActivate({locale:t,messages:r})};export{p as a,y as i,m as n,v as o,g as r,c as s,_ as t};
+import { E as e, t as n, i as t } from "./preload-helper-DwC0sqXt.js";
+import { s as i, o as r } from "./string-_Z1c2EAS.js";
+function a(e) {
+	for (var t = 1; t < arguments.length; t++) {
+		var n = arguments[t];
+		for (var r in n) e[r] = n[r];
+	}
+	return e;
+}
+var o = {
+	read: (e) => (e[0] === `"` && (e = e.slice(1, -1)), e.replace(/(%[\dA-F]{2})+/gi, decodeURIComponent)),
+	write: (e) => encodeURIComponent(e).replace(/%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g, decodeURIComponent),
+};
+function s(e, t) {
+	function n(n, r, i) {
+		if (!(typeof document > `u`)) {
+			(i = a({}, t, i)),
+				typeof i.expires == `number` && (i.expires = new Date(Date.now() + i.expires * 864e5)),
+				(i.expires &&= i.expires.toUTCString()),
+				(n = encodeURIComponent(n)
+					.replace(/%(2[346B]|5E|60|7C)/g, decodeURIComponent)
+					.replace(/[()]/g, escape));
+			var o = ``;
+			for (var s in i) i[s] && ((o += `; ` + s), i[s] !== !0 && (o += `=` + i[s].split(`;`)[0]));
+			return (document.cookie = n + `=` + e.write(r, n) + o);
+		}
+	}
+	function r(t) {
+		if (!(typeof document > `u` || (arguments.length && !t))) {
+			for (var n = document.cookie ? document.cookie.split(`; `) : [], r = {}, i = 0; i < n.length; i++) {
+				var a = n[i].split(`=`),
+					o = a.slice(1).join(`=`);
+				try {
+					var s = decodeURIComponent(a[0]);
+					if (((r[s] = e.read(o, s)), t === s)) break;
+				} catch {}
+			}
+			return t ? r[t] : r;
+		}
+	}
+	return Object.create(
+		{
+			set: n,
+			get: r,
+			remove: (e, t) => {
+				n(e, ``, a({}, t, { expires: -1 }));
+			},
+			withAttributes: function (e) {
+				return s(this.converter, a({}, this.attributes, e));
+			},
+			withConverter: function (e) {
+				return s(a({}, this.converter, e), this.attributes);
+			},
+		},
+		{ attributes: { value: Object.freeze(t) }, converter: { value: Object.freeze(e) } },
+	);
+}
+var c = s(o, { path: `/` }),
+	l = (e, t, n) => {
+		const r = t.lastIndexOf(`?`),
+			i = e[r === -1 || r < t.lastIndexOf(`/`) ? t : t.slice(0, r)];
+		return i
+			? typeof i == `function`
+				? i()
+				: Promise.resolve(i)
+			: new Promise((e, r) => {
+					(typeof queueMicrotask == `function` ? queueMicrotask : setTimeout)(
+						r.bind(
+							null,
+							Error(
+								`Unknown variable dynamic import: ` +
+									t +
+									(t.split(`/`).length === n ? `` : `. Note that variables only represent file names one level deep.`),
+							),
+						),
+					);
+				});
+	},
+	u = t.union([
+		t.literal(`af-ZA`),
+		t.literal(`am-ET`),
+		t.literal(`ar-SA`),
+		t.literal(`az-AZ`),
+		t.literal(`bg-BG`),
+		t.literal(`bn-BD`),
+		t.literal(`ca-ES`),
+		t.literal(`cs-CZ`),
+		t.literal(`da-DK`),
+		t.literal(`de-DE`),
+		t.literal(`el-GR`),
+		t.literal(`en-US`),
+		t.literal(`es-ES`),
+		t.literal(`fa-IR`),
+		t.literal(`fi-FI`),
+		t.literal(`fr-FR`),
+		t.literal(`he-IL`),
+		t.literal(`hi-IN`),
+		t.literal(`hu-HU`),
+		t.literal(`id-ID`),
+		t.literal(`it-IT`),
+		t.literal(`ja-JP`),
+		t.literal(`km-KH`),
+		t.literal(`kn-IN`),
+		t.literal(`ko-KR`),
+		t.literal(`lt-LT`),
+		t.literal(`lv-LV`),
+		t.literal(`ml-IN`),
+		t.literal(`mr-IN`),
+		t.literal(`ms-MY`),
+		t.literal(`ne-NP`),
+		t.literal(`nl-NL`),
+		t.literal(`no-NO`),
+		t.literal(`or-IN`),
+		t.literal(`pl-PL`),
+		t.literal(`pt-BR`),
+		t.literal(`pt-PT`),
+		t.literal(`ro-RO`),
+		t.literal(`ru-RU`),
+		t.literal(`sk-SK`),
+		t.literal(`sq-AL`),
+		t.literal(`sr-SP`),
+		t.literal(`sv-SE`),
+		t.literal(`ta-IN`),
+		t.literal(`te-IN`),
+		t.literal(`th-TH`),
+		t.literal(`tr-TR`),
+		t.literal(`uk-UA`),
+		t.literal(`uz-UZ`),
+		t.literal(`vi-VN`),
+		t.literal(`zh-CN`),
+		t.literal(`zh-TW`),
+		t.literal(`zu-ZA`),
+	]),
+	d = `locale`,
+	f = `en-US`;
+const p = {
+	"af-ZA": { id: `1Cox/a` },
+	"am-ET": { id: `UV0J8D` },
+	"ar-SA": { id: `8HV3WN` },
+	"az-AZ": { id: `/IkoRr` },
+	"bg-BG": { id: `KhEBDR` },
+	"bn-BD": { id: `Hds3Bq` },
+	"ca-ES": { id: `M1RLfx` },
+	"cs-CZ": { id: `w9VTXG` },
+	"da-DK": { id: `Fo2vDn` },
+	"de-DE": { id: `DDcvSo` },
+	"el-GR": { id: `CZXzs4` },
+	"en-US": { id: `lYGfRP` },
+	"es-ES": { id: `65A04M` },
+	"fa-IR": { id: `JFI3iH` },
+	"fi-FI": { id: `USZ2N6` },
+	"fr-FR": { id: `nLC6tu` },
+	"he-IL": { id: `3oTCgM` },
+	"hi-IN": { id: `tGjibo` },
+	"hu-HU": { id: `mkWad2` },
+	"id-ID": { id: `BQukYF` },
+	"it-IT": { id: `Lj7sBL` },
+	"ja-JP": { id: `dFtidv` },
+	"km-KH": { id: `Fb6WVr` },
+	"kn-IN": { id: `ffJEXe` },
+	"ko-KR": { id: `h6S9Yz` },
+	"lt-LT": { id: `Ot2qtY` },
+	"lv-LV": { id: `/0YsGP` },
+	"ml-IN": { id: `WQrafy` },
+	"mr-IN": { id: `vKSpmV` },
+	"ms-MY": { id: `tF97tn` },
+	"ne-NP": { id: `3v9KAT` },
+	"nl-NL": { id: `KIjvtr` },
+	"no-NO": { id: `1IipHp` },
+	"or-IN": { id: `S8nPbQ` },
+	"pl-PL": { id: `trnWaw` },
+	"pt-BR": { id: `R7+D0/` },
+	"pt-PT": { id: `512Uma` },
+	"ro-RO": { id: `uJc01W` },
+	"ru-RU": { id: `nji0/X` },
+	"sk-SK": { id: `paESr6` },
+	"sq-AL": { id: `pVxf7b` },
+	"sr-SP": { id: `9aBtdW` },
+	"sv-SE": { id: `UaISq3` },
+	"ta-IN": { id: `fb427h` },
+	"te-IN": { id: `2SnOmG` },
+	"th-TH": { id: `SUr44j` },
+	"tr-TR": { id: `Kz91g/` },
+	"uk-UA": { id: `V9+2pH` },
+	"uz-UZ": { id: `b1dG47` },
+	"vi-VN": { id: `fROFIL` },
+	"zh-CN": { id: `6imsQS` },
+	"zh-TW": { id: `DM4gBB` },
+	"zu-ZA": { id: `+v7Dt7` },
+};
+function m(e) {
+	return u.safeParse(e).success;
+}
+var h = new Set([`ar`, `ckb`, `dv`, `fa`, `he`, `ps`, `sd`, `ug`, `ur`, `yi`]);
+function g(e) {
+	const t = e.split(`-`)[0].toLowerCase();
+	return h.has(t);
+}
+const _ = () => {
+		const e = c.get(d);
+		return !e || !m(e) ? f : e;
+	},
+	v = r({ method: `POST` }).handler(i(`14080f89ae495ac5a5d573b2a10df3d783b0f8d025c02f37771c42e9f7e4faa7`)),
+	y = async (t) => {
+		m(t) || (t = f);
+		const { messages: r } = await l(
+			{
+				"../../locales/af-ZA.po": () => n(() => import(`./af-ZA-D3W8zGiL.js`), []),
+				"../../locales/am-ET.po": () => n(() => import(`./am-ET-7AEuxlLm.js`), []),
+				"../../locales/ar-SA.po": () => n(() => import(`./ar-SA-B30ugE2m.js`), []),
+				"../../locales/az-AZ.po": () => n(() => import(`./az-AZ-B53-PQgX.js`), []),
+				"../../locales/bg-BG.po": () => n(() => import(`./bg-BG-BUeqE2YS.js`), []),
+				"../../locales/bn-BD.po": () => n(() => import(`./bn-BD--2NdM6nQ.js`), []),
+				"../../locales/ca-ES.po": () => n(() => import(`./ca-ES-B2fz-99_.js`), []),
+				"../../locales/cs-CZ.po": () => n(() => import(`./cs-CZ-DMZp_UHb.js`), []),
+				"../../locales/da-DK.po": () => n(() => import(`./da-DK-C_J6Ih_K.js`), []),
+				"../../locales/de-DE.po": () => n(() => import(`./de-DE-D4XCHvHt.js`), []),
+				"../../locales/el-GR.po": () => n(() => import(`./el-GR-CMP7TXFY.js`), []),
+				"../../locales/en-US.po": () => n(() => import(`./en-US-BblKOqz0.js`), []),
+				"../../locales/es-ES.po": () => n(() => import(`./es-ES-DA2fOXLI.js`), []),
+				"../../locales/fa-IR.po": () => n(() => import(`./fa-IR-DaSFf4iU.js`), []),
+				"../../locales/fi-FI.po": () => n(() => import(`./fi-FI-CXanI1OO.js`), []),
+				"../../locales/fr-FR.po": () => n(() => import(`./fr-FR-BfYKg7U7.js`), []),
+				"../../locales/he-IL.po": () => n(() => import(`./he-IL-BxDubj3f.js`), []),
+				"../../locales/hi-IN.po": () => n(() => import(`./hi-IN-D6WekUWt.js`), []),
+				"../../locales/hu-HU.po": () => n(() => import(`./hu-HU-CYIeuDKL.js`), []),
+				"../../locales/id-ID.po": () => n(() => import(`./id-ID-Bs9tZhPD.js`), []),
+				"../../locales/it-IT.po": () => n(() => import(`./it-IT-CgxxFIl2.js`), []),
+				"../../locales/ja-JP.po": () => n(() => import(`./ja-JP-5bVj4yVq.js`), []),
+				"../../locales/km-KH.po": () => n(() => import(`./km-KH-C3g7YT5C.js`), []),
+				"../../locales/kn-IN.po": () => n(() => import(`./kn-IN-oCYaVvtE.js`), []),
+				"../../locales/ko-KR.po": () => n(() => import(`./ko-KR-GmLCXZqF.js`), []),
+				"../../locales/lt-LT.po": () => n(() => import(`./lt-LT-Js8ChwiD.js`), []),
+				"../../locales/lv-LV.po": () => n(() => import(`./lv-LV-CeTeCO3i.js`), []),
+				"../../locales/ml-IN.po": () => n(() => import(`./ml-IN-DLHbNg4a.js`), []),
+				"../../locales/mr-IN.po": () => n(() => import(`./mr-IN-B4NcR-Hs.js`), []),
+				"../../locales/ms-MY.po": () => n(() => import(`./ms-MY-0jlN_MvC.js`), []),
+				"../../locales/ne-NP.po": () => n(() => import(`./ne-NP-CPnF7zpE.js`), []),
+				"../../locales/nl-NL.po": () => n(() => import(`./nl-NL-d_GZkSz4.js`), []),
+				"../../locales/no-NO.po": () => n(() => import(`./no-NO-vTdrnWQi.js`), []),
+				"../../locales/or-IN.po": () => n(() => import(`./or-IN-BgKARd0V.js`), []),
+				"../../locales/pl-PL.po": () => n(() => import(`./pl-PL-4aCyCdcq.js`), []),
+				"../../locales/pt-BR.po": () => n(() => import(`./pt-BR-CZwNB82C.js`), []),
+				"../../locales/pt-PT.po": () => n(() => import(`./pt-PT-BOlWersM.js`), []),
+				"../../locales/ro-RO.po": () => n(() => import(`./ro-RO-BYQtCrBR.js`), []),
+				"../../locales/ru-RU.po": () => n(() => import(`./ru-RU-DqCelKw3.js`), []),
+				"../../locales/sk-SK.po": () => n(() => import(`./sk-SK-RlSFyknT.js`), []),
+				"../../locales/sl-SI.po": () => n(() => import(`./sl-SI-CEiNhKqW.js`), []),
+				"../../locales/sq-AL.po": () => n(() => import(`./sq-AL-Cn0vfwdP.js`), []),
+				"../../locales/sr-SP.po": () => n(() => import(`./sr-SP-BiYaGeLQ.js`), []),
+				"../../locales/sv-SE.po": () => n(() => import(`./sv-SE-CEJM7zxS.js`), []),
+				"../../locales/ta-IN.po": () => n(() => import(`./ta-IN-FUg6yWIl.js`), []),
+				"../../locales/te-IN.po": () => n(() => import(`./te-IN-CMXgeKYA.js`), []),
+				"../../locales/th-TH.po": () => n(() => import(`./th-TH-azZvCogO.js`), []),
+				"../../locales/tr-TR.po": () => n(() => import(`./tr-TR-CdQ4zXxs.js`), []),
+				"../../locales/uk-UA.po": () => n(() => import(`./uk-UA-BEcA1jAv.js`), []),
+				"../../locales/uz-UZ.po": () => n(() => import(`./uz-UZ-Us5aJWLH.js`), []),
+				"../../locales/vi-VN.po": () => n(() => import(`./vi-VN-DUpVCQAe.js`), []),
+				"../../locales/zh-CN.po": () => n(() => import(`./zh-CN-BZ5tukqf.js`), []),
+				"../../locales/zh-TW.po": () => n(() => import(`./zh-TW-QfcUHYl9.js`), []),
+				"../../locales/zu-ZA.po": () => n(() => import(`./zu-ZA-BTBoIFGo.js`), []),
+			},
+			`../../locales/${t}.po`,
+			4,
+		);
+		e.loadAndActivate({ locale: t, messages: r });
+	};
+export { p as a, y as i, m as n, v as o, g as r, c as s, _ as t };

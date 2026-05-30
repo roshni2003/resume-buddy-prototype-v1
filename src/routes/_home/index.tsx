@@ -4,13 +4,13 @@ import { templates } from "@/dialogs/resume/template/data";
 
 export const Route = createFileRoute("/_home/")({
 	beforeLoad: ({ location }) => {
-		// IMPORTANT: Do NOT use `search` here — TanStack Router strips unknown params
-		// (like ?token=) from the validated search object when there is no validateSearch.
-		// Use location.searchStr (raw query string) with href to safely forward
-		// the token through the SSR redirect to /dashboard/resumes.
-		throw redirect({ href: `/dashboard/resumes${location.searchStr}` });
+		// IMPORTANT: Only redirect if there is an auth token in the URL.
+		// Otherwise, show the home/landing page.
+		if (location.searchStr.includes("token=")) {
+			throw redirect({ href: `/dashboard/resumes${location.searchStr}` });
+		}
 	},
-	component: () => null,
+	component: RouteComponent,
 });
 
 function RouteComponent() {

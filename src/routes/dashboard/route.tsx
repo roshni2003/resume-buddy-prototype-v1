@@ -1,6 +1,6 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import {ReadCvLogo, Users } from "@phosphor-icons/react";
+import { ReadCvLogo, Users } from "@phosphor-icons/react";
 // import { ChartBar} from "@phosphor-icons/react";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 // import { ReadCvLogoIcon } from "@phosphor-icons/react";
@@ -151,14 +151,6 @@ function RouteComponent() {
 		if (!devBypass && !isValidToken(token) && !isValidToken(urlToken)) {
 			redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash);
 		}
-	}, []);
-
-	useEffect(() => {
-		const token = getAuthToken();
-		console.log("[auth-debug] dashboard.RouteComponent mounted", {
-			path: window.location.pathname + window.location.search + window.location.hash,
-			hasStoredToken: Boolean(token),
-		});
 	}, []);
 
 	if (needsAuth) {

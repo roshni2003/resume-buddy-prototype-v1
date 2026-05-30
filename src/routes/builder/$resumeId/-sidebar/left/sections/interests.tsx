@@ -24,9 +24,7 @@ export function InterestsSectionBuilder() {
 				items={section.items}
 				onReorder={handleReorder}
 				keyExtractor={(item) => item.id}
-				renderItem={(item) => (
-					<SortableSectionItem key={item.id} type="interests" item={item} title={item.name} />
-				)}
+				renderItem={(item) => <SortableSectionItem key={item.id} type="interests" item={item} title={item.name} />}
 			/>
 
 			<SectionAddItemButton type="interests">

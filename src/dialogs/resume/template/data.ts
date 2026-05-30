@@ -1,7 +1,6 @@
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/macro";
 import type { Template } from "@/schema/templates";
-import type { ResumeData } from "@/schema/resume/data";
 
 export type TemplateDefaults = {
 	design: {
