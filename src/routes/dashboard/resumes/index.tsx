@@ -64,23 +64,14 @@ function RouteComponent() {
 		enabled: isAuthed,
 	});
 
-	// Track User Resumes Count (Metric #2)
+	// Sync User Profile for total resumes length accurately
 	useEffect(() => {
-		if (resumes) {
-			mixpanelService.track("User Resumes Count", {
-				total_resumes: resumes.length,
-				timestamp: new Date().toISOString(),
+		if (resumes && resumes.length !== undefined) {
+			mixpanelService.setProfileProperties({
+				"Total Resumes": resumes.length,
 			});
-		}
-	}, [resumes]);
 
-	// Track Users Who Created Resumes (Metric #1)
-	useEffect(() => {
-		if (resumes && resumes.length > 0) {
-			mixpanelService.track("Resume Created", {
-				resume_count: resumes.length,
-				timestamp: new Date().toISOString(),
-			});
+			// Removing the broken tracking events below that fired repeatedly upon page load
 		}
 	}, [resumes]);
 

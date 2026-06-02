@@ -11,7 +11,6 @@ const tokenTail = (token: string | null | undefined) =>
 const log = (...args: unknown[]) => {
 	if (DEBUG && typeof console !== "undefined") {
 		// eslint-disable-next-line no-console
-		console.log("[auth-debug]", ...args);
 	}
 };
 
@@ -172,7 +171,8 @@ export const persistAuthToken = async (token: string, maxAttempts = 3): Promise<
 			sessionOk = true;
 			storedSomewhere = true;
 		}
-	} catch (e) {}
+	} catch (e) {
+	}
 
 	// 3. First-party cookie — survives some in-app browsers and Safari private mode
 	//    where Web Storage is silently broken. Always attempted as a third fallback.

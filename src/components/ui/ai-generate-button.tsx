@@ -109,56 +109,71 @@ export function AIGenerateButton({
 			{
 				onSuccess: async (response) => {
 					const content = Object.values(response)[0];
-					console.log("Generation successful, content length:", content?.length);
 
-					// Fetch recent usage from GET API to sync with Mixpanel
-					// Since backend might take a moment to record it, you could fetch the last page and get the most recent one
-					if (user?.id) {
+					if (user?.id && effectiveResumeId) {
 						try {
-							// Fetching the user AI invocations (latest one on page 1)
-							const invocationsResponse = await api.fetchUserAIInvocations(user.id, 1, 1);
+							// Fetch more records to find the correct one
+							const invocationsResponse = await api.fetchUserAIInvocations(user.id, 1, 10); // Get last 10 invocations
 
-							// Make sure we have invocations
 							if (invocationsResponse?.invocations?.length > 0) {
-								const latestInvocation = invocationsResponse.invocations[0];
+								// Find the invocation that matches current resume and type
+								const matchingInvocation = invocationsResponse.invocations.find(
+									(inv) =>
+										inv.resumeId === effectiveResumeId &&
+										inv.keyName ===
+											(type === "experience"
+												? "ExperienceDescription"
+												: type === "projects"
+													? "ProjectsDescription"
+													: type === "summary"
+														? "summary"
+														: "FinalReview"),
+								);
+
+								// Also check the most recent one if no match found
+								const latestInvocation = matchingInvocation || invocationsResponse.invocations[0];
+
+								console.log("[Mixpanel] Found invocation:", {
+									keyName: latestInvocation.keyName,
+									totalTokens: latestInvocation.totalTokens,
+									dollarUsed: latestInvocation.dollarUsed,
+									createdAt: latestInvocation.createdAt,
+								});
 
 								mixpanelService.track("AI Token Usage", {
-									tokens_used:
-										latestInvocation.totalTokens || latestInvocation.inputTokens + latestInvocation.outputTokens,
+									tokens_used: latestInvocation.totalTokens,
 									total_cost: latestInvocation.dollarUsed,
 									feature: type,
 									success: true,
 									round: roundsUsed + 1,
+									resume_id: effectiveResumeId,
+									invocation_id: latestInvocation.id,
 									timestamp: new Date().toISOString(),
 									date: new Date().toISOString().split("T")[0],
 								});
 							} else {
-								// Fallback
+								// Fallback: track without token data but mark as pending
 								mixpanelService.track("AI Token Usage", {
 									feature: type,
 									success: true,
 									round: roundsUsed + 1,
+									token_data_pending: true,
 								});
 							}
 						} catch (err) {
-							console.error("Failed to fetch recent invocation data", err);
+							console.error("Failed to fetch invocation data", err);
+							// Don't block the user experience - still track success
+							mixpanelService.track("AI Token Usage", {
+								feature: type,
+								success: true,
+								round: roundsUsed + 1,
+								token_tracking_failed: true,
+							});
 						}
 					}
 
-					// Check if content is valid
-					if (!content || content.length < 10) {
-						toast.error(t`Generated content is too short. Please try again.`, { id: toastId });
-						return;
-					}
-
-					toast.success(t`Content generated successfully!`, { id: toastId });
 					onGenerated(content);
-
-					// Record the round
-					if (isMounted.current) {
-						console.log("Recording round completion");
-						onRoundComplete?.();
-					}
+					onRoundComplete?.();
 				},
 				onError: (error: Error) => {
 					console.error("Generation error:", error);

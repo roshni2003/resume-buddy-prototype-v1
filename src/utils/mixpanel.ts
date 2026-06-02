@@ -23,6 +23,10 @@ export const mixpanelService = {
 			$email: user?.email,
 		});
 	},
+	setProfileProperties: (properties: object) => {
+		console.log(`[Mixpanel] Profile Set:`, properties);
+		mixpanel.people.set(properties);
+	},
 	track: (name: string, props?: object) => {
 		console.log(`[Mixpanel] Tracking: ${name}`, props);
 		mixpanel.track(name, props);
