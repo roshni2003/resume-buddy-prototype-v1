@@ -129,10 +129,9 @@ export function BuilderSidebarLeft() {
 			<div className="space-y-3 p-3 sm:space-y-4 sm:p-4">
 				{/* Fixed sections (picture and basics) - not draggable, always at top */}
 				{fixedSections.map((section) => (
-					<Fragment key={section}>
+					<div key={section} className="mb-4">
 						{getSectionComponent(section)}
-						<Separator />
-					</Fragment>
+					</div>
 				))}
 
 				{/* Reorderable content sections */}
@@ -140,11 +139,10 @@ export function BuilderSidebarLeft() {
 					items={sectionOrder}
 					onReorder={handleSectionReorder}
 					keyExtractor={(section) => section}
-					className="space-y-3 sm:space-y-4"
+					className="space-y-4"
 					renderItem={(section) => (
-						<SortableItem key={section} id={section} className="space-y-3 sm:space-y-4">
+						<SortableItem key={section} id={section}>
 							{getSectionComponent(section)}
-							<Separator />
 						</SortableItem>
 					)}
 				/>

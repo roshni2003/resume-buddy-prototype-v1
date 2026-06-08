@@ -21,7 +21,7 @@ export function PictureSectionBuilder() {
 	);
 }
 
-function PictureSectionForm() {
+export function PictureSectionForm() {
 	const picture = useResumeStore((state) => state.resume.data.picture);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 

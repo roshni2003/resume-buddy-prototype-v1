@@ -23,7 +23,7 @@ const formSchema = basicsSchema;
 
 type FormValues = z.infer<typeof formSchema>;
 
-function BasicsSectionForm() {
+export function BasicsSectionForm() {
 	const basics = useResumeStore((state) => state.resume.data.basics);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
