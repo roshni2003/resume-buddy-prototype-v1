@@ -24,6 +24,7 @@ import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/re
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
 import { Route as UploadsUserIdSplatRouteImport } from "./routes/uploads/$userId.$";
 import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
+import { Route as DashboardResumesUploadRouteImport } from "./routes/dashboard/resumes/upload";
 import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
 import { Route as ApiOpenapiSplatRouteImport } from "./routes/api/openapi.$";
 import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth.$";
@@ -103,6 +104,11 @@ const DashboardSettingsProfileRoute =
     path: "/settings/profile",
     getParentRoute: () => DashboardRouteRoute,
   } as any);
+const DashboardResumesUploadRoute = DashboardResumesUploadRouteImport.update({
+  id: "/resumes/upload",
+  path: "/resumes/upload",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: "/api/rpc/$",
   path: "/api/rpc/$",
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
+  "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
+  "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId": typeof BuilderResumeIdIndexRoute;
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   "/api/auth/$": typeof ApiAuthSplatRoute;
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
+  "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
+    | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId/"
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
+    | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId"
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | "/api/auth/$"
     | "/api/openapi/$"
     | "/api/rpc/$"
+    | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId/"
@@ -358,6 +370,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardSettingsProfileRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/dashboard/resumes/upload": {
+      id: "/dashboard/resumes/upload";
+      path: "/resumes/upload";
+      fullPath: "/dashboard/resumes/upload";
+      preLoaderRoute: typeof DashboardResumesUploadRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     "/api/rpc/$": {
       id: "/api/rpc/$";
       path: "/api/rpc/$";
@@ -396,12 +415,14 @@ const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute;
+  DashboardResumesUploadRoute: typeof DashboardResumesUploadRoute;
   DashboardSettingsProfileRoute: typeof DashboardSettingsProfileRoute;
   DashboardResumesIndexRoute: typeof DashboardResumesIndexRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardResumesUploadRoute: DashboardResumesUploadRoute,
   DashboardSettingsProfileRoute: DashboardSettingsProfileRoute,
   DashboardResumesIndexRoute: DashboardResumesIndexRoute,
 };
