@@ -1,6 +1,6 @@
-const fs = require('fs');
-const file = '/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx';
-let code = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const file = "/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx";
+let code = fs.readFileSync(file, "utf8");
 
 const colorMapCode = `
 const colorMap: Record<string, { iconText: string; iconBg: string; border: string }> = {
@@ -24,13 +24,13 @@ const colorMap: Record<string, { iconText: string; iconBg: string; border: strin
 `;
 
 code = code.replace(
-  'export function SectionBase({ type, className, ...props }: Props) {',
-  colorMapCode + '\nexport function SectionBase({ type, className, ...props }: Props) {'
+	"export function SectionBase({ type, className, ...props }: Props) {",
+	colorMapCode + "\nexport function SectionBase({ type, className, ...props }: Props) {",
 );
 
 code = code.replace(
-  'const toggleCollapsed = useSectionStore((state) => state.toggleCollapsed);',
-  'const toggleCollapsed = useSectionStore((state) => state.toggleCollapsed);\n\tconst colors = colorMap[type as string] || colorMap.custom;'
+	"const toggleCollapsed = useSectionStore((state) => state.toggleCollapsed);",
+	"const toggleCollapsed = useSectionStore((state) => state.toggleCollapsed);\n\tconst colors = colorMap[type as string] || colorMap.custom;",
 );
 
 const newRender = `

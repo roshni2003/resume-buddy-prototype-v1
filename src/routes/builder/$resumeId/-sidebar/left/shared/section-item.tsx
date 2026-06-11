@@ -344,7 +344,7 @@ export function SectionAddItemButton({ type, customSectionId, className, childre
 			openDialog(`resume.sections.${type}.create`, customSectionId ? { customSectionId } : undefined);
 		}
 	};
-	
+
 	const colors = colorMap[type as string] || colorMap.custom;
 
 	return (
@@ -352,7 +352,13 @@ export function SectionAddItemButton({ type, customSectionId, className, childre
 			tapScale={1}
 			variant="outline"
 			onClick={handleAdd}
-			className={cn("mt-4 h-10 w-full justify-center rounded-full border border-dashed transition-colors hover:bg-white", colors.text, colors.bg, colors.border, className)}
+			className={cn(
+				"mt-4 h-10 w-full justify-center rounded-full border border-dashed transition-colors hover:bg-white",
+				colors.text,
+				colors.bg,
+				colors.border,
+				className,
+			)}
 			{...props}
 		>
 			<PlusIcon className="mr-2 h-4 w-4" />

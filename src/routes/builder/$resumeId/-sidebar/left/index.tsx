@@ -1,11 +1,10 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { SortableItem } from "@/components/ui/sortable-item";
 import { SortableList } from "@/components/ui/sortable-list";
 import { type LeftSidebarSection, leftSidebarSections } from "@/utils/resume/section";
-import { AwardsSectionBuilder } from "./sections/awards";
+// import { AwardsSectionBuilder } from "./sections/awards";
 import { BasicsSectionBuilder } from "./sections/basics";
 import { CertificationsSectionBuilder } from "./sections/certifications";
 import { CustomSectionBuilder } from "./sections/custom";
@@ -16,8 +15,8 @@ import { LanguagesSectionBuilder } from "./sections/languages";
 import { PictureSectionBuilder } from "./sections/picture";
 import { ProfilesSectionBuilder } from "./sections/profiles";
 import { ProjectsSectionBuilder } from "./sections/projects";
-import { PublicationsSectionBuilder } from "./sections/publications";
-import { ReferencesSectionBuilder } from "./sections/references";
+// import { PublicationsSectionBuilder } from "./sections/publications";
+// import { ReferencesSectionBuilder } from "./sections/references";
 import { SkillsSectionBuilder } from "./sections/skills";
 import { SummarySectionBuilder } from "./sections/summary";
 import { VolunteerSectionBuilder } from "./sections/volunteer";
@@ -44,16 +43,16 @@ function getSectionComponent(type: LeftSidebarSection) {
 			return <LanguagesSectionBuilder />;
 		case "interests":
 			return <InterestsSectionBuilder />;
-		case "awards":
-			return <AwardsSectionBuilder />;
+		// case "awards":
+		// 	return <AwardsSectionBuilder />;
 		case "certifications":
 			return <CertificationsSectionBuilder />;
-		case "publications":
-			return <PublicationsSectionBuilder />;
+		// case "publications":
+		// 	return <PublicationsSectionBuilder />;
 		case "volunteer":
 			return <VolunteerSectionBuilder />;
-		case "references":
-			return <ReferencesSectionBuilder />;
+		// case "references":
+		// 	return <ReferencesSectionBuilder />;
 		case "custom":
 			return <CustomSectionBuilder />;
 		default: {

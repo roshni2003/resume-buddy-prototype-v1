@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 var MOBILE_QUERY = `(max-width: 767px)`;
 function useIsMobile() {
 	const [isMobile, setIsMobile] = useState(void 0);

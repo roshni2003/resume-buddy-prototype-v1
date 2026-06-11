@@ -115,18 +115,18 @@ class RuleBasedFixer {
 		// Strip HTML to count actual words
 		const plainText = RuleBasedFixer.stripHtml(text);
 		const words = plainText.trim().split(/\s+/);
-		
+
 		if (words.length >= minWords) return text;
 
 		// Check if original has HTML
 		const hasHtml = /<[^>]*>/.test(text);
-		
+
 		// Append a professional fallback sentence
 		const fallback =
 			" I bring a proven track record of delivering high-quality results, strong problem-solving abilities, and a commitment to continuous learning and professional growth in every project I undertake.";
-		
+
 		const result = plainText.trim() + fallback;
-		
+
 		// Wrap back in HTML if needed
 		return hasHtml ? RuleBasedFixer.wrapInHtml(result) : result;
 	}
@@ -149,7 +149,7 @@ class RuleBasedFixer {
 	static applyAllRules(text: string, isListFormat = false): string {
 		// Check if text contains HTML
 		const hasHtml = /<[^>]*>/.test(text);
-		
+
 		// Strip HTML if present, but remember we need to wrap it back
 		let fixed = hasHtml ? RuleBasedFixer.stripHtml(text) : text;
 
@@ -254,7 +254,7 @@ export class AutoFixEngine {
 			const originalSummary = fixed.summary.content;
 			fixed.summary.content = RuleBasedFixer.applyAllRules(fixed.summary.content);
 			fixed.summary.content = RuleBasedFixer.ensureMinimumSummaryLength(fixed.summary.content);
-			
+
 			if (originalSummary !== fixed.summary.content) {
 				console.log("✏️ Summary fixed:");
 				console.log("  Before:", originalSummary);

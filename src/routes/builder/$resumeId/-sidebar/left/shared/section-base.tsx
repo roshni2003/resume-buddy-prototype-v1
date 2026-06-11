@@ -1,10 +1,10 @@
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { ChevronDown } from "lucide-react";
+import { useMemo } from "react";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { DragHandle } from "@/components/ui/sortable-item";
 import type { SectionType } from "@/schema/resume/data";
-import { getSectionIcon, getSectionTitle, type LeftSidebarSection } from "@/utils/resume/section";
+import { getSectionIcon, getSectionTitle, type LeftSidebarSection, leftSidebarSections } from "@/utils/resume/section";
 import { cn } from "@/utils/style";
 import { useSectionStore } from "../../../-store/section";
 import { SectionDropdownMenu } from "./section-menu";
@@ -33,6 +33,7 @@ const colorMap: Record<string, { iconText: string; iconBg: string; border: strin
 };
 
 export function SectionBase({ type, className, ...props }: Props) {
+	const layout = useResumeStore((state) => state.resume.data.metadata.layout);
 	const section = useResumeStore((state) => {
 		if (type === "basics") return state.resume.data.basics;
 		if (type === "summary") return state.resume.data.summary;
@@ -41,10 +42,31 @@ export function SectionBase({ type, className, ...props }: Props) {
 		return state.resume.data.sections[type];
 	});
 
+	const orderedSections = useMemo(() => {
+		const layoutSections = layout.pages.flatMap((page) => [...page.main, ...page.sidebar]);
+		const ordered: string[] = [];
+		const seen = new Set<string>();
+
+		for (const section of layoutSections) {
+			if (!leftSidebarSections.includes(section as LeftSidebarSection)) continue;
+			if (seen.has(section)) continue;
+			ordered.push(section);
+			seen.add(section);
+		}
+
+		for (const section of leftSidebarSections) {
+			if (seen.has(section)) continue;
+			ordered.push(section);
+			seen.add(section);
+		}
+
+		return ordered;
+	}, [layout.pages]);
+
 	const isHidden = "hidden" in section && section.hidden;
 	const collapsed = useSectionStore((state) => state.sections[type]?.collapsed ?? false);
 	const toggleCollapsed = useSectionStore((state) => state.toggleCollapsed);
-	
+
 	const colors = colorMap[type as string] || colorMap.custom;
 
 	return (
@@ -56,39 +78,45 @@ export function SectionBase({ type, className, ...props }: Props) {
 			onValueChange={() => toggleCollapsed(type)}
 			className={cn(isHidden && "opacity-50")}
 		>
-			<AccordionItem 
-				value={type} 
+			<AccordionItem
+				value={type}
 				className={cn(
-					"group/accordion overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 transition-all hover:shadow-md",
-					"border-l-4",
-					colors.border
+					"group/accordion overflow-hidden rounded-[32px] border border-gray-100 bg-white transition-all hover:shadow-sm",
 				)}
 			>
-				<div className="flex items-center gap-2 p-3 sm:p-4 transition-colors hover:bg-gray-50/50">
+				<div className="flex items-center gap-2 p-3 transition-colors hover:bg-gray-50/50 sm:p-4">
 					{/* Drag handle */}
-					<DragHandle className="text-gray-400 hover:text-gray-600" />
+					{!["picture", "basics"].includes(type) && (
+						<DragHandle className="ml-1 text-gray-400 hover:text-gray-600" />
+					)}
 
-					{/* Icon and Title */}
-					<div className="flex flex-1 items-center gap-x-3">
-						<div className={cn("flex h-8 w-8 items-center justify-center rounded-full", colors.iconBg, colors.iconText)}>
-							{getSectionIcon(type)}
-						</div>
-						<h2 className="line-clamp-1 font-semibold text-gray-900 lg:text-lg">
-							{("title" in section && section.title) || getSectionTitle(type)}
-						</h2>
+					<div className="flex-1">
+						<AccordionTrigger className="flex w-full items-center justify-between py-0 hover:no-underline">
+							{/* Icon and Title */}
+							<div className="ml-2 flex items-center gap-x-4 text-left">
+								<div
+									className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", colors.iconBg, colors.iconText)}
+								>
+									{getSectionIcon(type)}
+								</div>
+								<h2 className="line-clamp-1 font-serif text-gray-900 text-xl tracking-tight">
+									{("title" in section && section.title) || getSectionTitle(type)}
+								</h2>
+							</div>
+
+							{/* OPEN Button Toggle Chevron */}
+							<div className="flex items-center justify-center text-gray-500 transition-colors hover:text-gray-900">
+								<ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/accordion:rotate-180" />
+							</div>
+						</AccordionTrigger>
 					</div>
 
 					{/* Menu */}
 					{!["picture", "basics", "custom"].includes(type) && (
-						<SectionDropdownMenu type={type as "summary" | SectionType} />
+						<div className="ml-2">
+							<SectionDropdownMenu type={type as "summary" | SectionType} />
+						</div>
 					)}
-
-					{/* Arrow */}
-					<AccordionTrigger asChild className="ml-2 items-center justify-center">
-						<Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-gray-400 hover:text-gray-900">
-							<CaretRightIcon className="h-4 w-4 transition-transform group-data-[state=open]/accordion:rotate-90" />
-						</Button>
-					</AccordionTrigger>
 				</div>
 
 				<AccordionContent

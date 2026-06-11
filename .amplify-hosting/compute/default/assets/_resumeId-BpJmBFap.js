@@ -9,10 +9,11 @@ import "./locale-BPZR263U.js";
 import "./alert-dialog-D16KSnDL.js";
 import { t as useResumeStore } from "./resume-BHY1IvQp.js";
 import "./section-lTXHolph.js";
-import { t as ResumePreview } from "./preview-BAUdtGCW.js";
-import { useEffect, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { jsx } from "react/jsx-runtime";
+import { t as ResumePreview } from "./preview-BAUdtGCW.js";
+
 var routeApi = getRouteApi("/printer/$resumeId");
 function RouteComponent() {
 	const loaderData = routeApi.useLoaderData();
@@ -31,20 +32,18 @@ function RouteComponent() {
 				setClientResume(await api.fetchResume(resumeId));
 			} catch (error) {
 				console.error(`[Printer] Client-side fetch failed for ${resumeId}:`, error);
-				window.parent.postMessage({
-					type: "PRINTER_ERROR",
-					resumeId,
-					message: String(error)
-				}, "*");
+				window.parent.postMessage(
+					{
+						type: "PRINTER_ERROR",
+						resumeId,
+						message: String(error),
+					},
+					"*",
+				);
 			}
 		};
 		fetchResume();
-	}, [
-		clientResume,
-		token,
-		searchToken,
-		resumeId
-	]);
+	}, [clientResume, token, searchToken, resumeId]);
 	useEffect(() => {
 		if (!clientResume) return;
 		initialize(clientResume);
@@ -54,19 +53,18 @@ function RouteComponent() {
 		else document.body.removeAttribute("data-wf-loaded");
 	}, [isReady]);
 	useEffect(() => {
-		if (isReady && (token === "preview" || searchToken === "preview")) window.parent.postMessage({
-			type: "RESUME_READY",
-			resumeId: clientResume?.id ?? resumeId
-		}, "*");
-	}, [
-		isReady,
-		token,
-		searchToken,
-		clientResume?.id,
-		resumeId
-	]);
+		if (isReady && (token === "preview" || searchToken === "preview"))
+			window.parent.postMessage(
+				{
+					type: "RESUME_READY",
+					resumeId: clientResume?.id ?? resumeId,
+				},
+				"*",
+			);
+	}, [isReady, token, searchToken, clientResume?.id, resumeId]);
 	if (!isReady) {
-		if (token === "preview" || searchToken === "preview") return /* @__PURE__ */ jsx("div", { className: "fixed inset-0 bg-white" });
+		if (token === "preview" || searchToken === "preview")
+			return /* @__PURE__ */ jsx("div", { className: "fixed inset-0 bg-white" });
 		return /* @__PURE__ */ jsx(LoadingScreen, {});
 	}
 	return /* @__PURE__ */ jsx(ResumePreview, { pageClassName: "print:w-full!" });

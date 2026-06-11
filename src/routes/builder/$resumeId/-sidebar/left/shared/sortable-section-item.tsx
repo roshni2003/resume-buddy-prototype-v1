@@ -125,7 +125,7 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 
 	return (
 		<SortableItem id={item.id} asHandle className="group relative border-b last:border-b-0">
-			<div className={cn("flex h-18 items-center bg-white border-l-2 ml-4", colors.border)}>
+			<div className={cn("ml-4 flex h-18 items-center border-l-2 bg-white", colors.border)}>
 				<div className="flex shrink-0 items-center px-2 text-gray-400 opacity-70 transition-opacity hover:text-gray-600 group-hover:opacity-100">
 					<DotsSixVerticalIcon size={20} />
 				</div>

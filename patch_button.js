@@ -1,6 +1,6 @@
-const fs = require('fs');
-const file = '/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx';
-let code = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const file = "/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx";
+let code = fs.readFileSync(file, "utf8");
 
 const colorMapCode = `
 const colorMap: Record<string, { text: string; bg: string; border: string }> = {
@@ -52,9 +52,6 @@ export function SectionAddItemButton({ type, customSectionId, className, childre
 }
 `;
 
-code = code.replace(
-  /export function SectionAddItemButton[\s\S]*?}\n/,
-  colorMapCode + '\n' + replaceCode
-);
+code = code.replace(/export function SectionAddItemButton[\s\S]*?}\n/, colorMapCode + "\n" + replaceCode);
 
 fs.writeFileSync(file, code);

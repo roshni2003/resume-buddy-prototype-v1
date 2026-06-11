@@ -41,7 +41,7 @@ export const authService = {
 		if (!db) {
 			throw new ORPCError("SERVICE_UNAVAILABLE", { message: "Database not available" });
 		}
-		
+
 		const [resume] = await db
 			.select({ id: schema.resume.id, password: schema.resume.password })
 			.from(schema.resume)

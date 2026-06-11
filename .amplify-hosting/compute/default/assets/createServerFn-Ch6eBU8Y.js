@@ -1,15 +1,17 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+
 function redirect(opts) {
 	opts.statusCode = opts.statusCode || opts.code || 307;
-	if (!opts._builtLocation && !opts.reloadDocument && typeof opts.href === "string") try {
-		new URL(opts.href);
-		opts.reloadDocument = true;
-	} catch {}
+	if (!opts._builtLocation && !opts.reloadDocument && typeof opts.href === "string")
+		try {
+			new URL(opts.href);
+			opts.reloadDocument = true;
+		} catch {}
 	const headers = new Headers(opts.headers);
 	if (opts.href && headers.get("Location") === null) headers.set("Location", opts.href);
 	const response = new Response(null, {
 		status: opts.statusCode,
-		headers
+		headers,
 	});
 	response.options = opts;
 	if (opts.throw) throw response;
@@ -34,7 +36,7 @@ var FrameType = {
 	JSON: 0,
 	CHUNK: 1,
 	END: 2,
-	ERROR: 3
+	ERROR: 3,
 };
 var FRAME_HEADER_SIZE = 9;
 var TSS_CONTENT_TYPE_FRAMED_VERSIONED = `${TSS_CONTENT_TYPE_FRAMED}; v=1`;
@@ -66,7 +68,10 @@ async function runWithStartContext(context, fn) {
 }
 function getStartContext(opts) {
 	const context = startStorage.getStore();
-	if (!context && opts?.throwIfNotFound !== false) throw new Error(`No Start context found in AsyncLocalStorage. Make sure you are using the function within the server runtime.`);
+	if (!context && opts?.throwIfNotFound !== false)
+		throw new Error(
+			`No Start context found in AsyncLocalStorage. Make sure you are using the function within the server runtime.`,
+		);
 	return context;
 }
 var getStartOptions = () => getStartContext().startOptions;
@@ -122,8 +127,9 @@ function mergeHeaders(...headers) {
 	return headers.reduce((acc, header) => {
 		const headersInstance = toHeadersInstance(header);
 		if (!headersInstance) return acc;
-		for (const [key, value] of headersInstance.entries()) if (key === "set-cookie") splitSetCookieString(value).forEach((cookie) => acc.append("set-cookie", cookie));
-		else acc.set(key, value);
+		for (const [key, value] of headersInstance.entries())
+			if (key === "set-cookie") splitSetCookieString(value).forEach((cookie) => acc.append("set-cookie", cookie));
+			else acc.set(key, value);
 		return acc;
 	}, new Headers());
 }
@@ -133,7 +139,7 @@ var createServerFn = (options, __opts) => {
 	const res = {
 		options: resolvedOptions,
 		middleware: (middleware) => {
-			const newMiddleware = [...resolvedOptions.middleware || []];
+			const newMiddleware = [...(resolvedOptions.middleware || [])];
 			middleware.map((m) => {
 				if (TSS_SERVER_FUNCTION_FACTORY in m) {
 					if (m.options.middleware) newMiddleware.push(...m.options.middleware);
@@ -141,7 +147,7 @@ var createServerFn = (options, __opts) => {
 			});
 			const res$1 = createServerFn(void 0, {
 				...resolvedOptions,
-				middleware: newMiddleware
+				middleware: newMiddleware,
 			});
 			res$1[TSS_SERVER_FUNCTION_FACTORY] = true;
 			return res$1;
@@ -149,7 +155,7 @@ var createServerFn = (options, __opts) => {
 		inputValidator: (inputValidator) => {
 			return createServerFn(void 0, {
 				...resolvedOptions,
-				inputValidator
+				inputValidator,
 			});
 		},
 		handler: (...args) => {
@@ -157,64 +163,69 @@ var createServerFn = (options, __opts) => {
 			const newOptions = {
 				...resolvedOptions,
 				extractedFn,
-				serverFn
+				serverFn,
 			};
-			const resolvedMiddleware = [...newOptions.middleware || [], serverFnBaseToMiddleware(newOptions)];
+			const resolvedMiddleware = [...(newOptions.middleware || []), serverFnBaseToMiddleware(newOptions)];
 			extractedFn.method = resolvedOptions.method;
-			return Object.assign(async (opts) => {
-				const result = await executeMiddleware(resolvedMiddleware, "client", {
-					...extractedFn,
-					...newOptions,
-					data: opts?.data,
-					headers: opts?.headers,
-					signal: opts?.signal,
-					fetch: opts?.fetch,
-					context: createNullProtoObject()
-				});
-				const redirect$1 = parseRedirect(result.error);
-				if (redirect$1) throw redirect$1;
-				if (result.error) throw result.error;
-				return result.result;
-			}, {
-				...extractedFn,
-				method: resolvedOptions.method,
-				__executeServer: async (opts) => {
-					const startContext = getStartContextServerOnly();
-					const serverContextAfterGlobalMiddlewares = startContext.contextAfterGlobalMiddlewares;
-					return await executeMiddleware(resolvedMiddleware, "server", {
+			return Object.assign(
+				async (opts) => {
+					const result = await executeMiddleware(resolvedMiddleware, "client", {
 						...extractedFn,
-						...opts,
-						serverFnMeta: extractedFn.serverFnMeta,
-						context: safeObjectMerge(opts.context, serverContextAfterGlobalMiddlewares),
-						request: startContext.request
-					}).then((d) => ({
-						result: d.result,
-						error: d.error,
-						context: d.sendContext
-					}));
-				}
-			});
-		}
+						...newOptions,
+						data: opts?.data,
+						headers: opts?.headers,
+						signal: opts?.signal,
+						fetch: opts?.fetch,
+						context: createNullProtoObject(),
+					});
+					const redirect$1 = parseRedirect(result.error);
+					if (redirect$1) throw redirect$1;
+					if (result.error) throw result.error;
+					return result.result;
+				},
+				{
+					...extractedFn,
+					method: resolvedOptions.method,
+					__executeServer: async (opts) => {
+						const startContext = getStartContextServerOnly();
+						const serverContextAfterGlobalMiddlewares = startContext.contextAfterGlobalMiddlewares;
+						return await executeMiddleware(resolvedMiddleware, "server", {
+							...extractedFn,
+							...opts,
+							serverFnMeta: extractedFn.serverFnMeta,
+							context: safeObjectMerge(opts.context, serverContextAfterGlobalMiddlewares),
+							request: startContext.request,
+						}).then((d) => ({
+							result: d.result,
+							error: d.error,
+							context: d.sendContext,
+						}));
+					},
+				},
+			);
+		},
 	};
 	const fun = (options$1) => {
 		return createServerFn(void 0, {
 			...resolvedOptions,
-			...options$1
+			...options$1,
 		});
 	};
 	return Object.assign(fun, res);
 };
 async function executeMiddleware(middlewares, env, opts) {
-	let flattenedMiddlewares = flattenMiddlewares([...getStartOptions()?.functionMiddleware || [], ...middlewares]);
+	let flattenedMiddlewares = flattenMiddlewares([...(getStartOptions()?.functionMiddleware || []), ...middlewares]);
 	if (env === "server") {
 		const startContext = getStartContextServerOnly({ throwIfNotFound: false });
-		if (startContext?.executedRequestMiddlewares) flattenedMiddlewares = flattenedMiddlewares.filter((m) => !startContext.executedRequestMiddlewares.has(m));
+		if (startContext?.executedRequestMiddlewares)
+			flattenedMiddlewares = flattenedMiddlewares.filter((m) => !startContext.executedRequestMiddlewares.has(m));
 	}
 	const callNextMiddleware = async (ctx) => {
 		const nextMiddleware = flattenedMiddlewares.shift();
 		if (!nextMiddleware) return ctx;
 		try {
-			if ("inputValidator" in nextMiddleware.options && nextMiddleware.options.inputValidator && env === "server") ctx.data = await execValidator(nextMiddleware.options.inputValidator, ctx.data);
+			if ("inputValidator" in nextMiddleware.options && nextMiddleware.options.inputValidator && env === "server")
+				ctx.data = await execValidator(nextMiddleware.options.inputValidator, ctx.data);
 			let middlewareFn = void 0;
 			if (env === "client") {
 				if ("client" in nextMiddleware.options) middlewareFn = nextMiddleware.options.client;
@@ -230,31 +241,36 @@ async function executeMiddleware(middlewares, env, opts) {
 						_callSiteFetch: ctx._callSiteFetch,
 						fetch: ctx._callSiteFetch ?? userCtx.fetch ?? ctx.fetch,
 						result: userCtx.result !== void 0 ? userCtx.result : userCtx instanceof Response ? userCtx : ctx.result,
-						error: userCtx.error ?? ctx.error
+						error: userCtx.error ?? ctx.error,
 					});
 					if (result$1.error) throw result$1.error;
 					return result$1;
 				};
 				const result = await middlewareFn({
 					...ctx,
-					next: userNext
+					next: userNext,
 				});
-				if (isRedirect(result)) return {
-					...ctx,
-					error: result
-				};
-				if (result instanceof Response) return {
-					...ctx,
-					result
-				};
-				if (!result) throw new Error("User middleware returned undefined. You must call next() or return a result in your middlewares.");
+				if (isRedirect(result))
+					return {
+						...ctx,
+						error: result,
+					};
+				if (result instanceof Response)
+					return {
+						...ctx,
+						result,
+					};
+				if (!result)
+					throw new Error(
+						"User middleware returned undefined. You must call next() or return a result in your middlewares.",
+					);
 				return result;
 			}
 			return callNextMiddleware(ctx);
 		} catch (error) {
 			return {
 				...ctx,
-				error
+				error,
 			};
 		}
 	};
@@ -263,14 +279,15 @@ async function executeMiddleware(middlewares, env, opts) {
 		headers: opts.headers || {},
 		sendContext: opts.sendContext || {},
 		context: opts.context || createNullProtoObject(),
-		_callSiteFetch: opts.fetch
+		_callSiteFetch: opts.fetch,
 	});
 }
 function flattenMiddlewares(middlewares, maxDepth = 100) {
 	const seen = /* @__PURE__ */ new Set();
 	const flattened = [];
 	const recurse = (middleware, depth) => {
-		if (depth > maxDepth) throw new Error(`Middleware nesting depth exceeded maximum of ${maxDepth}. Check for circular references.`);
+		if (depth > maxDepth)
+			throw new Error(`Middleware nesting depth exceeded maximum of ${maxDepth}. Check for circular references.`);
 		middleware.forEach((m) => {
 			if (m.options.middleware) recurse(m.options.middleware, depth + 1);
 			if (!seen.has(m)) {
@@ -302,7 +319,7 @@ function serverFnBaseToMiddleware(options) {
 				const payload = {
 					...ctx,
 					context: sendContext,
-					fetch
+					fetch,
 				};
 				return next(await options.extractedFn?.(payload));
 			},
@@ -310,10 +327,28 @@ function serverFnBaseToMiddleware(options) {
 				const result = await options.serverFn?.(ctx);
 				return next({
 					...ctx,
-					result
+					result,
 				});
-			}
-		}
+			},
+		},
 	};
 }
-export { isResolvedRedirect as _, getStartContext as a, safeObjectMerge as c, TSS_CONTENT_TYPE_FRAMED_VERSIONED as d, TSS_FORMDATA_CONTEXT as f, isRedirect as g, X_TSS_SERIALIZED as h, getStartOptions as i, FRAME_HEADER_SIZE as l, X_TSS_RAW_RESPONSE as m, flattenMiddlewares as n, runWithStartContext as o, TSS_SERVER_FUNCTION as p, mergeHeaders as r, createNullProtoObject as s, createServerFn as t, FrameType as u };
+export {
+	isResolvedRedirect as _,
+	getStartContext as a,
+	safeObjectMerge as c,
+	TSS_CONTENT_TYPE_FRAMED_VERSIONED as d,
+	TSS_FORMDATA_CONTEXT as f,
+	isRedirect as g,
+	X_TSS_SERIALIZED as h,
+	getStartOptions as i,
+	FRAME_HEADER_SIZE as l,
+	X_TSS_RAW_RESPONSE as m,
+	flattenMiddlewares as n,
+	runWithStartContext as o,
+	TSS_SERVER_FUNCTION as p,
+	mergeHeaders as r,
+	createNullProtoObject as s,
+	createServerFn as t,
+	FrameType as u,
+};

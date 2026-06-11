@@ -5,9 +5,7 @@ import { CameraIcon, PencilSimpleIcon, PlusIcon, TrashIcon } from "@phosphor-ico
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type z from "zod";
-import { ColorPicker } from "@/components/input/color-picker";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { pictureSchema } from "@/schema/resume/data";
@@ -226,7 +224,7 @@ export function PictureSectionForm() {
 					/>
 
 					{/* Rotation */}
-					<FormField
+					{/* <FormField
 						control={form.control}
 						name="rotation"
 						render={({ field }) => (
@@ -255,10 +253,10 @@ export function PictureSectionForm() {
 								<FormMessage />
 							</FormItem>
 						)}
-					/>
+					/> */}
 
 					{/* Aspect Ratio */}
-					<FormField
+					{/* <FormField
 						control={form.control}
 						name="aspectRatio"
 						render={({ field }) => (
@@ -327,10 +325,10 @@ export function PictureSectionForm() {
 								<FormMessage />
 							</FormItem>
 						)}
-					/>
+					/> */}
 
 					{/* Border Radius */}
-					<FormField
+					{/* <FormField
 						control={form.control}
 						name="borderRadius"
 						render={({ field }) => (
@@ -399,10 +397,10 @@ export function PictureSectionForm() {
 								<FormMessage />
 							</FormItem>
 						)}
-					/>
+					/> */}
 
 					{/* Border Color & Width */}
-					<div className="grid grid-cols-2 gap-3">
+					{/* <div className="grid grid-cols-2 gap-3">
 						<FormField
 							control={form.control}
 							name="borderColor"
@@ -463,10 +461,10 @@ export function PictureSectionForm() {
 								</FormItem>
 							)}
 						/>
-					</div>
+					</div> */}
 
 					{/* Shadow Color & Width */}
-					<div className="grid grid-cols-2 gap-3">
+					{/* <div className="grid grid-cols-2 gap-3">
 						<FormField
 							control={form.control}
 							name="shadowColor"
@@ -527,7 +525,7 @@ export function PictureSectionForm() {
 								</FormItem>
 							)}
 						/>
-					</div>
+					</div> */}
 				</div>
 			</form>
 		</Form>

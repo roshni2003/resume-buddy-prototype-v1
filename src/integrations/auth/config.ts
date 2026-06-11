@@ -79,7 +79,7 @@ const getAuthConfig = () => {
 	}
 
 	const db = getDatabase();
-	
+
 	if (!db) {
 		// Return a minimal auth config when database is not available
 		console.warn("⚠️  Database not configured. Authentication will not work properly.");

@@ -1,5 +1,6 @@
 import { createAdapterFactory } from "@better-auth/core/db/adapter";
 import { logger } from "@better-auth/core/env";
+
 function insensitiveCompare(a, b) {
 	if (typeof a === "string" && typeof b === "string") return a.toLowerCase() === b.toLowerCase();
 	return a === b;
@@ -33,7 +34,12 @@ var memoryAdapter = (db, config) => {
 			debugLogs: config?.debugLogs || false,
 			supportsArrays: true,
 			customTransformInput(props) {
-				if (props.options.advanced?.database?.generateId === "serial" && props.field === "id" && props.action === "create") return db[props.model].length + 1;
+				if (
+					props.options.advanced?.database?.generateId === "serial" &&
+					props.field === "id" &&
+					props.action === "create"
+				)
+					return db[props.model].length + 1;
 				return props.data;
 			},
 			transaction: async (cb) => {
@@ -46,7 +52,7 @@ var memoryAdapter = (db, config) => {
 					});
 					throw error;
 				}
-			}
+			},
 		},
 		adapter: ({ getFieldName, getDefaultFieldName, options, getModelName }) => {
 			const applySortToRecords = (records, sortBy, model) => {
@@ -54,7 +60,7 @@ var memoryAdapter = (db, config) => {
 				return records.sort((a, b) => {
 					const field = getFieldName({
 						model,
-						field: sortBy.field
+						field: sortBy.field,
 					});
 					const aValue = a[field];
 					const bValue = b[field];
@@ -65,7 +71,8 @@ var memoryAdapter = (db, config) => {
 					else if (typeof aValue === "string" && typeof bValue === "string") comparison = aValue.localeCompare(bValue);
 					else if (aValue instanceof Date && bValue instanceof Date) comparison = aValue.getTime() - bValue.getTime();
 					else if (typeof aValue === "number" && typeof bValue === "number") comparison = aValue - bValue;
-					else if (typeof aValue === "boolean" && typeof bValue === "boolean") comparison = aValue === bValue ? 0 : aValue ? 1 : -1;
+					else if (typeof aValue === "boolean" && typeof bValue === "boolean")
+						comparison = aValue === bValue ? 0 : aValue ? 1 : -1;
 					else comparison = String(aValue).localeCompare(String(bValue));
 					return sortBy.direction === "asc" ? comparison : -comparison;
 				});
@@ -79,7 +86,9 @@ var memoryAdapter = (db, config) => {
 					}
 					const evalClause = (record, clause) => {
 						const { field, value, operator, mode = "sensitive" } = clause;
-						const isInsensitive = mode === "insensitive" && (typeof value === "string" || Array.isArray(value) && value.every((v) => typeof v === "string"));
+						const isInsensitive =
+							mode === "insensitive" &&
+							(typeof value === "string" || (Array.isArray(value) && value.every((v) => typeof v === "string")));
 						switch (operator) {
 							case "in":
 								if (!Array.isArray(value)) throw new Error("Value must be an array");
@@ -98,12 +107,18 @@ var memoryAdapter = (db, config) => {
 							case "ends_with":
 								if (isInsensitive) return insensitiveEndsWith(record[field], value);
 								return record[field].endsWith(value);
-							case "ne": return isInsensitive ? !insensitiveCompare(record[field], value) : record[field] !== value;
-							case "gt": return value != null && Boolean(record[field] > value);
-							case "gte": return value != null && Boolean(record[field] >= value);
-							case "lt": return value != null && Boolean(record[field] < value);
-							case "lte": return value != null && Boolean(record[field] <= value);
-							default: return isInsensitive ? insensitiveCompare(record[field], value) : record[field] === value;
+							case "ne":
+								return isInsensitive ? !insensitiveCompare(record[field], value) : record[field] !== value;
+							case "gt":
+								return value != null && Boolean(record[field] > value);
+							case "gte":
+								return value != null && Boolean(record[field] >= value);
+							case "lt":
+								return value != null && Boolean(record[field] < value);
+							case "lte":
+								return value != null && Boolean(record[field] <= value);
+							default:
+								return isInsensitive ? insensitiveCompare(record[field], value) : record[field] === value;
 						}
 					};
 					let records = table.filter((record) => {
@@ -116,10 +131,19 @@ var memoryAdapter = (db, config) => {
 						}
 						return result;
 					});
-					if (select?.length && select.length > 0) records = records.map((record) => Object.fromEntries(Object.entries(record).filter(([key]) => select.includes(getDefaultFieldName({
-						model,
-						field: key
-					})))));
+					if (select?.length && select.length > 0)
+						records = records.map((record) =>
+							Object.fromEntries(
+								Object.entries(record).filter(([key]) =>
+									select.includes(
+										getDefaultFieldName({
+											model,
+											field: key,
+										}),
+									),
+								),
+							),
+						);
 					return records;
 				})();
 				if (!join) return baseRecords;
@@ -147,7 +171,9 @@ var memoryAdapter = (db, config) => {
 							logger.error(`[MemoryAdapter] JoinOption model ${joinModelName} not found in the DB`, Object.keys(db));
 							throw new Error(`JoinOption model ${joinModelName} not found`);
 						}
-						const matchingRecords = joinTable.filter((joinRecord) => joinRecord[joinAttr.on.to] === baseRecord[joinAttr.on.from]);
+						const matchingRecords = joinTable.filter(
+							(joinRecord) => joinRecord[joinAttr.on.to] === baseRecord[joinAttr.on.from],
+						);
 						if (joinAttr.relation === "one-to-one") nestedEntry[joinModelName] = matchingRecords[0] || null;
 						else {
 							const seenSet = seenIds.get(`${baseId}-${joinModel}`);
@@ -233,9 +259,9 @@ var memoryAdapter = (db, config) => {
 						Object.assign(record, update);
 					});
 					return res[0] || null;
-				}
+				},
 			};
-		}
+		},
 	});
 	return (options) => {
 		lazyOptions = options;
