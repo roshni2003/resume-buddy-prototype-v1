@@ -17,6 +17,7 @@ import { getAuthToken, isValidToken } from "@/utils/auth-token";
 import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
 import { GridView } from "./-components/grid-view";
+import { ZoeBanner } from "./-components/zoe-banner";
 
 type SortOption = "lastUpdatedAt" | "createdAt" | "name";
 
@@ -114,7 +115,7 @@ function RouteComponent() {
 
 	useEffect(() => {
 		if (resumes && resumes.length === 0) {
-			openDialog("resume.create", undefined);
+			openDialog("resume.onboarding", undefined);
 		}
 	}, [resumes, openDialog]);
 
@@ -165,16 +166,17 @@ function RouteComponent() {
 	};
 	return (
 		<div className="space-y-6">
+			<ZoeBanner />
 			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+					<div className="flex items-center justify-between">
 						<div>
-							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
+							<p className="text-gray-600 text-xs">
 								<Trans>Total Resumes</Trans>
 							</p>
-							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalResumes ?? 0}</p>
+							<p className="mt-1 font-bold text-emerald-600 text-base">{statistics?.totalResumes ?? 0}</p>
 						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
+						<div className="flex size-9 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									strokeLinecap="round"
@@ -188,15 +190,15 @@ function RouteComponent() {
 				</div>
 
 				{/* Last Update */}
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+					<div className="flex items-center justify-between">
 						<div>
-							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
+							<p className="text-gray-600 text-xs">
 								<Trans>Last Update</Trans>
 							</p>
-							<p className="font-semibold text-emerald-600 text-sm sm:text-base">{lastUpdateText}</p>
+							<p className="mt-1 font-semibold text-emerald-600 text-base">{lastUpdateText}</p>
 						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
+						<div className="flex size-9 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									strokeLinecap="round"
@@ -210,18 +212,16 @@ function RouteComponent() {
 				</div>
 
 				{/* Total Downloads */}
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+					<div className="flex items-center justify-between">
 						<div>
-							<p className="mb-1 text-gray-600 text-xs sm:text-sm">
-								<Trans>Total Downloads</Trans>
-							</p>
-							<p className="mb-2 text-gray-500 text-xs">
-								<Trans>This month</Trans>
-							</p>
-							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalDownloads ?? 0}</p>
+							<div className="flex items-baseline gap-1.5">
+								<p className="text-gray-600 text-xs"><Trans>Total Downloads</Trans></p>
+								<p className="text-gray-400 text-xs"><Trans>This month</Trans></p>
+							</div>
+							<p className="mt-1 font-bold text-emerald-600 text-base">{statistics?.totalDownloads ?? 0}</p>
 						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
+						<div className="flex size-9 items-center justify-center rounded-lg bg-emerald-50">
 							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									strokeLinecap="round"
@@ -235,17 +235,17 @@ function RouteComponent() {
 				</div>
 
 				{/* Total Submissions */}
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
+				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+					<div className="flex items-center justify-between">
 						<div>
-							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
+							<p className="text-gray-600 text-xs">
 								<Trans>Total Submissions</Trans>
 							</p>
-							<p className="font-semibold text-amber-600 text-sm sm:text-base">
+							<p className="mt-1 font-semibold text-amber-600 text-base">
 								<Trans>Coming Soon!</Trans>
 							</p>
 						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-gray-200">
+						<div className="flex size-9 items-center justify-center rounded-lg bg-gray-200">
 							<svg className="size-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									strokeLinecap="round"
