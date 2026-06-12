@@ -2,6 +2,7 @@ import { DownloadSimpleIcon, MagicWandIcon, SuitcaseIcon } from "@phosphor-icons
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useDialogStore } from "@/dialogs/store";
+import { cn } from "@/utils/style";
 
 type Step = 0 | 1 | 2;
 
@@ -56,20 +57,17 @@ export function ZoeBanner() {
 	const current = steps[activeStep];
 
 	return (
-		<div className="flex flex-col gap-3 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-			{/* Left: Zoe icon + text */}
-			<div className="flex min-w-0 items-center gap-3">
-				<div className="shrink-0">
-					<img
-						src="/zoe-icon.png"
-						alt="Zoe AI"
-						className="h-9 w-9 rounded-full object-cover"
-					/>
+		<div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-[#0f172a]/80 p-4 sm:p-5 shadow-lg backdrop-blur-sm transition-all">
+			<div className="flex items-center gap-3 sm:gap-4">
+				<div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+						<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+					</svg>
 				</div>
-				<div className="min-w-0">
-					<p className="font-semibold text-emerald-900 text-sm leading-tight">Zoe works the way you do</p>
+				<div className="min-h-[44px] flex flex-col justify-center">
+					<h3 className="font-bold text-white text-sm sm:text-base">Zoe works the way you do</h3>
 					<div
-						className="mt-0.5 flex items-center gap-1.5 text-emerald-700 text-xs"
+						className="text-gray-400 text-xs sm:text-sm flex items-center gap-1.5 mt-0.5"
 						style={{
 							opacity: animating ? 0 : 1,
 							transform: animating ? "translateY(4px)" : "translateY(0)",
@@ -85,9 +83,9 @@ export function ZoeBanner() {
 					</div>
 				</div>
 			</div>
-
+			
 			{/* Right: Action buttons */}
-			<div className="flex shrink-0 flex-wrap items-center gap-2">
+			<div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
 				{steps.map((step, index) => {
 					const Icon = step.icon;
 					const isActive = activeStep === index;
@@ -96,20 +94,17 @@ export function ZoeBanner() {
 							key={step.label}
 							type="button"
 							onClick={() => {
-								// Switch active highlight
 								setAnimating(true);
 								setTimeout(() => {
 									setActiveStep(index as Step);
 									setAnimating(false);
 								}, 300);
-								// Run the step action
 								step.action(navigate, openDialog);
 							}}
-							className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-300 ${
-								isActive
-									? "border-emerald-600 bg-emerald-600 text-white shadow-sm shadow-emerald-200"
-									: "border-emerald-200 bg-white text-emerald-700 hover:border-emerald-400 hover:bg-emerald-50"
-							}`}
+							className={cn(
+								"flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-300",
+								isActive ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "border border-emerald-500/30 bg-white/5 text-gray-300 hover:bg-white/10"
+							)}
 						>
 							<Icon className="size-3.5" weight={isActive ? "bold" : "regular"} />
 							{step.label}
