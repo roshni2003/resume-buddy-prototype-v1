@@ -427,34 +427,37 @@ export function BuilderTopTray() {
 					</Button>
 				)}
 
-				{/* Consolidated Download button */}
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button
-							size="sm"
-							variant="default"
-							disabled={isPrinting}
-							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-2 text-white hover:bg-emerald-700 sm:h-9 sm:w-auto sm:gap-2 sm:px-3"
-							aria-label="Download"
-						>
-							{isPrinting ? <CircleNotchIcon className={cn("animate-spin")} /> : <DownloadSimpleIcon />}
-							<span className="hidden lg:inline">
-								<Trans>Download</Trans>
-							</span>
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="min-w-35">
-						<DropdownMenuItem onClick={onDownloadPDF} disabled={isPrinting}>
-							<FilePdfIcon className="size-4 text-red-500" />
-							<Trans>Download PDF</Trans>
-						</DropdownMenuItem>
+				{/* Download DOCX button */}
+				<Button
+					size="sm"
+					variant="outline"
+					disabled={isPrinting}
+					onClick={onDownloadDocx}
+					className="hidden sm:flex shrink-0 items-center justify-center gap-1.5 px-2 hover:bg-gray-100 sm:h-9 sm:w-auto sm:gap-2 sm:px-3 transition-all"
+					aria-label="Download Word"
+					title="Export as Microsoft Word"
+				>
+					<MicrosoftWordLogoIcon className="text-blue-600" />
+					<span className="hidden lg:inline text-gray-700 font-medium">
+						<Trans>Word</Trans>
+					</span>
+				</Button>
 
-						<DropdownMenuItem onClick={onDownloadDocx}>
-							<MicrosoftWordLogoIcon className="size-4 text-blue-600" />
-							<Trans>Download Word</Trans>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				{/* Download PDF button */}
+				<Button
+					size="sm"
+					variant="default"
+					disabled={isPrinting}
+					onClick={onDownloadPDF}
+					className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-3 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 sm:h-9 sm:w-auto sm:gap-2 sm:px-4 transition-all hover:scale-105 active:scale-95"
+					aria-label="Download PDF"
+					title="Export as PDF Document"
+				>
+					{isPrinting ? <CircleNotchIcon className={cn("animate-spin size-4")} /> : <FilePdfIcon className="size-4" />}
+					<span className="font-medium">
+						<Trans>Download PDF</Trans>
+					</span>
+				</Button>
 
 				{/* Review Drawer */}
 				{reviewResult && <ReviewDrawer result={reviewResult} />}
