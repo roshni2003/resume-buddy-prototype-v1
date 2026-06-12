@@ -1,17 +1,10 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-<<<<<<< HEAD
-import {ReadCvLogo, Users } from "@phosphor-icons/react";
-// import { ChartBar} from "@phosphor-icons/react";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
-// import { ReadCvLogoIcon } from "@phosphor-icons/react";
-=======
-import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
->>>>>>> feat/glassmorphic-redesign
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
-import { authClient } from "@/integrations/auth/client";
+// authClient used in index.tsx for session
 import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
@@ -142,7 +135,6 @@ function AuthGate() {
 }
 
 function DashboardHeader() {
-	const matchRoute = useMatchRoute();
 
 	return (
 		<header

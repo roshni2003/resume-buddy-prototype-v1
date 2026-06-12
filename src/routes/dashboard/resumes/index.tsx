@@ -11,7 +11,6 @@ import z from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
 import { MultipleCombobox } from "@/components/ui/multiple-combobox";
-import { Separator } from "@/components/ui/separator";
 import { useDialogStore } from "@/dialogs/store";
 import { api } from "@/utils/api";
 import { getAuthToken, isValidToken } from "@/utils/auth-token";
@@ -38,84 +37,6 @@ function AnimatedNumber({ value }: { value: number }) {
 	return <span>{count}</span>;
 }
 
-function ZoeBanner() {
-	const { openDialog } = useDialogStore();
-	const [activeIndex, setActiveIndex] = useState(0);
-
-	const steps = [
-		{
-			id: "upload",
-			text: "📄 Upload your existing resume and let me enhance it.",
-			label: "Upload resume",
-			icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
-		},
-		{
-			id: "create",
-			text: "✨ Create a beautiful resume from scratch in minutes.",
-			label: "Build from scratch",
-			icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>,
-		},
-		{
-			id: "match",
-			text: "💼 Paste a job description and I'll tailor your resume to land the interview.",
-			label: "Match to a job",
-			icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>,
-		}
-	];
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setActiveIndex((current) => (current + 1) % steps.length);
-		}, 3000);
-		return () => clearInterval(interval);
-	}, []);
-
-	return (
-		<div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-[#0f172a]/80 p-4 sm:p-5 shadow-lg backdrop-blur-sm transition-all">
-			<div className="flex items-center gap-3 sm:gap-4">
-				<div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-				</div>
-				<div className="min-h-[44px] flex flex-col justify-center">
-					<h3 className="font-bold text-white text-sm sm:text-base">Zoe works the way you do</h3>
-					<p className="text-gray-400 text-xs sm:text-sm transition-all duration-300">{steps[activeIndex].text}</p>
-				</div>
-			</div>
-			<div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
-				<button 
-					onClick={() => openDialog("resume.upload", undefined)}
-					className={cn(
-						"flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-300",
-						activeIndex === 0 ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "border border-emerald-500/30 bg-white/5 text-gray-300 hover:bg-white/10"
-					)}
-				>
-					{steps[0].icon}
-					{steps[0].label}
-				</button>
-				<button 
-					onClick={() => openDialog("resume.create", undefined)}
-					className={cn(
-						"flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-300",
-						activeIndex === 1 ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "border border-emerald-500/30 bg-white/5 text-gray-300 hover:bg-white/10"
-					)}
-				>
-					{steps[1].icon}
-					{steps[1].label}
-				</button>
-				<button 
-					className={cn(
-						"flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-300",
-						activeIndex === 2 ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "border border-emerald-500/30 bg-white/5 text-gray-300 hover:bg-white/10"
-					)}
-				>
-					{steps[2].icon}
-					{steps[2].label}
-				</button>
-			</div>
-		</div>
-	);
-}
-
 type SortOption = "lastUpdatedAt" | "createdAt" | "name";
 
 const searchSchema = z.object({
@@ -137,12 +58,10 @@ function RouteComponent() {
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { openDialog } = useDialogStore();
 
-	// Track page view immediately
 	// Defensive: if auth redirect hasn't happened yet, don't fire queries.
 	// The /dashboard parent route is responsible for redirecting to Zuvy when unauthenticated.
 	const isAuthed = useMemo(() => isValidToken(getAuthToken()), []);
 
-	// Invalidate statistics when component mounts to ensure fresh data
 	useEffect(() => {
 		mixpanelService.track("Page View", {
 			page: "resumes",
@@ -162,7 +81,7 @@ function RouteComponent() {
 		enabled: isAuthed,
 	});
 
-	// Track User Resumes Count (Metric #2)
+	// Track User Resumes Count
 	useEffect(() => {
 		if (resumes) {
 			mixpanelService.track("User Resumes Count", {
@@ -172,7 +91,7 @@ function RouteComponent() {
 		}
 	}, [resumes]);
 
-	// Track Users Who Created Resumes (Metric #1)
+	// Track Users Who Created Resumes
 	useEffect(() => {
 		if (resumes && resumes.length > 0) {
 			mixpanelService.track("Resume Created", {
@@ -182,7 +101,7 @@ function RouteComponent() {
 		}
 	}, [resumes]);
 
-	// Track resume data loaded with all metrics
+	// Track resume data loaded
 	useEffect(() => {
 		if (resumes && statistics) {
 			mixpanelService.track("Resume Data Loaded", {
@@ -245,8 +164,8 @@ function RouteComponent() {
 	}, [statistics]);
 
 	const { data: session, isPending } = authClient.useSession();
-	const user = session?.user as (typeof session)["user"] & { username?: string; displayName?: string } | undefined;
-	
+	const user = session?.user as any;
+
 	const tokenName = useMemo(() => {
 		try {
 			const token = typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("token") || localStorage.getItem("authToken")) : null;
@@ -258,23 +177,13 @@ function RouteComponent() {
 		}
 	}, []);
 
-	// Try every field that might contain a display name — username is always set per auth config
+	// Try every field that might contain a display name
 	const displayName = user?.name || user?.displayName || user?.username || user?.email?.split("@")[0] || tokenName;
 	const firstName = displayName?.split(" ")[0] || (isPending ? "" : "");
-
-	const handleSortChange = (value: string | null, _option: unknown | null) => {
-		const v = value ?? "lastUpdatedAt";
-		mixpanelService.track("Sort Changed", {
-			sort_by: v,
-			current_filter_count: tags.length,
-		});
-		navigate({ search: { tags, sort: v as SortOption } });
-	};
 
 	const handleFilterChange = (value: string[]) => {
 		mixpanelService.track("Filter Applied", {
 			tags_selected: value.length,
-			tags_count: value.length,
 			current_sort: sort,
 		});
 		navigate({ search: { tags: value, sort } });
@@ -309,8 +218,6 @@ function RouteComponent() {
 						<p className="text-lg font-bold text-emerald-500"><AnimatedNumber value={statistics?.totalResumes ?? 0} /></p>
 					</div>
 				</div>
-					</div>
-				</div>
 
 				{/* Last Update */}
 				<div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-3 sm:p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
@@ -322,8 +229,6 @@ function RouteComponent() {
 					<div className="flex flex-col">
 						<p className="text-xs font-medium text-gray-400"><Trans>Last Update</Trans></p>
 						<p className="text-lg font-bold text-emerald-500">{lastUpdateText}</p>
-					</div>
-				</div>
 					</div>
 				</div>
 
@@ -339,8 +244,6 @@ function RouteComponent() {
 						<p className="text-lg font-bold text-emerald-500"><AnimatedNumber value={statistics?.totalDownloads ?? 0} /></p>
 					</div>
 				</div>
-					</div>
-				</div>
 
 				{/* Total Submissions */}
 				<div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-3 sm:p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
@@ -354,8 +257,6 @@ function RouteComponent() {
 						<p className="text-sm font-semibold text-emerald-500 mt-1"><Trans>Coming Soon!</Trans></p>
 					</div>
 				</div>
-					</div>
-				</div>
 			</div>
 
 			<div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -367,6 +268,7 @@ function RouteComponent() {
 							options={sortOptions}
 							onValueChange={(value) => {
 								if (!value) return;
+								mixpanelService.track("Sort Changed", { sort_by: value });
 								navigate({ search: { tags, sort: value as SortOption } });
 							}}
 							buttonProps={{
@@ -384,7 +286,7 @@ function RouteComponent() {
 						<MultipleCombobox
 							value={tags}
 							options={tagOptions}
-							onValueChange={handleFilterChange} // Use the new Mixpanel handler
+							onValueChange={handleFilterChange}
 							buttonProps={{
 								variant: "ghost",
 								title: t`Filter by`,
