@@ -1,31 +1,33 @@
 import { CometCard } from "@/components/animation/comet-card";
 import { cn } from "@/utils/style";
 
-type BaseCardProps = React.ComponentProps<"div"> & {
+interface BaseCardProps extends React.HTMLAttributes<HTMLDivElement> {
 	title: string;
-	description: string;
+	description?: string;
 	tags?: string[];
-	className?: string;
-	children?: React.ReactNode;
-};
+	hoverOverlay?: React.ReactNode;
+}
 
-export function BaseCard({ title, description, tags, className, children, ...props }: BaseCardProps) {
+export function BaseCard({ title, description, tags, className, children, hoverOverlay, ...props }: BaseCardProps) {
 	return (
-		<CometCard translateDepth={3} rotateDepth={6}>
+		<CometCard translateDepth={3} rotateDepth={6} className="group/card relative h-full">
 			<div
 				{...props}
 				className={cn(
-					"group relative flex aspect-page size-full cursor-pointer overflow-hidden rounded-xl border-2 border-gray-200 bg-white shadow-sm transition-all duration-200 hover:border-emerald-300 hover:shadow-xl active:scale-[0.98] sm:active:scale-100",
+					"relative flex h-[280px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#1e293b]/50 shadow-sm transition-all duration-300 hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]",
 					className,
 				)}
 			>
 				{children}
 
-				<div className="absolute inset-x-0 bottom-0 w-full border-gray-200 border-t bg-gradient-to-t from-white via-white to-transparent p-3 antialiased sm:p-4">
-					<h3 className="mb-1 truncate font-semibold text-base text-gray-900 sm:mb-1.5 sm:text-lg">{title}</h3>
-					<p className="truncate text-gray-600 text-xs sm:text-sm">{description}</p>
+				<div className="absolute inset-x-0 bottom-0 w-full border-t border-white/10 bg-[#0f172a] p-3 antialiased sm:p-4 transition-colors group-hover:bg-[#0f172a]/90 flex justify-between items-center">
+					<div className="flex-1 min-w-0">
+						<h3 className="mb-0.5 truncate font-semibold text-base text-white">{title}</h3>
+						<p className="truncate text-gray-400 text-xs">{description}</p>
+					</div>
 				</div>
 			</div>
+			{hoverOverlay}
 		</CometCard>
 	);
 }

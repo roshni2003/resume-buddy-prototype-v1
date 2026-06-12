@@ -1,10 +1,10 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-// import { ReadCvLogoIcon } from "@phosphor-icons/react";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
+import { authClient } from "@/integrations/auth/client";
 import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
 import { redirectToZuvyLogin } from "@/utils/zuvy-redirect";
@@ -70,8 +70,6 @@ function AuthGate() {
 		const tick = async () => {
 			if (cancelled) return;
 
-			// Re-attempt persistence from the URL each tick: on some devices the storage
-			// quota opens up after a delay, so a retry may succeed where the first write failed.
 			const urlToken = getUrlToken();
 			if (urlToken) {
 				await persistAuthToken(urlToken);
@@ -87,8 +85,6 @@ function AuthGate() {
 				tokenValid: isValidToken(token),
 			});
 			if (isValidToken(token)) {
-				// Storage finally has a valid token — reload so the route re-runs
-				// beforeLoad and renders the dashboard with auth.
 				console.log("[auth-debug] AuthGate.tick: token landed, reloading");
 				window.location.reload();
 				return;
@@ -113,21 +109,103 @@ function AuthGate() {
 	}, []);
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-6">
+		<div
+			className="flex min-h-screen flex-col items-center justify-center px-6"
+			style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+		>
 			<div className="flex max-w-md flex-col items-center gap-6 text-center">
-				<img src="/zoe-talking.png" alt="Zoe AI" className="h-16 w-12" />
-				<div className="size-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+				<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover" />
+				<div className="size-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
 				<div>
-					<h1 className="mb-2 font-bold text-gray-900 text-xl">Logging you in...</h1>
-					<p className="text-gray-600 text-sm">
+					<h1 className="mb-2 font-bold text-white text-xl">Logging you in...</h1>
+					<p className="text-white/60 text-sm">
 						Please wait while we securely sign you in. This usually takes a few seconds.
 					</p>
 				</div>
-				<p className="text-gray-400 text-xs">
+				<p className="text-white/30 text-xs">
 					If this takes longer than expected, we'll redirect you to sign in again in {secondsLeft}s.
 				</p>
 			</div>
 		</div>
+	);
+}
+
+function DashboardHeader() {
+	const matchRoute = useMatchRoute();
+
+	return (
+		<header
+			className="sticky top-0 z-30 border-b"
+			style={{
+				background: "rgba(9, 13, 22, 0.85)",
+				borderColor: "rgba(255,255,255,0.08)",
+				backdropFilter: "blur(20px)",
+				WebkitBackdropFilter: "blur(20px)",
+			}}
+		>
+			<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5">
+				{/* Left: Logo */}
+				<Link
+					to="/dashboard/resumes"
+					className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
+				>
+					<img
+						src="/zoe-icon.png"
+						alt="Resume Buddy"
+						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9"
+						style={{ boxShadow: "0 0 0 2px rgba(0,208,156,0.3)" }}
+					/>
+					<span
+						className="font-bold text-base text-white sm:text-lg"
+						style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+					>
+						Resume Buddy
+					</span>
+				</Link>
+
+				{/* Right: Settings & User menu */}
+				<div className="flex items-center gap-2 sm:gap-4">
+					<nav className="hidden items-center gap-1 sm:flex">
+						<Link
+							to="/dashboard/resumes"
+							className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+						>
+							Resumes
+						</Link>
+						<Link
+							to="/dashboard/resumes"
+							className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+						>
+							User Analytics
+						</Link>
+					</nav>
+
+					<button className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-gray-400 transition-colors hover:bg-white/5 hover:text-white">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+							<circle cx="12" cy="12" r="3"></circle>
+						</svg>
+						<span className="hidden sm:inline text-sm font-medium">Settings</span>
+					</button>
+
+					<UserDropdownMenu>
+						{({ session: userSession }) => (
+							<button className="flex items-center justify-center rounded-full transition-all hover:ring-2 hover:ring-white/20">
+								<Avatar className="size-8">
+									<AvatarImage src={userSession.user.image ?? undefined} />
+									<AvatarFallback
+										className="text-xs text-white"
+										style={{ background: "rgba(0,208,156,0.2)" }}
+									>
+										{getInitials(userSession.user.name)}
+									</AvatarFallback>
+								</Avatar>
+							</button>
+						)}
+					</UserDropdownMenu>
+				</div>
+			</div>
+		</header>
 	);
 }
 
@@ -140,46 +218,15 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="flex min-h-screen flex-col bg-gray-50">
-			{/* Header */}
-			<header className="border-gray-200 border-b bg-white shadow-sm">
-				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-					{/* Left: Logo and Title */}
-					<div className="flex items-center gap-2 sm:gap-3">
-						<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full sm:h-10 sm:w-8" />
-						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Resume Buddy</h1>
-					</div>{" "}
-					{/* Center: Navigation */}
-					{/* <nav className="flex items-center gap-2">
-						<Link
-							to="/dashboard/resumes"
-							activeProps={{ className: "bg-emerald-50 text-emerald-700" }}
-							className="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-gray-700 text-sm transition-all hover:bg-gray-100 sm:px-4"
-						>
-							<ReadCvLogoIcon className="size-5" />
-							<span>{i18n._(t`Resumes`)}</span>
-						</Link>
-					</nav> */}
-					{/* Right: User Menu */}
-					<UserDropdownMenu>
-						{({ session }) => (
-							<button className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100">
-								<Avatar className="size-8">
-									<AvatarImage src={session.user.image ?? undefined} />
-									<AvatarFallback className="text-xs">{getInitials(session.user.name)}</AvatarFallback>
-								</Avatar>
-								<div className="hidden text-left md:block">
-									<p className="font-medium text-sm">{session.user.name}</p>
-									<p className="text-gray-500 text-xs">{session.user.email}</p>
-								</div>
-							</button>
-						)}
-					</UserDropdownMenu>
-				</div>
-			</header>
+		<div
+			className="flex min-h-screen flex-col"
+			style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+		>
 
-			{/* Main Content */}
-			<main className="@container mx-auto w-full max-w-7xl flex-1 p-6">
+			<DashboardHeader />
+
+			{/* Main content — sits above the orbs */}
+			<main className="@container relative z-10 mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">
 				<Outlet />
 			</main>
 		</div>
