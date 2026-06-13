@@ -265,6 +265,7 @@ function RouteComponent() {
 					<div className="flex items-center gap-x-2">
 						<Combobox
 							value={sort}
+							hideSearch
 							options={sortOptions}
 							onValueChange={(value) => {
 								if (!value) return;
@@ -283,26 +284,7 @@ function RouteComponent() {
 								),
 							}}
 						/>
-						<MultipleCombobox
-							value={tags}
-							options={tagOptions}
-							onValueChange={handleFilterChange}
-							buttonProps={{
-								variant: "ghost",
-								title: t`Filter by`,
-								className: cn("text-gray-400 hover:text-white hover:bg-white/5", { hidden: tagOptions.length === 0 }),
-								children: (_, options) => (
-									<>
-										<TagIcon />
-										{options.map((option) => (
-											<Badge key={option.value} variant="outline" className="border-white/10 bg-white/5 text-gray-300">
-												{option.label}
-											</Badge>
-										))}
-									</>
-								),
-							}}
-						/>
+
 					</div>
 				</div>
 			</div>
