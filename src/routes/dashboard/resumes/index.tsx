@@ -3,7 +3,7 @@ import { authClient } from "@/integrations/auth/client";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { SortAscendingIcon, TagIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useState, useEffect, useMemo } from "react";
@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
 import { MultipleCombobox } from "@/components/ui/multiple-combobox";
 import { useDialogStore } from "@/dialogs/store";
-import { api } from "@/utils/api";
+import { api, safeParseDate } from "@/utils/api";
 import { getAuthToken, isValidToken } from "@/utils/auth-token";
 import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
@@ -61,13 +61,19 @@ function RouteComponent() {
 	// Defensive: if auth redirect hasn't happened yet, don't fire queries.
 	// The /dashboard parent route is responsible for redirecting to Zuvy when unauthenticated.
 	const isAuthed = useMemo(() => isValidToken(getAuthToken()), []);
+	const queryClient = useQueryClient();
 
 	useEffect(() => {
 		mixpanelService.track("Page View", {
 			page: "resumes",
 			timestamp: new Date().toISOString(),
 		});
-	}, []);
+		
+		// Invalidate queries when returning to dashboard to ensure we fetch the latest changes
+		// from the builder (like updated timestamp and sort order)
+		queryClient.invalidateQueries({ queryKey: ["resumes"] });
+		queryClient.invalidateQueries({ queryKey: ["statistics"] });
+	}, [queryClient]);
 
 	const { data: resumes } = useQuery({
 		queryKey: ["resumes", { tags, sort }],
@@ -150,9 +156,12 @@ function RouteComponent() {
 
 	const lastUpdateText = useMemo(() => {
 		if (!statistics?.lastUpdated) return "Never";
+		const last = safeParseDate(statistics.lastUpdated);
+		
+		if (isNaN(last.getTime())) return "Never";
 		const now = new Date();
-		const last = new Date(statistics.lastUpdated);
 		const diff = now.getTime() - last.getTime();
+		if (diff < 0) return "Just now";
 		const minutes = Math.floor(diff / 60000);
 		const hours = Math.floor(diff / 3600000);
 		const days = Math.floor(diff / 86400000);

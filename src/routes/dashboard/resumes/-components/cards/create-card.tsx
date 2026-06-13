@@ -1,4 +1,3 @@
-import { Trans } from "@lingui/react/macro";
 import { PlusIcon } from "@phosphor-icons/react";
 import { useDialogStore } from "@/dialogs/store";
 import { cn } from "@/utils/style";
@@ -16,8 +15,8 @@ export function CreateResumeCard() {
 			<div className="flex size-10 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-emerald-500/10 mb-3">
 				<PlusIcon weight="bold" className="size-5 text-gray-400 transition-colors group-hover:text-emerald-400" />
 			</div>
-			<h3 className="font-semibold text-base text-white"><Trans>New Resume</Trans></h3>
-			<p className="text-gray-400 text-xs sm:text-sm mt-1"><Trans>Start from scratch or upload</Trans></p>
+			<h3 className="font-semibold text-base text-white">New Resume</h3>
+			<p className="text-gray-400 text-xs sm:text-sm mt-1">Start from scratch or upload</p>
 		</div>
 	);
 }

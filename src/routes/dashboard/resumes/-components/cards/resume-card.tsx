@@ -24,10 +24,12 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 	});
 
 	const updatedAt = useMemo(() => {
-		const isToday = dayjs(resume.updatedAt).isSame(dayjs(), "day");
+		const d = dayjs(resume.updatedAt);
+		if (!d.isValid()) return "Recently";
+		const isToday = d.isSame(dayjs(), "day");
 		return isToday
-			? `Today, ${dayjs(resume.updatedAt).format("h:mm A")}`
-			: dayjs(resume.updatedAt).format("MMM D, YYYY [at] h:mm A");
+			? `Today, ${d.format("h:mm A")}`
+			: d.format("MMM D, YYYY [at] h:mm A");
 	}, [resume.updatedAt]);
 
 	const scale = useMemo(() => {

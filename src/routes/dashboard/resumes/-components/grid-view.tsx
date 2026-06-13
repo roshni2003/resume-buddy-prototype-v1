@@ -31,7 +31,7 @@ export function GridView({ resumes }: Props) {
 						key={resume.id}
 						initial={{ opacity: 0, x: -50 }}
 						animate={{ opacity: 1, x: 0 }}
-						exit={{ opacity: 0, y: -50, filter: "blur(12px)" }}
+						exit={{ opacity: 0, y: -20 }}
 						transition={{ delay: (index + 2) * 0.05 }}
 					>
 						<ResumeCard resume={resume} />

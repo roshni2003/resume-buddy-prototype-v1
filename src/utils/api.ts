@@ -167,6 +167,48 @@ export interface AIInvocationsResponse {
 
 // ----- Helpers -----
 
+/** Safely parse any date-like value into a valid Date. Handles the backend bug where hour=24 is returned. */
+export const safeParseDate = (value: unknown): Date => {
+	let parsedDate = new Date("invalid");
+	
+	if (value instanceof Date) {
+		parsedDate = value;
+	} else if (typeof value === "string" && value.length > 0) {
+		let str = value;
+		// Fix backend bug: hour 24 is invalid ISO — normalize T24:xx:xx to T00:xx:xx
+		const h24Match = str.match(/^(\d{4}-\d{2}-\d{2})T24:(.*)$/);
+		if (h24Match) {
+			str = `${h24Match[1]}T00:${h24Match[2]}`;
+		}
+		const d = new Date(str);
+		if (!isNaN(d.getTime())) {
+			parsedDate = d;
+		} else {
+			// Try numeric string (unix ms)
+			const num = Number(str);
+			if (!isNaN(num)) {
+				const d2 = new Date(num);
+				if (!isNaN(d2.getTime())) parsedDate = d2;
+			}
+		}
+	} else if (typeof value === "number") {
+		const d = new Date(value);
+		if (!isNaN(d.getTime())) parsedDate = d;
+	}
+
+	// Fix backend bug: Backend mixes IST Date with UTC Time between midnight and 5:30 AM IST,
+	// which creates a timestamp exactly 24 hours in the future.
+	if (!isNaN(parsedDate.getTime())) {
+		const now = Date.now();
+		// If the date is more than 5 minutes in the future, it's definitely the +24hr bug
+		if (parsedDate.getTime() > now + 5 * 60 * 1000) {
+			parsedDate = new Date(parsedDate.getTime() - 24 * 60 * 60 * 1000);
+		}
+	}
+
+	return parsedDate;
+};
+
 const mapResume = (resume: ResumeSummary): ResumeSummary => {
 	const sections = resume.data?.sections ?? {};
 	const experience = sections.experience ?? { items: [] };
@@ -176,8 +218,8 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 		tags: resume.tags ?? [],
 		isPublic: resume.isPublic ?? false,
 		isLocked: resume.isLocked ?? false,
-		createdAt: new Date(resume.createdAt),
-		updatedAt: new Date(resume.updatedAt),
+		createdAt: safeParseDate(resume.createdAt),
+		updatedAt: safeParseDate(resume.updatedAt),
 		data: {
 			...resume.data,
 			sections: {
@@ -214,6 +256,9 @@ export const api = {
 		}
 		const queryString = searchParams.toString();
 		const resumes = await request<ResumeSummary[]>(`/resumes/user${queryString ? `?${queryString}` : ""}`);
+		if (resumes?.[0]) {
+			console.log("[date-debug] raw resume dates:", { createdAt: resumes[0].createdAt, updatedAt: resumes[0].updatedAt, type_created: typeof resumes[0].createdAt, type_updated: typeof resumes[0].updatedAt });
+		}
 		return resumes.map(mapResume);
 	},
 
@@ -258,7 +303,11 @@ export const api = {
 		}),
 
 	// 7. GET: /resumes/statistics (Dashboard summary)
-	fetchStatistics: () => request<ResumeStatistics>("/resumes/statistics"),
+	fetchStatistics: async () => {
+		const stats = await request<ResumeStatistics>("/resumes/statistics");
+		console.log("[date-debug] raw statistics:", JSON.stringify(stats));
+		return stats;
+	},
 
 	// 7a. GET: /resume/statistics/{id} (Individual resume statistics)
 	fetchResumeStatistics: async (id: string) => {
