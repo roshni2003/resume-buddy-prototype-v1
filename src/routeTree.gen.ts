@@ -25,6 +25,7 @@ import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resu
 import { Route as UploadsUserIdSplatRouteImport } from "./routes/uploads/$userId.$";
 import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
 import { Route as DashboardResumesUploadRouteImport } from "./routes/dashboard/resumes/upload";
+import { Route as DashboardResumesMatchRouteImport } from "./routes/dashboard/resumes/match";
 import { Route as DashboardAdminMixpanelRouteImport } from "./routes/dashboard/admin/mixpanel";
 import { Route as DashboardAdminAnalyticsRouteImport } from "./routes/dashboard/admin/analytics";
 import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
@@ -111,6 +112,11 @@ const DashboardResumesUploadRoute = DashboardResumesUploadRouteImport.update({
   path: "/resumes/upload",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
+const DashboardResumesMatchRoute = DashboardResumesMatchRouteImport.update({
+  id: "/resumes/match",
+  path: "/resumes/match",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const DashboardAdminMixpanelRoute = DashboardAdminMixpanelRouteImport.update({
   id: "/admin/mixpanel",
   path: "/admin/mixpanel",
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
   "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
+  "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
   "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
   "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
+  "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
   "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
   "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
+  "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
   "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
     | "/dashboard/admin/mixpanel"
+    | "/dashboard/resumes/match"
     | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
     | "/dashboard/admin/mixpanel"
+    | "/dashboard/resumes/match"
     | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
     | "/dashboard/admin/mixpanel"
+    | "/dashboard/resumes/match"
     | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
@@ -401,6 +413,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardResumesUploadRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/dashboard/resumes/match": {
+      id: "/dashboard/resumes/match";
+      path: "/resumes/match";
+      fullPath: "/dashboard/resumes/match";
+      preLoaderRoute: typeof DashboardResumesMatchRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     "/dashboard/admin/mixpanel": {
       id: "/dashboard/admin/mixpanel";
       path: "/admin/mixpanel";
@@ -455,6 +474,7 @@ interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute;
   DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute;
   DashboardAdminMixpanelRoute: typeof DashboardAdminMixpanelRoute;
+  DashboardResumesMatchRoute: typeof DashboardResumesMatchRoute;
   DashboardResumesUploadRoute: typeof DashboardResumesUploadRoute;
   DashboardSettingsProfileRoute: typeof DashboardSettingsProfileRoute;
   DashboardResumesIndexRoute: typeof DashboardResumesIndexRoute;
@@ -464,6 +484,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
   DashboardAdminMixpanelRoute: DashboardAdminMixpanelRoute,
+  DashboardResumesMatchRoute: DashboardResumesMatchRoute,
   DashboardResumesUploadRoute: DashboardResumesUploadRoute,
   DashboardSettingsProfileRoute: DashboardSettingsProfileRoute,
   DashboardResumesIndexRoute: DashboardResumesIndexRoute,

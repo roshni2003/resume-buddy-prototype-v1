@@ -71,22 +71,24 @@ export function OnboardingDialog() {
 				</button>
 
 				{/* Match to a Job */}
-				<div
-					className="relative flex flex-col items-center justify-between text-center p-5 rounded-xl border border-slate-800 bg-slate-900/30 opacity-50 cursor-not-allowed select-none"
+				<button
+					type="button"
+					onClick={() => {
+						closeDialog();
+						navigate({ to: "/dashboard/resumes/match" });
+					}}
+					className="group flex flex-col items-center justify-between text-center p-5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-purple-500/50 transition-all duration-300 shadow-sm"
 				>
-					<span className="absolute top-2 right-2 rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-400 ring-1 ring-slate-700">
-						Soon
-					</span>
-					<div className="flex size-12 items-center justify-center rounded-lg bg-slate-800/50 text-slate-500">
+					<div className="flex size-12 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400 group-hover:scale-110 transition-transform duration-300 ring-1 ring-purple-500/20">
 						<SuitcaseIcon className="size-6" weight="regular" />
 					</div>
 					<div className="mt-4">
-						<h3 className="font-bold text-slate-400 text-sm">Match to a job</h3>
-						<p className="mt-1 text-xs text-slate-500 leading-snug">
+						<h3 className="font-bold text-slate-200 text-sm group-hover:text-purple-400 transition-colors">Match to a job</h3>
+						<p className="mt-1 text-xs text-slate-400 leading-snug">
 							Paste a job description to tailor your resume fields.
 						</p>
 					</div>
-				</div>
+				</button>
 			</div>
 		</DialogContent>
 	);
