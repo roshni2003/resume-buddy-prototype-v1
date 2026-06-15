@@ -560,51 +560,75 @@ export function ResumeBuddyEditor() {
 				</aside>
 
 				{/* Right Main Editor Content Canvas */}
-				<main className="flex flex-1 justify-center overflow-y-auto p-8">
-					<div className="w-full max-w-[800px] rounded-2xl border border-gray-200 bg-white p-8 shadow-xs">
+				<main className="flex flex-1 justify-center overflow-y-auto p-8 bg-slate-50/50">
+					<div className="w-full max-w-[800px] rounded-3xl border border-white/60 bg-white/90 p-8 shadow-2xl shadow-indigo-100/50 backdrop-blur-xl ring-1 ring-black/5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
 						{/* Conditional form rendering */}
 						{activeSection === "basics" && (
-							<div>
-								<h2 className="mb-6 font-bold text-gray-900 text-xl">Basics Information</h2>
+							<div className="animate-in fade-in duration-300">
+								<div className="mb-8 rounded-2xl bg-gradient-to-r from-sky-500/10 via-sky-500/5 to-transparent p-6 border-l-4 border-sky-500 shadow-sm">
+									<h2 className="font-bold text-sky-950 text-2xl flex items-center gap-3">
+										<User className="h-6 w-6 text-sky-500" />
+										Basics Information
+									</h2>
+									<p className="text-sky-700/80 mt-1.5 text-sm">Update your personal details and contact information.</p>
+								</div>
 								<BasicsSectionForm />
 							</div>
 						)}
 
 						{activeSection === "picture" && (
-							<div>
-								<h2 className="mb-6 font-bold text-gray-900 text-xl">Profile Photo</h2>
+							<div className="animate-in fade-in duration-300">
+								<div className="mb-8 rounded-2xl bg-gradient-to-r from-pink-500/10 via-pink-500/5 to-transparent p-6 border-l-4 border-pink-500 shadow-sm">
+									<h2 className="font-bold text-pink-950 text-2xl flex items-center gap-3">
+										<ImageIcon className="h-6 w-6 text-pink-500" />
+										Profile Photo
+									</h2>
+									<p className="text-pink-700/80 mt-1.5 text-sm">Upload a professional headshot for your resume.</p>
+								</div>
 								<PictureSectionForm />
 							</div>
 						)}
 
-						{activeSection === "summary" && <SummaryInlineForm />}
+						{activeSection === "summary" && (
+							<div className="animate-in fade-in duration-300">
+								<SummaryInlineForm />
+							</div>
+						)}
 
 						{activeSection === "profiles" && (
-							<ProfilesInlineForm activeSubItem={activeSubItem} setActiveSubItem={setActiveSubItem} />
+							<div className="animate-in fade-in duration-300">
+								<ProfilesInlineForm activeSubItem={activeSubItem} setActiveSubItem={setActiveSubItem} />
+							</div>
 						)}
 
 						{activeSection === "education" && (
-							<EducationInlineForm
-								activeSubItem={activeSubItem}
-								setActiveSubItem={setActiveSubItem}
-								handleDeleteItem={handleDeleteItem}
-							/>
+							<div className="animate-in fade-in duration-300">
+								<EducationInlineForm
+									activeSubItem={activeSubItem}
+									setActiveSubItem={setActiveSubItem}
+									handleDeleteItem={handleDeleteItem}
+								/>
+							</div>
 						)}
 
 						{activeSection === "experience" && (
-							<ExperienceInlineForm
-								activeSubItem={activeSubItem}
-								setActiveSubItem={setActiveSubItem}
-								handleDeleteItem={handleDeleteItem}
-							/>
+							<div className="animate-in fade-in duration-300">
+								<ExperienceInlineForm
+									activeSubItem={activeSubItem}
+									setActiveSubItem={setActiveSubItem}
+									handleDeleteItem={handleDeleteItem}
+								/>
+							</div>
 						)}
 
 						{activeSection === "projects" && (
-							<ProjectsInlineForm
-								activeSubItem={activeSubItem}
-								setActiveSubItem={setActiveSubItem}
-								handleDeleteItem={handleDeleteItem}
-							/>
+							<div className="animate-in fade-in duration-300">
+								<ProjectsInlineForm
+									activeSubItem={activeSubItem}
+									setActiveSubItem={setActiveSubItem}
+									handleDeleteItem={handleDeleteItem}
+								/>
+							</div>
 						)}
 					</div>
 				</main>
@@ -636,8 +660,13 @@ function SummaryInlineForm() {
 
 	return (
 		<div>
-			<h2 className="mb-2 font-bold text-gray-900 text-xl">Professional Summary</h2>
-			<p className="mb-6 text-gray-600 text-sm">Write a brief overview of your background and achievements.</p>
+			<div className="mb-8 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-6 border-l-4 border-amber-500 shadow-sm">
+				<h2 className="font-bold text-amber-950 text-2xl flex items-center gap-3">
+					<FileText className="h-6 w-6 text-amber-500" />
+					Professional Summary
+				</h2>
+				<p className="text-amber-700/80 mt-1.5 text-sm">Write a brief overview of your background and achievements.</p>
+			</div>
 			<FormProvider {...form}>
 				<form onChange={form.handleSubmit(onSubmit)} className="space-y-4">
 					<RichInput
@@ -719,8 +748,13 @@ function ProfilesInlineForm({
 	if (!isEditing) {
 		return (
 			<div>
-				<h2 className="mb-2 font-bold text-gray-900 text-xl">Social & Professional Profiles</h2>
-				<p className="mb-6 text-gray-600 text-sm">Add links to GitHub, LinkedIn, or your portfolio website.</p>
+				<div className="mb-8 rounded-2xl bg-gradient-to-r from-purple-500/10 via-purple-500/5 to-transparent p-6 border-l-4 border-purple-500 shadow-sm">
+					<h2 className="font-bold text-purple-950 text-2xl flex items-center gap-3">
+						<LinkIcon className="h-6 w-6 text-purple-500" />
+						Social & Professional Profiles
+					</h2>
+					<p className="text-purple-700/80 mt-1.5 text-sm">Add links to GitHub, LinkedIn, or your portfolio website.</p>
+				</div>
 
 				<div className="space-y-3">
 					{section.items.map((item) => (
@@ -746,11 +780,16 @@ function ProfilesInlineForm({
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center gap-3">
-				<button onClick={() => setActiveSubItem(null)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+			<div className="mb-8 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-purple-500/10 via-purple-500/5 to-transparent p-6 border-l-4 border-purple-500 shadow-sm">
+				<button onClick={() => setActiveSubItem(null)} className="rounded-full bg-white/50 p-2 text-purple-600 hover:bg-white/80 transition-colors shadow-sm">
 					<ArrowLeft className="h-5 w-5" />
 				</button>
-				<h2 className="font-bold text-gray-900 text-xl">{editId ? "Edit Profile" : "Add Profile"}</h2>
+				<div>
+					<h2 className="font-bold text-purple-950 text-2xl flex items-center gap-3">
+						{editId ? "Edit Profile" : "Add Profile"}
+					</h2>
+					<p className="text-purple-700/80 mt-1 text-sm">Fill in the details for your social or professional profile.</p>
+				</div>
 			</div>
 
 			<FormProvider {...form}>
@@ -876,8 +915,13 @@ function EducationInlineForm({
 	if (!isEditing) {
 		return (
 			<div>
-				<h2 className="mb-2 font-bold text-gray-900 text-xl">Education</h2>
-				<p className="mb-6 text-gray-600 text-sm">Add details of your degrees and academic history.</p>
+				<div className="mb-8 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-6 border-l-4 border-emerald-500 shadow-sm">
+					<h2 className="font-bold text-emerald-950 text-2xl flex items-center gap-3">
+						<GraduationCap className="h-6 w-6 text-emerald-500" />
+						Education
+					</h2>
+					<p className="text-emerald-700/80 mt-1.5 text-sm">Add details of your degrees and academic history.</p>
+				</div>
 
 				<div className="space-y-3">
 					{section.items.map((item) => (
@@ -912,11 +956,16 @@ function EducationInlineForm({
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center gap-3">
-				<button onClick={() => setActiveSubItem(null)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+			<div className="mb-8 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-6 border-l-4 border-emerald-500 shadow-sm">
+				<button onClick={() => setActiveSubItem(null)} className="rounded-full bg-white/50 p-2 text-emerald-600 hover:bg-white/80 transition-colors shadow-sm">
 					<ArrowLeft className="h-5 w-5" />
 				</button>
-				<h2 className="font-bold text-gray-900 text-xl">{editId ? "Edit Education" : "Add Education"}</h2>
+				<div>
+					<h2 className="font-bold text-emerald-950 text-2xl flex items-center gap-3">
+						{editId ? "Edit Education" : "Add Education"}
+					</h2>
+					<p className="text-emerald-700/80 mt-1 text-sm">Fill in the details for your education entry.</p>
+				</div>
 			</div>
 
 			<FormProvider {...form}>
@@ -1095,8 +1144,13 @@ function ExperienceInlineForm({
 	if (!isEditing) {
 		return (
 			<div>
-				<h2 className="mb-2 font-bold text-gray-900 text-xl">Experience</h2>
-				<p className="mb-6 text-gray-600 text-sm">Add details of your current and past work experience.</p>
+				<div className="mb-8 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent p-6 border-l-4 border-indigo-600 shadow-sm">
+					<h2 className="font-bold text-indigo-950 text-2xl flex items-center gap-3">
+						<Briefcase className="h-6 w-6 text-indigo-600" />
+						Experience
+					</h2>
+					<p className="text-indigo-700/80 mt-1.5 text-sm">Add details of your current and past work experience.</p>
+				</div>
 
 				<div className="space-y-3">
 					{section.items.map((item) => (
@@ -1131,11 +1185,16 @@ function ExperienceInlineForm({
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center gap-3">
-				<button onClick={() => setActiveSubItem(null)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+			<div className="mb-8 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent p-6 border-l-4 border-indigo-600 shadow-sm">
+				<button onClick={() => setActiveSubItem(null)} className="rounded-full bg-white/50 p-2 text-indigo-600 hover:bg-white/80 transition-colors shadow-sm">
 					<ArrowLeft className="h-5 w-5" />
 				</button>
-				<h2 className="font-bold text-gray-900 text-xl">{editId ? "Edit Experience" : "Add Experience"}</h2>
+				<div>
+					<h2 className="font-bold text-indigo-950 text-2xl flex items-center gap-3">
+						{editId ? "Edit Experience" : "Add Experience"}
+					</h2>
+					<p className="text-indigo-700/80 mt-1 text-sm">Fill in the details for your work experience.</p>
+				</div>
 			</div>
 
 			<FormProvider {...form}>
@@ -1279,8 +1338,13 @@ function ProjectsInlineForm({
 	if (!isEditing) {
 		return (
 			<div>
-				<h2 className="mb-2 font-bold text-gray-900 text-xl">Projects</h2>
-				<p className="mb-6 text-gray-600 text-sm">Add details of personal or academic projects.</p>
+				<div className="mb-8 rounded-2xl bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent p-6 border-l-4 border-rose-500 shadow-sm">
+					<h2 className="font-bold text-rose-950 text-2xl flex items-center gap-3">
+						<Code className="h-6 w-6 text-rose-500" />
+						Projects
+					</h2>
+					<p className="text-rose-700/80 mt-1.5 text-sm">Add details of personal or academic projects.</p>
+				</div>
 
 				<div className="space-y-3">
 					{section.items.map((item) => (
@@ -1309,11 +1373,16 @@ function ProjectsInlineForm({
 
 	return (
 		<div>
-			<div className="mb-6 flex items-center gap-3">
-				<button onClick={() => setActiveSubItem(null)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+			<div className="mb-8 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent p-6 border-l-4 border-rose-500 shadow-sm">
+				<button onClick={() => setActiveSubItem(null)} className="rounded-full bg-white/50 p-2 text-rose-600 hover:bg-white/80 transition-colors shadow-sm">
 					<ArrowLeft className="h-5 w-5" />
 				</button>
-				<h2 className="font-bold text-gray-900 text-xl">{editId ? "Edit Project" : "Add Project"}</h2>
+				<div>
+					<h2 className="font-bold text-rose-950 text-2xl flex items-center gap-3">
+						{editId ? "Edit Project" : "Add Project"}
+					</h2>
+					<p className="text-rose-700/80 mt-1 text-sm">Fill in the details for your project.</p>
+				</div>
 			</div>
 
 			<FormProvider {...form}>

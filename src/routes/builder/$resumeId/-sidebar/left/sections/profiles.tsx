@@ -1,5 +1,7 @@
+import { DribbbleLogo, GithubLogo, Globe, LinkedinLogo, PlusIcon, TwitterLogo } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useResumeStore } from "@/components/resume/store/resume";
+import { Input } from "@/components/ui/input";
 import { DragHandle, SortableItem } from "@/components/ui/sortable-item";
 import { SortableList } from "@/components/ui/sortable-list";
 import { cn } from "@/utils/style";
@@ -14,16 +16,129 @@ type ProfileFormData = {
 type SocialNetwork = {
 	name: string;
 	icon: string;
+	iconNode: React.ReactNode;
+	iconColor: string;
+	borderColor: string;
 	placeholder: string;
-	color: string;
 };
 
 const socialNetworks: SocialNetwork[] = [
-	{ name: "LinkedIn", icon: "💼", placeholder: "linkedin.com/in/username", color: "bg-blue-600" },
-	{ name: "GitHub", icon: "💻", placeholder: "github.com/username", color: "bg-gray-800" },
-	{ name: "Twitter", icon: "🐦", placeholder: "twitter.com/username", color: "bg-sky-500" },
-	{ name: "Portfolio", icon: "🌐", placeholder: "yourwebsite.com", color: "bg-purple-600" },
+	{
+		name: "LinkedIn",
+		icon: "LinkedinLogo",
+		iconNode: <LinkedinLogo weight="regular" className="h-4 w-4" />,
+		iconColor: "text-[#0077b5]",
+		borderColor: "border-[#0077b5]/30",
+		placeholder: "linkedin.com/in/username",
+	},
+	{
+		name: "GitHub",
+		icon: "GithubLogo",
+		iconNode: <GithubLogo weight="regular" className="h-4 w-4" />,
+		iconColor: "text-gray-800",
+		borderColor: "border-gray-300",
+		placeholder: "github.com/username",
+	},
+	{
+		name: "Twitter",
+		icon: "TwitterLogo",
+		iconNode: <TwitterLogo weight="regular" className="h-4 w-4" />,
+		iconColor: "text-[#1da1f2]",
+		borderColor: "border-[#1da1f2]/30",
+		placeholder: "twitter.com/username",
+	},
+	{
+		name: "Dribbble",
+		icon: "DribbbleLogo",
+		iconNode: <DribbbleLogo weight="regular" className="h-4 w-4" />,
+		iconColor: "text-[#ea4c89]",
+		borderColor: "border-[#ea4c89]/30",
+		placeholder: "dribbble.com/username",
+	},
+	{
+		name: "Portfolio",
+		icon: "Globe",
+		iconNode: <Globe weight="regular" className="h-4 w-4" />,
+		iconColor: "text-emerald-600",
+		borderColor: "border-emerald-200",
+		placeholder: "yourwebsite.com",
+	},
 ];
+
+const detectNetworkFromUrl = (url: string) => {
+	try {
+		// Clean the URL - remove any extra spaces
+		let cleanUrl = url.trim();
+
+		// Add protocol if missing for URL parsing
+		if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+			cleanUrl = "https://" + cleanUrl;
+		}
+
+		const urlObj = new URL(cleanUrl);
+		const hostname = urlObj.hostname.toLowerCase();
+
+		// Remove www. prefix for better matching
+		const domain = hostname.replace(/^www\./, "");
+
+		let network = "Portfolio";
+		let username = "";
+
+		if (domain.includes("linkedin.com")) {
+			network = "LinkedIn";
+			// Extract username from LinkedIn URL (e.g., /in/username)
+			const pathParts = urlObj.pathname.split("/").filter(Boolean);
+			if (pathParts.includes("in") && pathParts.length > 1) {
+				username = pathParts[pathParts.indexOf("in") + 1] || "";
+			} else {
+				username = pathParts.pop() || "";
+			}
+		} else if (domain.includes("github.com")) {
+			network = "GitHub";
+			username = urlObj.pathname.split("/").filter(Boolean)[0] || "";
+		} else if (domain.includes("twitter.com") || domain.includes("x.com")) {
+			network = "Twitter";
+			username = urlObj.pathname.split("/").filter(Boolean)[0] || "";
+		} else if (domain.includes("dribbble.com")) {
+			network = "Dribbble";
+			username = urlObj.pathname.split("/").filter(Boolean)[0] || "";
+		} else {
+			// For portfolio/other websites, try to extract a username from common patterns
+			// Extract network name from domain (e.g., instagram.com -> Instagram)
+			const domainName = domain.split(".")[0];
+			if (domainName && domainName !== "www") {
+				network = domainName.charAt(0).toUpperCase() + domainName.slice(1);
+			} else {
+				network = "Website";
+			}
+
+			// Common patterns for portfolio URLs
+			const pathParts = urlObj.pathname.split("/").filter(Boolean);
+
+			// Check for patterns like /u/username, /user/username, /profile/username
+			if (pathParts.includes("u") && pathParts.length > 1) {
+				username = pathParts[pathParts.indexOf("u") + 1] || "";
+			} else if (pathParts.includes("user") && pathParts.length > 1) {
+				username = pathParts[pathParts.indexOf("user") + 1] || "";
+			} else if (pathParts.includes("profile") && pathParts.length > 1) {
+				username = pathParts[pathParts.indexOf("profile") + 1] || "";
+			} else if (pathParts.length > 0) {
+				// If no common pattern, use the first path segment or the domain
+				username = pathParts[0] || domain;
+			} else {
+				username = domain;
+			}
+		}
+
+		// Clean up username (remove trailing slashes, query params, etc.)
+		username = username.split("?")[0].split("#")[0];
+
+		return { network, username: username || domain, url: cleanUrl };
+	} catch (error) {
+		// If URL parsing fails, return as portfolio with the original string
+		return { network: "Portfolio", username: url, url: url };
+	}
+};
 
 export function ProfilesSectionBuilder() {
 	const section = useResumeStore((state) => state.resume.data.sections.profiles);
@@ -111,12 +226,14 @@ export function ProfilesSectionBuilder() {
 
 	const getNetworkIcon = (network: string) => {
 		const networkData = socialNetworks.find((n) => n.name === network);
-		return networkData?.icon || "🔗";
+		return networkData?.iconNode || <Globe weight="regular" className="h-4 w-4" />;
 	};
 
 	const getNetworkColor = (network: string) => {
 		const networkData = socialNetworks.find((n) => n.name === network);
-		return networkData?.color || "bg-gray-600";
+		return networkData
+			? `${networkData.iconColor} bg-white border ${networkData.borderColor}`
+			: "text-gray-500 bg-white border border-gray-200";
 	};
 
 	return (
@@ -140,7 +257,7 @@ export function ProfilesSectionBuilder() {
 									<DragHandle className="shrink-0 p-1 text-gray-400 transition-colors hover:text-gray-600" />
 									<div
 										className={cn(
-											"flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white text-xl",
+											"flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
 											getNetworkColor(profile.network),
 										)}
 									>
@@ -189,64 +306,67 @@ export function ProfilesSectionBuilder() {
 
 					{/* Add/Edit Form */}
 					{(isAddingProfile || editingId) && (
-						<div className="border-gray-200 border-t bg-gray-50 p-4">
-							<h4 className="mb-4 font-semibold text-gray-900 text-sm">
-								{editingId ? "Edit Profile" : "Add New Profile"}
-							</h4>
+						<div className="border-gray-200 border-t bg-white p-6">
+							<div className="mb-4 flex items-center justify-between">
+								<h4 className="font-semibold text-gray-900 text-sm">
+									{editingId ? "Edit Profile" : "Add New Profile"}
+								</h4>
+							</div>
 
-							<div className="space-y-3">
-								{/* Network Selection */}
-								<div>
-									<label className="mb-2 block font-medium text-gray-700 text-xs">Social Network</label>
-									<select
-										value={formData.network}
-										onChange={(e) => setFormData({ ...formData, network: e.target.value })}
-										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
-									>
-										{socialNetworks.map((network) => (
-											<option key={network.name} value={network.name}>
-												{network.icon} {network.name}
-											</option>
-										))}
-									</select>
-								</div>
+							<div className="space-y-4">
+								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+									{/* Network Selection */}
+									<div className="space-y-1.5">
+										<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Network</label>
+										<Input
+											type="text"
+											list="network-options"
+											value={formData.network}
+											onChange={(e) => setFormData({ ...formData, network: e.target.value })}
+											placeholder="e.g. LinkedIn, Instagram"
+										/>
+										<datalist id="network-options">
+											{socialNetworks.map((network) => (
+												<option key={network.name} value={network.name} />
+											))}
+										</datalist>
+									</div>
 
-								{/* Username */}
-								<div>
-									<label className="mb-2 block font-medium text-gray-700 text-xs">Username</label>
-									<input
-										type="text"
-										value={formData.username}
-										onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-										placeholder="johndoe"
-										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
-									/>
+									{/* Username */}
+									<div className="space-y-1.5">
+										<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Username</label>
+										<Input
+											type="text"
+											value={formData.username}
+											onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+											placeholder="johndoe"
+										/>
+									</div>
 								</div>
 
 								{/* URL */}
-								<div>
-									<label className="mb-2 block font-medium text-gray-700 text-xs">Profile URL</label>
-									<input
+								<div className="space-y-1.5">
+									<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Profile URL</label>
+									<Input
 										type="url"
 										value={formData.url}
 										onChange={(e) => setFormData({ ...formData, url: e.target.value })}
 										placeholder={socialNetworks.find((n) => n.name === formData.network)?.placeholder}
-										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 									/>
 								</div>
 
 								{/* Form Actions */}
-								<div className="flex items-center gap-2 pt-2">
+								<div className="flex items-center gap-3 pt-2">
 									<button
 										onClick={editingId ? handleUpdateProfile : handleAddProfile}
-										className="flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-sm text-white transition-all hover:bg-emerald-700"
+										className="flex h-10 flex-1 items-center justify-center rounded-xl bg-[#0f1c23] font-medium text-sm text-white transition-all hover:bg-gray-800"
 										type="button"
 									>
-										{editingId ? "Update Profile" : "Add Profile"}
+										{editingId ? "Save Changes" : "Add Profile"}
 									</button>
 									<button
 										onClick={cancelForm}
-										className="rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-700 text-sm transition-all hover:bg-gray-300"
+										className="flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-6 font-medium text-gray-700 text-sm transition-all hover:bg-gray-50"
 										type="button"
 									>
 										Cancel
@@ -256,93 +376,56 @@ export function ProfilesSectionBuilder() {
 						</div>
 					)}
 
-					{/* Add Button */}
+					{/* Add Network Default View */}
 					{!isAddingProfile && !editingId && (
-						<div className="p-4">
-							<button
-								onClick={() => setIsAddingProfile(true)}
-								className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-gray-300 border-dashed py-3 font-medium text-gray-600 text-sm transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700"
-								type="button"
-							>
-								<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-								</svg>
-								Add a new profile
-							</button>
-						</div>
-					)}
-
-					{/* Empty State */}
-					{section.items.length === 0 && !isAddingProfile && (
-						<div className="p-8 text-center">
-							<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-								<svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth={2}
-										d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-									/>
-								</svg>
+						<div className="flex flex-col gap-4 p-5">
+							<div className="flex items-center gap-2 font-bold text-gray-500 text-xs uppercase tracking-widest">
+								<span>&bull;</span> ADD A NETWORK
 							</div>
-							<h4 className="mb-1 font-semibold text-gray-900 text-sm">No profiles added yet</h4>
-							<p className="mb-4 text-gray-600 text-xs">Add your social media profiles and professional links</p>
+
+							<div className="flex flex-wrap gap-3">
+								{socialNetworks.map((network) => (
+									<button
+										key={network.name}
+										onClick={() => {
+											setFormData({ ...formData, network: network.name });
+											setIsAddingProfile(true);
+										}}
+										className={cn(
+											"flex items-center gap-2 rounded-full border px-4 py-2 font-medium text-sm transition-colors hover:bg-gray-50",
+											network.borderColor,
+										)}
+										type="button"
+									>
+										<span className={network.iconColor}>{network.iconNode}</span>
+										<span className="text-gray-900">{network.name}</span>
+										<PlusIcon className="h-4 w-4 text-gray-500" weight="bold" />
+									</button>
+								))}
+							</div>
+
+							<div className="relative mt-2">
+								<input
+									type="text"
+									placeholder="Or paste any URL — we'll detect the network."
+									onChange={(e) => {
+										const val = e.target.value;
+										if (val.trim()) {
+											const detected = detectNetworkFromUrl(val.trim());
+											setFormData({
+												network: detected.network,
+												username: detected.username,
+												url: detected.url,
+											});
+											setIsAddingProfile(true);
+										}
+									}}
+									className="flex w-full items-center justify-center rounded-[20px] border-2 border-cyan-200 border-dashed p-4 text-center font-medium text-gray-600 text-sm transition-all placeholder:text-gray-600 hover:bg-gray-50 focus:border-cyan-400 focus:text-left focus:outline-none focus:ring-4 focus:ring-cyan-50 focus:placeholder:text-gray-400"
+								/>
+							</div>
 						</div>
 					)}
 				</div>
-
-				{/* Profile Tips */}
-				{section.items.length > 0 && !isAddingProfile && !editingId && (
-					<div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-						<div className="flex gap-3">
-							<svg
-								className="mt-0.5 h-5 w-5 shrink-0 text-blue-600"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
-							<div>
-								<h4 className="mb-2 font-semibold text-blue-900 text-sm">Profile Tips</h4>
-								<ul className="space-y-1 text-blue-800 text-xs">
-									<li>• Add your most professional networks first (LinkedIn, GitHub)</li>
-									<li>• Use consistent usernames across platforms when possible</li>
-									<li>• Only include profiles that are relevant to your job search</li>
-									<li>• Drag and drop to reorder profiles</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* Quick Add Popular Networks */}
-				{section.items.length === 0 && !isAddingProfile && (
-					<div className="rounded-xl border border-emerald-200 bg-linear-to-br from-emerald-50 p-4">
-						<h4 className="mb-3 font-semibold text-gray-900 text-sm">Popular Networks</h4>
-						<div className="grid grid-cols-2 gap-2">
-							{socialNetworks.map((network) => (
-								<button
-									key={network.name}
-									onClick={() => {
-										setFormData({ ...formData, network: network.name });
-										setIsAddingProfile(true);
-									}}
-									className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-3 py-2 font-medium text-gray-700 text-sm transition-all hover:bg-emerald-50 hover:text-emerald-700"
-									type="button"
-								>
-									<span className="text-lg">{network.icon}</span>
-									{network.name}
-								</button>
-							))}
-						</div>
-					</div>
-				)}
 			</div>
 		</SectionBase>
 	);

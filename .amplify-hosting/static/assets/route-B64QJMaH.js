@@ -132,6 +132,7 @@ import { t as lt } from "./loading-screen-M1mL3n-i.js";
 import { t as It } from "./separator-E8i2irOi.js";
 import { r as Bt, a as Lt, i as Rt, t as Vt, n as zt } from "./sidebar-BIIS38Jo.js";
 import { t as Wt } from "./use-mobile-D_kEz352.js";
+
 function Yt(e, t) {
 	return S({ ...e, enabled: !0, suspense: !0, throwOnError: ae, placeholderData: void 0 }, k, t);
 }
@@ -5411,18 +5412,16 @@ function ss(e, t) {
 }
 function cs(e) {
 	return function (t) {
-		return [...arguments]
-			.slice(1)
-			.reduce(
-				(t, n) => ({
-					...t,
-					top: t.top + e * n.y,
-					bottom: t.bottom + e * n.y,
-					left: t.left + e * n.x,
-					right: t.right + e * n.x,
-				}),
-				{ ...t },
-			);
+		return [...arguments].slice(1).reduce(
+			(t, n) => ({
+				...t,
+				top: t.top + e * n.y,
+				bottom: t.bottom + e * n.y,
+				left: t.left + e * n.x,
+				right: t.right + e * n.x,
+			}),
+			{ ...t },
+		);
 	};
 }
 var ls = cs(1);

@@ -261,3 +261,39 @@
 		direction: rtl;
 	}
 }
+
+@keyframes aiGlow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+    filter: blur(10px);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+    filter: blur(14px);
+  }
+}
+
+@keyframes aiGlowRing {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.12);
+  }
+}
+
+.animate-ai-glow {
+  animation: aiGlow 1.8s ease-in-out infinite;
+}
+
+.animate-ai-glow-ring {
+  animation: aiGlowRing 1.8s ease-in-out infinite;
+}
