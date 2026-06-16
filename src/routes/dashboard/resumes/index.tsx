@@ -23,7 +23,7 @@ function AnimatedNumber({ value }: { value: number }) {
 	const [count, setCount] = useState(0);
 	useEffect(() => {
 		let startTime: number | null = null;
-		const duration = 200;
+		const duration = 1000;
 		const step = (timestamp: number) => {
 			if (!startTime) startTime = timestamp;
 			const progress = Math.min((timestamp - startTime) / duration, 1);
