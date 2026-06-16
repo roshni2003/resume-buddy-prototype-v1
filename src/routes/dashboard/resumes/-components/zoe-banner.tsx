@@ -10,7 +10,10 @@ const steps: {
 	label: string;
 	description: string;
 	icon: React.ElementType;
-	action: (navigate: ReturnType<typeof useNavigate>, openDialog: ReturnType<typeof useDialogStore>["openDialog"]) => void;
+	action: (
+		navigate: ReturnType<typeof useNavigate>,
+		openDialog: ReturnType<typeof useDialogStore>["openDialog"],
+	) => void;
 }[] = [
 	{
 		label: "Upload resume",
@@ -57,17 +60,26 @@ export function ZoeBanner() {
 	const current = steps[activeStep];
 
 	return (
-		<div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-[#0f172a]/80 p-4 sm:p-5 shadow-lg backdrop-blur-sm transition-all">
+		<div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-card/80 p-4 shadow-lg backdrop-blur-sm transition-all sm:p-5 xl:flex-row xl:items-center">
 			<div className="flex items-center gap-3 sm:gap-4">
-				<div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+				<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 sm:size-12">
+					<svg
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
 						<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
 					</svg>
 				</div>
-				<div className="min-h-[44px] flex flex-col justify-center">
-					<h3 className="font-bold text-white text-sm sm:text-base">Zoe works the way you do</h3>
+				<div className="flex min-h-[44px] flex-col justify-center">
+					<h3 className="font-bold text-sm text-foreground sm:text-base">Zoe works the way you do</h3>
 					<div
-						className="text-gray-400 text-xs sm:text-sm flex items-center gap-1.5 mt-0.5"
+						className="mt-0.5 flex items-center gap-1.5 text-muted-foreground text-xs sm:text-sm"
 						style={{
 							opacity: animating ? 0 : 1,
 							transform: animating ? "translateY(4px)" : "translateY(0)",
@@ -83,9 +95,9 @@ export function ZoeBanner() {
 					</div>
 				</div>
 			</div>
-			
+
 			{/* Right: Action buttons */}
-			<div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+			<div className="flex w-full flex-wrap items-center gap-2 sm:gap-3 xl:w-auto">
 				{steps.map((step, index) => {
 					const Icon = step.icon;
 					const isActive = activeStep === index;
@@ -102,8 +114,10 @@ export function ZoeBanner() {
 								step.action(navigate, openDialog);
 							}}
 							className={cn(
-								"flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-300",
-								isActive ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "border border-emerald-500/30 bg-white/5 text-gray-300 hover:bg-white/10"
+								"flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-xs transition-all duration-300 sm:text-sm",
+								isActive
+									? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+									: "border border-emerald-500/30 bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground",
 							)}
 						>
 							<Icon className="size-3.5" weight={isActive ? "bold" : "regular"} />

@@ -122,16 +122,16 @@ function Combobox<TValue extends string | number = string>({
 				aria-disabled={disabled}
 				tabIndex={disabled ? -1 : undefined}
 				className={cn(
-					"min-w-[200px] p-0 border border-white/10 bg-[#0f172a]/95 backdrop-blur-md shadow-xl",
+					"min-w-[200px] p-0 border border-border bg-popover/95 backdrop-blur-md shadow-xl",
 					className,
 					disabled && "pointer-events-none select-none opacity-60"
 				)}
 				{...props}
 			>
 				<Command className="bg-transparent">
-					{!hideSearch && <CommandInput placeholder={searchPlaceholder} disabled={disabled} className="text-white placeholder:text-gray-500 border-b border-white/10" />}
+					{!hideSearch && <CommandInput placeholder={searchPlaceholder} disabled={disabled} className="text-foreground placeholder:text-muted-foreground border-b border-border" />}
 					<CommandList>
-						<CommandEmpty className="text-gray-400">{emptyMessage}</CommandEmpty>
+						<CommandEmpty className="text-muted-foreground">{emptyMessage}</CommandEmpty>
 						<CommandGroup>
 							{options.map((option) => {
 								const isSelected = selectedValue === option.value;
@@ -146,7 +146,7 @@ function Combobox<TValue extends string | number = string>({
 										onSelect={isDisabled ? undefined : onSelect}
 										aria-disabled={isDisabled}
 										className={cn(
-											"text-gray-300 hover:bg-white/5 hover:text-white aria-selected:bg-emerald-500/10 aria-selected:text-emerald-400",
+											"text-foreground hover:bg-accent hover:text-accent-foreground aria-selected:bg-emerald-500/10 aria-selected:text-emerald-500",
 											isDisabled && "pointer-events-none opacity-60"
 										)}
 									>

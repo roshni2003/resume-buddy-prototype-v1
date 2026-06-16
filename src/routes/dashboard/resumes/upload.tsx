@@ -1,19 +1,19 @@
 import {
 	ArrowLeftIcon,
+	BookOpenIcon,
 	CheckCircleIcon,
 	CloudArrowUpIcon,
 	FileTextIcon,
 	SpinnerGapIcon,
-	WarningCircleIcon,
-	XCircleIcon,
-	BookOpenIcon,
 	SuitcaseIcon,
-	WrenchIcon,
 	UserIcon,
+	WarningCircleIcon,
+	WrenchIcon,
+	XCircleIcon,
 } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
@@ -86,7 +86,12 @@ const ACCEPTED_EXTENSIONS = ".pdf, .doc, .docx";
 const MAX_SIZE_MB = 5;
 
 function validateFile(file: File): string | null {
-	if (!ACCEPTED_TYPES.includes(file.type) && !file.name.endsWith(".pdf") && !file.name.endsWith(".doc") && !file.name.endsWith(".docx")) {
+	if (
+		!ACCEPTED_TYPES.includes(file.type) &&
+		!file.name.endsWith(".pdf") &&
+		!file.name.endsWith(".doc") &&
+		!file.name.endsWith(".docx")
+	) {
 		return "Only PDF, DOC, or DOCX files are accepted.";
 	}
 	if (file.size > MAX_SIZE_MB * 1024 * 1024) {
@@ -107,10 +112,10 @@ function formatBytes(bytes: number) {
 
 function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
 	return (
-		<div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 space-y-3">
-			<div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+		<div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+			<div className="flex items-center gap-2 border-border border-b pb-3">
 				<span className="text-emerald-400">{icon}</span>
-				<span className="font-bold text-slate-300 text-xs uppercase tracking-wider">{title}</span>
+				<span className="font-bold text-foreground text-xs uppercase tracking-wider">{title}</span>
 			</div>
 			{children}
 		</div>
@@ -223,13 +228,13 @@ function UploadRouteComponent() {
 	};
 
 	return (
-		<div className="min-h-screen bg-[#0b1120] px-4 py-8">
+		<div className="min-h-screen bg-background px-4 py-8">
 			<div className="mx-auto max-w-4xl space-y-6">
 				{/* Top Bar */}
 				<div className="flex items-center justify-between">
 					<Link
 						to="/dashboard/resumes"
-						className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all text-sm font-medium"
+						className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-muted-foreground text-sm transition-all hover:bg-muted hover:text-foreground"
 					>
 						<ArrowLeftIcon className="size-4" />
 						<span>Back to Resumes</span>
@@ -237,15 +242,15 @@ function UploadRouteComponent() {
 				</div>
 
 				{/* Main Card */}
-				<div className="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-md shadow-2xl overflow-hidden">
+				<div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md">
 					{/* Card Header */}
-					<div className="flex items-center gap-4 border-b border-slate-800 bg-slate-900/80 px-6 py-5">
+					<div className="flex items-center gap-4 border-border border-b bg-card/80 px-6 py-5">
 						<div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
 							<img src="/zoe-icon.png" alt="Zoe AI" className="size-9 rounded-full object-cover" />
 						</div>
 						<div>
-							<h1 className="text-xl font-bold text-slate-50">Upload & Parse Resume</h1>
-							<p className="text-sm text-slate-400 mt-0.5">
+							<h1 className="font-bold text-foreground text-xl">Upload & Parse Resume</h1>
+							<p className="mt-0.5 text-muted-foreground text-sm">
 								Zoe reads your document and populates the editor with structured, optimized content.
 							</p>
 						</div>
@@ -260,7 +265,10 @@ function UploadRouteComponent() {
 										role="button"
 										tabIndex={0}
 										aria-label="Upload resume file drop zone"
-										onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+										onDragOver={(e) => {
+											e.preventDefault();
+											setDragging(true);
+										}}
 										onDragLeave={() => setDragging(false)}
 										onDrop={handleDrop}
 										onClick={() => fileInputRef.current?.click()}
@@ -268,20 +276,20 @@ function UploadRouteComponent() {
 										className={`flex cursor-pointer flex-col items-center justify-center gap-5 rounded-xl border-2 border-dashed p-14 text-center transition-all duration-200 ${
 											dragging
 												? "border-emerald-500 bg-emerald-500/5"
-												: "border-slate-700 hover:border-emerald-500/50 hover:bg-slate-800/40"
+												: "border-border hover:border-emerald-500/50 hover:bg-muted/40"
 										}`}
 									>
-										<div className={`rounded-full p-4 transition-all ${dragging ? "bg-emerald-500/15 text-emerald-400" : "bg-slate-800 text-slate-400"}`}>
+										<div
+											className={`rounded-full p-4 transition-all ${dragging ? "bg-emerald-500/15 text-emerald-400" : "bg-muted text-muted-foreground"}`}
+										>
 											<CloudArrowUpIcon className="size-10 animate-bounce" weight="regular" />
 										</div>
 										<div>
-											<p className="font-semibold text-slate-200 text-sm">
+											<p className="font-semibold text-foreground text-sm">
 												Drag & drop your resume here, or{" "}
-												<span className="text-emerald-400 underline underline-offset-2">browse</span>
+												<span className="text-emerald-500 underline underline-offset-2">browse</span>
 											</p>
-											<p className="mt-1 text-slate-500 text-xs">
-												Supports PDF, DOC, DOCX up to {MAX_SIZE_MB}MB
-											</p>
+											<p className="mt-1 text-muted-foreground text-xs">Supports PDF, DOC, DOCX up to {MAX_SIZE_MB}MB</p>
 										</div>
 										<input
 											ref={fileInputRef}
@@ -296,25 +304,25 @@ function UploadRouteComponent() {
 										/>
 									</div>
 								) : (
-									<div className={`flex items-center gap-3 rounded-xl border p-4 ${
-										fileError
-											? "border-red-500/30 bg-red-500/5"
-											: "border-emerald-500/30 bg-emerald-500/5"
-									}`}>
+									<div
+										className={`flex items-center gap-3 rounded-xl border p-4 ${
+											fileError ? "border-red-500/30 bg-red-500/5" : "border-emerald-500/30 bg-emerald-500/5"
+										}`}
+									>
 										<FileTextIcon
 											weight="fill"
 											className={`size-10 shrink-0 ${fileError ? "text-red-400" : "text-emerald-400"}`}
 										/>
 										<div className="min-w-0 flex-1">
-											<p className="truncate font-semibold text-slate-200 text-sm">{file.name}</p>
-											<p className={`text-xs ${fileError ? "text-red-400" : "text-slate-500"}`}>
+											<p className="truncate font-semibold text-foreground text-sm">{file.name}</p>
+											<p className={`text-xs ${fileError ? "text-red-400" : "text-muted-foreground"}`}>
 												{fileError ?? formatBytes(file.size)}
 											</p>
 										</div>
 										<button
 											type="button"
 											onClick={handleRemoveFile}
-											className="shrink-0 rounded-lg p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-200 transition-colors"
+											className="shrink-0 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 											aria-label="Remove file"
 										>
 											<XCircleIcon weight="fill" className="size-6" />
@@ -330,16 +338,19 @@ function UploadRouteComponent() {
 								)}
 
 								{/* Footer Actions */}
-								<div className="flex justify-end gap-3 border-t border-slate-800 pt-5">
+								<div className="flex justify-end gap-3 border-border border-t pt-5">
 									<Link to="/dashboard/resumes">
-										<Button variant="outline" className="border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-slate-50 transition-colors">
+										<Button
+											variant="outline"
+											className="border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+										>
 											Cancel
 										</Button>
 									</Link>
 									<Button
 										onClick={handleUpload}
 										disabled={!file || !!fileError}
-										className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
+										className="bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										<CloudArrowUpIcon className="mr-1.5 size-4" />
 										Upload & Parse with Zoe
@@ -350,7 +361,7 @@ function UploadRouteComponent() {
 
 						{/* ── STATE 2: AI Reading / Uploading ── */}
 						{uploadState === "uploading" && (
-							<div className="flex flex-col items-center justify-center py-16 space-y-8">
+							<div className="flex flex-col items-center justify-center space-y-8 py-16">
 								{/* Animated rings */}
 								<div className="relative flex items-center justify-center">
 									<div className="absolute size-28 animate-ping rounded-full bg-emerald-500/10" />
@@ -361,33 +372,38 @@ function UploadRouteComponent() {
 								</div>
 
 								{/* Status text */}
-								<div className="text-center max-w-sm space-y-2">
-									<p className="font-bold text-slate-50 text-lg">Zoe AI is reading your resume...</p>
-									<p className="text-sm text-slate-400 h-5 flex items-center justify-center">{progressText}</p>
+								<div className="max-w-sm space-y-2 text-center">
+									<p className="font-bold text-lg text-foreground">Zoe AI is reading your resume...</p>
+									<p className="flex h-5 items-center justify-center text-muted-foreground text-sm">{progressText}</p>
 								</div>
 
 								{/* Progress bar */}
 								<div className="w-full max-w-xs space-y-2">
-									<div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+									<div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
 										<div
 											className="h-full rounded-full bg-emerald-500 transition-all duration-300 ease-out"
 											style={{ width: `${progressPercent}%` }}
 										/>
 									</div>
-									<div className="flex justify-between text-[11px] text-slate-500 font-medium">
+									<div className="flex justify-between font-medium text-[11px] text-muted-foreground">
 										<span>Analyzing document...</span>
 										<span>{progressPercent}%</span>
 									</div>
 								</div>
 
 								{/* Stage indicators */}
-								<div className="flex gap-6 text-xs text-slate-500">
+								<div className="flex gap-6 text-muted-foreground text-xs">
 									{["Extracting", "Analyzing", "Structuring"].map((stage, i) => {
 										const thresholds = [0, 35, 60];
 										const active = progressPercent >= thresholds[i];
 										return (
-											<div key={stage} className={`flex items-center gap-1.5 transition-all ${active ? "text-emerald-400" : "text-slate-600"}`}>
-												<div className={`size-1.5 rounded-full transition-all ${active ? "bg-emerald-400" : "bg-slate-700"}`} />
+											<div
+												key={stage}
+												className={`flex items-center gap-1.5 transition-all ${active ? "text-emerald-500" : "text-muted-foreground"}`}
+											>
+												<div
+													className={`size-1.5 rounded-full transition-all ${active ? "bg-emerald-500" : "bg-muted-foreground"}`}
+												/>
 												{stage}
 											</div>
 										);
@@ -401,55 +417,56 @@ function UploadRouteComponent() {
 							<div className="space-y-6">
 								{/* Success Banner */}
 								<div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-									<CheckCircleIcon weight="fill" className="size-6 text-emerald-400 shrink-0" />
+									<CheckCircleIcon weight="fill" className="size-6 shrink-0 text-emerald-400" />
 									<div>
 										<h3 className="font-bold text-emerald-300 text-sm">Resume successfully read by Zoe!</h3>
-										<p className="text-xs text-emerald-500/80 mt-0.5">
+										<p className="mt-0.5 text-emerald-500/80 text-xs">
 											Review the extracted information below before creating your resume in the editor.
 										</p>
 									</div>
 								</div>
 
 								{/* Extracted Data Grid */}
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+								<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 									{/* Left Column */}
 									<div className="space-y-5">
 										{/* Contact Details */}
 										<SectionCard icon={<UserIcon className="size-4" />} title="Contact Details">
 											<div className="grid grid-cols-2 gap-4 text-sm">
 												<div>
-													<p className="text-[10px] text-slate-500 font-semibold uppercase mb-1">Full Name</p>
-													<p className="font-medium text-slate-200">{parsedData.fullName}</p>
+													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Full Name</p>
+													<p className="font-medium text-foreground">{parsedData.fullName}</p>
 												</div>
 												<div>
-													<p className="text-[10px] text-slate-500 font-semibold uppercase mb-1">Title</p>
-													<p className="font-medium text-slate-200">{parsedData.professionalTitle}</p>
+													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Title</p>
+													<p className="font-medium text-foreground">{parsedData.professionalTitle}</p>
 												</div>
 												<div>
-													<p className="text-[10px] text-slate-500 font-semibold uppercase mb-1">Email</p>
-													<p className="font-medium text-slate-200 truncate">{parsedData.email}</p>
+													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Email</p>
+													<p className="truncate font-medium text-foreground">{parsedData.email}</p>
 												</div>
 												<div>
-													<p className="text-[10px] text-slate-500 font-semibold uppercase mb-1">Phone</p>
-													<p className="font-medium text-slate-200">{parsedData.phone}</p>
+													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Phone</p>
+													<p className="font-medium text-foreground">{parsedData.phone}</p>
 												</div>
 											</div>
 										</SectionCard>
 
 										{/* Profile Summary */}
 										<SectionCard icon={<FileTextIcon className="size-4" />} title="Profile Summary">
-											<p className="text-sm text-slate-300 leading-relaxed italic">
-												"{parsedData.summary}"
-											</p>
+											<p className="text-muted-foreground text-sm italic leading-relaxed">"{parsedData.summary}"</p>
 										</SectionCard>
 
 										{/* Skills */}
-										<SectionCard icon={<WrenchIcon className="size-4" />} title={`Skills Detected (${parsedData.skills.length})`}>
+										<SectionCard
+											icon={<WrenchIcon className="size-4" />}
+											title={`Skills Detected (${parsedData.skills.length})`}
+										>
 											<div className="flex flex-wrap gap-1.5">
 												{parsedData.skills.map((skill) => (
 													<span
 														key={skill}
-														className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400"
+														className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 font-medium text-emerald-400 text-xs"
 													>
 														{skill}
 													</span>
@@ -466,16 +483,16 @@ function UploadRouteComponent() {
 												{parsedData.experience.map((exp, idx) => (
 													<div
 														key={`${exp.company}-${idx}`}
-														className="border-l-2 border-emerald-500/40 pl-3 py-0.5 space-y-1"
+														className="space-y-1 border-emerald-500/40 border-l-2 py-0.5 pl-3"
 													>
 														<div className="flex items-baseline justify-between gap-2">
-															<p className="font-bold text-sm text-slate-200">{exp.role}</p>
-															<span className="text-[10px] text-slate-500 font-semibold uppercase shrink-0">
+															<p className="font-bold text-foreground text-sm">{exp.role}</p>
+															<span className="shrink-0 font-semibold text-[10px] text-muted-foreground uppercase">
 																{exp.duration}
 															</span>
 														</div>
-														<p className="text-xs text-emerald-400 font-medium">{exp.company}</p>
-														<p className="text-xs text-slate-400 leading-snug">{exp.description}</p>
+														<p className="font-medium text-emerald-500 text-xs">{exp.company}</p>
+														<p className="text-muted-foreground text-xs leading-snug">{exp.description}</p>
 													</div>
 												))}
 											</div>
@@ -487,12 +504,10 @@ function UploadRouteComponent() {
 												{parsedData.education.map((edu, idx) => (
 													<div key={`${edu.institution}-${idx}`} className="space-y-0.5">
 														<div className="flex items-baseline justify-between gap-2">
-															<p className="font-bold text-sm text-slate-200">{edu.degree}</p>
-															<span className="text-[10px] text-slate-500 font-semibold shrink-0">
-																{edu.year}
-															</span>
+															<p className="font-bold text-foreground text-sm">{edu.degree}</p>
+															<span className="shrink-0 font-semibold text-[10px] text-muted-foreground">{edu.year}</span>
 														</div>
-														<p className="text-xs text-slate-400">{edu.institution}</p>
+														<p className="text-muted-foreground text-xs">{edu.institution}</p>
 													</div>
 												))}
 											</div>
@@ -501,7 +516,7 @@ function UploadRouteComponent() {
 								</div>
 
 								{/* Action Buttons */}
-								<div className="flex justify-between items-center border-t border-slate-800 pt-5">
+								<div className="flex items-center justify-between border-border border-t pt-5">
 									<Button
 										variant="outline"
 										onClick={() => {
@@ -509,7 +524,7 @@ function UploadRouteComponent() {
 											setFile(null);
 											setUploadState("idle");
 										}}
-										className="border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-slate-50 transition-colors"
+										className="border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 									>
 										Try another file
 									</Button>
@@ -517,7 +532,7 @@ function UploadRouteComponent() {
 									<Button
 										onClick={handleConfirm}
 										disabled={isCreating}
-										className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
+										className="bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										{isCreating ? (
 											<>

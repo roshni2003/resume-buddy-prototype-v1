@@ -134,14 +134,18 @@ function AuthGate() {
 	);
 }
 
+import { useSettingsStore } from "@/stores/settings";
+import { useTheme } from "@/components/theme/provider";
+
 function DashboardHeader() {
+	const { theme } = useTheme();
 
 	return (
 		<header
 			className="sticky top-0 z-30 border-b"
 			style={{
-				background: "rgba(9, 13, 22, 0.85)",
-				borderColor: "rgba(255,255,255,0.08)",
+				background: theme === "light" ? "rgba(255, 255, 255, 0.85)" : "rgba(9, 13, 22, 0.85)",
+				borderColor: theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
 				backdropFilter: "blur(20px)",
 				WebkitBackdropFilter: "blur(20px)",
 			}}
@@ -159,7 +163,7 @@ function DashboardHeader() {
 						style={{ boxShadow: "0 0 0 2px rgba(0,208,156,0.3)" }}
 					/>
 					<span
-						className="font-bold text-base text-white sm:text-lg"
+						className={`font-bold text-base sm:text-lg ${theme === "light" ? "text-slate-900" : "text-white"}`}
 						style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
 					>
 						Resume Buddy
@@ -171,28 +175,32 @@ function DashboardHeader() {
 					<nav className="hidden items-center gap-1 sm:flex">
 						<Link
 							to="/dashboard/resumes"
-							activeProps={{ className: "bg-white/10 text-white shadow-sm" }}
-							className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+							activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
+							className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
 						>
 							Resumes
 						</Link>
 						{/* TODO: Add logic to conditionally render Analytics link for admins only if needed */}
 						<Link
 							to="/dashboard/admin/analytics"
-							activeProps={{ className: "bg-white/10 text-white shadow-sm" }}
-							className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+							activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
+							className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
 						>
 							User Analytics
 						</Link>
 					</nav>
 
-					<button className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-gray-400 transition-colors hover:bg-white/5 hover:text-white">
+					<Link 
+						to="/dashboard/settings"
+						activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
+						className={`flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+					>
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 							<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
 							<circle cx="12" cy="12" r="3"></circle>
 						</svg>
 						<span className="hidden sm:inline text-sm font-medium">Settings</span>
-					</button>
+					</Link>
 
 					<UserDropdownMenu>
 						{({ session: userSession }) => (
@@ -218,6 +226,8 @@ function DashboardHeader() {
 function RouteComponent() {
 	useLingui();
 	const { needsAuth } = Route.useRouteContext();
+	const { theme } = useTheme();
+	const { backgroundTheme } = useSettingsStore();
 
 	useEffect(() => {
 		// Safety net: if beforeLoad didn't redirect for some reason (stale cached context,
@@ -243,10 +253,18 @@ function RouteComponent() {
 		return <AuthGate />;
 	}
 
+	const getBackgroundStyle = () => {
+		if (theme === "light") return { background: "var(--color-background)" };
+		if (backgroundTheme === "navy") return { background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" };
+		if (backgroundTheme === "purple") return { background: "linear-gradient(145deg, #0f0514 0%, #1c0f2a 100%)" };
+		if (backgroundTheme === "forest") return { background: "linear-gradient(145deg, #05140b 0%, #0f2a17 100%)" };
+		return { background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" };
+	};
+
 	return (
 		<div
-			className="flex min-h-screen flex-col"
-			style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+			className="flex min-h-screen flex-col bg-background text-foreground"
+			style={getBackgroundStyle()}
 		>
 			<DashboardHeader />
 

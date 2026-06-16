@@ -21,7 +21,7 @@ export function BuilderHeader() {
 	};
 
 	return (
-		<header className="z-10 flex shrink-0 items-center justify-between gap-2 border-gray-200 border-b bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-3 md:px-6">
+		<header className="z-10 flex shrink-0 items-center justify-between gap-2 border-border border-b bg-background px-3 py-2 sm:gap-3 sm:px-4 sm:py-3 md:px-6">
 			<div className="flex items-center">
 				<Button
 					size="icon"

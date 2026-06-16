@@ -103,9 +103,9 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 	};
 
 	return (
-		<SortableItem id={item.id} asHandle className="group relative border-b last:border-b-0">
-			<div className="flex h-18 items-center bg-white">
-				<div className="flex shrink-0 items-center px-3 text-gray-500 opacity-70 transition-opacity group-hover:opacity-100">
+		<SortableItem id={item.id} asHandle className="group relative border-b border-border last:border-b-0">
+			<div className="flex h-18 items-center bg-card transition-colors">
+				<div className="flex shrink-0 items-center px-3 text-muted-foreground opacity-70 transition-opacity group-hover:opacity-100">
 					<DotsSixVerticalIcon size={20} />
 				</div>
 
@@ -123,7 +123,7 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<button className="flex h-full cursor-context-menu items-center px-3 text-gray-500 opacity-70 transition-[background-color,opacity] hover:bg-secondary/40 focus:outline-none focus-visible:ring-1 group-hover:opacity-100">
+						<button className="flex h-full cursor-context-menu items-center px-3 text-muted-foreground opacity-70 transition-[background-color,opacity] hover:bg-secondary/40 focus:outline-none focus-visible:ring-1 group-hover:opacity-100">
 							<DotsThreeVerticalIcon size={20} />
 						</button>
 					</DropdownMenuTrigger>

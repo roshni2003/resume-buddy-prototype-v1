@@ -87,11 +87,11 @@ function PictureSectionForm() {
 		<Form {...form}>
 			<form onChange={form.handleSubmit(onSubmit)} className="space-y-6">
 				{/* Profile Photo Upload Section */}
-				<div className="rounded-xl border border-gray-200 bg-gray-50 p-5 shadow-sm">
+				<div className="rounded-xl border border-border bg-muted/50 p-5 shadow-sm">
 					{/* Section Header */}
-					<div className="mb-4 flex items-center gap-2 border-gray-200 border-b pb-3">
+					<div className="mb-4 flex items-center gap-2 border-border border-b pb-3">
 						<CameraIcon className="h-5 w-5 text-emerald-600" weight="bold" />
-						<h3 className="font-semibold text-gray-900 text-sm">
+						<h3 className="font-semibold text-foreground text-sm">
 							<Trans>Profile Picture</Trans>
 						</h3>
 					</div>
@@ -100,7 +100,7 @@ function PictureSectionForm() {
 						{/* Photo Preview with Live Customization */}
 						<div className="relative shrink-0">
 							<div
-								className="flex items-center justify-center overflow-hidden bg-white shadow-md"
+								className="flex items-center justify-center overflow-hidden bg-card shadow-md"
 								style={{
 									width: "112px",
 									height: "112px",
@@ -115,8 +115,8 @@ function PictureSectionForm() {
 									<img src={pictureUrl} alt="Profile" className="h-full w-full object-cover" />
 								) : (
 									<div className="flex flex-col items-center gap-2">
-										<CameraIcon className="h-10 w-10 text-gray-300" />
-										<span className="text-gray-400 text-xs">No Photo</span>
+										<CameraIcon className="h-10 w-10 text-muted-foreground" />
+										<span className="text-muted-foreground text-xs">No Photo</span>
 									</div>
 								)}
 							</div>
@@ -162,14 +162,14 @@ function PictureSectionForm() {
 								name="url"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel className="font-medium text-gray-700 text-xs">
+										<FormLabel className="font-medium text-muted-foreground text-xs">
 											<Trans>Picture URL</Trans>
 										</FormLabel>
 										<FormControl>
 											<Input
 												{...field}
 												placeholder="Paste image URL here..."
-												className="h-auto border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+												className="h-auto border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 												onChange={(e) => {
 													field.onChange(e);
 													if (e.target.value.trim() !== "") {
@@ -179,7 +179,7 @@ function PictureSectionForm() {
 											/>
 										</FormControl>
 										<FormMessage />
-										<p className="mt-1.5 text-gray-500 text-xs">Upload a photo or paste an image URL</p>
+										<p className="mt-1.5 text-muted-foreground text-xs">Upload a photo or paste an image URL</p>
 									</FormItem>
 								)}
 							/>
@@ -188,8 +188,8 @@ function PictureSectionForm() {
 				</div>
 
 				{/* Customization Options */}
-				<div className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-					<h3 className="mb-4 font-semibold text-gray-900 text-sm">
+				<div className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm">
+					<h3 className="mb-4 font-semibold text-foreground text-sm">
 						<Trans>Picture Customization</Trans>
 					</h3>
 
@@ -199,7 +199,7 @@ function PictureSectionForm() {
 						name="size"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="font-medium text-gray-700 text-xs">
+								<FormLabel className="font-medium text-muted-foreground text-xs">
 									<Trans>Size</Trans>
 								</FormLabel>
 								<div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ function PictureSectionForm() {
 											min={32}
 											max={512}
 											step={1}
-											className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 											onChange={(e) => {
 												const value = e.target.value;
 												if (value === "") field.onChange("");
@@ -218,7 +218,7 @@ function PictureSectionForm() {
 											}}
 										/>
 									</FormControl>
-									<span className="font-medium text-gray-500 text-sm">pt</span>
+									<span className="font-medium text-muted-foreground text-sm">pt</span>
 								</div>
 								<FormMessage />
 							</FormItem>
@@ -231,7 +231,7 @@ function PictureSectionForm() {
 						name="rotation"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="font-medium text-gray-700 text-xs">
+								<FormLabel className="font-medium text-muted-foreground text-xs">
 									<Trans>Rotation</Trans>
 								</FormLabel>
 								<div className="flex items-center gap-2">
@@ -242,7 +242,7 @@ function PictureSectionForm() {
 											min={0}
 											max={360}
 											step={5}
-											className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 											onChange={(e) => {
 												const value = e.target.value;
 												if (value === "") field.onChange("");
@@ -250,7 +250,7 @@ function PictureSectionForm() {
 											}}
 										/>
 									</FormControl>
-									<span className="font-medium text-gray-500 text-sm">°</span>
+									<span className="font-medium text-muted-foreground text-sm">°</span>
 								</div>
 								<FormMessage />
 							</FormItem>
@@ -263,7 +263,7 @@ function PictureSectionForm() {
 						name="aspectRatio"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="font-medium text-gray-700 text-xs">
+								<FormLabel className="font-medium text-muted-foreground text-xs">
 									<Trans>Aspect Ratio</Trans>
 								</FormLabel>
 								<div className="flex items-center gap-2">
@@ -274,7 +274,7 @@ function PictureSectionForm() {
 											min={0.5}
 											max={2.5}
 											step={0.1}
-											className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 											onChange={(e) => {
 												const value = e.target.value;
 												if (value === "") field.onChange("");
@@ -288,7 +288,7 @@ function PictureSectionForm() {
 											size="icon"
 											variant="outline"
 											title={t`Square`}
-											className="h-10 w-10 border-gray-300 p-2 transition-all hover:bg-gray-50"
+											className="h-10 w-10 border-border p-2 transition-all hover:bg-muted/50"
 											onClick={() => {
 												field.onChange(1);
 												form.handleSubmit(onSubmit)();
@@ -301,7 +301,7 @@ function PictureSectionForm() {
 											size="icon"
 											variant="outline"
 											title={t`Landscape`}
-											className="h-10 w-10 border-gray-300 p-2 transition-all hover:bg-gray-50"
+											className="h-10 w-10 border-border p-2 transition-all hover:bg-muted/50"
 											onClick={() => {
 												field.onChange(1.5);
 												form.handleSubmit(onSubmit)();
@@ -314,7 +314,7 @@ function PictureSectionForm() {
 											size="icon"
 											variant="outline"
 											title={t`Portrait`}
-											className="h-10 w-10 border-gray-300 p-2 transition-all hover:bg-gray-50"
+											className="h-10 w-10 border-border p-2 transition-all hover:bg-muted/50"
 											onClick={() => {
 												field.onChange(0.5);
 												form.handleSubmit(onSubmit)();
@@ -335,7 +335,7 @@ function PictureSectionForm() {
 						name="borderRadius"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="font-medium text-gray-700 text-xs">
+								<FormLabel className="font-medium text-muted-foreground text-xs">
 									<Trans>Border Radius</Trans>
 								</FormLabel>
 								<div className="flex items-center gap-2">
@@ -346,21 +346,21 @@ function PictureSectionForm() {
 											min={0}
 											max={100}
 											step={1}
-											className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 											onChange={(e) => {
 												const value = Number(e.target.value);
 												field.onChange(value);
 											}}
 										/>
 									</FormControl>
-									<span className="mr-1 font-medium text-gray-500 text-sm">pt</span>
+									<span className="mr-1 font-medium text-muted-foreground text-sm">pt</span>
 									<div className="flex gap-1">
 										<Button
 											type="button"
 											size="icon"
 											variant="outline"
 											title={t`Square (0pt)`}
-											className="h-10 w-10 border-gray-300 p-2 transition-all hover:bg-gray-50"
+											className="h-10 w-10 border-border p-2 transition-all hover:bg-muted/50"
 											onClick={() => {
 												field.onChange(0);
 												form.handleSubmit(onSubmit)();
@@ -373,7 +373,7 @@ function PictureSectionForm() {
 											size="icon"
 											variant="outline"
 											title={t`Rounded (10pt)`}
-											className="h-10 w-10 border-gray-300 p-2 transition-all hover:bg-gray-50"
+											className="h-10 w-10 border-border p-2 transition-all hover:bg-muted/50"
 											onClick={() => {
 												field.onChange(10);
 												form.handleSubmit(onSubmit)();
@@ -386,7 +386,7 @@ function PictureSectionForm() {
 											size="icon"
 											variant="outline"
 											title={t`Circle (100pt)`}
-											className="h-10 w-10 border-gray-300 p-2 transition-all hover:bg-gray-50"
+											className="h-10 w-10 border-border p-2 transition-all hover:bg-muted/50"
 											onClick={() => {
 												field.onChange(100);
 												form.handleSubmit(onSubmit)();
@@ -408,14 +408,14 @@ function PictureSectionForm() {
 							name="borderColor"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="font-medium text-gray-700 text-xs">
+									<FormLabel className="font-medium text-muted-foreground text-xs">
 										<Trans>Border Color</Trans>
 									</FormLabel>
 									<div className="flex items-center gap-2">
 										<FormControl>
 											<ColorPicker
 												{...field}
-												className="h-10 w-12 cursor-pointer rounded-lg border border-gray-300"
+												className="h-10 w-12 cursor-pointer rounded-lg border border-border"
 												defaultValue={field.value}
 												onValueChange={(color) => {
 													field.onChange(color);
@@ -426,7 +426,7 @@ function PictureSectionForm() {
 										<Input
 											{...field}
 											placeholder="#10b981"
-											className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 										/>
 									</div>
 									<FormMessage />
@@ -439,7 +439,7 @@ function PictureSectionForm() {
 							name="borderWidth"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="font-medium text-gray-700 text-xs">
+									<FormLabel className="font-medium text-muted-foreground text-xs">
 										<Trans>Border Width</Trans>
 									</FormLabel>
 									<div className="flex items-center gap-2">
@@ -449,7 +449,7 @@ function PictureSectionForm() {
 												type="number"
 												min={0}
 												step={1}
-												className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+												className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 												onChange={(e) => {
 													const value = e.target.value;
 													if (value === "") field.onChange("");
@@ -457,7 +457,7 @@ function PictureSectionForm() {
 												}}
 											/>
 										</FormControl>
-										<span className="font-medium text-gray-500 text-sm">pt</span>
+										<span className="font-medium text-muted-foreground text-sm">pt</span>
 									</div>
 									<FormMessage />
 								</FormItem>
@@ -472,14 +472,14 @@ function PictureSectionForm() {
 							name="shadowColor"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="font-medium text-gray-700 text-xs">
+									<FormLabel className="font-medium text-muted-foreground text-xs">
 										<Trans>Shadow Color</Trans>
 									</FormLabel>
 									<div className="flex items-center gap-2">
 										<FormControl>
 											<ColorPicker
 												{...field}
-												className="h-10 w-12 cursor-pointer rounded-lg border border-gray-300"
+												className="h-10 w-12 cursor-pointer rounded-lg border border-border"
 												defaultValue={field.value}
 												onValueChange={(color) => {
 													field.onChange(color);
@@ -490,7 +490,7 @@ function PictureSectionForm() {
 										<Input
 											{...field}
 											placeholder="#000000"
-											className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 										/>
 									</div>
 									<FormMessage />
@@ -503,7 +503,7 @@ function PictureSectionForm() {
 							name="shadowWidth"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="font-medium text-gray-700 text-xs">
+									<FormLabel className="font-medium text-muted-foreground text-xs">
 										<Trans>Shadow Width</Trans>
 									</FormLabel>
 									<div className="flex items-center gap-2">
@@ -513,7 +513,7 @@ function PictureSectionForm() {
 												type="number"
 												min={0}
 												step={0.5}
-												className="flex-1 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+												className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 												onChange={(e) => {
 													const value = e.target.value;
 													if (value === "") field.onChange("");
@@ -521,7 +521,7 @@ function PictureSectionForm() {
 												}}
 											/>
 										</FormControl>
-										<span className="font-medium text-gray-500 text-sm">pt</span>
+										<span className="font-medium text-muted-foreground text-sm">pt</span>
 									</div>
 									<FormMessage />
 								</FormItem>

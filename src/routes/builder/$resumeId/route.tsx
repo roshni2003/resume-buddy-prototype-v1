@@ -152,7 +152,7 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 								aria-label="Close sidebar"
 							/>
 							{/* Drawer with slide animation */}
-							<div className="fixed inset-y-0 top-14 left-0 z-50 w-[85vw] max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out">
+							<div className="fixed inset-y-0 top-14 left-0 z-50 w-[85vw] max-w-sm transform bg-background shadow-xl transition-transform duration-300 ease-in-out">
 								<BuilderSidebarLeft />
 							</div>
 						</>

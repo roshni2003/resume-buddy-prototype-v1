@@ -202,10 +202,10 @@ function RouteComponent() {
 		<div className="space-y-6 sm:space-y-8">
 			{/* Welcome Banner */}
 			<div className="flex flex-col gap-1.5 sm:gap-2">
-				<h1 className="font-bold text-2xl text-white sm:text-3xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+				<h1 className="font-bold text-2xl text-foreground sm:text-3xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 					Welcome back{firstName ? `, ${firstName}` : ""} <span className="inline-block origin-bottom-right hover:animate-pulse text-yellow-400">✨</span>
 				</h1>
-				<p className="text-gray-400 text-sm sm:text-base">
+				<p className="text-muted-foreground text-sm sm:text-base">
 					Pick up where you left off or start something new with Zoe.
 				</p>
 			</div>
@@ -216,60 +216,60 @@ function RouteComponent() {
 			{/* Stats Grid */}
 			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 				{/* Total Resumes */}
-				<div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-3 sm:p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
-					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
 						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 						</svg>
 					</div>
 					<div className="flex flex-col">
-						<p className="text-xs font-medium text-gray-400"><Trans>Total Resumes</Trans></p>
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Total Resumes</Trans></p>
 						<p className="text-lg font-bold text-emerald-500"><AnimatedNumber value={statistics?.totalResumes ?? 0} /></p>
 					</div>
 				</div>
 
 				{/* Last Update */}
-				<div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-3 sm:p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
-					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
 						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
 						</svg>
 					</div>
 					<div className="flex flex-col">
-						<p className="text-xs font-medium text-gray-400"><Trans>Last Update</Trans></p>
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Last Update</Trans></p>
 						<p className="text-lg font-bold text-emerald-500">{lastUpdateText}</p>
 					</div>
 				</div>
 
 				{/* Total Downloads */}
-				<div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-3 sm:p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
-					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
 						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
 						</svg>
 					</div>
 					<div className="flex flex-col">
-						<p className="text-xs font-medium text-gray-400"><Trans>Total Downloads</Trans></p>
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Total Downloads</Trans></p>
 						<p className="text-lg font-bold text-emerald-500"><AnimatedNumber value={statistics?.totalDownloads ?? 0} /></p>
 					</div>
 				</div>
 
 				{/* Total Submissions */}
-				<div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-3 sm:p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
-					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
 						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
 						</svg>
 					</div>
 					<div className="flex flex-col">
-						<p className="text-xs font-medium text-gray-400"><Trans>Total Submissions</Trans></p>
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Total Submissions</Trans></p>
 						<p className="text-sm font-semibold text-emerald-500 mt-1"><Trans>Coming Soon!</Trans></p>
 					</div>
 				</div>
 			</div>
 
 			<div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<h2 className="text-xl font-bold text-white">My Resumes</h2>
+				<h2 className="text-xl font-bold text-foreground">My Resumes</h2>
 				<div className="flex items-center gap-3">
 					<div className="flex items-center gap-x-2">
 						<Combobox
@@ -284,7 +284,7 @@ function RouteComponent() {
 							buttonProps={{
 								title: t`Sort by`,
 								variant: "ghost",
-								className: "text-gray-400 hover:text-white hover:bg-white/5",
+								className: "text-muted-foreground hover:text-foreground hover:bg-accent",
 								children: (_, option) => (
 									<>
 										<SortAscendingIcon />

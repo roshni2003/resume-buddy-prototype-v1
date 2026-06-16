@@ -208,7 +208,7 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 					<ResumeDropdownMenu resume={resume}>
 						<button
 							type="button"
-							className="flex cursor-pointer items-center justify-center rounded-full p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white focus:outline-none"
+							className="flex cursor-pointer items-center justify-center rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none"
 							aria-label="Open menu"
 							tabIndex={0}
 						>

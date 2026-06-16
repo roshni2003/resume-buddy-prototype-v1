@@ -84,14 +84,14 @@ export function ProjectsSectionBuilder() {
 			</SectionAddItemButton>
 
 			{generatingIds.size > 0 && (
-				<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-white p-5 shadow-2xl">
+				<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
 					<div className="flex items-start gap-4">
 						<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
 							<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
 						</div>
 						<div>
-							<h4 className="mb-1 font-bold text-gray-900">Zoe is working...</h4>
-							<p className="text-gray-600 text-sm">Generating professional descriptions for your projects</p>
+							<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>
+							<p className="text-muted-foreground text-sm">Generating professional descriptions for your projects</p>
 						</div>
 					</div>
 				</div>

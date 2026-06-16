@@ -86,6 +86,27 @@
 	--sidebar-ring: oklch(0.643 0.165 162);
 }
 
+.dark[data-theme="navy"] {
+	--background: #0b1120;
+	--card: #0f1830;
+	--muted: #1a2540;
+	--popover: #0f1830;
+}
+
+.dark[data-theme="purple"] {
+	--background: #130b20;
+	--card: #1c1030;
+	--muted: #281540;
+	--popover: #1c1030;
+}
+
+.dark[data-theme="forest"] {
+	--background: #0b1a11;
+	--card: #0f2218;
+	--muted: #163024;
+	--popover: #0f2218;
+}
+
 @theme inline {
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
