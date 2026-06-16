@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { SidebarSimpleIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -32,6 +33,26 @@ export function BuilderHeader() {
 				>
 					<SidebarSimpleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
 				</Button>
+
+				<div className="mx-2 h-6 w-px bg-border sm:mx-3" />
+
+				<Link
+					to="/dashboard/resumes"
+					className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
+				>
+					<img
+						src="/zoe-icon.png"
+						alt="Resume Buddy"
+						className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8"
+						style={{ boxShadow: "0 0 0 2px rgba(0,208,156,0.3)" }}
+					/>
+					<span
+						className="hidden font-bold text-foreground text-sm sm:block sm:text-base"
+						style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+					>
+						Resume Buddy
+					</span>
+				</Link>
 			</div>
 			<div className="flex-1 overflow-x-auto">
 				<BuilderTopTray />
