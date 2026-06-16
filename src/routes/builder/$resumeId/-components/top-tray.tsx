@@ -427,37 +427,48 @@ export function BuilderTopTray() {
 					</Button>
 				)}
 
-				{/* Download DOCX button */}
-				<Button
-					size="sm"
-					variant="outline"
-					disabled={isPrinting}
-					onClick={onDownloadDocx}
-					className="hidden sm:flex shrink-0 items-center justify-center gap-1.5 px-2 hover:bg-gray-100 sm:h-9 sm:w-auto sm:gap-2 sm:px-3 transition-all"
-					aria-label="Download Word"
-					title="Export as Microsoft Word"
-				>
-					<MicrosoftWordLogoIcon className="text-blue-600" />
-					<span className="hidden lg:inline text-gray-700 font-medium">
-						<Trans>Word</Trans>
-					</span>
-				</Button>
-
-				{/* Download PDF button */}
-				<Button
-					size="sm"
-					variant="default"
-					disabled={isPrinting}
-					onClick={onDownloadPDF}
-					className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-3 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 sm:h-9 sm:w-auto sm:gap-2 sm:px-4 transition-all hover:scale-105 active:scale-95"
-					aria-label="Download PDF"
-					title="Export as PDF Document"
-				>
-					{isPrinting ? <CircleNotchIcon className={cn("animate-spin size-4")} /> : <FilePdfIcon className="size-4" />}
-					<span className="font-medium">
-						<Trans>Download PDF</Trans>
-					</span>
-				</Button>
+				{/* Download Dropdown */}
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							size="sm"
+							variant="default"
+							disabled={isPrinting}
+							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-3 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 sm:h-9 sm:w-auto sm:gap-2 sm:px-4 transition-all"
+							aria-label="Download"
+						>
+							{isPrinting ? (
+								<CircleNotchIcon className="size-4 animate-spin" />
+							) : (
+								<DownloadSimpleIcon className="size-4" />
+							)}
+							<span className="font-medium">
+								<Trans>Download</Trans>
+							</span>
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent
+						align="end"
+						className="min-w-[160px] bg-popover text-foreground border-border"
+					>
+						<DropdownMenuItem
+							onClick={onDownloadPDF}
+							disabled={isPrinting}
+							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
+						>
+							<FilePdfIcon className="size-4 text-red-500" />
+							<span className="font-medium">Download PDF</span>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={onDownloadDocx}
+							disabled={isPrinting}
+							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
+						>
+							<MicrosoftWordLogoIcon className="size-4 text-blue-500" />
+							<span className="font-medium">Download Word</span>
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 
 				{/* Review Drawer */}
 				{reviewResult && <ReviewDrawer result={reviewResult} />}
