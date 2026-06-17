@@ -85,18 +85,20 @@ export function SectionBase({ type, className, ...props }: Props) {
 								</div>
 
 								{/* Icon */}
-								<div
-									className={cn(
-										"flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-										colors.iconBg,
-										colors.iconText,
-									)}
-								>
-									{getSectionIcon(type)}
+								<div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full", colors.iconBg, colors.iconText)}>
+									<div
+										className={cn(
+											"flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+											colors.iconBg,
+											colors.iconText,
+										)}
+									>
+										{getSectionIcon(type)}
+									</div>
 								</div>
 
 								{/* Title */}
-								<h2 className="line-clamp-1 font-serif text-gray-900 text-xl tracking-tight">
+								<h2 className="line-clamp-1 font-semibold text-gray-900 xl:text-xl">
 									{("title" in section && section.title) || getSectionTitle(type)}
 								</h2>
 							</div>
