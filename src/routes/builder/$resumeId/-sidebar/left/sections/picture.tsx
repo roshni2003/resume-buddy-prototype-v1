@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
-import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
+import { PencilSimpleIcon, TrashIcon, CameraIcon } from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type z from "zod";
 import { useResumeStore } from "@/components/resume/store/resume";
+import { Button } from "@/components/ui/button";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { pictureSchema } from "@/schema/resume/data";
@@ -104,9 +106,9 @@ export function PictureSectionForm() {
 									width: `${size}px`,
 									height: `${size / (aspectRatio || 1)}px`,
 									borderRadius:
-										aspectRatio === 0.75 && borderRadius === 100 ? "50%" : // Oval uses 50% border radius on a rectangular container
-											aspectRatio === 1 && borderRadius === 100 ? "50%" : // Circle
-												`${borderRadius}px`, // Square
+										aspectRatio === 0.75 && borderRadius === 100 ? "50%" :
+											aspectRatio === 1 && borderRadius === 100 ? "50%" :
+												`${borderRadius}px`,
 									border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : "none",
 									boxShadow: shadowWidth > 0 ? `0 0 ${shadowWidth * 4}px ${shadowColor}40` : "none",
 									transform: `rotate(${rotation}deg)`,
@@ -121,82 +123,69 @@ export function PictureSectionForm() {
 									</div>
 								)}
 							</div>
-						) : (
-							<div className="flex flex-col items-center justify-center gap-4 text-emerald-800">
-								<div
-									className={`flex items-center justify-center bg-emerald-50 transition-all duration-300 ${aspectRatio === 1 && borderRadius === 100 ? "rounded-full" : // Circle
-										aspectRatio === 0.75 && borderRadius === 100 ? "rounded-full" : // Oval (uses 50% border-radius)
-											"rounded-xl" // Square
-										}`}
-									style={{
-										width: `${size}px`,
-										height: `${size / (aspectRatio || 1)}px`,
-										border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : "none",
-										boxShadow: shadowWidth > 0 ? `0 0 ${shadowWidth * 4}px ${shadowColor}40` : "none",
-										transform: `rotate(${rotation}deg)`,
-									}}
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="32"
-										height="32"
-										fill="currentColor"
-										viewBox="0 0 256 256"
-									>
-										<path d="M224,144v64a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V144a8,8,0,0,1,16,0v64H208V144a8,8,0,0,1,16,0ZM133.66,34.34a8,8,0,0,0-11.32,0l-48,48a8,8,0,0,0,11.32,11.32L120,59.31V160a8,8,0,0,0,16,0V59.31l34.34,34.35a8,8,0,0,0,11.32-11.32Z"></path>
-									</svg>
-								</div>
-								<span className="font-medium text-gray-500 text-sm">Drop an image, or paste a URL</span>
-							</div>
-						)}
-						<input
-							type="file"
-							accept="image/*"
-							onChange={handlePhotoChange}
-							className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-							id="picture-upload"
-						/>
 
-						{pictureUrl && (
-							<div className="absolute top-3 right-3 z-20 flex gap-2">
-								<label
-									htmlFor="picture-upload"
-									className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white shadow-md transition-all hover:scale-110 hover:bg-gray-100"
-									title="Change photo"
-								>
-									<PencilSimpleIcon className="h-4 w-4 text-gray-700" weight="bold" />
-								</label>
+							{/* File input overlay */}
+							<input
+								type="file"
+								accept="image/*"
+								onChange={handlePhotoChange}
+								className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+								id="picture-upload"
+							/>
+
+							{/* Action buttons */}
+							{pictureUrl && (
+								<div className="absolute top-3 right-3 z-20 flex gap-2">
+									<label
+										htmlFor="picture-upload"
+										className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white shadow-md transition-all hover:scale-110 hover:bg-gray-100"
+										title="Change photo"
+									>
+										<PencilSimpleIcon className="h-4 w-4 text-gray-700" weight="bold" />
+									</label>
+									<button
+										type="button"
+										onClick={handleRemovePhoto}
+										className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md transition-all hover:scale-110 hover:bg-gray-100"
+										title="Remove photo"
+									>
+										<TrashIcon className="h-4 w-4 text-red-500" weight="bold" />
+									</button>
+								</div>
 							)}
 						</div>
 
-						{/* URL Input */}
-						<div className="flex-1">
-							<FormField
-								control={form.control}
-								name="url"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="font-medium text-muted-foreground text-xs">
-											<Trans>Picture URL</Trans>
-										</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												placeholder="Paste image URL here..."
-												className="h-auto border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
-												onChange={(e) => {
-													field.onChange(e);
-													if (e.target.value.trim() !== "") {
-														form.setValue("hidden", false, { shouldDirty: true });
-													}
-												}}
-											/>
-										</FormControl>
-										<FormMessage />
-										<p className="mt-1.5 text-muted-foreground text-xs">Upload a photo or paste an image URL</p>
-									</FormItem>
-								)}
-							/>
+						{/* Right Column: Controls */}
+						<div className="flex flex-col gap-6 flex-1">
+							{/* URL Input */}
+							<div className="flex-1">
+								<FormField
+									control={form.control}
+									name="url"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className="font-medium text-muted-foreground text-xs">
+												<Trans>Picture URL</Trans>
+											</FormLabel>
+											<FormControl>
+												<Input
+													{...field}
+													placeholder="Paste image URL here..."
+													className="h-auto border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+													onChange={(e) => {
+														field.onChange(e);
+														if (e.target.value.trim() !== "") {
+															form.setValue("hidden", false, { shouldDirty: true });
+														}
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+											<p className="mt-1.5 text-muted-foreground text-xs">Upload a photo or paste an image URL</p>
+										</FormItem>
+									)}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -237,7 +226,7 @@ export function PictureSectionForm() {
 								<FormMessage />
 							</FormItem>
 						)}
-					</div>
+					/>
 
 					{/* Rotation */}
 					<FormField
@@ -258,10 +247,9 @@ export function PictureSectionForm() {
 											step={5}
 											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 											onChange={(e) => {
-												field.onChange(e);
-												if (e.target.value.trim() !== "") {
-													form.setValue("hidden", false, { shouldDirty: true });
-												}
+												const value = e.target.value;
+												if (value === "") field.onChange("");
+												else field.onChange(Number(value));
 											}}
 										/>
 									</FormControl>
@@ -338,12 +326,11 @@ export function PictureSectionForm() {
 											<div className="h-5 w-3 border-2 border-emerald-600" />
 										</Button>
 									</div>
-									<span
-										className={`text-sm ${aspectRatio === 1 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
-									>
-										Circle
-									</span>
-								</button>
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
 					{/* Border Radius */}
 					<FormField
@@ -411,12 +398,11 @@ export function PictureSectionForm() {
 											<div className="h-4 w-4 rounded-full border-2 border-emerald-600" />
 										</Button>
 									</div>
-									<span
-										className={`text-sm ${aspectRatio === 0.75 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
-									>
-										Oval
-									</span>
-								</button>
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
 					{/* Border Color & Width */}
 					<div className="grid grid-cols-2 gap-3">
@@ -446,19 +432,14 @@ export function PictureSectionForm() {
 											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 										/>
 									</div>
-									<span
-										className={`text-sm ${aspectRatio === 1 && borderRadius === 10 ? "font-medium text-gray-700" : "text-gray-900"}`}
-									>
-										Square
-									</span>
-								</button>
-							</div>
-						</div>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-						{/* Size Slider */}
 						<FormField
 							control={form.control}
-							name="size"
+							name="borderWidth"
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="font-medium text-muted-foreground text-xs">
@@ -473,7 +454,9 @@ export function PictureSectionForm() {
 												step={1}
 												className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 												onChange={(e) => {
-													field.onChange(Number(e.target.value));
+													const value = e.target.value;
+													if (value === "") field.onChange("");
+													else field.onChange(Number(e.target.value));
 												}}
 											/>
 										</FormControl>
