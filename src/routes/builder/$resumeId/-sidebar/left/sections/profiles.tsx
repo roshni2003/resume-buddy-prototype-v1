@@ -242,8 +242,8 @@ export function ProfilesSectionBuilder() {
 				{/* Section Card */}
 				<div
 					className={cn(
-						"overflow-hidden rounded-xl border-2 bg-card shadow-sm transition-colors",
-						section.items.length === 0 && !isAddingProfile ? "border-border border-dashed" : "border-border",
+						"overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-colors",
+						section.items.length === 0 && !isAddingProfile ? "border-gray-300 border-dashed" : "border-gray-200",
 					)}
 				>
 					{/* Profiles List */}
@@ -252,9 +252,9 @@ export function ProfilesSectionBuilder() {
 						onReorder={handleReorder}
 						keyExtractor={(item) => item.id}
 						renderItem={(profile) => (
-							<SortableItem key={profile.id} id={profile.id} className="group border-border border-b last:border-b-0">
-								<div className="flex items-center gap-4 p-4 transition-all hover:bg-muted/50">
-									<DragHandle className="shrink-0 p-1 text-muted-foreground transition-colors hover:text-foreground" />
+							<SortableItem key={profile.id} id={profile.id} className="group border-gray-200 border-b last:border-b-0">
+								<div className="flex items-center gap-4 p-4 transition-all hover:bg-gray-50">
+									<DragHandle className="shrink-0 p-1 text-gray-400 transition-colors hover:text-gray-600" />
 									<div
 										className={cn(
 											"flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
@@ -264,13 +264,13 @@ export function ProfilesSectionBuilder() {
 										{getNetworkIcon(profile.network)}
 									</div>
 									<div className="min-w-0 flex-1">
-										<h4 className="font-semibold text-foreground text-sm">{profile.network}</h4>
-										<p className="truncate text-muted-foreground text-sm">{profile.username}</p>
+										<h4 className="font-semibold text-gray-900 text-sm">{profile.network}</h4>
+										<p className="truncate text-gray-600 text-sm">{profile.username}</p>
 									</div>
 									<div className="flex shrink-0 items-center gap-2">
 										<button
 											onClick={() => startEditing(profile)}
-											className="rounded-lg p-2 text-muted-foreground transition-all hover:bg-emerald-50 hover:text-emerald-600"
+											className="rounded-lg p-2 text-gray-600 transition-all hover:bg-emerald-50 hover:text-emerald-600"
 											title="Edit"
 											type="button"
 										>
@@ -285,7 +285,7 @@ export function ProfilesSectionBuilder() {
 										</button>
 										<button
 											onClick={() => handleDeleteProfile(profile.id)}
-											className="rounded-lg p-2 text-muted-foreground transition-all hover:bg-red-50 hover:text-red-600"
+											className="rounded-lg p-2 text-gray-600 transition-all hover:bg-red-50 hover:text-red-600"
 											title="Delete"
 											type="button"
 										>
@@ -306,49 +306,52 @@ export function ProfilesSectionBuilder() {
 
 					{/* Add/Edit Form */}
 					{(isAddingProfile || editingId) && (
-						<div className="border-border border-t bg-muted/50 p-4">
-							<h4 className="mb-4 font-semibold text-foreground text-sm">
-								{editingId ? "Edit Profile" : "Add New Profile"}
-							</h4>
+						<div className="border-gray-200 border-t bg-white p-6">
+							<div className="mb-4 flex items-center justify-between">
+								<h4 className="font-semibold text-gray-900 text-sm">
+									{editingId ? "Edit Profile" : "Add New Profile"}
+								</h4>
+							</div>
 
-							<div className="space-y-3">
-								{/* Network Selection */}
-								<div>
-									<label className="mb-2 block font-medium text-muted-foreground text-xs">Social Network</label>
-									<select
-										value={formData.network}
-										onChange={(e) => setFormData({ ...formData, network: e.target.value })}
-										className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
-									>
-										{socialNetworks.map((network) => (
-											<option key={network.name} value={network.name}>
-												{network.icon} {network.name}
-											</option>
-										))}
-									</select>
-								</div>
+							<div className="space-y-4">
+								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+									{/* Network Selection */}
+									<div className="space-y-1.5">
+										<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Network</label>
+										<Input
+											type="text"
+											list="network-options"
+											value={formData.network}
+											onChange={(e) => setFormData({ ...formData, network: e.target.value })}
+											placeholder="e.g. LinkedIn, Instagram"
+										/>
+										<datalist id="network-options">
+											{socialNetworks.map((network) => (
+												<option key={network.name} value={network.name} />
+											))}
+										</datalist>
+									</div>
 
-								{/* Username */}
-								<div>
-									<label className="mb-2 block font-medium text-muted-foreground text-xs">Username</label>
-									<input
-										type="text"
-										value={formData.username}
-										onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-										placeholder="johndoe"
-										className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
-									/>
+									{/* Username */}
+									<div className="space-y-1.5">
+										<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Username</label>
+										<Input
+											type="text"
+											value={formData.username}
+											onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+											placeholder="johndoe"
+										/>
+									</div>
 								</div>
 
 								{/* URL */}
-								<div>
-									<label className="mb-2 block font-medium text-muted-foreground text-xs">Profile URL</label>
-									<input
+								<div className="space-y-1.5">
+									<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Profile URL</label>
+									<Input
 										type="url"
 										value={formData.url}
 										onChange={(e) => setFormData({ ...formData, url: e.target.value })}
 										placeholder={socialNetworks.find((n) => n.name === formData.network)?.placeholder}
-										className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 									/>
 								</div>
 
@@ -363,7 +366,7 @@ export function ProfilesSectionBuilder() {
 									</button>
 									<button
 										onClick={cancelForm}
-										className="rounded-lg bg-gray-200 px-4 py-2 font-medium text-muted-foreground text-sm transition-all hover:bg-gray-300"
+										className="flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-6 font-medium text-gray-700 text-sm transition-all hover:bg-gray-50"
 										type="button"
 									>
 										Cancel
@@ -375,82 +378,54 @@ export function ProfilesSectionBuilder() {
 
 					{/* Add Network Default View */}
 					{!isAddingProfile && !editingId && (
-						<div className="p-4">
-							<button
-								onClick={() => setIsAddingProfile(true)}
-								className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-border border-dashed py-3 font-medium text-muted-foreground text-sm transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700"
-								type="button"
-							>
-								<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-								</svg>
-								Add a new profile
-							</button>
-						</div>
-					)}
-
-					{/* Empty State */}
-					{section.items.length === 0 && !isAddingProfile && (
-						<div className="p-8 text-center">
-							<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-								<svg className="h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth={2}
-										d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-									/>
-								</svg>
+						<div className="flex flex-col gap-4 p-5">
+							<div className="flex items-center gap-2 font-bold text-gray-500 text-xs uppercase tracking-widest">
+								<span>&bull;</span> ADD A NETWORK
 							</div>
-							<h4 className="mb-1 font-semibold text-foreground text-sm">No profiles added yet</h4>
-							<p className="mb-4 text-muted-foreground text-xs">Add your social media profiles and professional links</p>
+
+							<div className="flex flex-wrap gap-3">
+								{socialNetworks.map((network) => (
+									<button
+										key={network.name}
+										onClick={() => {
+											setFormData({ ...formData, network: network.name });
+											setIsAddingProfile(true);
+										}}
+										className={cn(
+											"flex items-center gap-2 rounded-full border px-4 py-2 font-medium text-sm transition-colors hover:bg-gray-50",
+											network.borderColor,
+										)}
+										type="button"
+									>
+										<span className={network.iconColor}>{network.iconNode}</span>
+										<span className="text-gray-900">{network.name}</span>
+										<PlusIcon className="h-4 w-4 text-gray-500" weight="bold" />
+									</button>
+								))}
+							</div>
+
+							<div className="relative mt-2">
+								<input
+									type="text"
+									placeholder="Or paste any URL — we'll detect the network."
+									onChange={(e) => {
+										const val = e.target.value;
+										if (val.trim()) {
+											const detected = detectNetworkFromUrl(val.trim());
+											setFormData({
+												network: detected.network,
+												username: detected.username,
+												url: detected.url,
+											});
+											setIsAddingProfile(true);
+										}
+									}}
+									className="flex w-full items-center justify-center rounded-[20px] border-2 border-cyan-200 border-dashed p-4 text-center font-medium text-gray-600 text-sm transition-all placeholder:text-gray-600 hover:bg-gray-50 focus:border-cyan-400 focus:text-left focus:outline-none focus:ring-4 focus:ring-cyan-50 focus:placeholder:text-gray-400"
+								/>
+							</div>
 						</div>
 					)}
 				</div>
-
-				{/* Quick Add by URL - Moved outside the card */}
-				<div className="relative mt-2">
-					<input
-						type="text"
-						placeholder="Or paste any URL — we'll detect the network."
-						onChange={(e) => {
-							const val = e.target.value;
-							if (val.trim()) {
-								const detected = detectNetworkFromUrl(val.trim());
-								setFormData({
-									network: detected.network,
-									username: detected.username,
-									url: detected.url,
-								});
-								setIsAddingProfile(true);
-							}
-						}}
-						className="flex w-full items-center justify-center rounded-[20px] border-2 border-cyan-200 border-dashed p-4 text-center font-medium text-gray-600 text-sm transition-all placeholder:text-gray-600 hover:bg-gray-50 focus:border-cyan-400 focus:text-left focus:outline-none focus:ring-4 focus:ring-cyan-50 focus:placeholder:text-gray-400"
-					/>
-				</div>
-
-				{/* Quick Add Popular Networks */}
-				{section.items.length === 0 && !isAddingProfile && (
-					<div className="rounded-xl border border-emerald-200 bg-linear-to-br from-emerald-50 p-4">
-						<h4 className="mb-3 font-semibold text-foreground text-sm">Popular Networks</h4>
-						<div className="grid grid-cols-2 gap-2">
-							{socialNetworks.map((network) => (
-								<button
-									key={network.name}
-									onClick={() => {
-										setFormData({ ...formData, network: network.name });
-										setIsAddingProfile(true);
-									}}
-									className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-card px-3 py-2 font-medium text-foreground text-sm transition-all hover:bg-emerald-50 hover:text-emerald-700"
-									type="button"
-								>
-									<span className="text-lg">{network.icon}</span>
-									{network.name}
-								</button>
-							))}
-						</div>
-					</div>
-				)}
 			</div>
 		</SectionBase>
 	);
