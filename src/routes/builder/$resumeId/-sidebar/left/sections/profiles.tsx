@@ -408,28 +408,26 @@ export function ProfilesSectionBuilder() {
 					)}
 				</div>
 
-							<div className="relative mt-2">
-								<input
-									type="text"
-									placeholder="Or paste any URL — we'll detect the network."
-									onChange={(e) => {
-										const val = e.target.value;
-										if (val.trim()) {
-											const detected = detectNetworkFromUrl(val.trim());
-											setFormData({
-												network: detected.network,
-												username: detected.username,
-												url: detected.url,
-											});
-											setIsAddingProfile(true);
-										}
-									}}
-									className="flex w-full items-center justify-center rounded-[20px] border-2 border-cyan-200 border-dashed p-4 text-center font-medium text-gray-600 text-sm transition-all placeholder:text-gray-600 hover:bg-gray-50 focus:border-cyan-400 focus:text-left focus:outline-none focus:ring-4 focus:ring-cyan-50 focus:placeholder:text-gray-400"
-								/>
-							</div>
-						</div>
-					</div>
-				)}
+				{/* Quick Add by URL - Moved outside the card */}
+				<div className="relative mt-2">
+					<input
+						type="text"
+						placeholder="Or paste any URL — we'll detect the network."
+						onChange={(e) => {
+							const val = e.target.value;
+							if (val.trim()) {
+								const detected = detectNetworkFromUrl(val.trim());
+								setFormData({
+									network: detected.network,
+									username: detected.username,
+									url: detected.url,
+								});
+								setIsAddingProfile(true);
+							}
+						}}
+						className="flex w-full items-center justify-center rounded-[20px] border-2 border-cyan-200 border-dashed p-4 text-center font-medium text-gray-600 text-sm transition-all placeholder:text-gray-600 hover:bg-gray-50 focus:border-cyan-400 focus:text-left focus:outline-none focus:ring-4 focus:ring-cyan-50 focus:placeholder:text-gray-400"
+					/>
+				</div>
 
 				{/* Quick Add Popular Networks */}
 				{section.items.length === 0 && !isAddingProfile && (

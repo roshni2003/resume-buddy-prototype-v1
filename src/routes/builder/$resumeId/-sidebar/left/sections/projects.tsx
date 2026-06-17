@@ -41,6 +41,7 @@ import { Input } from "@/components/ui/input";
 import { projectItemSchema } from "@/schema/resume/data";
 import { SectionBase } from "../shared/section-base";
 import { generateId } from "@/utils/string";
+
 /* ─────────────────────────────────────────────
    Types
 ───────────────────────────────────────────── */
@@ -104,13 +105,13 @@ function InlineProjectForm({
 	onCancel,
 	isNew = false,
 }: InlineFormProps) {
-	InlineProjectForm
 	const [isPulsing, setIsPulsing] = useState(true);
 
 	useEffect(() => {
 		const timer = setTimeout(() => setIsPulsing(false), 5000);
 		return () => clearTimeout(timer);
 	}, []);
+
 	const form = useForm<FormValues>({
 		resolver: zodResolver(projectItemSchema),
 		defaultValues,
@@ -166,7 +167,6 @@ function InlineProjectForm({
 	return (
 		<Form {...form}>
 			<form className="space-y-5" onSubmit={form.handleSubmit(onSave)}>
-
 				{/* ── Row 1: Project name ── */}
 				<FormField
 					control={form.control}
@@ -279,7 +279,6 @@ function InlineProjectForm({
 					/>
 				</div>
 
-				{/* ── Description + AI ── */}
 				{/* ── Description + AI ── */}
 				<FormField
 					control={form.control}
@@ -415,8 +414,8 @@ function ProjectCard({
 	return (
 		<div
 			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
-				? "border-violet-300 shadow-violet-100 shadow-md"
-				: "border-gray-100 hover:border-gray-200 hover:shadow"
+					? "border-violet-300 shadow-violet-100 shadow-md"
+					: "border-gray-100 hover:border-gray-200 hover:shadow"
 				}`}
 		>
 			{/* ── Header ── */}
@@ -550,19 +549,92 @@ export function ProjectsSectionBuilder() {
 	);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
-			{generatingIds.size > 0 && (
-				<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
-					<div className="flex items-start gap-4">
-						<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
-							<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
-						</div>
-						<div>
-							<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>
-							<p className="text-muted-foreground text-sm">Generating professional descriptions for your projects</p>
+	const [expandedId, setExpandedId] = useState<string | null>(null);
+	const [panelState, setPanelState] = useState<PanelState>({ mode: "idle" });
+	const [generatingIds] = useState<Set<string>>(new Set());
+
+	const handleAddProject = (values: FormValues) => {
+		updateResumeData((draft) => {
+			draft.sections.projects.items.push(values);
+		});
+		setPanelState({ mode: "idle" });
+	};
+
+	const handleUpdateProject = (values: FormValues) => {
+		updateResumeData((draft) => {
+			const index = draft.sections.projects.items.findIndex(
+				(item) => item.id === values.id
+			);
+			if (index !== -1) {
+				draft.sections.projects.items[index] = values;
+			}
+		});
+		setExpandedId(null);
+	};
+
+	const handleDeleteProject = (id: string) => {
+		updateResumeData((draft) => {
+			draft.sections.projects.items = draft.sections.projects.items.filter(
+				(item) => item.id !== id
+			);
+		});
+		setExpandedId(null);
+	};
+
+	const toggleExpand = (id: string) => {
+		setExpandedId(expandedId === id ? null : id);
+		if (panelState.mode !== "idle") {
+			setPanelState({ mode: "idle" });
+		}
+	};
+
+	return (
+		<SectionBase type="projects">
+			<div className="space-y-4">
+				{/* Projects List */}
+				{section.items.map((item) => (
+					<ProjectCard
+						key={item.id}
+						item={item}
+						isExpanded={expandedId === item.id}
+						onToggle={() => toggleExpand(item.id)}
+						onSave={handleUpdateProject}
+						onDelete={() => handleDeleteProject(item.id)}
+					/>
+				))}
+
+				{/* Add New Panel */}
+				{panelState.mode === "create" ? (
+					<AddNewPanel
+						onSave={handleAddProject}
+						onCancel={() => setPanelState({ mode: "idle" })}
+					/>
+				) : (
+					<button
+						type="button"
+						onClick={() => setPanelState({ mode: "create" })}
+						className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-4 text-sm font-medium text-gray-400 transition-all hover:border-violet-300 hover:bg-violet-50/30 hover:text-violet-600"
+					>
+						<PlusIcon className="h-4 w-4" />
+						<Trans>Add a new project</Trans>
+					</button>
+				)}
+
+				{/* Zoe Working Indicator */}
+				{generatingIds.size > 0 && (
+					<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
+						<div className="flex items-start gap-4">
+							<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
+								<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
+							</div>
+							<div>
+								<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>
+								<p className="text-muted-foreground text-sm">Generating professional descriptions for your projects</p>
+							</div>
 						</div>
 					</div>
-				</div>
-			)}
+				)}
+			</div>
 		</SectionBase>
 	);
 }

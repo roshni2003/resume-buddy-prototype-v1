@@ -128,6 +128,7 @@ function InlineExperienceForm({
 		const timer = setTimeout(() => setIsPulsing(false), 5000);
 		return () => clearTimeout(timer);
 	}, []);
+
 	const form = useForm<FormValues>({
 		resolver: zodResolver(experienceItemSchema),
 		defaultValues,
@@ -344,30 +345,61 @@ function InlineExperienceForm({
 					)}
 				/>
 
-				{/* Add Button */}
-				<SectionAddItemButton type="experience">
-					<Trans>Add a new experience</Trans>
-				</SectionAddItemButton>
-
-				{/* AI Generation Indicator */}
-				{generatingIds.size > 0 && (
-					<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
-						<div className="flex items-start gap-4">
-							<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
-								<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
+				{/* ── Description + AI ── */}
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<div className="flex items-end justify-between">
+								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<Trans>Description</Trans>
+								</FormLabel>
+								<div className="relative mb-2 rounded-xl bg-gray-50 p-1">
+									{isPulsing && (
+										<>
+											<div className="absolute -inset-1 rounded-full bg-emerald-400/40 blur-md animate-ai-glow" />
+											<div className="absolute -inset-2 rounded-full border border-emerald-300/50 animate-ai-glow-ring" />
+										</>
+									)}
+									<AIGenerateButton
+										resumeId={useResumeStore.getState().resume.id}
+										type="experience"
+										data={{
+											company: form.getValues("company"),
+											position: form.getValues("position"),
+											description,
+										}}
+										onGenerated={handleAIGenerated}
+										roundsUsed={roundsUsed}
+										maxRounds={maxRounds}
+										isWordCountValid={isWordCountValid}
+										disabled={roundsUsed >= maxRounds || !isWordCountValid}
+										className="relative z-10 border border-emerald-300 font-bold text-black shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 hover:text-white"
+									/>
+								</div>
 							</div>
-							<div>
-								<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>
-								<p className="text-muted-foreground text-sm">Generating professional descriptions for your experience</p>
+
+							{/* AI badge */}
+							<div className="flex items-center gap-2">
+								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+									<SparkleIcon weight="fill" className="h-3 w-3" />
+									AI Assisted
+								</span>
+								<span className="text-xs text-gray-400">
+									Zoe can sharpen your experience description
+								</span>
 							</div>
 
 							<FormControl>
 								<RichInput
 									{...field}
-									content={field.value}
-									onChange={(value) => field.onChange(value)}
+									value={field.value || ""}
+									onChange={field.onChange}
 								/>
 							</FormControl>
+
+							{/* Word / char count */}
 							<p className="flex justify-between text-xs text-gray-400">
 								<span>
 									{wordCount} words · {charCount} chars
@@ -392,10 +424,12 @@ function InlineExperienceForm({
 									</Trans>
 								</p>
 							)}
+
 							<FormMessage />
 						</FormItem>
 					)}
 				/>
+
 				{/* ── Tips Card ── */}
 				<ZoeTipsCard />
 
@@ -454,8 +488,8 @@ function ExperienceCard({
 	return (
 		<div
 			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
-				? "border-emerald-300 shadow-emerald-100 shadow-md"
-				: "border-gray-100 hover:border-gray-200 hover:shadow"
+					? "border-emerald-300 shadow-emerald-100 shadow-md"
+					: "border-gray-100 hover:border-gray-200 hover:shadow"
 				}`}
 		>
 			{/* ── Header (always visible) ── */}
@@ -466,25 +500,19 @@ function ExperienceCard({
 			>
 				{/* Icon bubble */}
 				<span
-					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded
-						? "bg-indigo-100"
-						: "bg-gray-100"
+					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-indigo-100" : "bg-gray-100"
 						}`}
 				>
 					<BriefcaseIcon
 						weight="fill"
-						className={`h-6 w-6 ${isExpanded
-							? "text-indigo-600"
-							: "text-gray-500"
+						className={`h-6 w-6 ${isExpanded ? "text-indigo-600" : "text-gray-500"
 							}`}
 					/>
 				</span>
 
 				<div className="min-w-0 flex-1">
 					<p
-						className={`truncate font-semibold leading-tight ${isExpanded
-							? "text-indigo-800"
-							: "text-gray-800"
+						className={`truncate font-semibold leading-tight ${isExpanded ? "text-indigo-800" : "text-gray-800"
 							}`}
 					>
 						{item.position || "New Position"}

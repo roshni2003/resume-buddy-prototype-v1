@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import type z from "zod";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Button } from "@/components/ui/button";
-import { ColorPicker } from "@/components/ui/color-picker";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { pictureSchema } from "@/schema/resume/data";
@@ -40,19 +39,16 @@ export function PictureSectionForm() {
 	const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			// Validate file type
 			if (!file.type.startsWith("image/")) {
 				toast.error(t`Please select a valid image file (PNG, JPG, WEBP, etc.)`);
 				return;
 			}
 
-			// Validate file size (max 10MB)
 			if (file.size > 10 * 1024 * 1024) {
 				toast.error(t`Image size should be less than 10MB`);
 				return;
 			}
 
-			// Create preview URL
 			const reader = new FileReader();
 			reader.onloadend = () => {
 				const url = reader.result as string;
@@ -63,7 +59,6 @@ export function PictureSectionForm() {
 			};
 			reader.readAsDataURL(file);
 		}
-		// Reset input value to allow selecting the same file again
 		event.target.value = "";
 	};
 
@@ -89,7 +84,6 @@ export function PictureSectionForm() {
 			<form onChange={form.handleSubmit(onSubmit)} className="space-y-6">
 				{/* Profile Photo Upload Section */}
 				<div className="rounded-xl border border-border bg-muted/50 p-5 shadow-sm">
-					{/* Section Header */}
 					<div className="mb-4 flex items-center gap-2 border-border border-b pb-3">
 						<CameraIcon className="h-5 w-5 text-emerald-600" weight="bold" />
 						<h3 className="font-semibold text-foreground text-sm">
@@ -98,7 +92,6 @@ export function PictureSectionForm() {
 					</div>
 
 					<div className="flex items-center gap-6">
-						{/* Photo Preview with Live Customization */}
 						<div className="relative shrink-0">
 							<div
 								className="flex items-center justify-center overflow-hidden bg-card shadow-md"
@@ -124,7 +117,6 @@ export function PictureSectionForm() {
 								)}
 							</div>
 
-							{/* File input overlay */}
 							<input
 								type="file"
 								accept="image/*"
@@ -133,7 +125,6 @@ export function PictureSectionForm() {
 								id="picture-upload"
 							/>
 
-							{/* Action buttons */}
 							{pictureUrl && (
 								<div className="absolute top-3 right-3 z-20 flex gap-2">
 									<label
@@ -155,9 +146,7 @@ export function PictureSectionForm() {
 							)}
 						</div>
 
-						{/* Right Column: Controls */}
 						<div className="flex flex-col gap-6 flex-1">
-							{/* URL Input */}
 							<div className="flex-1">
 								<FormField
 									control={form.control}
@@ -416,20 +405,26 @@ export function PictureSectionForm() {
 									</FormLabel>
 									<div className="flex items-center gap-2">
 										<FormControl>
-											<ColorPicker
-												{...field}
-												className="h-10 w-12 cursor-pointer rounded-lg border border-border"
-												defaultValue={field.value}
-												onValueChange={(color) => {
-													field.onChange(color);
-													form.handleSubmit(onSubmit)();
-												}}
-											/>
+											<div className="flex items-center gap-2">
+												<input
+													type="color"
+													value={field.value || "#10b981"}
+													onChange={(e) => {
+														field.onChange(e.target.value);
+														form.handleSubmit(onSubmit)();
+													}}
+													className="h-10 w-12 cursor-pointer rounded-lg border border-border p-1"
+												/>
+											</div>
 										</FormControl>
 										<Input
 											{...field}
 											placeholder="#10b981"
 											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											onChange={(e) => {
+												field.onChange(e.target.value);
+												form.handleSubmit(onSubmit)();
+											}}
 										/>
 									</div>
 									<FormMessage />
@@ -480,20 +475,26 @@ export function PictureSectionForm() {
 									</FormLabel>
 									<div className="flex items-center gap-2">
 										<FormControl>
-											<ColorPicker
-												{...field}
-												className="h-10 w-12 cursor-pointer rounded-lg border border-border"
-												defaultValue={field.value}
-												onValueChange={(color) => {
-													field.onChange(color);
-													form.handleSubmit(onSubmit)();
-												}}
-											/>
+											<div className="flex items-center gap-2">
+												<input
+													type="color"
+													value={field.value || "#000000"}
+													onChange={(e) => {
+														field.onChange(e.target.value);
+														form.handleSubmit(onSubmit)();
+													}}
+													className="h-10 w-12 cursor-pointer rounded-lg border border-border p-1"
+												/>
+											</div>
 										</FormControl>
 										<Input
 											{...field}
 											placeholder="#000000"
 											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+											onChange={(e) => {
+												field.onChange(e.target.value);
+												form.handleSubmit(onSubmit)();
+											}}
 										/>
 									</div>
 									<FormMessage />
