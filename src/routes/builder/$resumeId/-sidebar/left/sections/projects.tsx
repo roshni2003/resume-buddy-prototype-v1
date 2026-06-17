@@ -414,8 +414,8 @@ function ProjectCard({
 	return (
 		<div
 			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
-					? "border-violet-300 shadow-violet-100 shadow-md"
-					: "border-gray-100 hover:border-gray-200 hover:shadow"
+				? "border-violet-300 shadow-violet-100 shadow-md"
+				: "border-gray-100 hover:border-gray-200 hover:shadow"
 				}`}
 		>
 			{/* ── Header ── */}
