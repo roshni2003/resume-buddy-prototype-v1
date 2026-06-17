@@ -127,6 +127,7 @@ export const certificationItemSchema = baseItemSchema.extend({
 });
 
 export const educationItemSchema = baseItemSchema.extend({
+	educationType: z.enum(["School", "College"]).default("College").describe("The type of education."),
 	school: z.string().min(1).describe("The name of the school or institution."),
 	degree: z.string().describe("The degree or qualification obtained."),
 	area: z.string().describe("The area of study or specialization."),
@@ -152,28 +153,29 @@ export const experienceItemSchema = baseItemSchema.extend({
 
 export const interestItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
-	name: z.string().min(1).describe("The name of the interest/hobby."),
+	name: z
+		.string()
+		.trim()
+		.min(2, "Interest must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid interest name")
+		.describe("The name of the interest/hobby."),
 	keywords: z
 		.array(z.string())
 		.catch([])
 		.describe("The keywords associated with the interest/hobby, if any. These are displayed as tags below the name."),
 });
 
-export const languageItemSchema = baseItemSchema.extend({
-	language: z.string().min(1).describe("The name of the language the author knows."),
-	fluency: z
+export const languageItemSchema = z.object({
+	id: z.string(),
+	hidden: z.boolean(),
+
+	language: z
 		.string()
-		.describe(
-			"The fluency level of the language. Can be any text, such as 'Native', 'Fluent', 'Conversational', etc. or can also be a CEFR level (A1, A2, B1, B2, C1, C2).",
-		),
-	level: z
-		.number()
-		.min(0)
-		.max(5)
-		.catch(0)
-		.describe(
-			"The proficiency level of the language, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden.",
-		),
+		.trim()
+		.min(2, "Language must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid language name"),
+	fluency: z.string(),
+	level: z.number(),
 });
 
 export const profileItemSchema = baseItemSchema.extend({
@@ -212,7 +214,12 @@ export const referenceItemSchema = baseItemSchema.extend({
 
 export const skillItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
-	name: z.string().min(1).describe("The name of the skill."),
+	name: z
+		.string()
+		.trim()
+		.min(2, "Skill must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid skill name")
+		.describe("The name of the skill."),
 	proficiency: z
 		.string()
 		.describe(
@@ -365,6 +372,12 @@ export type CustomSectionItem = z.infer<typeof customSectionItemSchema>;
 
 export const customSectionSchema = baseSectionSchema.extend({
 	id: z.string().describe("The unique identifier for the custom section. Usually generated as a UUID."),
+	title: z
+		.string()
+		.trim()
+		.min(2, "Section title must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid section title")
+		.describe("The title of the section."),
 	type: sectionTypeSchema.describe(
 		"The type of items this custom section contains. Determines which item schema and form fields to use.",
 	),

@@ -122,18 +122,17 @@ export function VolunteerSectionBuilder() {
 					type="button"
 					onClick={handleAdd}
 					className="
-						mt-2 flex w-full items-center justify-center gap-2
-						rounded-2xl border-2 border-rose-300 bg-white
-						py-4 text-sm font-semibold text-rose-400
-						transition-all duration-150
-						hover:border-rose-400 hover:bg-rose-50 hover:text-rose-500
-						active:scale-[0.99]
-					"
+					mt-2 flex w-full items-center justify-center gap-2
+					rounded-2xl border border-dashed border-rose-300
+					bg-rose-50/50
+					py-2 text-sm font-medium text-rose-500
+					transition-all duration-150
+					hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm
+					active:scale-[0.99]"
 				>
-					<Plus className="h-4 w-4" strokeWidth={2.5} />
+					<Plus className="h-4 w-4" strokeWidth={2} />
 					<Trans>Add volunteer work</Trans>
 				</button>
-
 			</div>
 		</SectionBase>
 	);

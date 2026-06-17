@@ -1,4 +1,5 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
+import { Sparkle } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -42,27 +43,6 @@ export function SectionBase({ type, className, ...props }: Props) {
 		return state.resume.data.sections[type];
 	});
 
-	const orderedSections = useMemo(() => {
-		const layoutSections = layout.pages.flatMap((page) => [...page.main, ...page.sidebar]);
-		const ordered: string[] = [];
-		const seen = new Set<string>();
-
-		for (const section of layoutSections) {
-			if (!leftSidebarSections.includes(section as LeftSidebarSection)) continue;
-			if (seen.has(section)) continue;
-			ordered.push(section);
-			seen.add(section);
-		}
-
-		for (const section of leftSidebarSections) {
-			if (seen.has(section)) continue;
-			ordered.push(section);
-			seen.add(section);
-		}
-
-		return ordered;
-	}, [layout.pages]);
-
 	const isHidden = "hidden" in section && section.hidden;
 	const collapsed = useSectionStore((state) => state.sections[type]?.collapsed ?? false);
 	const toggleCollapsed = useSectionStore((state) => state.toggleCollapsed);
@@ -82,7 +62,7 @@ export function SectionBase({ type, className, ...props }: Props) {
 				value={type}
 				className={cn(
 					"group/accordion overflow-hidden rounded-[32px] border transition-all duration-300 transform",
-					!collapsed 
+					!collapsed
 						? cn("scale-[1.01] my-2 z-10", colors.activeClasses)
 						: "border-gray-100 bg-white hover:border-gray-300 hover:shadow-md",
 				)}
@@ -93,8 +73,18 @@ export function SectionBase({ type, className, ...props }: Props) {
 
 					<div className="flex-1">
 						<AccordionTrigger className="flex w-full items-center justify-between py-0 hover:no-underline">
-							{/* Icon and Title */}
-							<div className="ml-2 flex items-center gap-x-4 text-left">
+							{/* Left side: Chevron + Icon + Title */}
+							<div className="flex flex-1 items-center gap-2">
+								{/* Chevron Arrow - Right when closed, Down when open */}
+								<div className="flex items-center justify-center text-gray-400 transition-colors group-hover/accordion:text-gray-700">
+									{collapsed ? (
+										<ChevronRight className="h-4 w-4 transition-transform duration-300" />
+									) : (
+										<ChevronDown className="h-4 w-4 transition-transform duration-300" />
+									)}
+								</div>
+
+								{/* Icon */}
 								<div
 									className={cn(
 										"flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
@@ -104,24 +94,36 @@ export function SectionBase({ type, className, ...props }: Props) {
 								>
 									{getSectionIcon(type)}
 								</div>
+
+								{/* Title */}
 								<h2 className="line-clamp-1 font-serif text-gray-900 text-xl tracking-tight">
 									{("title" in section && section.title) || getSectionTitle(type)}
 								</h2>
 							</div>
 
-							{/* OPEN Button Toggle Chevron */}
-							<div className="flex items-center justify-center text-gray-500 transition-colors hover:text-gray-900">
-								<ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/accordion:rotate-180" />
+							{/* Right side: AI Badge and Menu - Pushed to far right with flex-shrink-0 */}
+							<div className="flex shrink-0 items-center gap-3">
+								{/* AI Badge */}
+								{["summary", "experience", "projects"].includes(type) && (
+									<div
+										className={cn(
+											"flex items-center gap-1.5 rounded-full border border-current/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-opacity",
+											colors.iconBg,
+											colors.iconText,
+										)}
+									>
+										<Sparkle className="h-3 w-3 animate-ai-glow-ring" weight="fill" />
+										AI
+									</div>
+								)}
+
+								{/* Menu */}
+								{!["picture", "basics", "custom"].includes(type) && (
+									<SectionDropdownMenu type={type as "summary" | SectionType} />
+								)}
 							</div>
 						</AccordionTrigger>
 					</div>
-
-					{/* Menu */}
-					{!["picture", "basics", "custom"].includes(type) && (
-						<div className="ml-2">
-							<SectionDropdownMenu type={type as "summary" | SectionType} />
-						</div>
-					)}
 				</div>
 
 				<AccordionContent

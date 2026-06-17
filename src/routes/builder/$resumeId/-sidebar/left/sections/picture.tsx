@@ -90,15 +90,17 @@ export function PictureSectionForm() {
 					<div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[24px] border-2 border-emerald-200 border-dashed bg-white shadow-sm transition-all hover:bg-gray-50">
 						{pictureUrl ? (
 							<div
-								className="flex items-center justify-center overflow-hidden bg-white shadow-md"
+								className="flex items-center justify-center overflow-hidden bg-white shadow-md transition-all duration-300"
 								style={{
-									width: "100%",
-									height: "100%",
-									borderRadius: borderRadius === 100 ? "50%" : `${borderRadius}%`,
+									width: `${size}px`,
+									height: `${size / (aspectRatio || 1)}px`,
+									borderRadius:
+										aspectRatio === 0.75 && borderRadius === 100 ? "50%" : // Oval uses 50% border radius on a rectangular container
+											aspectRatio === 1 && borderRadius === 100 ? "50%" : // Circle
+												`${borderRadius}px`, // Square
 									border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : "none",
 									boxShadow: shadowWidth > 0 ? `0 0 ${shadowWidth * 4}px ${shadowColor}40` : "none",
 									transform: `rotate(${rotation}deg)`,
-									aspectRatio: aspectRatio.toString(),
 								}}
 							>
 								<img src={pictureUrl} alt="Profile" className="h-full w-full object-cover" />
@@ -106,16 +108,16 @@ export function PictureSectionForm() {
 						) : (
 							<div className="flex flex-col items-center justify-center gap-4 text-emerald-800">
 								<div
-									className={`flex items-center justify-center bg-emerald-50 transition-all duration-300 ${
-										aspectRatio === 0.8 && borderRadius === 100
-											? "rounded-t-full rounded-b-sm"
-											: aspectRatio === 1 && borderRadius === 10
-												? "rounded-xl"
-												: "rounded-full"
-									}`}
+									className={`flex items-center justify-center bg-emerald-50 transition-all duration-300 ${aspectRatio === 1 && borderRadius === 100 ? "rounded-full" : // Circle
+										aspectRatio === 0.75 && borderRadius === 100 ? "rounded-full" : // Oval (uses 50% border-radius)
+											"rounded-xl" // Square
+										}`}
 									style={{
-										width: `${Math.max(64, Math.min(160, size * 0.8))}px`,
-										height: `${Math.max(64, Math.min(160, size * 0.8)) / (aspectRatio || 1)}px`,
+										width: `${size}px`,
+										height: `${size / (aspectRatio || 1)}px`,
+										border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : "none",
+										boxShadow: shadowWidth > 0 ? `0 0 ${shadowWidth * 4}px ${shadowColor}40` : "none",
+										transform: `rotate(${rotation}deg)`,
 									}}
 								>
 									<svg
@@ -206,41 +208,40 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 100 ? "bg-[#0f1c23]" : "bg-transparent hover:bg-gray-50"}`}
+										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-200" : "bg-transparent hover:bg-gray-50"}`}
 									>
 										<div
-											className={`h-5 w-5 rounded-full ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-300" : "bg-gray-500"}`}
+											className={`h-5 w-5 rounded-full ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-500" : "bg-gray-500"}`}
 										/>
 									</div>
 									<span
-										className={`text-sm ${aspectRatio === 1 && borderRadius === 100 ? "font-medium text-[#0f1c23]" : "text-gray-900"}`}
+										className={`text-sm ${aspectRatio === 1 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
 									>
 										Circle
 									</span>
 								</button>
 
-								{/* Arch */}
+								{/* Oval */}
 								<button
 									type="button"
 									className="group flex flex-col items-center gap-2"
 									onClick={() => {
-										form.setValue("aspectRatio", 0.8, { shouldDirty: true });
-										// we can set borderRadius to something high to simulate arch
+										form.setValue("aspectRatio", 0.75, { shouldDirty: true });
 										form.setValue("borderRadius", 100, { shouldDirty: true });
 										form.handleSubmit(onSubmit)();
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 0.8 && borderRadius === 100 ? "bg-[#0f1c23]" : "bg-transparent hover:bg-gray-50"}`}
+										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-200" : "bg-transparent hover:bg-gray-50"}`}
 									>
 										<div
-											className={`h-6 w-5 rounded-t-full rounded-b-sm ${aspectRatio === 0.8 && borderRadius === 100 ? "bg-gray-300" : "bg-gray-500"}`}
+											className={`h-6 w-5 rounded-full ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-500" : "bg-gray-500"}`}
 										/>
 									</div>
 									<span
-										className={`text-sm ${aspectRatio === 0.8 && borderRadius === 100 ? "font-medium text-[#0f1c23]" : "text-gray-900"}`}
+										className={`text-sm ${aspectRatio === 0.75 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
 									>
-										Arch
+										Oval
 									</span>
 								</button>
 
@@ -255,14 +256,14 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 10 ? "bg-[#0f1c23]" : "bg-transparent hover:bg-gray-50"}`}
+										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-200" : "bg-transparent hover:bg-gray-50"}`}
 									>
 										<div
-											className={`h-5 w-5 rounded-sm ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-300" : "bg-gray-500"}`}
+											className={`h-5 w-5 rounded-sm ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-500" : "bg-gray-500"}`}
 										/>
 									</div>
 									<span
-										className={`text-sm ${aspectRatio === 1 && borderRadius === 10 ? "font-medium text-[#0f1c23]" : "text-gray-900"}`}
+										className={`text-sm ${aspectRatio === 1 && borderRadius === 10 ? "font-medium text-gray-700" : "text-gray-900"}`}
 									>
 										Square
 									</span>

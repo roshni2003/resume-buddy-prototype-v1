@@ -4,6 +4,7 @@ import { useResumeStore } from "@/components/resume/store/resume";
 import { Input } from "@/components/ui/input";
 import { RichInput } from "@/components/input/rich-input";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/utils/style";
 import { SectionBase } from "../shared/section-base";
 
 export function EducationSectionBuilder() {
@@ -15,6 +16,7 @@ export function EducationSectionBuilder() {
 			draft.sections.education.items.push({
 				id: crypto.randomUUID(),
 				hidden: false,
+				educationType: "College",
 				school: "",
 				degree: "",
 				area: "",
@@ -67,39 +69,105 @@ export function EducationSectionBuilder() {
 						{/* All fields */}
 						<div className="flex flex-1 flex-col gap-3 min-w-0">
 							{/* Row 1: Institution + Degree */}
-							<div className="grid grid-cols-2 gap-3">
-								<Input
-									placeholder="Institution"
-									value={item.school}
-									onChange={(e) => handleChange(item.id, "school", e.target.value)}
-									className={inputCls}
-								/>
-								<Input
-									placeholder="Degree / Field"
-									value={item.degree}
-									onChange={(e) => handleChange(item.id, "degree", e.target.value)}
-									className={inputCls}
-								/>
+							<div className="flex rounded-lg bg-gray-100 p-1 w-max">
+								<button
+									type="button"
+									onClick={() => handleChange(item.id, "educationType", "School")}
+									className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", item.educationType === "School" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+								>
+									School
+								</button>
+								<button
+									type="button"
+									onClick={() => handleChange(item.id, "educationType", "College")}
+									className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", (!item.educationType || item.educationType === "College") ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+								>
+									College/University
+								</button>
 							</div>
 
 							{/* Row 2: Period + Grade */}
-							<div className="grid grid-cols-2 gap-3">
-								<Input
-									placeholder="2020 – 2024"
-									value={item.period}
-									onChange={(e) => handleChange(item.id, "period", e.target.value)}
-									className={inputCls}
-								/>
-								<Input
-									placeholder="Grade / GPA"
-									value={item.grade}
-									onChange={(e) => handleChange(item.id, "grade", e.target.value)}
-									className={inputCls}
-								/>
-							</div>
+							{item.educationType === "School" ? (
+								<>
+									<div className="grid grid-cols-2 gap-3">
+										<Input
+											placeholder="School Name"
+											value={item.school}
+											onChange={(e) => handleChange(item.id, "school", e.target.value)}
+											className={inputCls}
+										/>
+										<Input
+											placeholder="Board"
+											value={item.degree}
+											onChange={(e) => handleChange(item.id, "degree", e.target.value)}
+											className={inputCls}
+										/>
+									</div>
+									<div className="grid grid-cols-2 gap-3">
+										<Input
+											placeholder="Passing Year"
+											value={item.period}
+											onChange={(e) => handleChange(item.id, "period", e.target.value)}
+											className={inputCls}
+										/>
+										<Input
+											placeholder="Percentage / CGPA"
+											value={item.grade}
+											onChange={(e) => handleChange(item.id, "grade", e.target.value)}
+											className={inputCls}
+										/>
+									</div>
+								</>
+							) : (
+								<>
+									<div className="grid grid-cols-2 gap-3">
+										<Input
+											placeholder="Institution Name"
+											value={item.school}
+											onChange={(e) => handleChange(item.id, "school", e.target.value)}
+											className={inputCls}
+										/>
+										<Input
+											placeholder="Degree"
+											value={item.degree}
+											onChange={(e) => handleChange(item.id, "degree", e.target.value)}
+											className={inputCls}
+										/>
+									</div>
+									<div className="grid grid-cols-2 gap-3">
+										<Input
+											placeholder="Specialization"
+											value={item.area}
+											onChange={(e) => handleChange(item.id, "area", e.target.value)}
+											className={inputCls}
+										/>
+										<Input
+											placeholder="CGPA / Percentage"
+											value={item.grade}
+											onChange={(e) => handleChange(item.id, "grade", e.target.value)}
+											className={inputCls}
+										/>
+									</div>
+									<div className="grid grid-cols-2 gap-3">
+										<Input
+											placeholder="Graduation Year"
+											value={item.period}
+											onChange={(e) => handleChange(item.id, "period", e.target.value)}
+											className={inputCls}
+										/>
+										<Input
+											placeholder="Location"
+											value={item.location}
+											onChange={(e) => handleChange(item.id, "location", e.target.value)}
+											className={inputCls}
+										/>
+									</div>
+								</>
+							)}
+
 
 							{/* Row 3: Area + Location */}
-							<div className="grid grid-cols-2 gap-3">
+							{/* <div className="grid grid-cols-2 gap-3">
 								<Input
 									placeholder="Area of Study"
 									value={item.area}
@@ -112,7 +180,7 @@ export function EducationSectionBuilder() {
 									onChange={(e) => handleChange(item.id, "location", e.target.value)}
 									className={inputCls}
 								/>
-							</div>
+							</div> */}
 
 							{/* Row 4: Website full width */}
 							<Input
@@ -155,16 +223,9 @@ export function EducationSectionBuilder() {
 				<button
 					type="button"
 					onClick={handleAdd}
-					className="
-						mt-2 flex w-full items-center justify-center gap-2
-						rounded-2xl border-2 border-emerald-300 bg-white
-						py-4 text-sm font-semibold text-emerald-500
-						transition-all duration-150
-						hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-600
-						active:scale-[0.99]
-					"
+					className="mt-0 h-auto w-auto rounded-full border border-dashed border-emerald-300 bg-emerald-50/50 px-4 py-1.5 text-sm font-medium text-emerald-500 transition-all hover:border-emerald-400 hover:bg-emerald-50 hover:shadow-sm [&>svg:first-child]:hidden"
 				>
-					<Plus className="h-4 w-4" strokeWidth={2.5} />
+					<Plus className="h-4 w-4" strokeWidth={1.5} />
 					<Trans>Add education</Trans>
 				</button>
 

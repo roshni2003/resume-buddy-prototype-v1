@@ -265,28 +265,28 @@
 @keyframes aiGlow {
   0%,
   100% {
-    opacity: 0.4;
+    opacity: 0.35;
     transform: scale(1);
-    filter: blur(10px);
+    filter: blur(6px);
   }
 
   50% {
-    opacity: 0.9;
-    transform: scale(1.08);
-    filter: blur(14px);
+    opacity: 0.8;
+    transform: scale(1.04);
+    filter: blur(8px);
   }
 }
 
 @keyframes aiGlowRing {
   0%,
   100% {
-    opacity: 0.3;
+    opacity: 0.25;
     transform: scale(1);
   }
 
   50% {
-    opacity: 0.8;
-    transform: scale(1.12);
+    opacity: 0.7;
+    transform: scale(1.06);
   }
 }
 
@@ -296,4 +296,36 @@
 
 .animate-ai-glow-ring {
   animation: aiGlowRing 1.8s ease-in-out infinite;
+}
+
+.ai-blink {
+  animation: subtle-blink 1.5s ease-in-out infinite;
+}
+
+.ai-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes subtle-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
 }

@@ -1,101 +1,627 @@
+/**
+ * ProjectsSectionBuilder — inline (no dialog) redesign
+ * Mirrors the Experience section UX: click a card or "Add" to expand
+ * the form in-place with Zoe tips + AI button.
+ *
+ * Drop-in replacement for the existing ProjectsSectionBuilder file.
+ */
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
-import { useState } from "react";
-import { toast } from "sonner";
+import {
+	CaretDownIcon,
+	CaretUpIcon,
+	CodeIcon,
+	FolderOpenIcon,
+	GlobeIcon,
+	LinkIcon,
+	PlusIcon,
+	SparkleIcon,
+	TagIcon,
+	TrashIcon,
+} from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import type z from "zod";
+
+import { RichInput } from "@/components/input/rich-input";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { SortableList } from "@/components/ui/sortable-list";
-import type { projectItemSchema } from "@/schema/resume/data";
-import { api } from "@/utils/api";
-import { stripHtml } from "@/utils/string";
-import { cn } from "@/utils/style";
+import { AIGenerateButton } from "@/components/ui/ai-generate-button";
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { projectItemSchema } from "@/schema/resume/data";
 import { SectionBase } from "../shared/section-base";
-import { SectionAddItemButton } from "../shared/section-item";
-import { SortableSectionItem } from "../shared/sortable-section-item";
+import { generateId } from "@/utils/string";
+/* ─────────────────────────────────────────────
+   Types
+───────────────────────────────────────────── */
+type FormValues = z.infer<typeof projectItemSchema>;
 
-export function ProjectsSectionBuilder() {
-	const section = useResumeStore((state) => state.resume.data.sections.projects);
-	const updateResumeData = useResumeStore((state) => state.updateResumeData);
+type PanelState =
+	| { mode: "idle" }
+	| { mode: "create" }
+	| { mode: "edit"; id: string };
 
-	const onReorder = (items: z.infer<typeof projectItemSchema>[]) => {
-		updateResumeData((draft) => {
-			draft.sections.projects.items = items;
-		});
-	};
+/* ─────────────────────────────────────────────
+   ZOE TIPS CARD
+───────────────────────────────────────────── */
+function ZoeTipsCard() {
+	return (
+		<div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50 p-5 shadow-sm">
+			<div className="mb-3 flex items-center gap-2">
+				<SparkleIcon weight="fill" className="h-5 w-5 text-violet-500" />
+				<span className="text-xs font-bold uppercase tracking-widest text-violet-700">
+					Zoe Tips
+				</span>
+				<SparkleIcon
+					weight="fill"
+					className="ml-auto h-8 w-8 text-violet-100"
+				/>
+			</div>
+			<ul className="space-y-2 text-sm text-violet-800">
+				{[
+					"Lead with what the project does, not how you built it",
+					"Mention the tech stack concisely (3–5 keywords)",
+					"Highlight impact — users, scale, or problem solved",
+					"Include a live link or GitHub repo if public",
+				].map((tip) => (
+					<li key={tip} className="flex items-start gap-2">
+						<span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-violet-400" />
+						{tip}
+					</li>
+				))}
+			</ul>
+			<p className="mt-4 text-xs italic text-violet-600">
+				Zoe will sharpen your project pitch and highlight the impact. Look for
+				the magic button above!
+			</p>
+		</div>
+	);
+}
 
-	const buildSubtitle = (item: z.infer<typeof projectItemSchema>) => {
-		const parts = [item.period, item.website.label].filter((part) => part && part.trim().length > 0);
-		return parts.length > 0 ? parts.join(" • ") : undefined;
-	};
+/* ─────────────────────────────────────────────
+   INLINE FORM
+───────────────────────────────────────────── */
+interface InlineFormProps {
+	defaultValues: FormValues;
+	onSave: (values: FormValues) => void;
+	onCancel: () => void;
+	isNew?: boolean;
+}
 
-	const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
+function InlineProjectForm({
+	defaultValues,
+	onSave,
+	onCancel,
+	isNew = false,
+}: InlineFormProps) {
+	InlineProjectForm
+	const [isPulsing, setIsPulsing] = useState(true);
 
-	const handleAskZoe = async (id: string) => {
-		setGeneratingIds((prev) => new Set([...prev, id]));
-		try {
-			const item = section.items.find((p) => p.id === id);
-			if (!item) throw new Error("Project item not found");
+	useEffect(() => {
+		const timer = setTimeout(() => setIsPulsing(false), 5000);
+		return () => clearTimeout(timer);
+	}, []);
+	const form = useForm<FormValues>({
+		resolver: zodResolver(projectItemSchema),
+		defaultValues,
+	});
 
-			const response = await api.generateAIContent({
-				resume_id: useResumeStore.getState().resume.id,
-				type: "ProjectsDescription",
-				value: stripHtml(item.name),
+	const projectId = form.getValues("id");
+	const description = useWatch({ control: form.control, name: "description" });
+	const previousDescriptionRef = useRef(description);
+	const aiUpdateCountRef = useRef(0);
+
+	const roundsUsed = useResumeStore(
+		(state) => state.projectAIRoundsUsed?.[projectId] ?? 0
+	);
+	const incrementRoundsUsed = useResumeStore(
+		(state) => state.incrementProjectRounds
+	);
+	const resetRounds = useResumeStore((state) => state.resetProjectRounds);
+	const maxRounds = 2;
+
+	useEffect(() => {
+		if (aiUpdateCountRef.current > 0) {
+			aiUpdateCountRef.current -= 1;
+			previousDescriptionRef.current = description;
+			return;
+		}
+		if (description !== previousDescriptionRef.current) {
+			resetRounds(projectId);
+		}
+		previousDescriptionRef.current = description;
+	}, [description, resetRounds, projectId]);
+
+	const wordCount =
+		typeof description === "string"
+			? description.trim().split(/\s+/).filter(Boolean).length
+			: 0;
+	const charCount =
+		typeof description === "string"
+			? description.replace(/<[^>]*>/g, "").length
+			: 0;
+	const isWordCountValid = wordCount >= 5;
+
+	const handleAIGenerated = (aiText: string) => {
+		if (aiText && aiText.length > 10) {
+			aiUpdateCountRef.current = 2;
+			form.setValue("description", aiText, {
+				shouldDirty: true,
+				shouldValidate: true,
 			});
-
-			const aiDescription = Object.values(response)[0];
-
-			updateResumeData((draft) => {
-				const draftItem = draft.sections.projects.items.find((p) => p.id === id);
-				if (draftItem) draftItem.description = aiDescription;
-			});
-
-			toast.success("AI project description generated!");
-		} catch (error) {
-			console.error("AI generation error:", error);
-			toast.error(error instanceof Error ? error.message : "Failed to generate");
-		} finally {
-			setGeneratingIds((prev) => {
-				const newSet = new Set(prev);
-				newSet.delete(id);
-				return newSet;
-			});
+			incrementRoundsUsed(projectId);
 		}
 	};
 
 	return (
-		<SectionBase type="projects" className={cn("rounded-md border", section.items.length === 0 && "border-dashed")}>
-			<SortableList
-				items={section.items}
-				onReorder={onReorder}
-				keyExtractor={(item) => item.id}
-				renderItem={(item) => (
-					<SortableSectionItem
-						key={item.id}
-						type="projects"
-						item={item}
-						title={item.name}
-						subtitle={buildSubtitle(item)}
-						onAskZoe={() => handleAskZoe(item.id)}
+		<Form {...form}>
+			<form className="space-y-5" onSubmit={form.handleSubmit(onSave)}>
+
+				{/* ── Row 1: Project name ── */}
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FolderOpenIcon className="h-3.5 w-3.5" />
+								<Trans>Project Name</Trans>
+							</FormLabel>
+							<FormControl>
+								<Input
+									{...field}
+									placeholder="My Awesome Project"
+									className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				{/* ── Row 2: Period + Tech stack ── */}
+				<div className="grid gap-4 sm:grid-cols-2">
+					<FormField
+						control={form.control}
+						name="period"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<TagIcon className="h-3.5 w-3.5" />
+									<Trans>Period / Year</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="Jan 2024 – Mar 2024"
+										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
 					/>
-				)}
-			/>
 
-			<SectionAddItemButton type="projects">
-				<Trans>Add a new project</Trans>
-			</SectionAddItemButton>
-
-			{generatingIds.size > 0 && (
-				<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-white p-5 shadow-2xl">
-					<div className="flex items-start gap-4">
-						<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
-							<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
-						</div>
-						<div>
-							<h4 className="mb-1 font-bold text-gray-900">Zoe is working...</h4>
-							<p className="text-gray-600 text-sm">Generating professional descriptions for your projects</p>
-						</div>
-					</div>
+					<FormField
+						control={form.control}
+						name="techStack"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<CodeIcon className="h-3.5 w-3.5" />
+									<Trans>Tech Stack</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="React, Node.js, PostgreSQL"
+										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 				</div>
-			)}
+
+				{/* ── Row 3: Website URL + Label ── */}
+				<div className="grid gap-4 sm:grid-cols-2">
+					<FormField
+						control={form.control}
+						name="website.url"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<GlobeIcon className="h-3.5 w-3.5" />
+									<Trans>Live URL</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="https://myproject.com"
+										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="website.label"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<LinkIcon className="h-3.5 w-3.5" />
+									<Trans>Link Label</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="Live Demo"
+										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+
+				{/* ── Description + AI ── */}
+				{/* ── Description + AI ── */}
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<div className="flex items-end justify-between">
+								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<Trans>Description</Trans>
+								</FormLabel>
+								<div className="relative mb-2 rounded-xl bg-gray-50 p-1">
+									{isPulsing && (
+										<>
+											<div className="absolute -inset-1 rounded-full bg-violet-400/40 blur-md animate-ai-glow" />
+											<div className="absolute -inset-2 rounded-full border border-violet-300/50 animate-ai-glow-ring" />
+										</>
+									)}
+									<AIGenerateButton
+										resumeId={useResumeStore.getState().resume.id}
+										type="projects"
+										data={{
+											name: form.getValues("name"),
+											description,
+										}}
+										onGenerated={handleAIGenerated}
+										roundsUsed={roundsUsed}
+										maxRounds={maxRounds}
+										isWordCountValid={isWordCountValid}
+										disabled={roundsUsed >= maxRounds || !isWordCountValid}
+										className="relative z-10 border border-violet-300 font-bold text-black shadow-lg shadow-violet-500/30 hover:bg-violet-600 hover:text-white"
+									/>
+								</div>
+							</div>
+
+							{/* AI badge */}
+							<div className="flex items-center gap-2">
+								<span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-semibold text-violet-700">
+									<SparkleIcon weight="fill" className="h-3 w-3" />
+									AI Assisted
+								</span>
+								<span className="text-xs text-gray-400">
+									Zoe can sharpen your project pitch
+								</span>
+							</div>
+
+							<FormControl>
+								<RichInput
+									{...field}
+									value={field.value || ""}
+									onChange={field.onChange}
+								/>
+							</FormControl>
+
+							{/* Word / char count */}
+							<p className="flex justify-between text-xs text-gray-400">
+								<span>
+									{wordCount} words · {charCount} chars
+								</span>
+								{!isWordCountValid && field.value && (
+									<span className="text-amber-500">
+										<Trans>Write at least 5 words to enable Ask Zoe</Trans>
+									</span>
+								)}
+							</p>
+
+							{roundsUsed === 1 && (
+								<p className="text-xs text-blue-500">
+									<Trans>You have 1 more AI suggestion left for this text.</Trans>
+								</p>
+							)}
+							{roundsUsed >= maxRounds && (
+								<p className="text-xs font-medium text-red-500">
+									<Trans>
+										✓ You've used both AI suggestions. Edit the text to get new
+										suggestions.
+									</Trans>
+								</p>
+							)}
+
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				{/* ── Tips Card ── */}
+				<ZoeTipsCard />
+
+				{/* ── Actions ── */}
+				<div className="flex justify-end gap-2 pt-1">
+					<Button
+						type="button"
+						variant="ghost"
+						className="rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50"
+						onClick={onCancel}
+					>
+						<Trans>Cancel</Trans>
+					</Button>
+					<Button
+						type="submit"
+						disabled={form.formState.isSubmitting}
+						className="rounded-xl bg-violet-500 text-white hover:bg-violet-600 disabled:opacity-50"
+					>
+						{isNew ? <Trans>Add Project</Trans> : <Trans>Save Changes</Trans>}
+					</Button>
+				</div>
+			</form>
+		</Form>
+	);
+}
+
+/* ─────────────────────────────────────────────
+   PROJECT CARD  (collapsed / expanded)
+───────────────────────────────────────────── */
+interface ProjectCardProps {
+	item: FormValues;
+	isExpanded: boolean;
+	onToggle: () => void;
+	onSave: (values: FormValues) => void;
+	onDelete: () => void;
+}
+
+function ProjectCard({
+	item,
+	isExpanded,
+	onToggle,
+	onSave,
+	onDelete,
+}: ProjectCardProps) {
+	const subtitle = [item.period, item.website?.label]
+		.filter((p) => p && p.trim().length > 0)
+		.join(" · ");
+
+	return (
+		<div
+			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
+				? "border-violet-300 shadow-violet-100 shadow-md"
+				: "border-gray-100 hover:border-gray-200 hover:shadow"
+				}`}
+		>
+			{/* ── Header ── */}
+			<button
+				type="button"
+				onClick={onToggle}
+				className="flex w-full items-center gap-3 px-5 py-4 text-left"
+			>
+				<span
+					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-violet-500" : "bg-gray-100"
+						}`}
+				>
+					<FolderOpenIcon
+						weight="fill"
+						className={`h-5 w-5 ${isExpanded ? "text-white" : "text-gray-400"}`}
+					/>
+				</span>
+
+				<div className="min-w-0 flex-1">
+					<p
+						className={`truncate font-semibold leading-tight ${isExpanded ? "text-violet-800" : "text-gray-800"
+							}`}
+					>
+						{item.name || "New Project"}
+					</p>
+					{subtitle && (
+						<p className="truncate text-sm text-gray-400">{subtitle}</p>
+					)}
+				</div>
+
+				<span className="shrink-0 text-gray-400">
+					{isExpanded ? (
+						<CaretUpIcon className="h-4 w-4" />
+					) : (
+						<CaretDownIcon className="h-4 w-4" />
+					)}
+				</span>
+			</button>
+
+			{/* ── Expanded form ── */}
+			<AnimatePresence initial={false}>
+				{isExpanded && (
+					<motion.div
+						key="form"
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: "auto" }}
+						exit={{ opacity: 0, height: 0 }}
+						transition={{ duration: 0.25, ease: "easeInOut" }}
+						className="overflow-hidden"
+					>
+						<div className="border-t border-gray-100 px-5 pb-6 pt-5">
+							<div className="mb-4 flex justify-end">
+								<button
+									type="button"
+									onClick={onDelete}
+									className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600"
+								>
+									<TrashIcon className="h-3.5 w-3.5" />
+									<Trans>Remove</Trans>
+								</button>
+							</div>
+
+							<InlineProjectForm
+								key={item.id}
+								defaultValues={item}
+								onSave={onSave}
+								onCancel={onToggle}
+								isNew={false}
+							/>
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
+		</div>
+	);
+}
+
+/* ─────────────────────────────────────────────
+   ADD NEW PANEL
+───────────────────────────────────────────── */
+function AddNewPanel({
+	onSave,
+	onCancel,
+}: {
+	onSave: (v: FormValues) => void;
+	onCancel: () => void;
+}) {
+	const newDefaults: FormValues = {
+		id: generateId(),
+		hidden: false,
+		name: "",
+		period: "",
+		techStack: "",
+		description: "",
+		website: { url: "", label: "" },
+	};
+
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: -8 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -8 }}
+			transition={{ duration: 0.2 }}
+			className="rounded-2xl border border-violet-300 bg-gradient-to-b from-white to-violet-50/30 p-5 shadow-md shadow-violet-100"
+		>
+			<div className="mb-4 flex items-center gap-2">
+				<span className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-500 text-white shadow-sm">
+					<PlusIcon weight="bold" className="h-4 w-4" />
+				</span>
+				<p className="font-semibold text-violet-800">
+					<Trans>New Project</Trans>
+				</p>
+			</div>
+
+			<InlineProjectForm
+				defaultValues={newDefaults}
+				onSave={onSave}
+				onCancel={onCancel}
+				isNew
+			/>
+		</motion.div>
+	);
+}
+
+/* ─────────────────────────────────────────────
+   MAIN EXPORT
+───────────────────────────────────────────── */
+export function ProjectsSectionBuilder() {
+	const section = useResumeStore(
+		(state) => state.resume.data.sections.projects
+	);
+	const updateResumeData = useResumeStore((state) => state.updateResumeData);
+
+	const [panel, setPanel] = useState<PanelState>({ mode: "idle" });
+
+	const toggleEdit = (id: string) =>
+		setPanel((prev) =>
+			prev.mode === "edit" && prev.id === id
+				? { mode: "idle" }
+				: { mode: "edit", id }
+		);
+
+	const handleUpdate = (values: FormValues) => {
+		updateResumeData((draft) => {
+			const idx = draft.sections.projects.items.findIndex(
+				(i) => i.id === values.id
+			);
+			if (idx !== -1) draft.sections.projects.items[idx] = values;
+		});
+		setPanel({ mode: "idle" });
+	};
+
+	const handleCreate = (values: FormValues) => {
+		updateResumeData((draft) => {
+			draft.sections.projects.items.push(values);
+		});
+		setPanel({ mode: "idle" });
+	};
+
+	const handleDelete = (id: string) => {
+		updateResumeData((draft) => {
+			draft.sections.projects.items = draft.sections.projects.items.filter(
+				(i) => i.id !== id
+			);
+		});
+		setPanel({ mode: "idle" });
+	};
+
+	return (
+		<SectionBase type="projects">
+			<div className="space-y-3">
+				{/* ── Existing items ── */}
+				{section.items.map((item) => (
+					<ProjectCard
+						key={item.id}
+						item={item}
+						isExpanded={panel.mode === "edit" && panel.id === item.id}
+						onToggle={() => toggleEdit(item.id)}
+						onSave={handleUpdate}
+						onDelete={() => handleDelete(item.id)}
+					/>
+				))}
+
+				{/* ── Add-new panel ── */}
+				<AnimatePresence>
+					{panel.mode === "create" && (
+						<AddNewPanel
+							onSave={handleCreate}
+							onCancel={() => setPanel({ mode: "idle" })}
+						/>
+					)}
+				</AnimatePresence>
+
+				{/* ── Add button ── */}
+				{panel.mode !== "create" && (
+					<button
+						type="button"
+						onClick={() => setPanel({ mode: "create" })}
+						className="group flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-4 text-sm font-medium text-gray-400 transition-all hover:border-violet-300 hover:bg-violet-50 hover:text-violet-600"
+					>
+						<PlusIcon className="h-4 w-4 transition-transform group-hover:scale-125" />
+						<Trans>Add a new project</Trans>
+					</button>
+				)}
+			</div>
 		</SectionBase>
 	);
 }

@@ -315,9 +315,8 @@ export function ResumeBuddyEditor() {
 						return (
 							<div
 								key={sec.id}
-								className={`flex flex-col rounded-2xl border border-gray-100 bg-white shadow-xs transition-all duration-300 ${
-									isSelected ? `${sec.activeBorder} shadow-md` : "hover:border-gray-200 hover:shadow-sm"
-								}`}
+								className={`flex flex-col rounded-2xl border border-gray-100 bg-white shadow-xs transition-all duration-300 ${isSelected ? `${sec.activeBorder} shadow-md` : "hover:border-gray-200 hover:shadow-sm"
+									}`}
 							>
 								{/* Header of Section Card */}
 								<div
@@ -642,6 +641,7 @@ export function ResumeBuddyEditor() {
  * ============================================================================ */
 
 // Summary Inline Form
+// Summary Inline Form - Updated
 function SummaryInlineForm() {
 	const summary = useResumeStore((state) => state.resume.data.summary);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
@@ -658,6 +658,31 @@ function SummaryInlineForm() {
 		});
 	};
 
+	const [aiGenerating, setAiGenerating] = useState(false);
+
+	const handleAskZoeInline = async () => {
+		setAiGenerating(true);
+		const toastId = toast.loading("Zoe is writing summary...");
+
+		try {
+			const resume = useResumeStore.getState().resume;
+			const response = await api.generateAIContent({
+				resume_id: resume.id,
+				type: "Summary",
+				value: stripHtml(`Name: ${resume.data.basics.name}, Headline: ${resume.data.basics.headline}`),
+			});
+
+			const aiDescription = Object.values(response)[0];
+			form.setValue("content", aiDescription as string);
+			onSubmit({ content: aiDescription as string });
+			toast.success("AI summary generated!", { id: toastId });
+		} catch (err) {
+			toast.error("AI generation failed.", { id: toastId });
+		} finally {
+			setAiGenerating(false);
+		}
+	};
+
 	return (
 		<div>
 			<div className="mb-8 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-6 border-l-4 border-amber-500 shadow-sm">
@@ -669,13 +694,37 @@ function SummaryInlineForm() {
 			</div>
 			<FormProvider {...form}>
 				<form onChange={form.handleSubmit(onSubmit)} className="space-y-4">
-					<RichInput
-						value={summary.content}
-						onChange={(val) => {
-							form.setValue("content", val);
-							onSubmit({ content: val });
-						}}
-					/>
+					<div>
+						<div className="mb-2 flex items-center justify-between">
+							<label className="font-semibold text-gray-700 text-xs">Summary Content</label>
+							<button
+								type="button"
+								onClick={handleAskZoeInline}
+								disabled={aiGenerating}
+								className="group relative flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 font-semibold text-amber-600 text-xs transition-all hover:bg-amber-100 hover:shadow-md"
+							>
+								{/* Blinking AI icon */}
+								<div className="relative">
+									<Sparkles className="h-4 w-4 text-amber-500 ai-blink" />
+									{/* Subtle pulse ring */}
+									<div className="absolute inset-0 -m-1 rounded-full border border-amber-400 opacity-0 transition-opacity group-hover:opacity-100 ai-pulse" />
+								</div>
+								<span>Ask Zoe AI</span>
+								{/* Small dot indicator */}
+								<span className="absolute -top-1 -right-1 flex h-2 w-2">
+									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+									<span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500"></span>
+								</span>
+							</button>
+						</div>
+						<RichInput
+							value={form.watch("content")}
+							onChange={(val) => {
+								form.setValue("content", val);
+								onSubmit({ content: val });
+							}}
+						/>
+					</div>
 				</form>
 			</FormProvider>
 		</div>
@@ -1249,10 +1298,20 @@ function ExperienceInlineForm({
 								type="button"
 								onClick={handleAskZoeInline}
 								disabled={aiGenerating}
-								className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 font-semibold text-indigo-600 text-xs hover:bg-indigo-100"
+								className="group relative flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 font-semibold text-indigo-600 text-xs transition-all hover:bg-indigo-100 hover:shadow-md"
 							>
-								<Sparkles className="h-3 w-3" />
-								Ask Zoe AI
+								{/* Blinking AI icon */}
+								<div className="relative">
+									<Sparkles className="h-4 w-4 text-indigo-500 ai-blink" />
+									{/* Subtle pulse ring */}
+									<div className="absolute inset-0 -m-1 rounded-full border border-indigo-400 opacity-0 transition-opacity group-hover:opacity-100 ai-pulse" />
+								</div>
+								<span>Ask Zoe AI</span>
+								{/* Small dot indicator */}
+								<span className="absolute -top-1 -right-1 flex h-2 w-2">
+									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></span>
+									<span className="relative inline-flex h-2 w-2 rounded-full bg-indigo-500"></span>
+								</span>
 							</button>
 						</div>
 						<RichInput value={form.watch("description")} onChange={(val) => form.setValue("description", val)} />
@@ -1335,6 +1394,35 @@ function ProjectsInlineForm({
 		toast.success("Project saved");
 	};
 
+	const [aiGenerating, setAiGenerating] = useState(false);
+
+	const handleAskZoeInline = async () => {
+		const name = form.getValues("name");
+		if (!name) {
+			toast.error("Please enter project name first.");
+			return;
+		}
+
+		setAiGenerating(true);
+		const toastId = toast.loading("Zoe is writing description...");
+
+		try {
+			const response = await api.generateAIContent({
+				resume_id: useResumeStore.getState().resume.id,
+				type: "ProjectDescription",
+				value: stripHtml(`${name}`),
+			});
+
+			const aiDescription = Object.values(response)[0];
+			form.setValue("description", aiDescription as string);
+			toast.success("AI description generated!", { id: toastId });
+		} catch (err) {
+			toast.error("AI generation failed.", { id: toastId });
+		} finally {
+			setAiGenerating(false);
+		}
+	};
+
 	if (!isEditing) {
 		return (
 			<div>
@@ -1404,7 +1492,28 @@ function ProjectsInlineForm({
 					</div>
 
 					<div>
-						<label className="mb-1.5 block font-semibold text-gray-700 text-xs">Description</label>
+						<div className="mb-2 flex items-center justify-between">
+							<label className="font-semibold text-gray-700 text-xs">Description</label>
+							<button
+								type="button"
+								onClick={handleAskZoeInline}
+								disabled={aiGenerating}
+								className="group relative flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 font-semibold text-rose-600 text-xs transition-all hover:bg-rose-100 hover:shadow-md"
+							>
+								{/* Blinking AI icon */}
+								<div className="relative">
+									<Sparkles className="h-4 w-4 text-rose-500 ai-blink" />
+									{/* Subtle pulse ring */}
+									<div className="absolute inset-0 -m-1 rounded-full border border-rose-400 opacity-0 transition-opacity group-hover:opacity-100 ai-pulse" />
+								</div>
+								<span>Ask Zoe AI</span>
+								{/* Small dot indicator */}
+								<span className="absolute -top-1 -right-1 flex h-2 w-2">
+									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
+									<span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
+								</span>
+							</button>
+						</div>
 						<RichInput value={form.watch("description")} onChange={(val) => form.setValue("description", val)} />
 					</div>
 

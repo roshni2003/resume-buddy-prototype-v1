@@ -1,11 +1,12 @@
-import { SparkleIcon } from "@phosphor-icons/react";
+import { SparkleIcon, CheckIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { RichInput } from "@/components/input/rich-input";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { AIGenerateButton } from "@/components/ui/ai-generate-button";
-import { cn } from "@/utils/style";
 import { SectionBase } from "../shared/section-base";
+import { Button } from "@/components/ui/button";
+import { Trans } from "@lingui/react/macro";
 
 export function SummarySectionBuilder() {
 	const summary = useResumeStore((state) => state.resume.data.summary);
@@ -55,9 +56,6 @@ export function SummarySectionBuilder() {
 		if (aiSummary && aiSummary.length > 10) {
 			aiUpdateCountRef.current = 2;
 			form.setValue("content", aiSummary, { shouldDirty: true, shouldValidate: true });
-			updateResumeData((draft) => {
-				draft.summary.content = aiSummary;
-			});
 			incrementRoundsUsed();
 		}
 	};
@@ -66,6 +64,11 @@ export function SummarySectionBuilder() {
 		updateResumeData((draft) => {
 			draft.summary.content = data.content;
 		});
+		form.reset({ content: data.content });
+	};
+
+	const onCancel = () => {
+		form.reset({ content: summary.content ?? "" });
 	};
 
 	const wordCount = content
@@ -80,7 +83,7 @@ export function SummarySectionBuilder() {
 		<SectionBase type="summary">
 			<div className="flex flex-col gap-6 p-5">
 				<FormProvider {...form}>
-					<form onChange={form.handleSubmit(onSubmit)}>
+					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<div className="mb-3 flex items-end justify-between">
 							<label className="font-bold text-gray-500 text-xs uppercase tracking-widest">Professional Summary</label>
 
@@ -131,14 +134,13 @@ export function SummarySectionBuilder() {
 							<RichInput
 								value={content}
 								onChange={(val) => {
-									form.setValue("content", val);
-									onSubmit({ content: val });
+									form.setValue("content", val, { shouldDirty: true });
 								}}
 							/>
 						</div>
 
 						{/* Footer Stats */}
-						<div className="flex flex-col gap-1 font-mono text-gray-500 text-xs sm:flex-row sm:items-center sm:justify-between">
+						<div className="mb-4 flex flex-col gap-1 font-mono text-gray-500 text-xs sm:flex-row sm:items-center sm:justify-between">
 							<div>
 								{wordCount} words &nbsp;·&nbsp; {charCount} chars
 							</div>
@@ -152,6 +154,9 @@ export function SummarySectionBuilder() {
 								)}
 							</div>
 						</div>
+
+						{/* Actions */}
+
 					</form>
 				</FormProvider>
 
@@ -185,6 +190,23 @@ export function SummarySectionBuilder() {
 					<p className="font-serif text-emerald-700 text-sm italic">
 						Zoe will polish tone, tighten verbs, and quantify impact for you. Look for the magic button above!
 					</p>
+				</div>
+				<div className="flex justify-end gap-2">
+					<Button
+						type="button"
+						variant="ghost"
+						className="rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50"
+						onClick={onCancel}
+					>
+						<Trans>Cancel</Trans>
+					</Button>
+					<Button
+						type="submit"
+						disabled={!form.formState.isDirty}
+						className="rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
+					>
+						<Trans>Save Changes</Trans>
+					</Button>
 				</div>
 			</div>
 		</SectionBase>

@@ -12,9 +12,17 @@ export function LanguagesItem({ className, ...item }: LanguagesItemProps) {
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
 	const handleLanguageChange = (value: string) => {
+		const trimmed = value.trim();
+
 		updateResumeData((draft) => {
 			const sectionItem = draft.sections.languages.items.find((i) => i.id === item.id);
-			if (sectionItem) sectionItem.language = value;
+
+			if (!sectionItem) return;
+
+			// Don't save single character values
+			if (trimmed.length > 1) {
+				sectionItem.language = value;
+			}
 		});
 	};
 
