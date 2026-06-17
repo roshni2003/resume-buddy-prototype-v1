@@ -544,7 +544,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							<Button
 								type="button"
 								variant="outline"
-								className="border-border bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+								className="cursor-pointer border-border bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
 								onClick={closeDialog}
 							>
 								<ArrowLeftIcon className="mr-2" />
@@ -553,7 +553,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							<Button
 								type="submit"
 								disabled={!isFormValid}
-								className="bg-emerald-600 text-white transition-colors hover:bg-emerald-500"
+								className="cursor-pointer bg-emerald-600 text-white transition-colors hover:bg-emerald-500"
 							>
 								Continue
 								<ArrowRightIcon className="ml-2" />
@@ -607,7 +607,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 				<Button
 					type="button"
 					variant="outline"
-					className="border-border bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+					className="cursor-pointer border-border bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
 					onClick={() => setCurrentStep(1)}
 				>
 					<ArrowLeftIcon className="mr-2" />

@@ -152,7 +152,7 @@ function MatchToJobRouteComponent() {
 							if (step === "pick_resume") setStep("resume_choice");
 							if (step === "start_fresh") setStep("resume_choice");
 						}}
-						className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
+						className="cursor-pointer inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
 					>
 						<ArrowLeftIcon className="size-4" />
 						<span>Back</span>
@@ -205,14 +205,14 @@ function MatchToJobRouteComponent() {
 						<Button
 							variant="outline"
 							onClick={() => navigate({ to: "/dashboard/resumes" })}
-							className="border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
+							className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
 						>
 							Back
 						</Button>
 						<Button
 							disabled={!isStep1Valid}
 							onClick={() => setStep("resume_choice")}
-							className="bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+							className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							Continue
 						</Button>
@@ -231,7 +231,7 @@ function MatchToJobRouteComponent() {
 					<div className="grid grid-cols-2 gap-4">
 						<button
 							onClick={() => setStep("pick_resume")}
-							className="text-left group flex flex-col p-6 rounded-2xl border border-border/50 bg-muted/40 hover:bg-muted/60 hover:border-emerald-500/50 transition-all duration-300 gap-4"
+							className="cursor-pointer text-left group flex flex-col p-6 rounded-2xl border border-border/50 bg-muted/40 hover:bg-muted/60 hover:border-emerald-500/50 transition-all duration-300 gap-4"
 						>
 							<div className="flex size-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
 								<CheckCircleIcon className="size-5" weight="fill" />
@@ -246,7 +246,7 @@ function MatchToJobRouteComponent() {
 
 						<button
 							onClick={() => setStep("start_fresh")}
-							className="text-left group flex flex-col p-6 rounded-2xl border border-border/50 bg-muted/40 hover:bg-muted/60 hover:border-emerald-500/50 transition-all duration-300 gap-4"
+							className="cursor-pointer text-left group flex flex-col p-6 rounded-2xl border border-border/50 bg-muted/40 hover:bg-muted/60 hover:border-emerald-500/50 transition-all duration-300 gap-4"
 						>
 							<div className="flex size-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
 								<SparkleIcon className="size-5" weight="fill" />
@@ -281,7 +281,7 @@ function MatchToJobRouteComponent() {
 										setSelectedResumeId(r.id);
 										setUploadingFile(null);
 									}}
-									className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+									className={`cursor-pointer w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
 										isSelected
 											? "bg-muted border-emerald-500/50"
 											: "bg-card/60 border-border hover:bg-muted/80"
@@ -302,7 +302,7 @@ function MatchToJobRouteComponent() {
 						{uploadingFile ? (
 							<button
 								onClick={() => setSelectedResumeId("file_upload")}
-								className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+								className={`cursor-pointer w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
 									selectedResumeId === "file_upload"
 										? (fileError ? "bg-rose-500/10 border-rose-500/50" : "bg-muted border-emerald-500/50")
 										: "bg-card/60 border-border hover:bg-muted/80"
@@ -328,7 +328,7 @@ function MatchToJobRouteComponent() {
 											setFileError(null);
 											if (selectedResumeId === "file_upload") setSelectedResumeId(null);
 										}}
-										className="text-foreground0 hover:text-rose-400"
+										className="cursor-pointer text-foreground0 hover:text-rose-400"
 									>
 										<XCircleIcon weight="fill" className="size-5" />
 									</button>
@@ -346,7 +346,7 @@ function MatchToJobRouteComponent() {
 								/>
 								<button 
 									onClick={() => fileInputRef.current?.click()}
-									className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border border-dashed border-border hover:border-emerald-500/50 hover:bg-muted/40 hover:text-emerald-400 transition-colors text-muted-foreground"
+									className="cursor-pointer w-full flex items-center justify-center gap-2 p-4 rounded-xl border border-dashed border-border hover:border-emerald-500/50 hover:bg-muted/40 hover:text-emerald-400 transition-colors text-muted-foreground"
 								>
 									<UploadSimpleIcon className="size-5" />
 									<span className="text-sm font-medium">Upload from your System</span>
@@ -359,14 +359,14 @@ function MatchToJobRouteComponent() {
 						<Button
 							variant="outline"
 							onClick={() => setStep("resume_choice")}
-							className="border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
+							className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
 						>
 							Back
 						</Button>
 						<Button
 							disabled={!selectedResumeId || (selectedResumeId === "file_upload" && !!fileError)}
 							onClick={() => setStep("loading")}
-							className="bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+							className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							Tailor with Zoe
 						</Button>
@@ -458,14 +458,14 @@ function MatchToJobRouteComponent() {
 						<Button
 							variant="outline"
 							onClick={() => setStep("resume_choice")}
-							className="border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground rounded-full px-6"
+							className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground rounded-full px-6"
 						>
 							Back
 						</Button>
 						<Button
 							disabled={!isStartFreshValid}
 							onClick={() => setStep("loading")}
-							className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-full px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+							className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white rounded-full px-6 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							Tailor with Zoe
 						</Button>
@@ -494,7 +494,7 @@ function MatchToJobRouteComponent() {
 					<div className="flex items-center mb-6">
 						<button
 							onClick={() => setStep("paste_job")}
-							className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
+							className="cursor-pointer inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
 						>
 							<ArrowLeftIcon className="size-4" />
 							<span>Back</span>
@@ -607,20 +607,20 @@ function MatchToJobRouteComponent() {
 						<Button
 							variant="outline"
 							onClick={() => navigate({ to: "/dashboard/resumes" })}
-							className="border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
+							className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
 						>
 							<ArrowLeftIcon className="mr-2" /> Back to Builder
 						</Button>
 						<div className="flex gap-3">
 							<Button
 								variant="outline"
-								className="border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
+								className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
 							>
 								Export Score Report
 							</Button>
 							<Button
 								onClick={handleGenerateTailored}
-								className="bg-emerald-600 hover:bg-emerald-500 text-white"
+								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white"
 							>
 								Generate Tailored Resume
 							</Button>

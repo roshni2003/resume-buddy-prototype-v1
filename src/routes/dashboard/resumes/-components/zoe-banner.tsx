@@ -116,7 +116,7 @@ export function ZoeBanner() {
 								step.action(navigate, openDialog);
 							}}
 							className={cn(
-								"flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-xs transition-all duration-300 sm:text-sm",
+								"flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-xs transition-all duration-300 sm:text-sm",
 								isActive
 									? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]"
 									: "border border-emerald-500/30 bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground",

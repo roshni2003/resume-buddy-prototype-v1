@@ -342,7 +342,7 @@ function UploadRouteComponent() {
 									<Link to="/dashboard/resumes">
 										<Button
 											variant="outline"
-											className="border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+											className="cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 										>
 											Cancel
 										</Button>
@@ -350,7 +350,7 @@ function UploadRouteComponent() {
 									<Button
 										onClick={handleUpload}
 										disabled={!file || !!fileError}
-										className="bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
+										className="cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										<CloudArrowUpIcon className="mr-1.5 size-4" />
 										Upload & Parse with Zoe
@@ -524,7 +524,7 @@ function UploadRouteComponent() {
 											setFile(null);
 											setUploadState("idle");
 										}}
-										className="border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+										className="cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 									>
 										Try another file
 									</Button>
@@ -532,7 +532,7 @@ function UploadRouteComponent() {
 									<Button
 										onClick={handleConfirm}
 										disabled={isCreating}
-										className="bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
+										className="cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										{isCreating ? (
 											<>

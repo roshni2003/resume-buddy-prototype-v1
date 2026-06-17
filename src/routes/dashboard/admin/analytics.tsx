@@ -61,7 +61,7 @@ function AnalyticsPage() {
 				<p className="mt-2 font-medium text-muted-foreground">{(error as Error).message}</p>
 				<Button
 					variant="outline"
-					className="mt-6 border-rose-500/20 bg-background text-rose-500 hover:bg-rose-500/10"
+					className="cursor-pointer mt-6 border-rose-500/20 bg-background text-rose-500 hover:bg-rose-500/10"
 					onClick={() => window.location.reload()}
 				>
 					Retry Connection
@@ -111,7 +111,7 @@ function AnalyticsPage() {
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
-					className="group relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-8 shadow-sm transition-all hover:shadow-md"
+					className="cursor-pointer group relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-8 shadow-sm transition-all hover:shadow-md"
 				>
 					<div className="flex items-center justify-between pb-3">
 						<span className="font-black text-[11px] text-emerald-500 uppercase tracking-[0.2em]">Live Database</span>
@@ -213,7 +213,7 @@ function AnalyticsPage() {
 													<Button
 														variant="outline"
 														size="sm"
-														className="h-9 gap-2 rounded-xl border-emerald-500/30 bg-background font-bold text-emerald-500 shadow-sm transition-all hover:bg-emerald-600 hover:text-white active:scale-95"
+														className="cursor-pointer h-9 gap-2 rounded-xl border-emerald-500/30 bg-background font-bold text-emerald-500 shadow-sm transition-all hover:bg-emerald-600 hover:text-white active:scale-95"
 														onClick={() => setSelectedUserId(user.userId)}
 													>
 														<Eye size={16} weight="bold" />
@@ -256,7 +256,7 @@ function AnalyticsPage() {
 						<Button
 							variant="outline"
 							size="sm"
-							className="h-10 rounded-xl border-border bg-background px-5 font-black text-xs uppercase shadow-sm transition-all hover:translate-x-[-2px] hover:bg-muted"
+							className="cursor-pointer h-10 rounded-xl border-border bg-background px-5 font-black text-xs uppercase shadow-sm transition-all hover:translate-x-[-2px] hover:bg-muted"
 							disabled={page <= 1}
 							onClick={() => setPage((p) => p - 1)}
 						>
@@ -265,7 +265,7 @@ function AnalyticsPage() {
 						<Button
 							variant="outline"
 							size="sm"
-							className="h-10 rounded-xl border-border bg-background px-5 font-black text-xs uppercase shadow-sm transition-all hover:translate-x-[2px] hover:bg-muted"
+							className="cursor-pointer h-10 rounded-xl border-border bg-background px-5 font-black text-xs uppercase shadow-sm transition-all hover:translate-x-[2px] hover:bg-muted"
 							disabled={page >= (pagination?.totalPages || 1)}
 							onClick={() => setPage((p) => p + 1)}
 						>
@@ -331,28 +331,28 @@ function AIInvocationsDetail({ userId }: { userId: string | number | null }) {
 			<div className="custom-scrollbar flex-1 space-y-8 overflow-y-auto p-8">
 				{/* Top Hero Stats */}
 				<div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
-					<div className="rounded-3xl border border-border bg-muted/50 p-5 shadow-sm">
+					<div className="cursor-pointer rounded-3xl border border-border bg-muted/50 p-5 shadow-sm hover:shadow-md transition-shadow">
 						<div className="mb-2 flex items-center gap-2">
 							<CheckCircle className="text-emerald-500" size={20} weight="fill" />
 							<span className="font-black text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Success</span>
 						</div>
 						<div className="font-black text-2xl text-foreground">{summary?.successCount}</div>
 					</div>
-					<div className="rounded-3xl border border-rose-500/20 bg-rose-500/10 p-5 shadow-sm">
+					<div className="cursor-pointer rounded-3xl border border-rose-500/20 bg-rose-500/10 p-5 shadow-sm hover:shadow-md transition-shadow">
 						<div className="mb-2 flex items-center gap-2">
 							<XCircle className="text-rose-500" size={20} weight="fill" />
 							<span className="font-black text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Failure</span>
 						</div>
 						<div className="font-black text-2xl text-rose-500">{summary?.failedCalls}</div>
 					</div>
-					<div className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-5 shadow-sm">
+					<div className="cursor-pointer rounded-3xl border border-blue-500/20 bg-blue-500/10 p-5 shadow-sm hover:shadow-md transition-shadow">
 						<div className="mb-2 flex items-center gap-2">
 							<Stack className="text-blue-500" size={20} weight="fill" />
 							<span className="font-black text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Tokens</span>
 						</div>
 						<div className="font-black text-2xl text-blue-500">{summary?.totalTokens?.toLocaleString()}</div>
 					</div>
-					<div className="rounded-3xl border border-amber-500/20 bg-amber-500/10 p-5 shadow-sm">
+					<div className="cursor-pointer rounded-3xl border border-amber-500/20 bg-amber-500/10 p-5 shadow-sm hover:shadow-md transition-shadow">
 						<div className="mb-2 flex items-center gap-2">
 							<Timer className="text-amber-500" size={20} weight="fill" />
 							<span className="font-black text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Avg Time</span>
@@ -391,7 +391,7 @@ function AIInvocationsDetail({ userId }: { userId: string | number | null }) {
 					<Button
 						variant="outline"
 						size="sm"
-						className="h-10 rounded-xl border-border bg-muted/50 px-4 font-black shadow-sm transition-all hover:bg-muted"
+						className="cursor-pointer h-10 rounded-xl border-border bg-muted/50 px-4 font-black shadow-sm transition-all hover:bg-muted"
 						disabled={page <= 1}
 						onClick={() => setPage((p) => p - 1)}
 					>
@@ -400,7 +400,7 @@ function AIInvocationsDetail({ userId }: { userId: string | number | null }) {
 					<Button
 						variant="outline"
 						size="sm"
-						className="h-10 rounded-xl border-border bg-muted/50 px-4 font-black shadow-sm transition-all hover:bg-muted"
+						className="cursor-pointer h-10 rounded-xl border-border bg-muted/50 px-4 font-black shadow-sm transition-all hover:bg-muted"
 						disabled={page >= (pagination?.totalPages || 1)}
 						onClick={() => setPage((p) => p + 1)}
 					>

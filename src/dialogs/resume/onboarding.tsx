@@ -40,7 +40,7 @@ export function OnboardingDialog() {
 				<button
 					type="button"
 					onClick={handleScratch}
-					className="group flex flex-col items-center justify-between rounded-xl border border-border bg-muted/30 p-5 text-center shadow-sm transition-all duration-300 hover:border-emerald-500/50 hover:bg-muted/70"
+					className="group flex cursor-pointer flex-col items-center justify-between rounded-xl border border-border bg-muted/30 p-5 text-center shadow-sm transition-all duration-300 hover:border-emerald-500/50 hover:bg-muted/70"
 				>
 					<div className="flex size-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 transition-transform duration-300 group-hover:scale-110">
 						<MagicWandIcon className="size-6" weight="regular" />
@@ -59,7 +59,7 @@ export function OnboardingDialog() {
 				<button
 					type="button"
 					onClick={handleUpload}
-					className="group flex flex-col items-center justify-between rounded-xl border border-border bg-muted/30 p-5 text-center shadow-sm transition-all duration-300 hover:border-blue-500/50 hover:bg-muted/70"
+					className="group flex cursor-pointer flex-col items-center justify-between rounded-xl border border-border bg-muted/30 p-5 text-center shadow-sm transition-all duration-300 hover:border-blue-500/50 hover:bg-muted/70"
 				>
 					<div className="flex size-12 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110">
 						<UploadSimpleIcon className="size-6" weight="regular" />
@@ -81,7 +81,7 @@ export function OnboardingDialog() {
 						closeDialog();
 						navigate({ to: "/dashboard/resumes/match" });
 					}}
-					className="group flex flex-col items-center justify-between rounded-xl border border-border bg-muted/30 p-5 text-center shadow-sm transition-all duration-300 hover:border-purple-500/50 hover:bg-muted/70"
+					className="group flex cursor-pointer flex-col items-center justify-between rounded-xl border border-border bg-muted/30 p-5 text-center shadow-sm transition-all duration-300 hover:border-purple-500/50 hover:bg-muted/70"
 				>
 					<div className="flex size-12 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20 transition-transform duration-300 group-hover:scale-110">
 						<SuitcaseIcon className="size-6" weight="regular" />

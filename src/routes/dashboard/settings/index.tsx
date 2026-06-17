@@ -21,7 +21,7 @@ function SettingsRouteComponent() {
 					<div className="flex gap-4">
 						<button
 							onClick={() => setColorMode("light")}
-							className={`flex flex-1 items-center gap-4 rounded-xl border p-4 transition-all ${
+							className={`cursor-pointer flex flex-1 items-center gap-4 rounded-xl border p-4 transition-all ${
 								colorMode === "light"
 									? "border-emerald-500 bg-emerald-500/10"
 									: "border-border bg-muted/40 hover:bg-muted"
@@ -36,7 +36,7 @@ function SettingsRouteComponent() {
 
 						<button
 							onClick={() => setColorMode("dark")}
-							className={`flex flex-1 items-center gap-4 rounded-xl border p-4 transition-all ${
+							className={`cursor-pointer flex flex-1 items-center gap-4 rounded-xl border p-4 transition-all ${
 								colorMode === "dark"
 									? "border-emerald-500 bg-emerald-500/10"
 									: "border-border bg-muted/40 hover:bg-muted"
@@ -63,7 +63,7 @@ function SettingsRouteComponent() {
 						<button
 							disabled={colorMode === "light"}
 							onClick={() => setBackgroundTheme("navy")}
-							className={`disabled:cursor-not-allowed overflow-hidden rounded-xl border text-left transition-all ${
+							className={`cursor-pointer disabled:cursor-not-allowed overflow-hidden rounded-xl border text-left transition-all ${
 								backgroundTheme === "navy"
 									? "border-emerald-500 ring-1 ring-emerald-500"
 									: "border-border hover:border-foreground/20"
@@ -76,7 +76,7 @@ function SettingsRouteComponent() {
 						<button
 							disabled={colorMode === "light"}
 							onClick={() => setBackgroundTheme("purple")}
-							className={`disabled:cursor-not-allowed overflow-hidden rounded-xl border text-left transition-all ${
+							className={`cursor-pointer disabled:cursor-not-allowed overflow-hidden rounded-xl border text-left transition-all ${
 								backgroundTheme === "purple"
 									? "border-emerald-500 ring-1 ring-emerald-500"
 									: "border-border hover:border-foreground/20"
@@ -89,7 +89,7 @@ function SettingsRouteComponent() {
 						<button
 							disabled={colorMode === "light"}
 							onClick={() => setBackgroundTheme("forest")}
-							className={`disabled:cursor-not-allowed overflow-hidden rounded-xl border text-left transition-all ${
+							className={`cursor-pointer disabled:cursor-not-allowed overflow-hidden rounded-xl border text-left transition-all ${
 								backgroundTheme === "forest"
 									? "border-emerald-500 ring-1 ring-emerald-500"
 									: "border-border hover:border-foreground/20"
@@ -109,7 +109,7 @@ function SettingsRouteComponent() {
 							<button
 								key={density}
 								onClick={() => setUIDensity(density)}
-								className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all capitalize ${
+								className={`cursor-pointer flex-1 rounded-lg py-2.5 text-sm font-medium transition-all capitalize ${
 									uiDensity === density
 										? "bg-emerald-500 text-white shadow-sm"
 										: "text-muted-foreground hover:text-foreground"
