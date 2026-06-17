@@ -427,31 +427,45 @@ export function BuilderTopTray() {
 					</Button>
 				)}
 
-				{/* Consolidated Download button */}
+				{/* Download Dropdown */}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
 							size="sm"
 							variant="default"
 							disabled={isPrinting}
-							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-2 text-white hover:bg-emerald-700 sm:h-9 sm:w-auto sm:gap-2 sm:px-3"
+							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-3 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 sm:h-9 sm:w-auto sm:gap-2 sm:px-4 transition-all"
 							aria-label="Download"
 						>
-							{isPrinting ? <CircleNotchIcon className={cn("animate-spin")} /> : <DownloadSimpleIcon />}
-							<span className="hidden lg:inline">
+							{isPrinting ? (
+								<CircleNotchIcon className="size-4 animate-spin" />
+							) : (
+								<DownloadSimpleIcon className="size-4" />
+							)}
+							<span className="font-medium">
 								<Trans>Download</Trans>
 							</span>
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="min-w-35">
-						<DropdownMenuItem onClick={onDownloadPDF} disabled={isPrinting}>
+					<DropdownMenuContent
+						align="end"
+						className="min-w-[160px] bg-popover text-foreground border-border"
+					>
+						<DropdownMenuItem
+							onClick={onDownloadPDF}
+							disabled={isPrinting}
+							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
+						>
 							<FilePdfIcon className="size-4 text-red-500" />
-							<Trans>Download PDF</Trans>
+							<span className="font-medium">Download PDF</span>
 						</DropdownMenuItem>
-
-						<DropdownMenuItem onClick={onDownloadDocx}>
-							<MicrosoftWordLogoIcon className="size-4 text-blue-600" />
-							<Trans>Download Word</Trans>
+						<DropdownMenuItem
+							onClick={onDownloadDocx}
+							disabled={isPrinting}
+							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
+						>
+							<MicrosoftWordLogoIcon className="size-4 text-blue-500" />
+							<span className="font-medium">Download Word</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

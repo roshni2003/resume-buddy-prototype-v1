@@ -344,51 +344,21 @@ function InlineExperienceForm({
 					)}
 				/>
 
-				{/* ── Description + AI ── */}
-				{/* ── Description + AI ── */}
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<div className="flex items-end justify-between">
-								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-									<Trans>Description</Trans>
-								</FormLabel>
-								<div className="relative mb-2 rounded-xl bg-gray-50 p-1">
-									{isPulsing && (
-										<>
-											<div className="absolute -inset-1 rounded-full bg-indigo-400/40 blur-md animate-ai-glow" />
-											<div className="absolute -inset-2 rounded-full border border-indigo-300/50 animate-ai-glow-ring" />
-										</>
-									)}
-									<AIGenerateButton
-										resumeId={useResumeStore.getState().resume.id}
-										type="experience"
-										data={{
-											title: form.getValues("title"),
-											company: form.getValues("company"),
-											description: field.value,
-										}}
-										onGenerated={handleAIGenerated}
-										roundsUsed={roundsUsed}
-										maxRounds={maxRounds}
-										isWordCountValid={isWordCountValid}
-										disabled={roundsUsed >= maxRounds || !isWordCountValid}
-										className="relative z-10 border border-indigo-300 font-bold text-black shadow-lg shadow-indigo-500/30 hover:bg-indigo-600 hover:text-white"
-									/>
-								</div>
-							</div>
+				{/* Add Button */}
+				<SectionAddItemButton type="experience">
+					<Trans>Add a new experience</Trans>
+				</SectionAddItemButton>
 
-							{/* AI badge */}
-							<div className="flex items-center gap-2">
-								<span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">
-									<SparkleIcon weight="fill" className="h-3 w-3" />
-									AI Assisted
-								</span>
-								<span className="text-xs text-gray-400">
-									Zoe can improve your experience description
-								</span>
+				{/* AI Generation Indicator */}
+				{generatingIds.size > 0 && (
+					<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
+						<div className="flex items-start gap-4">
+							<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
+								<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
+							</div>
+							<div>
+								<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>
+								<p className="text-muted-foreground text-sm">Generating professional descriptions for your experience</p>
 							</div>
 
 							<FormControl>

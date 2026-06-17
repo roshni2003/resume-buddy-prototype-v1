@@ -1,22 +1,41 @@
 import { t } from "@lingui/macro";
+import { authClient } from "@/integrations/auth/client";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { SortAscendingIcon, TagIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import z from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
 import { MultipleCombobox } from "@/components/ui/multiple-combobox";
-import { Separator } from "@/components/ui/separator";
 import { useDialogStore } from "@/dialogs/store";
-import { api } from "@/utils/api";
+import { api, safeParseDate } from "@/utils/api";
 import { getAuthToken, isValidToken } from "@/utils/auth-token";
 import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
 import { GridView } from "./-components/grid-view";
+import { ZoeBanner } from "./-components/zoe-banner";
+
+function AnimatedNumber({ value }: { value: number }) {
+	const [count, setCount] = useState(0);
+	useEffect(() => {
+		let startTime: number | null = null;
+		const duration = 1000;
+		const step = (timestamp: number) => {
+			if (!startTime) startTime = timestamp;
+			const progress = Math.min((timestamp - startTime) / duration, 1);
+			setCount(Math.floor(progress * value));
+			if (progress < 1) {
+				window.requestAnimationFrame(step);
+			}
+		};
+		window.requestAnimationFrame(step);
+	}, [value]);
+	return <span>{count}</span>;
+}
 
 type SortOption = "lastUpdatedAt" | "createdAt" | "name";
 
@@ -39,18 +58,22 @@ function RouteComponent() {
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { openDialog } = useDialogStore();
 
-	// Track page view immediately
 	// Defensive: if auth redirect hasn't happened yet, don't fire queries.
 	// The /dashboard parent route is responsible for redirecting to Zuvy when unauthenticated.
 	const isAuthed = useMemo(() => isValidToken(getAuthToken()), []);
+	const queryClient = useQueryClient();
 
-	// Invalidate statistics when component mounts to ensure fresh data
 	useEffect(() => {
 		mixpanelService.track("Page View", {
 			page: "resumes",
 			timestamp: new Date().toISOString(),
 		});
-	}, []);
+		
+		// Invalidate queries when returning to dashboard to ensure we fetch the latest changes
+		// from the builder (like updated timestamp and sort order)
+		queryClient.invalidateQueries({ queryKey: ["resumes"] });
+		queryClient.invalidateQueries({ queryKey: ["statistics"] });
+	}, [queryClient]);
 
 	const { data: resumes } = useQuery({
 		queryKey: ["resumes", { tags, sort }],
@@ -64,7 +87,7 @@ function RouteComponent() {
 		enabled: isAuthed,
 	});
 
-	// Track User Resumes Count (Metric #2)
+	// Track User Resumes Count
 	useEffect(() => {
 		if (resumes) {
 			mixpanelService.track("User Resumes Count", {
@@ -74,7 +97,7 @@ function RouteComponent() {
 		}
 	}, [resumes]);
 
-	// Track Users Who Created Resumes (Metric #1)
+	// Track Users Who Created Resumes
 	useEffect(() => {
 		if (resumes && resumes.length > 0) {
 			mixpanelService.track("Resume Created", {
@@ -84,7 +107,7 @@ function RouteComponent() {
 		}
 	}, [resumes]);
 
-	// Track resume data loaded with all metrics
+	// Track resume data loaded
 	useEffect(() => {
 		if (resumes && statistics) {
 			mixpanelService.track("Resume Data Loaded", {
@@ -114,7 +137,7 @@ function RouteComponent() {
 
 	useEffect(() => {
 		if (resumes && resumes.length === 0) {
-			openDialog("resume.create", undefined);
+			openDialog("resume.onboarding", undefined);
 		}
 	}, [resumes, openDialog]);
 
@@ -133,9 +156,12 @@ function RouteComponent() {
 
 	const lastUpdateText = useMemo(() => {
 		if (!statistics?.lastUpdated) return "Never";
+		const last = safeParseDate(statistics.lastUpdated);
+		
+		if (isNaN(last.getTime())) return "Never";
 		const now = new Date();
-		const last = new Date(statistics.lastUpdated);
 		const diff = now.getTime() - last.getTime();
+		if (diff < 0) return "Just now";
 		const minutes = Math.floor(diff / 60000);
 		const hours = Math.floor(diff / 3600000);
 		const days = Math.floor(diff / 86400000);
@@ -146,158 +172,130 @@ function RouteComponent() {
 		return `${days} day${days > 1 ? "s" : ""} ago`;
 	}, [statistics]);
 
-	const handleSortChange = (value: string | null, _option: unknown | null) => {
-		const v = value ?? "lastUpdatedAt";
-		mixpanelService.track("Sort Changed", {
-			sort_by: v,
-			current_filter_count: tags.length,
-		});
-		navigate({ search: { tags, sort: v as SortOption } });
-	};
+	const { data: session, isPending } = authClient.useSession();
+	const user = session?.user as any;
+
+	const tokenName = useMemo(() => {
+		try {
+			const token = typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("token") || localStorage.getItem("authToken")) : null;
+			if (!token) return "";
+			const payload = JSON.parse(decodeURIComponent(escape(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")))));
+			return payload.name || payload.given_name || payload.preferred_username || payload.email?.split("@")[0] || "";
+		} catch {
+			return "";
+		}
+	}, []);
+
+	// Try every field that might contain a display name
+	const displayName = user?.name || user?.displayName || user?.username || user?.email?.split("@")[0] || tokenName;
+	const firstName = displayName?.split(" ")[0] || (isPending ? "" : "");
 
 	const handleFilterChange = (value: string[]) => {
 		mixpanelService.track("Filter Applied", {
 			tags_selected: value.length,
-			tags_count: value.length,
 			current_sort: sort,
 		});
 		navigate({ search: { tags: value, sort } });
 	};
+
 	return (
-		<div className="space-y-6">
-			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
-						<div>
-							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
-								<Trans>Total Resumes</Trans>
-							</p>
-							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalResumes ?? 0}</p>
-						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
-							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-								/>
-							</svg>
-						</div>
+		<div className="space-y-6 sm:space-y-8">
+			{/* Welcome Banner */}
+			<div className="flex flex-col gap-1.5 sm:gap-2">
+				<h1 className="font-bold text-2xl text-foreground sm:text-3xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+					Welcome back{firstName ? `, ${firstName}` : ""} <span className="inline-block origin-bottom-right hover:animate-pulse text-yellow-400">✨</span>
+				</h1>
+				<p className="text-muted-foreground text-sm sm:text-base">
+					Pick up where you left off or start something new with Zoe.
+				</p>
+			</div>
+
+			{/* Zoe Action Banner */}
+			<ZoeBanner />
+
+			{/* Stats Grid */}
+			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+				{/* Total Resumes */}
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
+						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+						</svg>
+					</div>
+					<div className="flex flex-col">
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Total Resumes</Trans></p>
+						<p className="text-lg font-bold text-emerald-500"><AnimatedNumber value={statistics?.totalResumes ?? 0} /></p>
 					</div>
 				</div>
 
 				{/* Last Update */}
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
-						<div>
-							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
-								<Trans>Last Update</Trans>
-							</p>
-							<p className="font-semibold text-emerald-600 text-sm sm:text-base">{lastUpdateText}</p>
-						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
-							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
-						</div>
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
+						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+					</div>
+					<div className="flex flex-col">
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Last Update</Trans></p>
+						<p className="text-lg font-bold text-emerald-500">{lastUpdateText}</p>
 					</div>
 				</div>
 
 				{/* Total Downloads */}
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
-						<div>
-							<p className="mb-1 text-gray-600 text-xs sm:text-sm">
-								<Trans>Total Downloads</Trans>
-							</p>
-							<p className="mb-2 text-gray-500 text-xs">
-								<Trans>This month</Trans>
-							</p>
-							<p className="font-bold text-emerald-600 text-sm sm:text-base">{statistics?.totalDownloads ?? 0}</p>
-						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-50">
-							<svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-								/>
-							</svg>
-						</div>
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
+						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+						</svg>
+					</div>
+					<div className="flex flex-col">
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Total Downloads</Trans></p>
+						<p className="text-lg font-bold text-emerald-500"><AnimatedNumber value={statistics?.totalDownloads ?? 0} /></p>
 					</div>
 				</div>
 
 				{/* Total Submissions */}
-				<div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-					<div className="mb-3 flex items-start justify-between">
-						<div>
-							<p className="mb-2 text-gray-600 text-xs sm:text-sm">
-								<Trans>Total Submissions</Trans>
-							</p>
-							<p className="font-semibold text-amber-600 text-sm sm:text-base">
-								<Trans>Coming Soon!</Trans>
-							</p>
-						</div>
-						<div className="flex size-10 items-center justify-center rounded-lg bg-gray-200">
-							<svg className="size-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M4 6h16M4 10h16M4 14h16M4 18h16"
-								/>
-							</svg>
-						</div>
+				<div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4 transition-all hover:bg-accent backdrop-blur-sm">
+					<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
+						<svg className="size-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+						</svg>
+					</div>
+					<div className="flex flex-col">
+						<p className="text-xs font-medium text-muted-foreground"><Trans>Total Submissions</Trans></p>
+						<p className="text-sm font-semibold text-emerald-500 mt-1"><Trans>Coming Soon!</Trans></p>
 					</div>
 				</div>
 			</div>
 
-			<Separator />
+			<div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+				<h2 className="text-xl font-bold text-foreground">My Resumes</h2>
+				<div className="flex items-center gap-3">
+					<div className="flex items-center gap-x-2">
+						<Combobox
+							value={sort}
+							hideSearch
+							options={sortOptions}
+							onValueChange={(value) => {
+								if (!value) return;
+								mixpanelService.track("Sort Changed", { sort_by: value });
+								navigate({ search: { tags, sort: value as SortOption } });
+							}}
+							buttonProps={{
+								title: t`Sort by`,
+								variant: "ghost",
+								className: "text-muted-foreground hover:text-foreground hover:bg-accent",
+								children: (_, option) => (
+									<>
+										<SortAscendingIcon />
+										<span className="hidden sm:inline">{option?.label}</span>
+									</>
+								),
+							}}
+						/>
 
-			<div className="flex items-center gap-x-4">
-				<Combobox
-					value={sort}
-					options={sortOptions}
-					onValueChange={handleSortChange} // Use only this one
-					buttonProps={{
-						title: t`Sort by`,
-						variant: "ghost",
-						children: (_, option) => (
-							<>
-								<SortAscendingIcon />
-								{option?.label}
-							</>
-						),
-					}}
-				/>
-
-				<MultipleCombobox
-					value={tags}
-					options={tagOptions}
-					onValueChange={handleFilterChange} // Use only this one
-					buttonProps={{
-						variant: "ghost",
-						title: t`Filter by`,
-						className: cn({ hidden: tagOptions.length === 0 }),
-						children: (_, options) => (
-							<>
-								<TagIcon />
-								{options.map((option) => (
-									<Badge key={option.value} variant="outline">
-										{option.label}
-									</Badge>
-								))}
-							</>
-						),
-					}}
-				/>
+					</div>
+				</div>
 			</div>
 
 			<GridView resumes={resumes ?? []} />

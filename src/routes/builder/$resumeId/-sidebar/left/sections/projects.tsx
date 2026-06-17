@@ -550,78 +550,19 @@ export function ProjectsSectionBuilder() {
 	);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
-	const [panel, setPanel] = useState<PanelState>({ mode: "idle" });
-
-	const toggleEdit = (id: string) =>
-		setPanel((prev) =>
-			prev.mode === "edit" && prev.id === id
-				? { mode: "idle" }
-				: { mode: "edit", id }
-		);
-
-	const handleUpdate = (values: FormValues) => {
-		updateResumeData((draft) => {
-			const idx = draft.sections.projects.items.findIndex(
-				(i) => i.id === values.id
-			);
-			if (idx !== -1) draft.sections.projects.items[idx] = values;
-		});
-		setPanel({ mode: "idle" });
-	};
-
-	const handleCreate = (values: FormValues) => {
-		updateResumeData((draft) => {
-			draft.sections.projects.items.push(values);
-		});
-		setPanel({ mode: "idle" });
-	};
-
-	const handleDelete = (id: string) => {
-		updateResumeData((draft) => {
-			draft.sections.projects.items = draft.sections.projects.items.filter(
-				(i) => i.id !== id
-			);
-		});
-		setPanel({ mode: "idle" });
-	};
-
-	return (
-		<SectionBase type="projects">
-			<div className="space-y-3">
-				{/* ── Existing items ── */}
-				{section.items.map((item) => (
-					<ProjectCard
-						key={item.id}
-						item={item}
-						isExpanded={panel.mode === "edit" && panel.id === item.id}
-						onToggle={() => toggleEdit(item.id)}
-						onSave={handleUpdate}
-						onDelete={() => handleDelete(item.id)}
-					/>
-				))}
-
-				{/* ── Add-new panel ── */}
-				<AnimatePresence>
-					{panel.mode === "create" && (
-						<AddNewPanel
-							onSave={handleCreate}
-							onCancel={() => setPanel({ mode: "idle" })}
-						/>
-					)}
-				</AnimatePresence>
-
-				{/* ── Add button ── */}
-				{panel.mode !== "create" && (
-					<button
-						type="button"
-						onClick={() => setPanel({ mode: "create" })}
-						className="group flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-4 text-sm font-medium text-gray-400 transition-all hover:border-violet-300 hover:bg-violet-50 hover:text-violet-600"
-					>
-						<PlusIcon className="h-4 w-4 transition-transform group-hover:scale-125" />
-						<Trans>Add a new project</Trans>
-					</button>
-				)}
-			</div>
+			{generatingIds.size > 0 && (
+				<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
+					<div className="flex items-start gap-4">
+						<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
+							<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
+						</div>
+						<div>
+							<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>
+							<p className="text-muted-foreground text-sm">Generating professional descriptions for your projects</p>
+						</div>
+					</div>
+				</div>
+			)}
 		</SectionBase>
 	);
 }

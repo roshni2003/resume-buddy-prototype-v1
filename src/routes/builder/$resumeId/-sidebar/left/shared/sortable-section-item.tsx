@@ -124,9 +124,9 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 	const colors = colorMap[type as string] || colorMap.custom;
 
 	return (
-		<SortableItem id={item.id} asHandle className="group relative border-b last:border-b-0">
-			<div className={cn("ml-4 flex h-18 items-center border-l-2 bg-white", colors.border)}>
-				<div className="flex shrink-0 items-center px-2 text-gray-400 opacity-70 transition-opacity hover:text-gray-600 group-hover:opacity-100">
+		<SortableItem id={item.id} asHandle className="group relative border-b border-border last:border-b-0">
+			<div className="flex h-18 items-center bg-card transition-colors">
+				<div className="flex shrink-0 items-center px-3 text-muted-foreground opacity-70 transition-opacity group-hover:opacity-100">
 					<DotsSixVerticalIcon size={20} />
 				</div>
 
@@ -144,7 +144,7 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<button className="flex h-full cursor-context-menu items-center px-3 text-gray-400 opacity-70 transition-[background-color,opacity] hover:text-gray-600 focus:outline-none focus-visible:ring-1 group-hover:opacity-100">
+						<button className="flex h-full cursor-context-menu items-center px-3 text-muted-foreground opacity-70 transition-[background-color,opacity] hover:bg-secondary/40 focus:outline-none focus-visible:ring-1 group-hover:opacity-100">
 							<DotsThreeVerticalIcon size={20} />
 						</button>
 					</DropdownMenuTrigger>

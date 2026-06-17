@@ -51,8 +51,7 @@ function RouteComponent() {
 
 	return (
 		<div
-			className="relative h-full w-full overflow-x-auto overflow-y-auto bg-gray-100"
-			style={{ backgroundColor: "#f0f0f0" }}
+			className="relative h-full w-full overflow-x-auto overflow-y-auto bg-muted/30"
 		>
 			{/* Outer flex container: centres the wrapper horizontally */}
 			<div

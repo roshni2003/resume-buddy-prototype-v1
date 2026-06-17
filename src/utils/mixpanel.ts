@@ -1,5 +1,3 @@
-import mixpanel from "mixpanel-browser";
-
 const MIXPANEL_TOKEN = "071926001d0ae550dfb32c46e1c9cfbd";
 
 // Initialize mixpanel

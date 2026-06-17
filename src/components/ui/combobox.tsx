@@ -20,6 +20,7 @@ type ComboboxProps<TValue extends string | number = string> = Omit<
 > & {
 	disabled?: boolean;
 	clearable?: boolean;
+	hideSearch?: boolean;
 	options: ReadonlyArray<ComboboxOption<TValue>>;
 	value?: TValue | null;
 	defaultValue?: TValue | null;
@@ -35,6 +36,7 @@ type ComboboxProps<TValue extends string | number = string> = Omit<
 function Combobox<TValue extends string | number = string>({
 	disabled = false,
 	clearable = true,
+	hideSearch = false,
 	options,
 	value,
 	defaultValue = null,
@@ -119,13 +121,17 @@ function Combobox<TValue extends string | number = string>({
 				align="start"
 				aria-disabled={disabled}
 				tabIndex={disabled ? -1 : undefined}
-				className={cn("min-w-[200px] p-0", className, disabled && "pointer-events-none select-none opacity-60")}
+				className={cn(
+					"min-w-[200px] p-0 border border-border bg-popover/95 backdrop-blur-md shadow-xl",
+					className,
+					disabled && "pointer-events-none select-none opacity-60"
+				)}
 				{...props}
 			>
-				<Command>
-					<CommandInput placeholder={searchPlaceholder} disabled={disabled} />
+				<Command className="bg-transparent">
+					{!hideSearch && <CommandInput placeholder={searchPlaceholder} disabled={disabled} className="text-foreground placeholder:text-muted-foreground border-b border-border" />}
 					<CommandList>
-						<CommandEmpty>{emptyMessage}</CommandEmpty>
+						<CommandEmpty className="text-muted-foreground">{emptyMessage}</CommandEmpty>
 						<CommandGroup>
 							{options.map((option) => {
 								const isSelected = selectedValue === option.value;
@@ -139,11 +145,14 @@ function Combobox<TValue extends string | number = string>({
 										disabled={isDisabled}
 										onSelect={isDisabled ? undefined : onSelect}
 										aria-disabled={isDisabled}
-										className={cn(isDisabled && "pointer-events-none opacity-60")}
+										className={cn(
+											"text-foreground hover:bg-accent hover:text-accent-foreground aria-selected:bg-emerald-500/10 aria-selected:text-emerald-500",
+											isDisabled && "pointer-events-none opacity-60"
+										)}
 									>
 										<CheckIcon
 											aria-hidden
-											className={cn("size-4 shrink-0 transition-opacity", isSelected ? "opacity-100" : "opacity-0")}
+											className={cn("size-4 shrink-0 transition-opacity text-emerald-400", isSelected ? "opacity-100" : "opacity-0")}
 										/>
 										<span className={cn("truncate", isDisabled && "opacity-60")}>{option.label}</span>
 									</CommandItem>
