@@ -158,9 +158,7 @@ export function AIGenerateButton({
 	const getButtonText = () => {
 		if (isLoading) return t`Generating...`;
 
-		if (hasReachedLimit) return t`Ask Zoe (Used)`;
-
-		return t`Ask Zoe (${roundsRemaining} ${roundsRemaining === 1 ? "round" : "rounds"} remaining)`;
+		return t`Ask Zoe`;
 	};
 
 	const isDisabled = disabled || isLoading || !isWordCountValid || hasReachedLimit;

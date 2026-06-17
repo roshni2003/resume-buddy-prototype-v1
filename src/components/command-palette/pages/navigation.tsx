@@ -1,7 +1,7 @@
 import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react";
+import { HouseSimple, ReadCvLogo, UserCircle, Wrench } from "@phosphor-icons/react";
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
-import { HouseSimple, ReadCvLogo, Wrench, UserCircle } from "@phosphor-icons/react";
 
 import { CommandItem } from "@/components/ui/command";
 import { useCommandPaletteStore } from "../store";

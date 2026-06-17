@@ -1,1 +1,52 @@
-import{o as e,t}from"./jsx-runtime-D7jARjhZ.js";import{t as n}from"./react-BZSX5Bs9.js";import{D as r,Z as i}from"./preload-helper-DwC0sqXt.js";import"./string-_Z1c2EAS.js";import"./with-selector-DTFISeXP.js";import{t as a}from"./useMutation-CUlWnMMx.js";import"./rich-input-BFCfY3FI.js";import"./section-BpLUrMt_.js";import{t as o}from"./DownloadSimple.es-BbsaHSey.js";import{t as s}from"./preview-eoaOyFC-.js";import"./resume-Cd2sSNAf.js";import{t as c}from"./spinner-BNUJLa4B.js";import{n as l}from"./input-DIek8tFf.js";import"./get-strict-context-DJn2x5wH.js";import"./alert-dialog-B7DDo-NI.js";import{t as u}from"./api-BDc_pfcq.js";import"./locale-xmC6h3Uu.js";import{t as d}from"./_slug-BoM2Pelm.js";import"./dist-Dj3RpNtB.js";import{t as f}from"./file-Ccm957YT.js";var p=e(n()),m=e(t());function h(){let{resume:e}=d.useLoaderData(),{mutateAsync:t,isPending:n}=a({mutationFn:e=>u.exportResume(e.id,e.format)}),h=(0,p.useCallback)(async()=>{if(!e)return;let{url:n}=await t({id:e.id,format:`pdf`});f(n,`resume-${e.name}.pdf`)},[e,t]);return(0,m.jsxs)(m.Fragment,{children:[(0,m.jsx)(`div`,{className:r(`mx-auto max-w-[210mm]`,`print:m-0 print:block print:max-w-full print:px-0`,`md:my-4 md:px-4`),children:(0,m.jsx)(s,{pageClassName:`print:w-full! w-full max-w-full`})}),(0,m.jsxs)(l,{size:`lg`,variant:`secondary`,disabled:n,className:`fixed end-4 bottom-4 z-50 hidden rounded-full px-4 md:inline-flex print:hidden`,onClick:h,children:[n?(0,m.jsx)(c,{}):(0,m.jsx)(o,{}),n?(0,m.jsx)(i,{id:`cCfxH1`}):(0,m.jsx)(i,{id:`mzI/c+`})]})]})}export{h as component};
+import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
+import { Z as i, D as r } from "./preload-helper-DwC0sqXt.js";
+import { t as n } from "./react-BZSX5Bs9.js";
+import "./string-_Z1c2EAS.js";
+import "./with-selector-DTFISeXP.js";
+import { t as a } from "./useMutation-CUlWnMMx.js";
+import "./rich-input-BFCfY3FI.js";
+import "./section-BpLUrMt_.js";
+import { t as o } from "./DownloadSimple.es-BbsaHSey.js";
+import { t as s } from "./preview-eoaOyFC-.js";
+import "./resume-Cd2sSNAf.js";
+import { n as l } from "./input-DIek8tFf.js";
+import { t as c } from "./spinner-BNUJLa4B.js";
+import "./get-strict-context-DJn2x5wH.js";
+import "./alert-dialog-B7DDo-NI.js";
+import { t as u } from "./api-BDc_pfcq.js";
+import "./locale-xmC6h3Uu.js";
+import { t as d } from "./_slug-BoM2Pelm.js";
+import "./dist-Dj3RpNtB.js";
+import { t as f } from "./file-Ccm957YT.js";
+
+var p = e(n()),
+	m = e(t());
+function h() {
+	const { resume: e } = d.useLoaderData(),
+		{ mutateAsync: t, isPending: n } = a({ mutationFn: (e) => u.exportResume(e.id, e.format) }),
+		h = (0, p.useCallback)(async () => {
+			if (!e) return;
+			const { url: n } = await t({ id: e.id, format: `pdf` });
+			f(n, `resume-${e.name}.pdf`);
+		}, [e, t]);
+	return (0, m.jsxs)(m.Fragment, {
+		children: [
+			(0, m.jsx)(`div`, {
+				className: r(`mx-auto max-w-[210mm]`, `print:m-0 print:block print:max-w-full print:px-0`, `md:my-4 md:px-4`),
+				children: (0, m.jsx)(s, { pageClassName: `print:w-full! w-full max-w-full` }),
+			}),
+			(0, m.jsxs)(l, {
+				size: `lg`,
+				variant: `secondary`,
+				disabled: n,
+				className: `fixed end-4 bottom-4 z-50 hidden rounded-full px-4 md:inline-flex print:hidden`,
+				onClick: h,
+				children: [
+					n ? (0, m.jsx)(c, {}) : (0, m.jsx)(o, {}),
+					n ? (0, m.jsx)(i, { id: `cCfxH1` }) : (0, m.jsx)(i, { id: `mzI/c+` }),
+				],
+			}),
+		],
+	});
+}
+export { h as component };

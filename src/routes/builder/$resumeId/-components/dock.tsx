@@ -1,9 +1,5 @@
 import { t } from "@lingui/macro";
-import {
-	ArrowUUpLeftIcon,
-	ArrowUUpRightIcon,
-	type Icon,
-} from "@phosphor-icons/react";
+import { ArrowUUpLeftIcon, ArrowUUpRightIcon, type Icon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useTemporalStore } from "@/components/resume/store/resume";

@@ -286,7 +286,6 @@
 /* ===================================================
    Dark Glassmorphic Dialog Overrides
    Targets the "New Resume" creation & onboarding modals
-=================================================== */
 
 /* Scrollbar styling for dark dialogs */
 [data-slot="dialog-content"].dialog-dark,

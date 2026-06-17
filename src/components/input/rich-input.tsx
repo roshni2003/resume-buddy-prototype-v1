@@ -76,7 +76,7 @@ export function RichInput({ value, onChange, style, className, editorClassName, 
 				"data-fullscreen": isFullscreen ? "true" : "false",
 				class: cn(
 					"group/editor overflow-y-auto p-3 pb-4",
-					"rounded-md rounded-t-none border outline-none focus-visible:border-ring",
+					"rounded-xl rounded-t-none border border-gray-200 bg-gray-50 outline-none transition-all duration-200 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 hover:bg-white",
 					"[td:has(.selectedCell)]:bg-primary",
 					"data-[fullscreen=false]:max-h-[400px] data-[fullscreen=false]:min-h-[100px]",
 					"data-[fullscreen=true]:max-h-none data-[fullscreen=true]:min-h-full",
@@ -310,7 +310,7 @@ function EditorToolbar({ editor, isFullscreen }: { editor: Editor; isFullscreen:
 	});
 
 	return (
-		<div className="flex flex-wrap items-center gap-y-0.5 rounded-md rounded-b-none border border-b-0">
+		<div className="flex flex-wrap items-center gap-y-0.5 rounded-xl rounded-b-none border border-gray-200 border-b-0 bg-gray-50/80 px-1 py-1">
 			<Toggle
 				size={isFullscreen ? "lg" : "sm"}
 				tabIndex={-1}

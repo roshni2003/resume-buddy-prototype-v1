@@ -1,12 +1,23 @@
-import { i as PACKAGE_VERSION, l as defu, n as USERNAME_ERROR_CODES, r as twoFactorClient, s as createFetch, t as GENERIC_OAUTH_ERROR_CODES, u as getBaseURL } from "./error-codes-COt8c5aQ.js";
-import { useCallback, useRef, useSyncExternalStore } from "react";
-import { passkeyClient } from "@better-auth/passkey/client";
 import { capitalizeFirstLetter } from "@better-auth/core/utils/string";
+import { passkeyClient } from "@better-auth/passkey/client";
+import { useCallback, useRef, useSyncExternalStore } from "react";
+import {
+	s as createFetch,
+	l as defu,
+	t as GENERIC_OAUTH_ERROR_CODES,
+	u as getBaseURL,
+	i as PACKAGE_VERSION,
+	r as twoFactorClient,
+	n as USERNAME_ERROR_CODES,
+} from "./error-codes-COt8c5aQ.js";
+
 var PROTO_POLLUTION_PATTERNS = {
-	proto: /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/,
-	constructor: /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/,
+	proto:
+		/"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/,
+	constructor:
+		/"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/,
 	protoShort: /"__proto__"\s*:/,
-	constructorShort: /"constructor"\s*:/
+	constructorShort: /"constructor"\s*:/,
 };
 var JSON_SIGNATURE = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
 var SPECIAL_VALUES = {
@@ -16,7 +27,7 @@ var SPECIAL_VALUES = {
 	undefined: void 0,
 	nan: NaN,
 	infinity: Number.POSITIVE_INFINITY,
-	"-infinity": Number.NEGATIVE_INFINITY
+	"-infinity": Number.NEGATIVE_INFINITY,
 };
 var ISO_DATE_REGEX = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,7}))?(?:Z|([+-])(\d{2}):(\d{2}))$/;
 function isValidDate(date) {
@@ -26,7 +37,17 @@ function parseISODate(value) {
 	const match = ISO_DATE_REGEX.exec(value);
 	if (!match) return null;
 	const [, year, month, day, hour, minute, second, ms, offsetSign, offsetHour, offsetMinute] = match;
-	const date = new Date(Date.UTC(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10), parseInt(hour, 10), parseInt(minute, 10), parseInt(second, 10), ms ? parseInt(ms.padEnd(3, "0"), 10) : 0));
+	const date = new Date(
+		Date.UTC(
+			parseInt(year, 10),
+			parseInt(month, 10) - 1,
+			parseInt(day, 10),
+			parseInt(hour, 10),
+			parseInt(minute, 10),
+			parseInt(second, 10),
+			ms ? parseInt(ms.padEnd(3, "0"), 10) : 0,
+		),
+	);
 	if (offsetSign) {
 		const offset = (parseInt(offsetHour, 10) * 60 + parseInt(offsetMinute, 10)) * (offsetSign === "+" ? -1 : 1);
 		date.setUTCMinutes(date.getUTCMinutes() + offset);
@@ -37,21 +58,30 @@ function betterJSONParse(value, options = {}) {
 	const { strict = false, warnings = false, reviver, parseDates = true } = options;
 	if (typeof value !== "string") return value;
 	const trimmed = value.trim();
-	if (trimmed.length > 0 && trimmed[0] === "\"" && trimmed.endsWith("\"") && !trimmed.slice(1, -1).includes("\"")) return trimmed.slice(1, -1);
+	if (trimmed.length > 0 && trimmed[0] === '"' && trimmed.endsWith('"') && !trimmed.slice(1, -1).includes('"'))
+		return trimmed.slice(1, -1);
 	const lowerValue = trimmed.toLowerCase();
 	if (lowerValue.length <= 9 && lowerValue in SPECIAL_VALUES) return SPECIAL_VALUES[lowerValue];
 	if (!JSON_SIGNATURE.test(trimmed)) {
 		if (strict) throw new SyntaxError("[better-json] Invalid JSON");
 		return value;
 	}
-	if (Object.entries(PROTO_POLLUTION_PATTERNS).some(([key, pattern]) => {
-		const matches = pattern.test(trimmed);
-		if (matches && warnings) console.warn(`[better-json] Detected potential prototype pollution attempt using ${key} pattern`);
-		return matches;
-	}) && strict) throw new Error("[better-json] Potential prototype pollution attempt detected");
+	if (
+		Object.entries(PROTO_POLLUTION_PATTERNS).some(([key, pattern]) => {
+			const matches = pattern.test(trimmed);
+			if (matches && warnings)
+				console.warn(`[better-json] Detected potential prototype pollution attempt using ${key} pattern`);
+			return matches;
+		}) &&
+		strict
+	)
+		throw new Error("[better-json] Potential prototype pollution attempt detected");
 	try {
 		const secureReviver = (key, value$1) => {
-			if (key === "__proto__" || key === "constructor" && value$1 && typeof value$1 === "object" && "prototype" in value$1) {
+			if (
+				key === "__proto__" ||
+				(key === "constructor" && value$1 && typeof value$1 === "object" && "prototype" in value$1)
+			) {
 				if (warnings) console.warn(`[better-json] Dropping "${key}" key to prevent prototype pollution`);
 				return;
 			}
@@ -74,7 +104,7 @@ var inferAdditionalFields = (schema) => {
 	return {
 		id: "additional-fields-client",
 		version: PACKAGE_VERSION,
-		$InferServerPlugin: {}
+		$InferServerPlugin: {},
 	};
 };
 var genericOAuthClient = () => {
@@ -82,16 +112,16 @@ var genericOAuthClient = () => {
 		id: "generic-oauth-client",
 		version: PACKAGE_VERSION,
 		$InferServerPlugin: {},
-		$ERROR_CODES: GENERIC_OAUTH_ERROR_CODES
+		$ERROR_CODES: GENERIC_OAUTH_ERROR_CODES,
 	};
 };
 var listenerQueue = [];
 var lqIndex = 0;
 var QUEUE_ITEMS_PER_LISTENER = 4;
-const nanostoresGlobal = globalThis.nanostoresGlobal ||= { epoch: 0 };
+const nanostoresGlobal = (globalThis.nanostoresGlobal ||= { epoch: 0 });
 const atom = /* @__NO_SIDE_EFFECTS__ */ (initialValue) => {
-	let listeners = [];
-	let $atom = {
+	const listeners = [];
+	const $atom = {
 		get() {
 			if (!$atom.lc) $atom.listen(() => {})();
 			return $atom.value;
@@ -101,9 +131,10 @@ const atom = /* @__NO_SIDE_EFFECTS__ */ (initialValue) => {
 		listen(listener) {
 			$atom.lc = listeners.push(listener);
 			return () => {
-				for (let i = lqIndex + QUEUE_ITEMS_PER_LISTENER; i < listenerQueue.length;) if (listenerQueue[i] === listener) listenerQueue.splice(i, QUEUE_ITEMS_PER_LISTENER);
-				else i += QUEUE_ITEMS_PER_LISTENER;
-				let index = listeners.indexOf(listener);
+				for (let i = lqIndex + QUEUE_ITEMS_PER_LISTENER; i < listenerQueue.length; )
+					if (listenerQueue[i] === listener) listenerQueue.splice(i, QUEUE_ITEMS_PER_LISTENER);
+					else i += QUEUE_ITEMS_PER_LISTENER;
+				const index = listeners.indexOf(listener);
 				if (~index) {
 					listeners.splice(index, 1);
 					if (!--$atom.lc) $atom.off();
@@ -112,46 +143,48 @@ const atom = /* @__NO_SIDE_EFFECTS__ */ (initialValue) => {
 		},
 		notify(oldValue, changedKey) {
 			nanostoresGlobal.epoch++;
-			let runListenerQueue = !listenerQueue.length;
-			for (let listener of listeners) listenerQueue.push(listener, $atom.value, oldValue, changedKey);
+			const runListenerQueue = !listenerQueue.length;
+			for (const listener of listeners) listenerQueue.push(listener, $atom.value, oldValue, changedKey);
 			if (runListenerQueue) {
-				for (lqIndex = 0; lqIndex < listenerQueue.length; lqIndex += QUEUE_ITEMS_PER_LISTENER) listenerQueue[lqIndex](listenerQueue[lqIndex + 1], listenerQueue[lqIndex + 2], listenerQueue[lqIndex + 3]);
+				for (lqIndex = 0; lqIndex < listenerQueue.length; lqIndex += QUEUE_ITEMS_PER_LISTENER)
+					listenerQueue[lqIndex](listenerQueue[lqIndex + 1], listenerQueue[lqIndex + 2], listenerQueue[lqIndex + 3]);
 				listenerQueue.length = 0;
 			}
 		},
 		off() {},
 		set(newValue) {
-			let oldValue = $atom.value;
+			const oldValue = $atom.value;
 			if (oldValue !== newValue) {
 				$atom.value = newValue;
 				$atom.notify(oldValue);
 			}
 		},
 		subscribe(listener) {
-			let unbind = $atom.listen(listener);
+			const unbind = $atom.listen(listener);
 			listener($atom.value);
 			return unbind;
 		},
-		value: initialValue
+		value: initialValue,
 	};
 	return $atom;
 };
 var MOUNT = 5;
 var UNMOUNT = 6;
 var REVERT_MUTATION = 10;
-let on = (object, listener, eventKey, mutateStore) => {
+const on = (object, listener, eventKey, mutateStore) => {
 	object.events = object.events || {};
-	if (!object.events[eventKey + REVERT_MUTATION]) object.events[eventKey + REVERT_MUTATION] = mutateStore((eventProps) => {
-		object.events[eventKey].reduceRight((event, l) => (l(event), event), {
-			shared: {},
-			...eventProps
+	if (!object.events[eventKey + REVERT_MUTATION])
+		object.events[eventKey + REVERT_MUTATION] = mutateStore((eventProps) => {
+			object.events[eventKey].reduceRight((event, l) => (l(event), event), {
+				shared: {},
+				...eventProps,
+			});
 		});
-	});
 	object.events[eventKey] = object.events[eventKey] || [];
 	object.events[eventKey].push(listener);
 	return () => {
-		let currentListeners = object.events[eventKey];
-		let index = currentListeners.indexOf(listener);
+		const currentListeners = object.events[eventKey];
+		const index = currentListeners.indexOf(listener);
 		currentListeners.splice(index, 1);
 		if (!currentListeners.length) {
 			delete object.events[eventKey];
@@ -161,13 +194,13 @@ let on = (object, listener, eventKey, mutateStore) => {
 	};
 };
 const STORE_UNMOUNT_DELAY = 1e3;
-let onMount = ($store, initialize) => {
-	let listener = (payload) => {
-		let destroy = initialize(payload);
+const onMount = ($store, initialize) => {
+	const listener = (payload) => {
+		const destroy = initialize(payload);
 		if (destroy) $store.events[UNMOUNT].push(destroy);
 	};
 	return on($store, listener, MOUNT, (runListeners) => {
-		let originListen = $store.listen;
+		const originListen = $store.listen;
 		$store.listen = (...args) => {
 			if (!$store.lc && !$store.active) {
 				$store.active = true;
@@ -175,14 +208,14 @@ let onMount = ($store, initialize) => {
 			}
 			return originListen(...args);
 		};
-		let originOff = $store.off;
+		const originOff = $store.off;
 		$store.events[UNMOUNT] = [];
 		$store.off = () => {
 			originOff();
 			setTimeout(() => {
 				if ($store.active && !$store.lc) {
 					$store.active = false;
-					for (let destroy of $store.events[UNMOUNT]) destroy();
+					for (const destroy of $store.events[UNMOUNT]) destroy();
 					$store.events[UNMOUNT] = [];
 				}
 			}, STORE_UNMOUNT_DELAY);
@@ -194,7 +227,7 @@ let onMount = ($store, initialize) => {
 	});
 };
 function listenKeys($store, keys, listener) {
-	let keysSet = new Set(keys).add(void 0);
+	const keysSet = new Set(keys).add(void 0);
 	return $store.listen((value, oldValue, changed) => {
 		if (keysSet.has(changed)) listener(value, oldValue, changed);
 	});
@@ -206,20 +239,23 @@ var useAuthQuery = (initializedAtom, path, $fetch, options) => {
 		error: null,
 		isPending: true,
 		isRefetching: false,
-		refetch: (queryParams) => fn(queryParams)
+		refetch: (queryParams) => fn(queryParams),
 	});
 	const fn = async (queryParams) => {
 		return new Promise((resolve) => {
-			const opts = typeof options === "function" ? options({
-				data: value.get().data,
-				error: value.get().error,
-				isPending: value.get().isPending
-			}) : options;
+			const opts =
+				typeof options === "function"
+					? options({
+							data: value.get().data,
+							error: value.get().error,
+							isPending: value.get().isPending,
+						})
+					: options;
 			$fetch(path, {
 				...opts,
 				query: {
 					...opts?.query,
-					...queryParams?.query
+					...queryParams?.query,
 				},
 				async onSuccess(context) {
 					value.set({
@@ -227,7 +263,7 @@ var useAuthQuery = (initializedAtom, path, $fetch, options) => {
 						error: null,
 						isPending: false,
 						isRefetching: false,
-						refetch: value.value.refetch
+						refetch: value.value.refetch,
 					});
 					await opts?.onSuccess?.(context);
 				},
@@ -242,7 +278,7 @@ var useAuthQuery = (initializedAtom, path, $fetch, options) => {
 						data: isUnauthorized ? null : value.get().data,
 						isPending: false,
 						isRefetching: false,
-						refetch: value.value.refetch
+						refetch: value.value.refetch,
 					});
 					await opts?.onError?.(context);
 				},
@@ -253,42 +289,46 @@ var useAuthQuery = (initializedAtom, path, $fetch, options) => {
 						data: currentValue.data,
 						error: null,
 						isRefetching: true,
-						refetch: value.value.refetch
+						refetch: value.value.refetch,
 					});
 					await opts?.onRequest?.(context);
-				}
-			}).catch((error) => {
-				value.set({
-					error,
-					data: value.get().data,
-					isPending: false,
-					isRefetching: false,
-					refetch: value.value.refetch
+				},
+			})
+				.catch((error) => {
+					value.set({
+						error,
+						data: value.get().data,
+						isPending: false,
+						isRefetching: false,
+						refetch: value.value.refetch,
+					});
+				})
+				.finally(() => {
+					resolve(void 0);
 				});
-			}).finally(() => {
-				resolve(void 0);
-			});
 		});
 	};
 	initializedAtom = Array.isArray(initializedAtom) ? initializedAtom : [initializedAtom];
 	let isInitialized = false;
-	for (const initAtom of initializedAtom) initAtom.subscribe(async () => {
-		if (isServer()) return;
-		if (isInitialized) await fn();
-		else onMount(value, () => {
-			const timeoutId = setTimeout(async () => {
-				if (!isInitialized) {
-					isInitialized = true;
-					await fn();
-				}
-			}, 0);
-			return () => {
-				value.off();
-				initAtom.off();
-				clearTimeout(timeoutId);
-			};
+	for (const initAtom of initializedAtom)
+		initAtom.subscribe(async () => {
+			if (isServer()) return;
+			if (isInitialized) await fn();
+			else
+				onMount(value, () => {
+					const timeoutId = setTimeout(async () => {
+						if (!isInitialized) {
+							isInitialized = true;
+							await fn();
+						}
+					}, 0);
+					return () => {
+						value.off();
+						initAtom.off();
+						clearTimeout(timeoutId);
+					};
+				});
 		});
-	});
 	return value;
 };
 var usernameClient = () => {
@@ -296,25 +336,30 @@ var usernameClient = () => {
 		id: "username",
 		version: PACKAGE_VERSION,
 		$InferServerPlugin: {},
-		atomListeners: [{
-			matcher: (path) => path === "/sign-in/username",
-			signal: "$sessionSignal"
-		}],
-		$ERROR_CODES: USERNAME_ERROR_CODES
+		atomListeners: [
+			{
+				matcher: (path) => path === "/sign-in/username",
+				signal: "$sessionSignal",
+			},
+		],
+		$ERROR_CODES: USERNAME_ERROR_CODES,
 	};
 };
 var redirectPlugin = {
 	id: "redirect",
 	name: "Redirect",
-	hooks: { onSuccess(context) {
-		if (context.data?.url && context.data?.redirect) {
-			if (typeof window !== "undefined" && window.location) {
-				if (window.location) try {
-					window.location.href = context.data.url;
-				} catch {}
+	hooks: {
+		onSuccess(context) {
+			if (context.data?.url && context.data?.redirect) {
+				if (typeof window !== "undefined" && window.location) {
+					if (window.location)
+						try {
+							window.location.href = context.data.url;
+						} catch {}
+				}
 			}
-		}
-	} }
+		},
+	},
 };
 var kBroadcastChannel = Symbol.for("better-auth:broadcast-channel");
 var now$1 = () => Math.floor(Date.now() / 1e3);
@@ -333,10 +378,13 @@ var WindowBroadcastChannel = class {
 	post(message) {
 		if (typeof window === "undefined") return;
 		try {
-			localStorage.setItem(this.name, JSON.stringify({
-				...message,
-				timestamp: now$1()
-			}));
+			localStorage.setItem(
+				this.name,
+				JSON.stringify({
+					...message,
+					timestamp: now$1(),
+				}),
+			);
 		} catch {}
 	}
 	setup() {
@@ -370,7 +418,12 @@ var WindowFocusManager = class {
 		this.listeners.forEach((listener) => listener(focused));
 	}
 	setup() {
-		if (typeof window === "undefined" || typeof document === "undefined" || typeof window.addEventListener === "undefined") return () => {};
+		if (
+			typeof window === "undefined" ||
+			typeof document === "undefined" ||
+			typeof window.addEventListener === "undefined"
+		)
+			return () => {};
 		const visibilityHandler = () => {
 			if (document.visibilityState === "visible") this.setFocused(true);
 		};
@@ -419,7 +472,7 @@ function normalizeSessionResponse(res) {
 	if (typeof res === "object" && res !== null && "data" in res && "error" in res) return res;
 	return {
 		data: res,
-		error: null
+		error: null,
 	};
 }
 var FOCUS_REFETCH_RATE_LIMIT_SECONDS = 5;
@@ -431,7 +484,7 @@ function createSessionRefreshManager(opts) {
 	const state = {
 		lastSync: 0,
 		lastSessionRequest: 0,
-		cachedSession: void 0
+		cachedSession: void 0,
 	};
 	const shouldRefetch = () => {
 		return refetchWhenOffline || getGlobalOnlineManager().isOnline;
@@ -446,21 +499,24 @@ function createSessionRefreshManager(opts) {
 		const currentSession = sessionAtom.get();
 		const fetchSessionWithRefresh = () => {
 			state.lastSessionRequest = now();
-			$fetch("/get-session").then(async (res) => {
-				let { data, error } = normalizeSessionResponse(res);
-				if (data?.needsRefresh) try {
-					const refreshRes = await $fetch("/get-session", { method: "POST" });
-					({data, error} = normalizeSessionResponse(refreshRes));
-				} catch {}
-				const sessionData = data?.session && data?.user ? data : null;
-				sessionAtom.set({
-					...currentSession,
-					data: sessionData,
-					error
-				});
-				state.lastSync = now();
-				sessionSignal.set(!sessionSignal.get());
-			}).catch(() => {});
+			$fetch("/get-session")
+				.then(async (res) => {
+					let { data, error } = normalizeSessionResponse(res);
+					if (data?.needsRefresh)
+						try {
+							const refreshRes = await $fetch("/get-session", { method: "POST" });
+							({ data, error } = normalizeSessionResponse(refreshRes));
+						} catch {}
+					const sessionData = data?.session && data?.user ? data : null;
+					sessionAtom.set({
+						...currentSession,
+						data: sessionData,
+						error,
+					});
+					state.lastSync = now();
+					sessionSignal.set(!sessionSignal.get());
+				})
+				.catch(() => {});
 		};
 		if (event?.event === "poll") {
 			fetchSessionWithRefresh();
@@ -483,13 +539,14 @@ function createSessionRefreshManager(opts) {
 		getGlobalBroadcastChannel().post({
 			event: "session",
 			data: { trigger },
-			clientId: Math.random().toString(36).substring(7)
+			clientId: Math.random().toString(36).substring(7),
 		});
 	};
 	const setupPolling = () => {
-		if (refetchInterval && refetchInterval > 0) state.pollInterval = setInterval(() => {
-			if (sessionAtom.get()?.data) triggerRefetch({ event: "poll" });
-		}, refetchInterval * 1e3);
+		if (refetchInterval && refetchInterval > 0)
+			state.pollInterval = setInterval(() => {
+				if (sessionAtom.get()?.data) triggerRefetch({ event: "poll" });
+			}, refetchInterval * 1e3);
 	};
 	const setupBroadcast = () => {
 		state.unsubscribeBroadcast = getGlobalBroadcastChannel().subscribe(() => {
@@ -541,7 +598,7 @@ function createSessionRefreshManager(opts) {
 		init,
 		cleanup,
 		triggerRefetch,
-		broadcastSessionUpdate
+		broadcastSessionUpdate,
 	};
 }
 function getSessionAtom($fetch, options) {
@@ -553,7 +610,7 @@ function getSessionAtom($fetch, options) {
 			sessionAtom: session,
 			sessionSignal: $signal,
 			$fetch,
-			options
+			options,
 		});
 		refreshManager.init();
 		broadcastSessionUpdate = refreshManager.broadcastSessionUpdate;
@@ -564,7 +621,7 @@ function getSessionAtom($fetch, options) {
 	return {
 		session,
 		$sessionSignal: $signal,
-		broadcastSessionUpdate: (trigger) => broadcastSessionUpdate(trigger)
+		broadcastSessionUpdate: (trigger) => broadcastSessionUpdate(trigger),
 	};
 }
 var resolvePublicAuthUrl = (basePath) => {
@@ -572,19 +629,25 @@ var resolvePublicAuthUrl = (basePath) => {
 	const path = basePath ?? "/api/auth";
 	if (process.env.NEXT_PUBLIC_AUTH_URL) return process.env.NEXT_PUBLIC_AUTH_URL;
 	if (typeof window === "undefined") {
-		if (process.env.NEXTAUTH_URL) try {
-			return process.env.NEXTAUTH_URL;
-		} catch {}
-		if (process.env.VERCEL_URL) try {
-			const protocol = process.env.VERCEL_URL.startsWith("http") ? "" : "https://";
-			return `${new URL(`${protocol}${process.env.VERCEL_URL}`).origin}${path}`;
-		} catch {}
+		if (process.env.NEXTAUTH_URL)
+			try {
+				return process.env.NEXTAUTH_URL;
+			} catch {}
+		if (process.env.VERCEL_URL)
+			try {
+				const protocol = process.env.VERCEL_URL.startsWith("http") ? "" : "https://";
+				return `${new URL(`${protocol}${process.env.VERCEL_URL}`).origin}${path}`;
+			} catch {}
 	}
 };
 var getClientConfig = (options, loadEnv) => {
 	const isCredentialsSupported = "credentials" in Request.prototype;
-	const baseURL = getBaseURL(options?.baseURL, options?.basePath, void 0, loadEnv) ?? resolvePublicAuthUrl(options?.basePath) ?? "/api/auth";
-	const pluginsFetchPlugins = options?.plugins?.flatMap((plugin) => plugin.fetchPlugins).filter((pl) => pl !== void 0) || [];
+	const baseURL =
+		getBaseURL(options?.baseURL, options?.basePath, void 0, loadEnv) ??
+		resolvePublicAuthUrl(options?.basePath) ??
+		"/api/auth";
+	const pluginsFetchPlugins =
+		options?.plugins?.flatMap((plugin) => plugin.fetchPlugins).filter((pl) => pl !== void 0) || [];
 	const lifeCyclePlugin = {
 		id: "lifecycle-hooks",
 		name: "lifecycle-hooks",
@@ -592,13 +655,19 @@ var getClientConfig = (options, loadEnv) => {
 			onSuccess: options?.fetchOptions?.onSuccess,
 			onError: options?.fetchOptions?.onError,
 			onRequest: options?.fetchOptions?.onRequest,
-			onResponse: options?.fetchOptions?.onResponse
-		}
+			onResponse: options?.fetchOptions?.onResponse,
+		},
 	};
-	const { onSuccess: _onSuccess, onError: _onError, onRequest: _onRequest, onResponse: _onResponse, ...restOfFetchOptions } = options?.fetchOptions || {};
+	const {
+		onSuccess: _onSuccess,
+		onError: _onError,
+		onRequest: _onRequest,
+		onResponse: _onResponse,
+		...restOfFetchOptions
+	} = options?.fetchOptions || {};
 	const $fetch = createFetch({
 		baseURL,
-		...isCredentialsSupported ? { credentials: "include" } : {},
+		...(isCredentialsSupported ? { credentials: "include" } : {}),
 		method: "GET",
 		jsonParser(text) {
 			if (!text) return null;
@@ -608,34 +677,49 @@ var getClientConfig = (options, loadEnv) => {
 		...restOfFetchOptions,
 		plugins: [
 			lifeCyclePlugin,
-			...restOfFetchOptions.plugins || [],
-			...options?.disableDefaultFetchPlugins ? [] : [redirectPlugin],
-			...pluginsFetchPlugins
-		]
+			...(restOfFetchOptions.plugins || []),
+			...(options?.disableDefaultFetchPlugins ? [] : [redirectPlugin]),
+			...pluginsFetchPlugins,
+		],
 	});
 	const { $sessionSignal, session, broadcastSessionUpdate } = getSessionAtom($fetch, options);
 	const plugins = options?.plugins || [];
 	let pluginsActions = {};
 	const pluginsAtoms = {
 		$sessionSignal,
-		session
+		session,
 	};
 	const pluginPathMethods = {
 		"/sign-out": "POST",
 		"/revoke-sessions": "POST",
 		"/revoke-other-sessions": "POST",
-		"/delete-user": "POST"
+		"/delete-user": "POST",
 	};
-	const atomListeners = [{
-		signal: "$sessionSignal",
-		matcher(path) {
-			return path === "/sign-out" || path === "/update-user" || path === "/update-session" || path === "/sign-up/email" || path === "/sign-in/email" || path === "/delete-user" || path === "/verify-email" || path === "/revoke-sessions" || path === "/revoke-session" || path === "/revoke-other-sessions" || path === "/change-email" || path === "/change-password";
+	const atomListeners = [
+		{
+			signal: "$sessionSignal",
+			matcher(path) {
+				return (
+					path === "/sign-out" ||
+					path === "/update-user" ||
+					path === "/update-session" ||
+					path === "/sign-up/email" ||
+					path === "/sign-in/email" ||
+					path === "/delete-user" ||
+					path === "/verify-email" ||
+					path === "/revoke-sessions" ||
+					path === "/revoke-session" ||
+					path === "/revoke-other-sessions" ||
+					path === "/change-email" ||
+					path === "/change-password"
+				);
+			},
+			callback(path) {
+				if (path === "/sign-out") broadcastSessionUpdate("signout");
+				else if (path === "/update-user" || path === "/update-session") broadcastSessionUpdate("updateUser");
+			},
 		},
-		callback(path) {
-			if (path === "/sign-out") broadcastSessionUpdate("signout");
-			else if (path === "/update-user" || path === "/update-session") broadcastSessionUpdate("updateUser");
-		}
-	}];
+	];
 	for (const plugin of plugins) {
 		if (plugin.getAtoms) Object.assign(pluginsAtoms, plugin.getAtoms?.($fetch));
 		if (plugin.pathMethods) Object.assign(pluginPathMethods, plugin.pathMethods);
@@ -648,9 +732,10 @@ var getClientConfig = (options, loadEnv) => {
 		listen: (signal, listener) => {
 			pluginsAtoms[signal].subscribe(listener);
 		},
-		atoms: pluginsAtoms
+		atoms: pluginsAtoms,
 	};
-	for (const plugin of plugins) if (plugin.getActions) pluginsActions = defu(plugin.getActions?.($fetch, $store, options) ?? {}, pluginsActions);
+	for (const plugin of plugins)
+		if (plugin.getActions) pluginsActions = defu(plugin.getActions?.($fetch, $store, options) ?? {}, pluginsActions);
 	return {
 		get baseURL() {
 			return baseURL;
@@ -660,11 +745,18 @@ var getClientConfig = (options, loadEnv) => {
 		pluginPathMethods,
 		atomListeners,
 		$fetch,
-		$store
+		$store,
 	};
 };
 function isAtom(value) {
-	return typeof value === "object" && value !== null && "get" in value && typeof value.get === "function" && "lc" in value && typeof value.lc === "number";
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		"get" in value &&
+		typeof value.get === "function" &&
+		"lc" in value &&
+		typeof value.lc === "number"
+	);
 }
 function getMethod(path, knownPathMethods, args) {
 	const method = knownPathMethods[path];
@@ -676,37 +768,42 @@ function getMethod(path, knownPathMethods, args) {
 }
 function createDynamicPathProxy(routes, client, knownPathMethods, atoms, atomListeners) {
 	function createProxy(path = []) {
-		return new Proxy(function() {}, {
+		return new Proxy(() => {}, {
 			get(_, prop) {
 				if (typeof prop !== "string") return;
 				if (prop === "then" || prop === "catch" || prop === "finally") return;
 				const fullPath = [...path, prop];
 				let current = routes;
-				for (const segment of fullPath) if (current && typeof current === "object" && segment in current) current = current[segment];
-				else {
-					current = void 0;
-					break;
-				}
+				for (const segment of fullPath)
+					if (current && typeof current === "object" && segment in current) current = current[segment];
+					else {
+						current = void 0;
+						break;
+					}
 				if (typeof current === "function") return current;
 				if (isAtom(current)) return current;
 				return createProxy(fullPath);
 			},
 			apply: async (_, __, args) => {
-				const routePath = "/" + path.map((segment) => segment.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)).join("/");
+				const routePath =
+					"/" + path.map((segment) => segment.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)).join("/");
 				const arg = args[0] || {};
 				const fetchOptions = args[1] || {};
 				const { query, fetchOptions: argFetchOptions, ...body } = arg;
 				const options = {
 					...fetchOptions,
-					...argFetchOptions
+					...argFetchOptions,
 				};
 				const method = getMethod(routePath, knownPathMethods, arg);
 				return await client(routePath, {
 					...options,
-					body: method === "GET" ? void 0 : {
-						...body,
-						...options?.body || {}
-					},
+					body:
+						method === "GET"
+							? void 0
+							: {
+									...body,
+									...(options?.body || {}),
+								},
 					query: query || options?.query,
 					method,
 					async onSuccess(context) {
@@ -726,9 +823,9 @@ function createDynamicPathProxy(routes, client, knownPathMethods, atoms, atomLis
 							}, 10);
 							match.callback?.(routePath);
 						}
-					}
+					},
 				});
-			}
+			},
 		});
 	}
 	return createProxy();
@@ -756,23 +853,33 @@ function createAuthClient(options) {
 	const { pluginPathMethods, pluginsActions, pluginsAtoms, $fetch, $store, atomListeners } = getClientConfig(options);
 	const resolvedHooks = {};
 	for (const [key, value] of Object.entries(pluginsAtoms)) resolvedHooks[getAtomKey(key)] = () => useStore(value);
-	return createDynamicPathProxy({
-		...pluginsActions,
-		...resolvedHooks,
+	return createDynamicPathProxy(
+		{
+			...pluginsActions,
+			...resolvedHooks,
+			$fetch,
+			$store,
+		},
 		$fetch,
-		$store
-	}, $fetch, pluginPathMethods, pluginsAtoms, atomListeners);
+		pluginPathMethods,
+		pluginsAtoms,
+		atomListeners,
+	);
 }
 var getAuthClient = () => {
-	return createAuthClient({ plugins: [
-		usernameClient(),
-		twoFactorClient({ onTwoFactorRedirect() {
-			if (typeof window !== "undefined") window.location.href = "/dashboard/resumes";
-		} }),
-		passkeyClient(),
-		genericOAuthClient(),
-		inferAdditionalFields()
-	] });
+	return createAuthClient({
+		plugins: [
+			usernameClient(),
+			twoFactorClient({
+				onTwoFactorRedirect() {
+					if (typeof window !== "undefined") window.location.href = "/dashboard/resumes";
+				},
+			}),
+			passkeyClient(),
+			genericOAuthClient(),
+			inferAdditionalFields(),
+		],
+	});
 };
 const authClient = getAuthClient();
 export { authClient as t };

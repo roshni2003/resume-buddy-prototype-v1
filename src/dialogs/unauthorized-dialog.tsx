@@ -31,7 +31,6 @@ export function UnauthorizedDialog() {
 			// ignore
 		}
 
-
 		// Note: we *don't* auto-open just because a token is syntactically invalid.
 		// We only open after the backend rejects a sent token (event/flag). Otherwise we'd show
 		// the modal even before any request happens.
