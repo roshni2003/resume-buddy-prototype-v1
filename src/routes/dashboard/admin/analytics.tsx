@@ -6,6 +6,7 @@ import {
 	Clock,
 	Download,
 	Eye,
+	ReadCvLogo,
 	Robot,
 	Stack,
 	Timer,
@@ -27,7 +28,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { api } from "@/utils/api";
-import { ReadCvLogo } from "@phosphor-icons/react";
 
 export const Route = createFileRoute("/dashboard/admin/analytics")({
 	component: AnalyticsPage,

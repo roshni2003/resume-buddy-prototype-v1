@@ -25,7 +25,13 @@ export function PublicationsSectionBuilder() {
 				onReorder={handleReorder}
 				keyExtractor={(item) => item.id}
 				renderItem={(item) => (
-					<SortableSectionItem key={item.id} type="publications" item={item} title={item.title} subtitle={item.publisher} />
+					<SortableSectionItem
+						key={item.id}
+						type="publications"
+						item={item}
+						title={item.title}
+						subtitle={item.publisher}
+					/>
 				)}
 			/>
 

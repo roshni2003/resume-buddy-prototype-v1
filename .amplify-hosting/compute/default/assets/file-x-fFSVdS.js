@@ -1,4 +1,5 @@
 import { a as init_string, o as slugify } from "./createSsrRpc-9mmrq80i.js";
+
 init_string();
 function getReadableTimestamp(now) {
 	return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
@@ -20,9 +21,10 @@ function downloadWithAnchor(blob, filename) {
 }
 async function downloadFromUrl(url, filename) {
 	let downloadUrl = url;
-	if (url.includes(".amazonaws.com") && url.includes("/uploads/")) try {
-		downloadUrl = `/uploads/proxy${new URL(url).pathname}?url=${encodeURIComponent(url)}`;
-	} catch {}
+	if (url.includes(".amazonaws.com") && url.includes("/uploads/"))
+		try {
+			downloadUrl = `/uploads/proxy${new URL(url).pathname}?url=${encodeURIComponent(url)}`;
+		} catch {}
 	try {
 		const response = await fetch(downloadUrl);
 		if (!response.ok) throw new Error(`Fetch failed with status ${response.status}`);

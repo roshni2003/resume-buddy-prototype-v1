@@ -1,13 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
-import { CameraIcon, PencilSimpleIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type z from "zod";
-import { ColorPicker } from "@/components/input/color-picker";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { pictureSchema } from "@/schema/resume/data";
@@ -21,7 +19,7 @@ export function PictureSectionBuilder() {
 	);
 }
 
-function PictureSectionForm() {
+export function PictureSectionForm() {
 	const picture = useResumeStore((state) => state.resume.data.picture);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
@@ -82,6 +80,7 @@ function PictureSectionForm() {
 	const shadowColor = form.watch("shadowColor");
 	const rotation = form.watch("rotation");
 	const aspectRatio = form.watch("aspectRatio");
+	const size = form.watch("size");
 
 	return (
 		<Form {...form}>
@@ -102,13 +101,15 @@ function PictureSectionForm() {
 							<div
 								className="flex items-center justify-center overflow-hidden bg-card shadow-md"
 								style={{
-									width: "112px",
-									height: "112px",
-									borderRadius: borderRadius === 100 ? "50%" : `${borderRadius}%`,
+									width: `${size}px`,
+									height: `${size / (aspectRatio || 1)}px`,
+									borderRadius:
+										aspectRatio === 0.75 && borderRadius === 100 ? "50%" : // Oval uses 50% border radius on a rectangular container
+											aspectRatio === 1 && borderRadius === 100 ? "50%" : // Circle
+												`${borderRadius}px`, // Square
 									border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : "none",
 									boxShadow: shadowWidth > 0 ? `0 0 ${shadowWidth * 4}px ${shadowColor}40` : "none",
 									transform: `rotate(${rotation}deg)`,
-									aspectRatio: aspectRatio.toString(),
 								}}
 							>
 								{pictureUrl ? (
@@ -120,37 +121,50 @@ function PictureSectionForm() {
 									</div>
 								)}
 							</div>
-							<input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" id="picture-upload" />
+						) : (
+							<div className="flex flex-col items-center justify-center gap-4 text-emerald-800">
+								<div
+									className={`flex items-center justify-center bg-emerald-50 transition-all duration-300 ${aspectRatio === 1 && borderRadius === 100 ? "rounded-full" : // Circle
+										aspectRatio === 0.75 && borderRadius === 100 ? "rounded-full" : // Oval (uses 50% border-radius)
+											"rounded-xl" // Square
+										}`}
+									style={{
+										width: `${size}px`,
+										height: `${size / (aspectRatio || 1)}px`,
+										border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : "none",
+										boxShadow: shadowWidth > 0 ? `0 0 ${shadowWidth * 4}px ${shadowColor}40` : "none",
+										transform: `rotate(${rotation}deg)`,
+									}}
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="32"
+										height="32"
+										fill="currentColor"
+										viewBox="0 0 256 256"
+									>
+										<path d="M224,144v64a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V144a8,8,0,0,1,16,0v64H208V144a8,8,0,0,1,16,0ZM133.66,34.34a8,8,0,0,0-11.32,0l-48,48a8,8,0,0,0,11.32,11.32L120,59.31V160a8,8,0,0,0,16,0V59.31l34.34,34.35a8,8,0,0,0,11.32-11.32Z"></path>
+									</svg>
+								</div>
+								<span className="font-medium text-gray-500 text-sm">Drop an image, or paste a URL</span>
+							</div>
+						)}
+						<input
+							type="file"
+							accept="image/*"
+							onChange={handlePhotoChange}
+							className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+							id="picture-upload"
+						/>
 
-							{/* Action Buttons */}
-							{pictureUrl ? (
-								<>
-									{/* Edit Button */}
-									<label
-										htmlFor="picture-upload"
-										className="absolute -top-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-emerald-600 shadow-lg transition-all hover:scale-110 hover:bg-emerald-700"
-										title="Change photo"
-									>
-										<PencilSimpleIcon className="h-4 w-4 text-white" weight="bold" />
-									</label>
-									{/* Delete Button */}
-									<button
-										type="button"
-										onClick={handleRemovePhoto}
-										className="absolute -right-1 -bottom-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-red-600 shadow-lg transition-all hover:scale-110 hover:bg-red-700"
-										title="Remove photo"
-									>
-										<TrashIcon className="h-4 w-4 text-white" weight="bold" />
-									</button>
-								</>
-							) : (
-								/* Upload Button */
+						{pictureUrl && (
+							<div className="absolute top-3 right-3 z-20 flex gap-2">
 								<label
 									htmlFor="picture-upload"
-									className="absolute -right-1 -bottom-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-emerald-600 shadow-lg transition-all hover:scale-110 hover:bg-emerald-700"
-									title="Upload photo"
+									className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white shadow-md transition-all hover:scale-110 hover:bg-gray-100"
+									title="Change photo"
 								>
-									<PlusIcon className="h-5 w-5 text-white" weight="bold" />
+									<PencilSimpleIcon className="h-4 w-4 text-gray-700" weight="bold" />
 								</label>
 							)}
 						</div>
@@ -223,7 +237,7 @@ function PictureSectionForm() {
 								<FormMessage />
 							</FormItem>
 						)}
-					/>
+					</div>
 
 					{/* Rotation */}
 					<FormField
@@ -244,9 +258,10 @@ function PictureSectionForm() {
 											step={5}
 											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 											onChange={(e) => {
-												const value = e.target.value;
-												if (value === "") field.onChange("");
-												else field.onChange(Number(value));
+												field.onChange(e);
+												if (e.target.value.trim() !== "") {
+													form.setValue("hidden", false, { shouldDirty: true });
+												}
 											}}
 										/>
 									</FormControl>
@@ -323,11 +338,12 @@ function PictureSectionForm() {
 											<div className="h-5 w-3 border-2 border-emerald-600" />
 										</Button>
 									</div>
-								</div>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+									<span
+										className={`text-sm ${aspectRatio === 1 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
+									>
+										Circle
+									</span>
+								</button>
 
 					{/* Border Radius */}
 					<FormField
@@ -395,11 +411,12 @@ function PictureSectionForm() {
 											<div className="h-4 w-4 rounded-full border-2 border-emerald-600" />
 										</Button>
 									</div>
-								</div>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+									<span
+										className={`text-sm ${aspectRatio === 0.75 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
+									>
+										Oval
+									</span>
+								</button>
 
 					{/* Border Color & Width */}
 					<div className="grid grid-cols-2 gap-3">
@@ -429,14 +446,19 @@ function PictureSectionForm() {
 											className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 										/>
 									</div>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+									<span
+										className={`text-sm ${aspectRatio === 1 && borderRadius === 10 ? "font-medium text-gray-700" : "text-gray-900"}`}
+									>
+										Square
+									</span>
+								</button>
+							</div>
+						</div>
 
+						{/* Size Slider */}
 						<FormField
 							control={form.control}
-							name="borderWidth"
+							name="size"
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="font-medium text-muted-foreground text-xs">
@@ -451,9 +473,7 @@ function PictureSectionForm() {
 												step={1}
 												className="flex-1 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 												onChange={(e) => {
-													const value = e.target.value;
-													if (value === "") field.onChange("");
-													else field.onChange(Number(e.target.value));
+													field.onChange(Number(e.target.value));
 												}}
 											/>
 										</FormControl>

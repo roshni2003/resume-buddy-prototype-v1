@@ -1,188 +1,186 @@
-const tsrStartManifest = () => ((h) => ({
-	routes: {
-		__root__: {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/__root.tsx",
-			children: [
-				"/_home",
-				"/dashboard",
-				"/schema.json",
-				"/builder/$resumeId",
-				"/$username/$slug",
-				"/api/health",
-				"/auth/login",
-				"/printer/$resumeId",
-				"/auth/",
-				"/api/auth/$",
-				"/api/openapi/$",
-				"/api/rpc/$",
-				"/uploads/$userId/$"
-			],
-			assets: [{
-				tag: "link",
-				attrs: {
-					rel: "stylesheet",
-					href: "/assets/rich-input-Hkl0RCOU.css",
-					type: "text/css"
-				}
-			}, {
-				tag: "link",
-				attrs: {
-					rel: "stylesheet",
-					href: "/assets/index-DuGpl1yU.css",
-					type: "text/css"
-				}
-			}],
-			preloads: [
-				"/assets/index-DLs_lJIl.js",
-				"/assets/locale-xmC6h3Uu.js",
-				"/assets/preload-helper-DwC0sqXt.js",
-				"/assets/client-kNPkBI8n.js",
-				"/assets/get-strict-context-DJn2x5wH.js",
-				"/assets/dist-DKdYDXPR.js",
-				"/assets/form-BYaSMHHq.js",
-				"/assets/rich-input-CFiOV_cF.js",
-				"/assets/route-DNj2UlN4.js",
-				"/assets/badge-BlEOZEch.js",
-				"/assets/DownloadSimple.es-BbsaHSey.js",
-				"/assets/resume-Cd2sSNAf.js",
-				"/assets/spinner-BNUJLa4B.js",
-				"/assets/profile-BhzKRY5a.js",
-				"/assets/Warning.es-uAi4GnyT.js",
-				"/assets/alert-dialog-B7DDo-NI.js",
-				"/assets/string-_Z1c2EAS.js",
-				"/assets/Match-BdX69eZ0.js",
-				"/assets/useMutation-CUlWnMMx.js",
-				"/assets/useStore-KX9e-E04.js",
-				"/assets/lazyRouteComponent-DBGst3ji.js",
-				"/assets/route-YyFGB8Ug.js",
-				"/assets/with-selector-DTFISeXP.js",
-				"/assets/resumes-BaUKLYDb.js",
-				"/assets/input-DIek8tFf.js",
-				"/assets/dist-DqYr19Cx.js",
-				"/assets/jsx-runtime-D7jARjhZ.js",
-				"/assets/react-BZSX5Bs9.js",
-				"/assets/dist-C4MU2sKv.js",
-				"/assets/loading-screen-M1mL3n-i.js",
-				"/assets/provider-CkD8x17o.js",
-				"/assets/data-BrHNqJrL.js",
-				"/assets/use-mobile-D_kEz352.js",
-				"/assets/_slug-MfENGNO3.js",
-				"/assets/api-BDc_pfcq.js"
-			]
+const tsrStartManifest = () =>
+	((h) => ({
+		routes: {
+			__root__: {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/__root.tsx",
+				children: [
+					"/_home",
+					"/dashboard",
+					"/schema.json",
+					"/builder/$resumeId",
+					"/$username/$slug",
+					"/api/health",
+					"/auth/login",
+					"/printer/$resumeId",
+					"/auth/",
+					"/api/auth/$",
+					"/api/openapi/$",
+					"/api/rpc/$",
+					"/uploads/$userId/$",
+				],
+				assets: [
+					{
+						tag: "link",
+						attrs: {
+							rel: "stylesheet",
+							href: "/assets/rich-input-Hkl0RCOU.css",
+							type: "text/css",
+						},
+					},
+					{
+						tag: "link",
+						attrs: {
+							rel: "stylesheet",
+							href: "/assets/index-DuGpl1yU.css",
+							type: "text/css",
+						},
+					},
+				],
+				preloads: [
+					"/assets/index-DLs_lJIl.js",
+					"/assets/locale-xmC6h3Uu.js",
+					"/assets/preload-helper-DwC0sqXt.js",
+					"/assets/client-kNPkBI8n.js",
+					"/assets/get-strict-context-DJn2x5wH.js",
+					"/assets/dist-DKdYDXPR.js",
+					"/assets/form-BYaSMHHq.js",
+					"/assets/rich-input-CFiOV_cF.js",
+					"/assets/route-DNj2UlN4.js",
+					"/assets/badge-BlEOZEch.js",
+					"/assets/DownloadSimple.es-BbsaHSey.js",
+					"/assets/resume-Cd2sSNAf.js",
+					"/assets/spinner-BNUJLa4B.js",
+					"/assets/profile-BhzKRY5a.js",
+					"/assets/Warning.es-uAi4GnyT.js",
+					"/assets/alert-dialog-B7DDo-NI.js",
+					"/assets/string-_Z1c2EAS.js",
+					"/assets/Match-BdX69eZ0.js",
+					"/assets/useMutation-CUlWnMMx.js",
+					"/assets/useStore-KX9e-E04.js",
+					"/assets/lazyRouteComponent-DBGst3ji.js",
+					"/assets/route-YyFGB8Ug.js",
+					"/assets/with-selector-DTFISeXP.js",
+					"/assets/resumes-BaUKLYDb.js",
+					"/assets/input-DIek8tFf.js",
+					"/assets/dist-DqYr19Cx.js",
+					"/assets/jsx-runtime-D7jARjhZ.js",
+					"/assets/react-BZSX5Bs9.js",
+					"/assets/dist-C4MU2sKv.js",
+					"/assets/loading-screen-M1mL3n-i.js",
+					"/assets/provider-CkD8x17o.js",
+					"/assets/data-BrHNqJrL.js",
+					"/assets/use-mobile-D_kEz352.js",
+					"/assets/_slug-MfENGNO3.js",
+					"/assets/api-BDc_pfcq.js",
+				],
+			},
+			"/_home": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/_home/route.tsx",
+				children: ["/_home/"],
+				assets: void 0,
+				preloads: ["/assets/route-BmutysnO.js"],
+			},
+			"/dashboard": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/dashboard/route.tsx",
+				children: ["/dashboard/", "/dashboard/settings/profile", "/dashboard/resumes/"],
+				assets: void 0,
+				preloads: [
+					"/assets/route-BOT-sMTa.js",
+					"/assets/dropdown-menu-BDYKGr0V.js",
+					"/assets/Translate.es-i6iYNQQy.js",
+				],
+			},
+			"/builder/$resumeId": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/route.tsx",
+				children: ["/builder/$resumeId/"],
+				assets: void 0,
+				preloads: [
+					"/assets/route-B64QJMaH.js",
+					"/assets/section-BpLUrMt_.js",
+					"/assets/dropdown-menu-BDYKGr0V.js",
+					"/assets/multiple-combobox-H_LL6Cck.js",
+					"/assets/Translate.es-i6iYNQQy.js",
+					"/assets/dist-C-d3ELl8.js",
+					"/assets/separator-E8i2irOi.js",
+					"/assets/sidebar-BIIS38Jo.js",
+					"/assets/dist-Dj3RpNtB.js",
+					"/assets/file-Ccm957YT.js",
+				],
+			},
+			"/$username/$slug": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/$username/$slug.tsx",
+				children: void 0,
+				assets: [
+					(h = {
+						tag: "link",
+						attrs: {
+							rel: "stylesheet",
+							href: "/assets/preview-Cab19a18.css",
+							type: "text/css",
+						},
+					}),
+				],
+				preloads: [
+					"/assets/_slug-BfDV86AB.js",
+					"/assets/section-BpLUrMt_.js",
+					"/assets/preview-BLets8yr.js",
+					"/assets/dist-Dj3RpNtB.js",
+					"/assets/file-Ccm957YT.js",
+				],
+			},
+			"/auth/login": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/auth/login.tsx",
+				children: void 0,
+				assets: void 0,
+				preloads: ["/assets/login-mYZo5lF9.js"],
+			},
+			"/printer/$resumeId": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/printer/$resumeId.tsx",
+				children: void 0,
+				assets: [h],
+				preloads: [
+					"/assets/_resumeId-dISPxFiC.js",
+					"/assets/section-BpLUrMt_.js",
+					"/assets/preview-BLets8yr.js",
+					"/assets/dist-Dj3RpNtB.js",
+				],
+			},
+			"/_home/": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/_home/index.tsx",
+				children: void 0,
+				assets: void 0,
+				preloads: ["/assets/_home-dwYeQJ89.js"],
+			},
+			"/auth/": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/auth/index.tsx",
+				children: void 0,
+				assets: void 0,
+				preloads: ["/assets/auth-DUbhSM3w.js"],
+			},
+			"/dashboard/settings/profile": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/dashboard/settings/profile.tsx",
+				children: void 0,
+				assets: void 0,
+				preloads: ["/assets/profile-DdSZOSZZ.js", "/assets/Check.es-BCVTpq-8.js", "/assets/separator-E8i2irOi.js"],
+			},
+			"/builder/$resumeId/": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/index.tsx",
+				children: void 0,
+				assets: [h],
+				preloads: ["/assets/_resumeId-CuUHmSkU.js", "/assets/preview-BLets8yr.js"],
+			},
+			"/dashboard/resumes/": {
+				filePath: "/Users/sama/Desktop/reactive-resume/src/routes/dashboard/resumes/index.tsx",
+				children: void 0,
+				assets: void 0,
+				preloads: [
+					"/assets/resumes-Ccgl7hVC.js",
+					"/assets/multiple-combobox-H_LL6Cck.js",
+					"/assets/separator-E8i2irOi.js",
+					"/assets/dist-Dj3RpNtB.js",
+				],
+			},
 		},
-		"/_home": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/_home/route.tsx",
-			children: ["/_home/"],
-			assets: void 0,
-			preloads: ["/assets/route-BmutysnO.js"]
-		},
-		"/dashboard": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/dashboard/route.tsx",
-			children: [
-				"/dashboard/",
-				"/dashboard/settings/profile",
-				"/dashboard/resumes/"
-			],
-			assets: void 0,
-			preloads: [
-				"/assets/route-BOT-sMTa.js",
-				"/assets/dropdown-menu-BDYKGr0V.js",
-				"/assets/Translate.es-i6iYNQQy.js"
-			]
-		},
-		"/builder/$resumeId": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/route.tsx",
-			children: ["/builder/$resumeId/"],
-			assets: void 0,
-			preloads: [
-				"/assets/route-B64QJMaH.js",
-				"/assets/section-BpLUrMt_.js",
-				"/assets/dropdown-menu-BDYKGr0V.js",
-				"/assets/multiple-combobox-H_LL6Cck.js",
-				"/assets/Translate.es-i6iYNQQy.js",
-				"/assets/dist-C-d3ELl8.js",
-				"/assets/separator-E8i2irOi.js",
-				"/assets/sidebar-BIIS38Jo.js",
-				"/assets/dist-Dj3RpNtB.js",
-				"/assets/file-Ccm957YT.js"
-			]
-		},
-		"/$username/$slug": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/$username/$slug.tsx",
-			children: void 0,
-			assets: [h = {
-				tag: "link",
-				attrs: {
-					rel: "stylesheet",
-					href: "/assets/preview-Cab19a18.css",
-					type: "text/css"
-				}
-			}],
-			preloads: [
-				"/assets/_slug-BfDV86AB.js",
-				"/assets/section-BpLUrMt_.js",
-				"/assets/preview-BLets8yr.js",
-				"/assets/dist-Dj3RpNtB.js",
-				"/assets/file-Ccm957YT.js"
-			]
-		},
-		"/auth/login": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/auth/login.tsx",
-			children: void 0,
-			assets: void 0,
-			preloads: ["/assets/login-mYZo5lF9.js"]
-		},
-		"/printer/$resumeId": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/printer/$resumeId.tsx",
-			children: void 0,
-			assets: [h],
-			preloads: [
-				"/assets/_resumeId-dISPxFiC.js",
-				"/assets/section-BpLUrMt_.js",
-				"/assets/preview-BLets8yr.js",
-				"/assets/dist-Dj3RpNtB.js"
-			]
-		},
-		"/_home/": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/_home/index.tsx",
-			children: void 0,
-			assets: void 0,
-			preloads: ["/assets/_home-dwYeQJ89.js"]
-		},
-		"/auth/": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/auth/index.tsx",
-			children: void 0,
-			assets: void 0,
-			preloads: ["/assets/auth-DUbhSM3w.js"]
-		},
-		"/dashboard/settings/profile": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/dashboard/settings/profile.tsx",
-			children: void 0,
-			assets: void 0,
-			preloads: [
-				"/assets/profile-DdSZOSZZ.js",
-				"/assets/Check.es-BCVTpq-8.js",
-				"/assets/separator-E8i2irOi.js"
-			]
-		},
-		"/builder/$resumeId/": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/builder/$resumeId/index.tsx",
-			children: void 0,
-			assets: [h],
-			preloads: ["/assets/_resumeId-CuUHmSkU.js", "/assets/preview-BLets8yr.js"]
-		},
-		"/dashboard/resumes/": {
-			filePath: "/Users/sama/Desktop/reactive-resume/src/routes/dashboard/resumes/index.tsx",
-			children: void 0,
-			assets: void 0,
-			preloads: [
-				"/assets/resumes-Ccgl7hVC.js",
-				"/assets/multiple-combobox-H_LL6Cck.js",
-				"/assets/separator-E8i2irOi.js",
-				"/assets/dist-Dj3RpNtB.js"
-			]
-		}
-	},
-	clientEntry: "/assets/index-DLs_lJIl.js"
-}))();
+		clientEntry: "/assets/index-DLs_lJIl.js",
+	}))();
 export { tsrStartManifest };

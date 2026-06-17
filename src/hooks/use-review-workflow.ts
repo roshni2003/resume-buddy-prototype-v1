@@ -29,13 +29,13 @@ export function useReviewWorkflow() {
 
 		// Remove any existing highlight first
 		sectionElement.classList.remove("review-highlight");
-		
+
 		// Force reflow to restart animation
 		void sectionElement.offsetWidth;
 
 		// Add highlight class
 		sectionElement.classList.add("review-highlight");
-		
+
 		console.log(`🎨 Highlight applied! Look at the LEFT sidebar for an orange border around "${sectionKey}"`);
 
 		// Remove highlight after 2 seconds
@@ -49,77 +49,79 @@ export function useReviewWorkflow() {
 	 * Scroll to a section in the left sidebar
 	 * @param sectionKey - The section identifier (e.g., "contact.phone", "summary", "experience[0]")
 	 */
-	const scrollToSection = useCallback((sectionKey: string) => {
-		try {
-			console.log(`📍 Attempting to scroll to section: ${sectionKey}`);
-			
-			// Parse the section key to extract the section type
-			const sectionType = parseSectionKey(sectionKey);
-			if (!sectionType) {
-				console.warn(`❌ Could not parse section key: ${sectionKey}`);
-				toast.error("Section not found", {
-					description: `Unable to locate section: ${sectionKey}`,
-				});
-				return;
-			}
+	const scrollToSection = useCallback(
+		(sectionKey: string) => {
+			try {
+				console.log(`📍 Attempting to scroll to section: ${sectionKey}`);
 
-			console.log(`✅ Parsed section type: ${sectionType}`);
-
-			// Find the section element in the sidebar
-			const sectionElement = document.getElementById(`sidebar-${sectionType}`);
-			if (!sectionElement) {
-				console.warn(`❌ Section element not found: sidebar-${sectionType}`);
-				toast.error("Section not found", {
-					description: `Unable to locate section: ${sectionType}`,
-				});
-				return;
-			}
-
-			console.log(`✅ Found section element:`, sectionElement);
-
-			// Expand the section if it's collapsed (Accordion)
-			// Find the accordion trigger button and click it if the section is collapsed
-			const accordionItem = sectionElement.querySelector('[data-state="closed"]');
-			if (accordionItem) {
-				const trigger = sectionElement.querySelector('button[role="button"]');
-				if (trigger instanceof HTMLElement) {
-					trigger.click();
-					// Wait a bit for the accordion to expand before scrolling
-					setTimeout(() => {
-						performScrollAndHighlight(sectionElement, sectionType);
-					}, 100);
+				// Parse the section key to extract the section type
+				const sectionType = parseSectionKey(sectionKey);
+				if (!sectionType) {
+					console.warn(`❌ Could not parse section key: ${sectionKey}`);
+					toast.error("Section not found", {
+						description: `Unable to locate section: ${sectionKey}`,
+					});
 					return;
 				}
+
+				console.log(`✅ Parsed section type: ${sectionType}`);
+
+				// Find the section element in the sidebar
+				const sectionElement = document.getElementById(`sidebar-${sectionType}`);
+				if (!sectionElement) {
+					console.warn(`❌ Section element not found: sidebar-${sectionType}`);
+					toast.error("Section not found", {
+						description: `Unable to locate section: ${sectionType}`,
+					});
+					return;
+				}
+
+				console.log(`✅ Found section element:`, sectionElement);
+
+				// Expand the section if it's collapsed (Accordion)
+				// Find the accordion trigger button and click it if the section is collapsed
+				const accordionItem = sectionElement.querySelector('[data-state="closed"]');
+				if (accordionItem) {
+					const trigger = sectionElement.querySelector('button[role="button"]');
+					if (trigger instanceof HTMLElement) {
+						trigger.click();
+						// Wait a bit for the accordion to expand before scrolling
+						setTimeout(() => {
+							performScrollAndHighlight(sectionElement, sectionType);
+						}, 100);
+						return;
+					}
+				}
+
+				// If already expanded, scroll immediately
+				performScrollAndHighlight(sectionElement, sectionType);
+			} catch (error) {
+				console.error("Error scrolling to section:", error);
+				toast.error("Unable to navigate to section");
 			}
 
-			// If already expanded, scroll immediately
-			performScrollAndHighlight(sectionElement, sectionType);
+			function performScrollAndHighlight(element: HTMLElement, sectionType: string) {
+				// Scroll to the section smoothly
+				element.scrollIntoView({
+					behavior: "smooth",
+					block: "center",
+				});
 
-		} catch (error) {
-			console.error("Error scrolling to section:", error);
-			toast.error("Unable to navigate to section");
-		}
-
-		function performScrollAndHighlight(element: HTMLElement, sectionType: string) {
-			// Scroll to the section smoothly
-			element.scrollIntoView({
-				behavior: "smooth",
-				block: "center",
-			});
-
-			// Highlight the section after a short delay to ensure scroll has started
-			setTimeout(() => {
-				highlightSection(sectionType);
-			}, 150);
-
-			// Close drawer on mobile
-			if (isMobile) {
+				// Highlight the section after a short delay to ensure scroll has started
 				setTimeout(() => {
-					setShowReviewDrawer(false);
-				}, 300);
+					highlightSection(sectionType);
+				}, 150);
+
+				// Close drawer on mobile
+				if (isMobile) {
+					setTimeout(() => {
+						setShowReviewDrawer(false);
+					}, 300);
+				}
 			}
-		}
-	}, [isMobile, setShowReviewDrawer, highlightSection]);
+		},
+		[isMobile, setShowReviewDrawer, highlightSection],
+	);
 
 	return {
 		scrollToSection,
@@ -179,7 +181,7 @@ export function useReviewOutdatedTracker() {
 	const resume = useResumeStore((state) => state.resume);
 	const reviewResult = useResumeStore((state) => state.reviewResult);
 	const setReviewOutdated: (outdated: boolean) => void = useResumeStore(
-		(state) => ((state as any).setReviewOutdated ?? (() => {}))
+		(state) => (state as any).setReviewOutdated ?? (() => {}),
 	);
 	const previousResumeRef = useRef(resume?.data);
 

@@ -1,19 +1,29 @@
-import { t as createServerFn } from "./createServerFn-Ch6eBU8Y.js";
-import { t as cn } from "./style-BVXxCckg.js";
-import { n as Button, t as Input } from "./input-C4lW-WI7.js";
-import { t as createSsrRpc } from "./createSsrRpc-9mmrq80i.js";
-import { C as InputGroupText, S as InputGroupInput, b as InputGroupAddon, i as PopoverContent, r as Popover$1, s as PopoverTrigger, x as InputGroupButton, y as InputGroup } from "./badge-C7BDNxcP.js";
-import { t as api } from "./api-CLpzZUWU.js";
-import { c as Label$1 } from "./form-DrLEBR9G.js";
-import { memo, useCallback, useMemo, useState } from "react";
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { jsx, jsxs } from "react/jsx-runtime";
+import { i18n } from "@lingui/core";
 import { Trans } from "@lingui/react";
 import { ProhibitIcon, TagIcon } from "@phosphor-icons/react";
-import { i18n } from "@lingui/core";
-import { ScrollArea } from "radix-ui";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import Fuse from "fuse.js";
+import { ScrollArea } from "radix-ui";
+import { memo, useCallback, useMemo, useState } from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
 import { Grid } from "react-window";
+import { t as api } from "./api-CLpzZUWU.js";
+import {
+	y as InputGroup,
+	b as InputGroupAddon,
+	x as InputGroupButton,
+	S as InputGroupInput,
+	C as InputGroupText,
+	r as Popover$1,
+	i as PopoverContent,
+	s as PopoverTrigger,
+} from "./badge-C7BDNxcP.js";
+import { t as createServerFn } from "./createServerFn-Ch6eBU8Y.js";
+import { t as createSsrRpc } from "./createSsrRpc-9mmrq80i.js";
+import { c as Label$1 } from "./form-DrLEBR9G.js";
+import { n as Button, t as Input } from "./input-C4lW-WI7.js";
+import { t as cn } from "./style-BVXxCckg.js";
+
 function rgbToHsv(color) {
 	const r = color.r / 255;
 	const g = color.g / 255;
@@ -21,17 +31,18 @@ function rgbToHsv(color) {
 	const max = Math.max(r, g, b);
 	const diff = max - Math.min(r, g, b);
 	let h = 0;
-	if (diff !== 0) switch (max) {
-		case r:
-			h = (g - b) / diff % 6;
-			break;
-		case g:
-			h = (b - r) / diff + 2;
-			break;
-		case b:
-			h = (r - g) / diff + 4;
-			break;
-	}
+	if (diff !== 0)
+		switch (max) {
+			case r:
+				h = ((g - b) / diff) % 6;
+				break;
+			case g:
+				h = (b - r) / diff + 2;
+				break;
+			case b:
+				h = (r - g) / diff + 4;
+				break;
+		}
 	h = Math.round(h * 60);
 	if (h < 0) h += 360;
 	const s = max === 0 ? 0 : diff / max;
@@ -40,7 +51,7 @@ function rgbToHsv(color) {
 		h,
 		s: Math.round(s * 100),
 		v: Math.round(v * 100),
-		a: color.a
+		a: color.a,
 	};
 }
 function hsvToRgb(hsv) {
@@ -95,52 +106,59 @@ function hsvToRgb(hsv) {
 		r: Math.round(r * 255),
 		g: Math.round(g * 255),
 		b: Math.round(b * 255),
-		a: hsv.a
+		a: hsv.a,
 	};
 }
 function parseRgbString(value) {
 	const trimmed = value.trim();
 	const rgbMatch = trimmed.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\s*\)$/);
-	if (rgbMatch) return {
-		r: Number.parseInt(rgbMatch[1] ?? "0", 10),
-		g: Number.parseInt(rgbMatch[2] ?? "0", 10),
-		b: Number.parseInt(rgbMatch[3] ?? "0", 10),
-		a: rgbMatch[4] ? Number.parseFloat(rgbMatch[4]) : 1
-	};
+	if (rgbMatch)
+		return {
+			r: Number.parseInt(rgbMatch[1] ?? "0", 10),
+			g: Number.parseInt(rgbMatch[2] ?? "0", 10),
+			b: Number.parseInt(rgbMatch[3] ?? "0", 10),
+			a: rgbMatch[4] ? Number.parseFloat(rgbMatch[4]) : 1,
+		};
 	if (trimmed.startsWith("#")) {
 		const hexMatch = trimmed.match(/^#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})$/i);
-		if (hexMatch) return {
-			r: Number.parseInt(hexMatch[1] ?? "0", 16),
-			g: Number.parseInt(hexMatch[2] ?? "0", 16),
-			b: Number.parseInt(hexMatch[3] ?? "0", 16),
-			a: 1
-		};
+		if (hexMatch)
+			return {
+				r: Number.parseInt(hexMatch[1] ?? "0", 16),
+				g: Number.parseInt(hexMatch[2] ?? "0", 16),
+				b: Number.parseInt(hexMatch[3] ?? "0", 16),
+				a: 1,
+			};
 		const hexMatch3 = trimmed.match(/^#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])$/i);
-		if (hexMatch3) return {
-			r: Number.parseInt((hexMatch3[1] ?? "0") + (hexMatch3[1] ?? "0"), 16),
-			g: Number.parseInt((hexMatch3[2] ?? "0") + (hexMatch3[2] ?? "0"), 16),
-			b: Number.parseInt((hexMatch3[3] ?? "0") + (hexMatch3[3] ?? "0"), 16),
-			a: 1
-		};
+		if (hexMatch3)
+			return {
+				r: Number.parseInt((hexMatch3[1] ?? "0") + (hexMatch3[1] ?? "0"), 16),
+				g: Number.parseInt((hexMatch3[2] ?? "0") + (hexMatch3[2] ?? "0"), 16),
+				b: Number.parseInt((hexMatch3[3] ?? "0") + (hexMatch3[3] ?? "0"), 16),
+				a: 1,
+			};
 	}
 	return null;
 }
 function rgbToString(color) {
-	return color.a < 1 ? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})` : `rgb(${color.r}, ${color.g}, ${color.b})`;
+	return color.a < 1
+		? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
+		: `rgb(${color.r}, ${color.g}, ${color.b})`;
 }
 function hexToRgb(hex, alpha = 1) {
 	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-	return result ? {
-		r: Number.parseInt(result[1] ?? "0", 16),
-		g: Number.parseInt(result[2] ?? "0", 16),
-		b: Number.parseInt(result[3] ?? "0", 16),
-		a: alpha
-	} : {
-		r: 0,
-		g: 0,
-		b: 0,
-		a: alpha
-	};
+	return result
+		? {
+				r: Number.parseInt(result[1] ?? "0", 16),
+				g: Number.parseInt(result[2] ?? "0", 16),
+				b: Number.parseInt(result[3] ?? "0", 16),
+				a: alpha,
+			}
+		: {
+				r: 0,
+				g: 0,
+				b: 0,
+				a: alpha,
+			};
 }
 var PREFIX = "https://";
 function stripPrefix(url) {
@@ -151,57 +169,74 @@ function ensurePrefix(url) {
 	return url.startsWith(PREFIX) ? url : PREFIX + url;
 }
 function URLInput({ value, onChange, hideLabelButton, ...props }) {
-	const handleUrlChange = useCallback((e) => {
-		onChange({
-			url: ensurePrefix(e.target.value),
-			label: value.label
-		});
-	}, [onChange, value.label]);
-	const handleLabelChange = useCallback((e) => {
-		onChange({
-			url: value.url,
-			label: e.target.value
-		});
-	}, [onChange, value.url]);
+	const handleUrlChange = useCallback(
+		(e) => {
+			onChange({
+				url: ensurePrefix(e.target.value),
+				label: value.label,
+			});
+		},
+		[onChange, value.label],
+	);
+	const handleLabelChange = useCallback(
+		(e) => {
+			onChange({
+				url: value.url,
+				label: e.target.value,
+			});
+		},
+		[onChange, value.url],
+	);
 	const urlValue = useMemo(() => stripPrefix(value.url), [value.url]);
-	return /* @__PURE__ */ jsxs(InputGroup, { children: [
-		/* @__PURE__ */ jsx(InputGroupAddon, {
-			align: "inline-start",
-			children: /* @__PURE__ */ jsx(InputGroupText, { children: PREFIX })
-		}),
-		/* @__PURE__ */ jsx(InputGroupInput, {
-			value: urlValue,
-			className: cn(props.className, "ps-0!"),
-			onChange: handleUrlChange,
-			...props
-		}),
-		!hideLabelButton && /* @__PURE__ */ jsx(InputGroupAddon, {
-			align: "inline-end",
-			children: /* @__PURE__ */ jsxs(Popover$1, { children: [/* @__PURE__ */ jsx(PopoverTrigger, {
-				asChild: true,
-				children: /* @__PURE__ */ jsx(InputGroupButton, {
-					size: "icon-sm",
-					title: i18n._({ id: "0Bi4hM" }),
-					children: /* @__PURE__ */ jsx(TagIcon, {})
-				})
-			}), /* @__PURE__ */ jsx(PopoverContent, {
-				className: "pt-3",
-				children: /* @__PURE__ */ jsxs("div", {
-					className: "grid gap-2",
-					onClick: (e) => e.stopPropagation(),
-					children: [/* @__PURE__ */ jsx(Label$1, {
-						htmlFor: "url-label",
-						children: /* @__PURE__ */ jsx(Trans, { id: "87a/t/" })
-					}), /* @__PURE__ */ jsx(Input, {
-						id: "url-label",
-						name: "url-label",
-						value: value.label,
-						onChange: handleLabelChange
-					})]
-				})
-			})] })
-		})
-	] });
+	return /* @__PURE__ */ jsxs(InputGroup, {
+		children: [
+			/* @__PURE__ */ jsx(InputGroupAddon, {
+				align: "inline-start",
+				children: /* @__PURE__ */ jsx(InputGroupText, { children: PREFIX }),
+			}),
+			/* @__PURE__ */ jsx(InputGroupInput, {
+				value: urlValue,
+				className: cn(props.className, "ps-0!"),
+				onChange: handleUrlChange,
+				...props,
+			}),
+			!hideLabelButton &&
+				/* @__PURE__ */ jsx(InputGroupAddon, {
+					align: "inline-end",
+					children: /* @__PURE__ */ jsxs(Popover$1, {
+						children: [
+							/* @__PURE__ */ jsx(PopoverTrigger, {
+								asChild: true,
+								children: /* @__PURE__ */ jsx(InputGroupButton, {
+									size: "icon-sm",
+									title: i18n._({ id: "0Bi4hM" }),
+									children: /* @__PURE__ */ jsx(TagIcon, {}),
+								}),
+							}),
+							/* @__PURE__ */ jsx(PopoverContent, {
+								className: "pt-3",
+								children: /* @__PURE__ */ jsxs("div", {
+									className: "grid gap-2",
+									onClick: (e) => e.stopPropagation(),
+									children: [
+										/* @__PURE__ */ jsx(Label$1, {
+											htmlFor: "url-label",
+											children: /* @__PURE__ */ jsx(Trans, { id: "87a/t/" }),
+										}),
+										/* @__PURE__ */ jsx(Input, {
+											id: "url-label",
+											name: "url-label",
+											value: value.label,
+											onChange: handleLabelChange,
+										}),
+									],
+								}),
+							}),
+						],
+					}),
+				}),
+		],
+	});
 }
 const icons = [
 	"",
@@ -1734,7 +1769,7 @@ const icons = [
 	"x-square",
 	"yarn",
 	"yin-yang",
-	"youtube-logo"
+	"youtube-logo",
 ];
 var columnCount = 8;
 var columnWidth = 36;
@@ -1748,7 +1783,7 @@ function _IconSearchInput(props) {
 		"aria-label": i18n._({ id: "tfjodq" }),
 		placeholder: i18n._({ id: "tfjodq" }),
 		onChange: (e) => props.onChange(e.currentTarget.value),
-		className: cn("rounded-none border-0 focus-visible:ring-0", props.className)
+		className: cn("rounded-none border-0 focus-visible:ring-0", props.className),
 	});
 }
 var IconSearchInput = memo(_IconSearchInput);
@@ -1762,15 +1797,20 @@ function IconCellComponent({ columnIndex, rowIndex, style, icons: icons$1, onCha
 		tabIndex: -1,
 		onClick: () => onChange(icon),
 		className: "flex size-full items-center justify-center hover:bg-accent",
-		children: icon ? /* @__PURE__ */ jsx("i", { className: cn("ph text-base", `ph-${icon}`) }) : /* @__PURE__ */ jsx(ProhibitIcon, {})
+		children: icon
+			? /* @__PURE__ */ jsx("i", { className: cn("ph text-base", `ph-${icon}`) })
+			: /* @__PURE__ */ jsx(ProhibitIcon, {}),
 	});
 }
 function useIconSearch() {
-	const fuse = useMemo(() => new Fuse(icons, { threshold: .35 }), []);
-	return useCallback((query) => {
-		if (!query.trim()) return Array.from(icons);
-		return fuse.search(query).map((result) => result.item);
-	}, [fuse]);
+	const fuse = useMemo(() => new Fuse(icons, { threshold: 0.35 }), []);
+	return useCallback(
+		(query) => {
+			if (!query.trim()) return Array.from(icons);
+			return fuse.search(query).map((result) => result.item);
+		},
+		[fuse],
+	);
 }
 function IconPicker({ value, onChange, popoverProps, ...props }) {
 	const searchIcons = useIconSearch();
@@ -1779,35 +1819,45 @@ function IconPicker({ value, onChange, popoverProps, ...props }) {
 	const rowCount = useMemo(() => Math.ceil(searchedIcons.length / columnCount), [searchedIcons]);
 	return /* @__PURE__ */ jsxs(Popover$1, {
 		...popoverProps,
-		children: [/* @__PURE__ */ jsx(PopoverTrigger, {
-			asChild: true,
-			children: /* @__PURE__ */ jsx(Button, {
-				size: "icon",
-				variant: "outline",
-				...props,
-				children: /* @__PURE__ */ jsx("i", { className: cn("ph size-4 text-base", `ph-${value}`) })
-			})
-		}), /* @__PURE__ */ jsxs(PopoverContent, {
-			align: "start",
-			className: "h-[326px] w-[290px] gap-0 p-0",
-			children: [/* @__PURE__ */ jsx(IconSearchInput, {
-				value: search,
-				onChange: setSearch
-			}), /* @__PURE__ */ jsx("div", {
-				className: "size-[290px]",
-				children: /* @__PURE__ */ jsx(Grid, {
-					rowCount,
-					rowHeight,
-					columnCount,
-					columnWidth,
-					cellComponent: IconCellComponent,
-					cellProps: {
-						icons: searchedIcons,
-						onChange
-					}
-				}, search)
-			})]
-		})]
+		children: [
+			/* @__PURE__ */ jsx(PopoverTrigger, {
+				asChild: true,
+				children: /* @__PURE__ */ jsx(Button, {
+					size: "icon",
+					variant: "outline",
+					...props,
+					children: /* @__PURE__ */ jsx("i", { className: cn("ph size-4 text-base", `ph-${value}`) }),
+				}),
+			}),
+			/* @__PURE__ */ jsxs(PopoverContent, {
+				align: "start",
+				className: "h-[326px] w-[290px] gap-0 p-0",
+				children: [
+					/* @__PURE__ */ jsx(IconSearchInput, {
+						value: search,
+						onChange: setSearch,
+					}),
+					/* @__PURE__ */ jsx("div", {
+						className: "size-[290px]",
+						children: /* @__PURE__ */ jsx(
+							Grid,
+							{
+								rowCount,
+								rowHeight,
+								columnCount,
+								columnWidth,
+								cellComponent: IconCellComponent,
+								cellProps: {
+									icons: searchedIcons,
+									onChange,
+								},
+							},
+							search,
+						),
+					}),
+				],
+			}),
+		],
 	});
 }
 function ScrollArea$1({ className, children, ...props }) {
@@ -1818,12 +1868,13 @@ function ScrollArea$1({ className, children, ...props }) {
 		children: [
 			/* @__PURE__ */ jsx(ScrollArea.Viewport, {
 				"data-slot": "scroll-area-viewport",
-				className: "size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50",
-				children
+				className:
+					"size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50",
+				children,
 			}),
 			/* @__PURE__ */ jsx(ScrollBar, {}),
-			/* @__PURE__ */ jsx(ScrollArea.Corner, {})
-		]
+			/* @__PURE__ */ jsx(ScrollArea.Corner, {}),
+		],
 	});
 }
 function ScrollBar({ className, orientation = "vertical", ...props }) {
@@ -1831,12 +1882,15 @@ function ScrollBar({ className, orientation = "vertical", ...props }) {
 		"data-slot": "scroll-area-scrollbar",
 		"data-orientation": orientation,
 		orientation,
-		className: cn("flex touch-none select-none p-px transition-colors data-horizontal:h-2.5 data-vertical:h-full data-vertical:w-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:border-l data-vertical:border-l-transparent", className),
+		className: cn(
+			"flex touch-none select-none p-px transition-colors data-horizontal:h-2.5 data-vertical:h-full data-vertical:w-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:border-l data-vertical:border-l-transparent",
+			className,
+		),
 		...props,
 		children: /* @__PURE__ */ jsx(ScrollArea.ScrollAreaThumb, {
 			"data-slot": "scroll-area-thumb",
-			className: "relative flex-1 rounded-full bg-border"
-		})
+			className: "relative flex-1 rounded-full bg-border",
+		}),
 	});
 }
 var $$splitComponentImporter = () => import("./route-c8es-xX0.js");
@@ -1850,16 +1904,31 @@ const Route = createFileRoute("/builder/$resumeId")({
 		return { session: context.session };
 	},
 	loader: async ({ params, context }) => {
-		const [layout, resume] = await Promise.all([getBuilderLayoutServerFn(), context.queryClient.ensureQueryData({
-			queryKey: ["resumes", params.resumeId],
-			queryFn: () => api.fetchResume(params.resumeId)
-		})]);
+		const [layout, resume] = await Promise.all([
+			getBuilderLayoutServerFn(),
+			context.queryClient.ensureQueryData({
+				queryKey: ["resumes", params.resumeId],
+				queryFn: () => api.fetchResume(params.resumeId),
+			}),
+		]);
 		return {
 			layout,
-			name: resume.name
+			name: resume.name,
 		};
 	},
-	head: ({ loaderData }) => ({ meta: loaderData ? [{ title: `${loaderData.name} - Zoe Resume Builder` }] : void 0 })
+	head: ({ loaderData }) => ({ meta: loaderData ? [{ title: `${loaderData.name} - Zoe Resume Builder` }] : void 0 }),
 });
-var getBuilderLayoutServerFn = createServerFn({ method: "GET" }).handler(createSsrRpc("87b9e274e18165348265760f0c6066b95da714ecd2e1a1b30427498be3225e01"));
-export { hexToRgb as a, rgbToHsv as c, URLInput as i, rgbToString as l, ScrollArea$1 as n, hsvToRgb as o, IconPicker as r, parseRgbString as s, Route as t };
+var getBuilderLayoutServerFn = createServerFn({ method: "GET" }).handler(
+	createSsrRpc("87b9e274e18165348265760f0c6066b95da714ecd2e1a1b30427498be3225e01"),
+);
+export {
+	hexToRgb as a,
+	rgbToHsv as c,
+	URLInput as i,
+	rgbToString as l,
+	ScrollArea$1 as n,
+	hsvToRgb as o,
+	IconPicker as r,
+	parseRgbString as s,
+	Route as t,
+};

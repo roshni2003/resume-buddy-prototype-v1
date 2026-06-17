@@ -1,5 +1,7 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
+import { ReadCvLogo, Users } from "@phosphor-icons/react";
+// import { ChartBar} from "@phosphor-icons/react";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
