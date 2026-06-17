@@ -35,7 +35,9 @@ const steps: {
 		label: "Match to a job",
 		description: "Paste a job description and I'll tailor your resume to land the interview.",
 		icon: SuitcaseIcon,
-		action: () => {}, // Coming soon
+		action: (navigate) => {
+			navigate({ to: "/dashboard/resumes/match" });
+		},
 	},
 ];
 
