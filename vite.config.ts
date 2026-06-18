@@ -65,6 +65,7 @@ const config = defineConfig({
 	},
 
 	server: {
+		// Vite auto-restart trigger
 		host: true,
 		port: 3000,
 		strictPort: true,
@@ -73,6 +74,15 @@ const config = defineConfig({
 			host: "localhost",
 			port: 3000,
 		},
+		proxy: {
+			"/api/openapi": {
+				target: "https://api.resume-builder.zuvy.org",
+				changeOrigin: true,
+				headers: {
+					Origin: "https://api.resume-builder.zuvy.org"
+				}
+			}
+		}
 	},
 
 	plugins: [

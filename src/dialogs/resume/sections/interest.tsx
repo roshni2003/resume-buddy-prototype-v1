@@ -23,7 +23,7 @@ const formSchema = interestItemSchema;
 type FormValues = z.infer<typeof formSchema>;
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react";
 
 export function CreateInterestDialog({ data }: DialogProps<"resume.sections.interests.create">) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);

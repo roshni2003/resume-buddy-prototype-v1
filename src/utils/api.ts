@@ -17,10 +17,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 		tokenTail: token ? `…${token.slice(-8)}` : null,
 	});
 
+	const isGet = !options.method || options.method.toUpperCase() === "GET";
 	const response = await fetch(url, {
 		...options,
 		headers: {
-			"Content-Type": "application/json",
+			...(!isGet ? { "Content-Type": "application/json" } : {}),
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
 			...options.headers,
 		},
