@@ -1,11 +1,3 @@
-/**
- * ProjectsSectionBuilder — inline (no dialog) redesign
- * Mirrors the Experience section UX: click a card or "Add" to expand
- * the form in-place with Zoe tips + AI button.
- *
- * Drop-in replacement for the existing ProjectsSectionBuilder file.
- */
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
 import {
