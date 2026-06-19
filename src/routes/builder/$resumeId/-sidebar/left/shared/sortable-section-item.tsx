@@ -133,12 +133,12 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 				<button
 					onClick={onUpdate}
 					className={cn(
-						"flex flex-1 flex-col items-start justify-center space-y-0.5 ps-1 text-start opacity-100 transition-opacity hover:bg-gray-50 focus:outline-none focus-visible:ring-1",
+						"flex flex-1 flex-col items-start justify-center space-y-0.5 ps-1 text-start opacity-100 transition-opacity hover:bg-gray-50 dark:hover:bg-muted/50 focus:outline-none focus-visible:ring-1",
 						item.hidden && "opacity-50",
 					)}
 					type="button"
 				>
-					<div className="line-clamp-1 font-medium text-gray-800">{title}</div>
+					<div className="line-clamp-1 font-medium text-gray-800 dark:text-gray-200">{title}</div>
 					{subtitle && <div className="line-clamp-1 text-muted-foreground text-xs">{subtitle}</div>}
 				</button>
 

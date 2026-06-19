@@ -85,9 +85,9 @@ export function SummarySectionBuilder() {
 				<FormProvider {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<div className="mb-3 flex items-end justify-between">
-							<label className="font-bold text-gray-500 text-xs uppercase tracking-widest">Professional Summary</label>
+							<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest">Professional Summary</label>
 
-							<div className="relative mb-2 rounded-xl bg-gray-50 p-1">
+							<div className="relative mb-2 rounded-xl bg-gray-50 dark:bg-muted/50 p-1">
 								{isPulsing && (
 									<>
 										<div className="absolute -inset-1 rounded-full bg-amber-400/40 blur-md animate-ai-glow" />
@@ -124,13 +124,13 @@ export function SummarySectionBuilder() {
 								AI Assisted
 							</div>
 
-							<span className="text-xs text-gray-500">
+							<span className="text-xs text-gray-500 dark:text-gray-400">
 								Zoe can improve tone and impact
 							</span>
 						</div>
 
 						{/* Input Area */}
-						<div className="mb-2 rounded-xl bg-gray-50 p-1">
+						<div className="mb-2 rounded-xl bg-gray-50 dark:bg-muted/50 p-1">
 							<RichInput
 								value={content}
 								onChange={(val) => {
@@ -140,7 +140,7 @@ export function SummarySectionBuilder() {
 						</div>
 
 						{/* Footer Stats */}
-						<div className="mb-4 flex flex-col gap-1 font-mono text-gray-500 text-xs sm:flex-row sm:items-center sm:justify-between">
+						<div className="mb-4 flex flex-col gap-1 font-mono text-gray-500 dark:text-gray-400 text-xs sm:flex-row sm:items-center sm:justify-between">
 							<div>
 								{wordCount} words &nbsp;·&nbsp; {charCount} chars
 							</div>
@@ -161,15 +161,15 @@ export function SummarySectionBuilder() {
 				</FormProvider>
 
 				{/* Zoe Tips Card Below Input */}
-				<div className="relative overflow-hidden rounded-xl border border-emerald-100 bg-linear-to-br from-emerald-50 to-teal-50/50 p-5 shadow-sm">
+				<div className="relative overflow-hidden rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-linear-to-br from-emerald-50 dark:from-emerald-900/20 to-teal-50/50 dark:to-teal-900/20 p-5 shadow-sm">
 					<div className="absolute top-0 right-0 p-4 opacity-10">
-						<SparkleIcon weight="fill" className="h-24 w-24 text-emerald-600" />
+						<SparkleIcon weight="fill" className="h-24 w-24 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<div className="mb-3 flex items-center gap-2">
-						<SparkleIcon className="h-5 w-5 text-emerald-600" weight="fill" />
-						<h4 className="font-bold text-emerald-800 text-sm uppercase tracking-widest">Zoe Tips</h4>
+						<SparkleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" weight="fill" />
+						<h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm uppercase tracking-widest">Zoe Tips</h4>
 					</div>
-					<ul className="mb-4 space-y-2 font-medium text-emerald-900 text-sm">
+					<ul className="mb-4 space-y-2 font-medium text-emerald-900 dark:text-emerald-200 text-sm">
 						<li className="flex items-center gap-2">
 							<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
 							Lead with your role + years
@@ -187,7 +187,7 @@ export function SummarySectionBuilder() {
 							Keep it under 80 words
 						</li>
 					</ul>
-					<p className="font-serif text-emerald-700 text-sm italic">
+					<p className="font-serif text-emerald-700 dark:text-emerald-400 text-sm italic">
 						Zoe will polish tone, tighten verbs, and quantify impact for you. Look for the magic button above!
 					</p>
 				</div>
@@ -195,7 +195,7 @@ export function SummarySectionBuilder() {
 					<Button
 						type="button"
 						variant="ghost"
-						className="rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50"
+						className="rounded-xl border border-gray-200 dark:border-border text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50"
 						onClick={onCancel}
 					>
 						<Trans>Cancel</Trans>

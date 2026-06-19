@@ -316,22 +316,22 @@ type AddButtonProps = Omit<ButtonProps, "type"> & {
 };
 
 const colorMap: Record<string, { text: string; bg: string; border: string }> = {
-	picture: { text: "text-pink-500", bg: "bg-pink-50", border: "border-pink-200" },
-	basics: { text: "text-sky-500", bg: "bg-sky-50", border: "border-sky-200" },
-	profiles: { text: "text-purple-500", bg: "bg-purple-50", border: "border-purple-200" },
-	summary: { text: "text-yellow-500", bg: "bg-yellow-50", border: "border-yellow-200" },
-	experience: { text: "text-blue-500", bg: "bg-blue-50", border: "border-blue-200" },
-	education: { text: "text-green-500", bg: "bg-green-50", border: "border-green-200" },
-	projects: { text: "text-red-500", bg: "bg-red-50", border: "border-red-200" },
-	skills: { text: "text-teal-500", bg: "bg-teal-50", border: "border-teal-200" },
-	languages: { text: "text-indigo-500", bg: "bg-indigo-50", border: "border-indigo-200" },
-	interests: { text: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200" },
-	awards: { text: "text-amber-500", bg: "bg-amber-50", border: "border-amber-200" },
-	certifications: { text: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-200" },
-	publications: { text: "text-cyan-500", bg: "bg-cyan-50", border: "border-cyan-200" },
-	volunteer: { text: "text-rose-500", bg: "bg-rose-50", border: "border-rose-200" },
-	references: { text: "text-violet-500", bg: "bg-violet-50", border: "border-violet-200" },
-	custom: { text: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200" },
+	picture: { text: "text-pink-500 dark:text-pink-400", bg: "bg-pink-50 dark:bg-pink-900/20", border: "border-pink-200 dark:border-pink-800/50" },
+	basics: { text: "text-sky-500 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-900/20", border: "border-sky-200 dark:border-sky-800/50" },
+	profiles: { text: "text-purple-500 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-900/20", border: "border-purple-200 dark:border-purple-800/50" },
+	summary: { text: "text-yellow-500 dark:text-yellow-400", bg: "bg-yellow-50 dark:bg-yellow-900/20", border: "border-yellow-200 dark:border-yellow-800/50" },
+	experience: { text: "text-blue-500 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-200 dark:border-blue-800/50" },
+	education: { text: "text-green-500 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20", border: "border-green-200 dark:border-green-800/50" },
+	projects: { text: "text-red-500 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20", border: "border-red-200 dark:border-red-800/50" },
+	skills: { text: "text-teal-500 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-900/20", border: "border-teal-200 dark:border-teal-800/50" },
+	languages: { text: "text-indigo-500 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/20", border: "border-indigo-200 dark:border-indigo-800/50" },
+	interests: { text: "text-orange-500 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-800/50" },
+	awards: { text: "text-amber-500 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-200 dark:border-amber-800/50" },
+	certifications: { text: "text-emerald-500 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-200 dark:border-emerald-800/50" },
+	publications: { text: "text-cyan-500 dark:text-cyan-400", bg: "bg-cyan-50 dark:bg-cyan-900/20", border: "border-cyan-200 dark:border-cyan-800/50" },
+	volunteer: { text: "text-rose-500 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-200 dark:border-rose-800/50" },
+	references: { text: "text-violet-500 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-900/20", border: "border-violet-200 dark:border-violet-800/50" },
+	custom: { text: "text-gray-500 dark:text-gray-400", bg: "bg-gray-50 dark:bg-muted/50", border: "border-gray-200 dark:border-border" },
 };
 
 export function SectionAddItemButton({ type, customSectionId, className, children, ...props }: AddButtonProps) {
@@ -353,7 +353,7 @@ export function SectionAddItemButton({ type, customSectionId, className, childre
 			variant="outline"
 			onClick={handleAdd}
 			className={cn(
-				"mt-4 h-10 w-full justify-center rounded-full border border-dashed transition-colors hover:bg-white",
+				"mt-4 h-10 w-full justify-center rounded-full border border-dashed transition-colors hover:bg-white dark:hover:bg-card hover:text-current",
 				colors.text,
 				colors.bg,
 				colors.border,

@@ -87,10 +87,10 @@ export function PictureSectionForm() {
 			<form onChange={form.handleSubmit(onSubmit)}>
 				<div className="grid grid-cols-1 gap-6 pt-2 md:grid-cols-2">
 					{/* Left Column: Photo Upload/Preview */}
-					<div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[24px] border-2 border-emerald-200 border-dashed bg-white shadow-sm transition-all hover:bg-gray-50">
+					<div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[24px] border-2 border-emerald-200 dark:border-emerald-800/50 border-dashed bg-white dark:bg-card shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-muted/50">
 						{pictureUrl ? (
 							<div
-								className="flex items-center justify-center overflow-hidden bg-white shadow-md transition-all duration-300"
+								className="flex items-center justify-center overflow-hidden bg-white dark:bg-card shadow-md transition-all duration-300"
 								style={{
 									width: `${size}px`,
 									height: `${size / (aspectRatio || 1)}px`,
@@ -106,9 +106,9 @@ export function PictureSectionForm() {
 								<img src={pictureUrl} alt="Profile" className="h-full w-full object-cover" />
 							</div>
 						) : (
-							<div className="flex flex-col items-center justify-center gap-4 text-emerald-800">
+							<div className="flex flex-col items-center justify-center gap-4 text-emerald-800 dark:text-emerald-300">
 								<div
-									className={`flex items-center justify-center bg-emerald-50 transition-all duration-300 ${aspectRatio === 1 && borderRadius === 100 ? "rounded-full" : // Circle
+									className={`flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 transition-all duration-300 ${aspectRatio === 1 && borderRadius === 100 ? "rounded-full" : // Circle
 										aspectRatio === 0.75 && borderRadius === 100 ? "rounded-full" : // Oval (uses 50% border-radius)
 											"rounded-xl" // Square
 										}`}
@@ -130,7 +130,7 @@ export function PictureSectionForm() {
 										<path d="M224,144v64a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V144a8,8,0,0,1,16,0v64H208V144a8,8,0,0,1,16,0ZM133.66,34.34a8,8,0,0,0-11.32,0l-48,48a8,8,0,0,0,11.32,11.32L120,59.31V160a8,8,0,0,0,16,0V59.31l34.34,34.35a8,8,0,0,0,11.32-11.32Z"></path>
 									</svg>
 								</div>
-								<span className="font-medium text-gray-500 text-sm">Drop an image, or paste a URL</span>
+								<span className="font-medium text-gray-500 dark:text-gray-400 text-sm">Drop an image, or paste a URL</span>
 							</div>
 						)}
 						<input
@@ -145,15 +145,15 @@ export function PictureSectionForm() {
 							<div className="absolute top-3 right-3 z-20 flex gap-2">
 								<label
 									htmlFor="picture-upload"
-									className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white shadow-md transition-all hover:scale-110 hover:bg-gray-100"
+									className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white dark:bg-card shadow-md transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-muted"
 									title="Change photo"
 								>
-									<PencilSimpleIcon className="h-4 w-4 text-gray-700" weight="bold" />
+									<PencilSimpleIcon className="h-4 w-4 text-gray-700 dark:text-gray-300" weight="bold" />
 								</label>
 								<button
 									type="button"
 									onClick={handleRemovePhoto}
-									className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md transition-all hover:scale-110 hover:bg-gray-100"
+									className="flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-card shadow-md transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-muted"
 									title="Remove photo"
 								>
 									<TrashIcon className="h-4 w-4 text-red-500" weight="bold" />
@@ -170,14 +170,14 @@ export function PictureSectionForm() {
 							name="url"
 							render={({ field }) => (
 								<FormItem className="space-y-3">
-									<FormLabel className="font-bold text-gray-500 text-xs uppercase tracking-wider">
+									<FormLabel className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
 										<Trans>Image URL</Trans>
 									</FormLabel>
 									<FormControl>
 										<Input
 											{...field}
 											placeholder="https://..."
-											className="h-10 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm transition-all focus:bg-white focus:ring-1 focus:ring-emerald-500"
+											className="h-10 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted/50 px-4 text-sm transition-all focus:bg-white focus:ring-1 focus:ring-emerald-500"
 											onChange={(e) => {
 												field.onChange(e);
 												if (e.target.value.trim() !== "") {
@@ -193,7 +193,7 @@ export function PictureSectionForm() {
 
 						{/* Frame Selection */}
 						<div className="space-y-3">
-							<FormLabel className="font-bold text-gray-500 text-xs uppercase tracking-wider">
+							<FormLabel className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
 								<Trans>Frame</Trans>
 							</FormLabel>
 							<div className="flex gap-6">
@@ -208,14 +208,14 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-200" : "bg-transparent hover:bg-gray-50"}`}
+										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
 									>
 										<div
 											className={`h-5 w-5 rounded-full ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-500" : "bg-gray-500"}`}
 										/>
 									</div>
 									<span
-										className={`text-sm ${aspectRatio === 1 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
+										className={`text-sm ${aspectRatio === 1 && borderRadius === 100 ? "font-medium text-gray-700 dark:text-gray-300" : "text-gray-900 dark:text-gray-100"}`}
 									>
 										Circle
 									</span>
@@ -232,14 +232,14 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-200" : "bg-transparent hover:bg-gray-50"}`}
+										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
 									>
 										<div
 											className={`h-6 w-5 rounded-full ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-500" : "bg-gray-500"}`}
 										/>
 									</div>
 									<span
-										className={`text-sm ${aspectRatio === 0.75 && borderRadius === 100 ? "font-medium text-gray-700" : "text-gray-900"}`}
+										className={`text-sm ${aspectRatio === 0.75 && borderRadius === 100 ? "font-medium text-gray-700 dark:text-gray-300" : "text-gray-900 dark:text-gray-100"}`}
 									>
 										Oval
 									</span>
@@ -256,14 +256,14 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-200" : "bg-transparent hover:bg-gray-50"}`}
+										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
 									>
 										<div
 											className={`h-5 w-5 rounded-sm ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-500" : "bg-gray-500"}`}
 										/>
 									</div>
 									<span
-										className={`text-sm ${aspectRatio === 1 && borderRadius === 10 ? "font-medium text-gray-700" : "text-gray-900"}`}
+										className={`text-sm ${aspectRatio === 1 && borderRadius === 10 ? "font-medium text-gray-700 dark:text-gray-300" : "text-gray-900 dark:text-gray-100"}`}
 									>
 										Square
 									</span>
@@ -278,10 +278,10 @@ export function PictureSectionForm() {
 							render={({ field }) => (
 								<FormItem className="space-y-3 pt-2">
 									<div className="flex items-center justify-between">
-										<FormLabel className="font-bold text-gray-500 text-xs uppercase tracking-wider">
+										<FormLabel className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
 											<Trans>Size</Trans>
 										</FormLabel>
-										<span className="font-medium text-gray-900 text-sm">{field.value}px</span>
+										<span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{field.value}px</span>
 									</div>
 									<FormControl>
 										<div className="relative flex w-full items-center">

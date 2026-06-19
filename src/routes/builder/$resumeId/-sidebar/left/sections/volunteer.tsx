@@ -52,7 +52,7 @@ export function VolunteerSectionBuilder() {
 				{section.items.map((item) => (
 					<div
 						key={item.id}
-						className="relative flex items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4"
+						className="relative flex items-start gap-3 rounded-2xl border border-gray-100 dark:border-border bg-gray-50 dark:bg-muted/50 p-4"
 						style={{ borderLeft: "4px solid #f87171" }}
 					>
 						{/* Heart icon — vertically centred to the first row of inputs */}
@@ -71,13 +71,13 @@ export function VolunteerSectionBuilder() {
 									placeholder="Organization"
 									value={item.organization}
 									onChange={(e) => handleChange(item.id, "organization", e.target.value)}
-									className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm h-auto shadow-sm"
+									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
 								/>
 								<Input
 									placeholder="Role"
 									value={item.location}
 									onChange={(e) => handleChange(item.id, "location", e.target.value)}
-									className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm h-auto shadow-sm"
+									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
 								/>
 							</div>
 
@@ -87,13 +87,13 @@ export function VolunteerSectionBuilder() {
 									placeholder="Dates"
 									value={item.period}
 									onChange={(e) => handleChange(item.id, "period", e.target.value)}
-									className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm h-auto shadow-sm"
+									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
 								/>
 								<Input
 									placeholder="Cause"
 									value={item.website?.url}
 									onChange={(e) => handleChange(item.id, "website.url", e.target.value)}
-									className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm h-auto shadow-sm"
+									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
 								/>
 							</div>
 
@@ -101,7 +101,7 @@ export function VolunteerSectionBuilder() {
 							<RichInput
 								value={item.description}
 								onChange={(val) => handleChange(item.id, "description", val)}
-								className="rounded-xl border border-gray-200 bg-white"
+								className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
 							/>
 						</div>
 
@@ -109,7 +109,7 @@ export function VolunteerSectionBuilder() {
 						<button
 							type="button"
 							onClick={() => handleDelete(item.id)}
-							className="flex-shrink-0 mt-0.5 text-gray-400 hover:text-gray-700 transition-colors"
+							className="flex-shrink-0 mt-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 							aria-label="Remove volunteer entry"
 						>
 							<X className="h-4 w-4" strokeWidth={2} />
@@ -123,11 +123,11 @@ export function VolunteerSectionBuilder() {
 					onClick={handleAdd}
 					className="
 					mt-2 flex w-full items-center justify-center gap-2
-					rounded-2xl border border-dashed border-rose-300
-					bg-rose-50/50
-					py-2 text-sm font-medium text-rose-500
+					rounded-2xl border border-dashed border-rose-300 dark:border-rose-800/50
+					bg-rose-50/50 dark:bg-rose-900/20
+					py-2 text-sm font-medium text-rose-500 dark:text-rose-400
 					transition-all duration-150
-					hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm
+					hover:border-rose-400 dark:hover:border-rose-700/50 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:shadow-sm
 					active:scale-[0.99]"
 				>
 					<Plus className="h-4 w-4" strokeWidth={2} />

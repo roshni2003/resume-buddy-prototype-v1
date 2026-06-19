@@ -80,11 +80,11 @@ export function CreateCustomSectionDialog({ data }: DialogProps<"resume.sections
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
 				<DialogTitle className="flex flex-col gap-y-1">
-					<span className="font-serif text-2xl font-bold tracking-tight text-gray-900">
+					<span className="font-serif text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
 						<Trans>New custom section</Trans>
 					</span>
 				</DialogTitle>
-				<DialogDescription className="text-sm text-gray-500">
+				<DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
 					<Trans>Name your section and choose a layout type.</Trans>
 				</DialogDescription>
 			</DialogHeader>
@@ -139,11 +139,11 @@ export function UpdateCustomSectionDialog({ data }: DialogProps<"resume.sections
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
 				<DialogTitle className="flex flex-col gap-y-1">
-					<span className="font-serif text-2xl font-bold tracking-tight text-gray-900">
+					<span className="font-serif text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
 						<Trans>Update custom section</Trans>
 					</span>
 				</DialogTitle>
-				<DialogDescription className="text-sm text-gray-500">
+				<DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
 					<Trans>Update your section name or change layout type.</Trans>
 				</DialogDescription>
 			</DialogHeader>
@@ -177,11 +177,11 @@ function CustomSectionForm({ isUpdate = false }: { isUpdate?: boolean }) {
 				name="title"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500">
+						<FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 							<Trans>Section Title</Trans>
 						</FormLabel>
 						<FormControl>
-							<Input {...field} placeholder="e.g. Volunteering, Awards, Publications" className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm transition-all focus:bg-white focus:ring-1 focus:ring-emerald-500" />
+							<Input {...field} placeholder="e.g. Volunteering, Awards, Publications" className="h-11 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted/50 px-4 text-sm transition-all focus:bg-white focus:ring-1 focus:ring-emerald-500" />
 						</FormControl>
 						<FormMessage />
 					</FormItem>
@@ -193,7 +193,7 @@ function CustomSectionForm({ isUpdate = false }: { isUpdate?: boolean }) {
 				name="type"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500">
+						<FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 							<Trans>Section Type</Trans>
 						</FormLabel>
 						<FormControl>
@@ -209,15 +209,15 @@ function CustomSectionForm({ isUpdate = false }: { isUpdate?: boolean }) {
 											disabled={isUpdate}
 											className={`flex items-start gap-4 rounded-2xl border p-4 text-left transition-all ${isSelected
 													? "border-emerald-500 bg-emerald-50/50 shadow-sm"
-													: "border-gray-200 bg-white hover:border-emerald-200 hover:bg-gray-50"
+													: "border-gray-200 dark:border-border bg-white dark:bg-card hover:border-emerald-200 hover:bg-gray-50 dark:hover:bg-muted/50"
 												} ${isUpdate ? "opacity-75 cursor-not-allowed" : "cursor-pointer"}`}
 										>
 											<div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isSelected ? "bg-emerald-500 text-white" : "bg-emerald-50 text-emerald-600"}`}>
 												<Icon className="h-5 w-5" weight={isSelected ? "bold" : "regular"} />
 											</div>
 											<div className="flex flex-col gap-0.5">
-												<span className={`font-semibold ${isSelected ? "text-emerald-900" : "text-gray-900"}`}>{option.label}</span>
-												<span className="text-xs text-gray-500">{option.description}</span>
+												<span className={`font-semibold ${isSelected ? "text-emerald-900" : "text-gray-900 dark:text-gray-100"}`}>{option.label}</span>
+												<span className="text-xs text-gray-500 dark:text-gray-400">{option.description}</span>
 											</div>
 										</button>
 									);

@@ -42,17 +42,17 @@ export function LanguagesSectionBuilder() {
 				{section.items.map((item) => (
 					<div
 						key={item.id}
-						className="relative flex flex-col justify-between rounded-2xl bg-white/80 backdrop-blur-sm p-5 shadow-sm border border-gray-200 transition-all hover:shadow-md hover:border-cyan-200"
+						className="relative flex flex-col justify-between rounded-2xl bg-white/80 dark:bg-card/80 backdrop-blur-sm p-5 shadow-sm border border-gray-200 dark:border-border transition-all hover:shadow-md hover:border-cyan-200"
 					>
 						<button
 							onClick={() => handleDelete(item.id)}
-							className="absolute right-3 top-3 text-gray-400 transition-colors hover:text-red-500 hover:bg-red-50 rounded-lg p-1"
+							className="absolute right-3 top-3 text-gray-400 dark:text-gray-500 transition-colors hover:text-red-500 hover:bg-red-50 rounded-lg p-1"
 						>
 							<X className="h-4 w-4" />
 						</button>
 
 						<div className="mb-4">
-							<h4 className="font-semibold text-gray-900 text-lg">{item.language}</h4>
+							<h4 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">{item.language}</h4>
 							{item.fluency && (
 								<p className="text-xs font-semibold text-cyan-600 uppercase tracking-wide mt-1">
 									{item.fluency}
@@ -61,7 +61,7 @@ export function LanguagesSectionBuilder() {
 						</div>
 
 						<div className="mt-2">
-							<div className="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+							<div className="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 								<span>Level</span>
 								<span className="text-cyan-600">
 									{item.level} · {levelLabels[item.level] || "Unknown"}

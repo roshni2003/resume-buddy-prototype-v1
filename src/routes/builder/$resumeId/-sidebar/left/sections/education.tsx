@@ -51,7 +51,7 @@ export function EducationSectionBuilder() {
 		});
 	};
 
-	const inputCls = "rounded-xl border border-gray-200 bg-white px-3 py-2.5 h-auto text-sm shadow-sm focus:border-emerald-300 focus:ring-1 focus:ring-emerald-200";
+	const inputCls = "rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 h-auto text-sm shadow-sm focus:border-emerald-300 focus:ring-1 focus:ring-emerald-200";
 
 	return (
 		<SectionBase type="education">
@@ -60,27 +60,27 @@ export function EducationSectionBuilder() {
 				{section.items.map((item) => (
 					<div
 						key={item.id}
-						className="relative flex items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4"
+						className="relative flex items-start gap-3 rounded-2xl border border-gray-100 dark:border-border bg-gray-50 dark:bg-muted/50 p-4"
 						style={{ borderLeft: "4px solid #10b981" }}
 					>
 						{/* Timeline dot — vertically aligned to first input row */}
-						<div className="mt-2 flex-shrink-0 h-3.5 w-3.5 rounded-full border-[3px] border-emerald-100 bg-emerald-500" />
+						<div className="mt-2 flex-shrink-0 h-3.5 w-3.5 rounded-full border-[3px] border-emerald-100 dark:border-emerald-900/30 bg-emerald-500" />
 
 						{/* All fields */}
 						<div className="flex flex-1 flex-col gap-3 min-w-0">
 							{/* Row 1: Institution + Degree */}
-							<div className="flex rounded-lg bg-gray-100 p-1 w-max">
+							<div className="flex rounded-lg bg-gray-100 dark:bg-muted p-1 w-max">
 								<button
 									type="button"
 									onClick={() => handleChange(item.id, "educationType", "School")}
-									className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", item.educationType === "School" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+									className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", item.educationType === "School" ? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300")}
 								>
 									School
 								</button>
 								<button
 									type="button"
 									onClick={() => handleChange(item.id, "educationType", "College")}
-									className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", (!item.educationType || item.educationType === "College") ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+									className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", (!item.educationType || item.educationType === "College") ? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300")}
 								>
 									College/University
 								</button>
@@ -196,14 +196,14 @@ export function EducationSectionBuilder() {
 									checked={item.currentlyStudyingHere}
 									onCheckedChange={(val) => handleChange(item.id, "currentlyStudyingHere", val)}
 								/>
-								<span className="text-sm text-gray-600 font-medium">Currently studying here</span>
+								<span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Currently studying here</span>
 							</div>
 
 							{/* Description */}
 							<RichInput
 								value={item.description}
 								onChange={(val) => handleChange(item.id, "description", val)}
-								className="rounded-xl border border-gray-200 bg-white"
+								className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
 							/>
 						</div>
 
@@ -211,7 +211,7 @@ export function EducationSectionBuilder() {
 						<button
 							type="button"
 							onClick={() => handleDelete(item.id)}
-							className="flex-shrink-0 mt-0.5 text-gray-400 hover:text-gray-700 transition-colors"
+							className="flex-shrink-0 mt-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 							aria-label="Remove education entry"
 						>
 							<X className="h-4 w-4" strokeWidth={2} />
@@ -223,7 +223,7 @@ export function EducationSectionBuilder() {
 				<button
 					type="button"
 					onClick={handleAdd}
-					className="mt-0 h-auto w-auto rounded-full border border-dashed border-emerald-300 bg-emerald-50/50 px-4 py-1.5 text-sm font-medium text-emerald-500 transition-all hover:border-emerald-400 hover:bg-emerald-50 hover:shadow-sm [&>svg:first-child]:hidden"
+					className="mt-0 h-auto w-auto rounded-full border border-dashed border-emerald-300 dark:border-emerald-700/50 bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-1.5 text-sm font-medium text-emerald-500 dark:text-emerald-400 transition-all hover:border-emerald-400 dark:hover:border-emerald-500/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:shadow-sm [&>svg:first-child]:hidden"
 				>
 					<Plus className="h-4 w-4" strokeWidth={1.5} />
 					<Trans>Add education</Trans>

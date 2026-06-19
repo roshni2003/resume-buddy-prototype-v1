@@ -25,7 +25,7 @@ type FormValues = z.infer<typeof formSchema>;
 /* ─── Styled label ───────────────────────────────────────── */
 function FieldLabel({ children }: { children: React.ReactNode }) {
 	return (
-		<label className="block text-[10.5px] font-semibold tracking-widest text-gray-500 uppercase mb-1.5">
+		<label className="block text-[10.5px] font-semibold tracking-widest text-gray-500 dark:text-gray-400 uppercase mb-1.5">
 			{children}
 		</label>
 	);
@@ -37,8 +37,8 @@ function StyledInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
 		<input
 			{...props}
 			className={[
-				"w-full rounded-xl border border-gray-200 bg-gray-50",
-				"px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400",
+				"w-full rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted/50",
+				"px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
 				"focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400",
 				"transition-all duration-150",
 				props.className ?? "",

@@ -35,7 +35,7 @@ const socialNetworks: SocialNetwork[] = [
 		name: "GitHub",
 		icon: "GithubLogo",
 		iconNode: <GithubLogo weight="regular" className="h-4 w-4" />,
-		iconColor: "text-gray-800",
+		iconColor: "text-gray-800 dark:text-gray-200",
 		borderColor: "border-gray-300",
 		placeholder: "github.com/username",
 	},
@@ -59,8 +59,8 @@ const socialNetworks: SocialNetwork[] = [
 		name: "Portfolio",
 		icon: "Globe",
 		iconNode: <Globe weight="regular" className="h-4 w-4" />,
-		iconColor: "text-emerald-600",
-		borderColor: "border-emerald-200",
+		iconColor: "text-emerald-600 dark:text-emerald-400",
+		borderColor: "border-emerald-200 dark:border-emerald-800/50",
 		placeholder: "yourwebsite.com",
 	},
 ];
@@ -232,8 +232,8 @@ export function ProfilesSectionBuilder() {
 	const getNetworkColor = (network: string) => {
 		const networkData = socialNetworks.find((n) => n.name === network);
 		return networkData
-			? `${networkData.iconColor} bg-white border ${networkData.borderColor}`
-			: "text-gray-500 bg-white border border-gray-200";
+			? `${networkData.iconColor} bg-white dark:bg-card border ${networkData.borderColor}`
+			: "text-gray-500 dark:text-gray-400 bg-white dark:bg-card border border-gray-200 dark:border-border";
 	};
 
 	return (
@@ -242,8 +242,8 @@ export function ProfilesSectionBuilder() {
 				{/* Section Card */}
 				<div
 					className={cn(
-						"overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-colors",
-						section.items.length === 0 && !isAddingProfile ? "border-gray-300 border-dashed" : "border-gray-200",
+						"overflow-hidden rounded-xl border-2 bg-white dark:bg-card shadow-sm transition-colors",
+						section.items.length === 0 && !isAddingProfile ? "border-gray-300 border-dashed" : "border-gray-200 dark:border-border",
 					)}
 				>
 					{/* Profiles List */}
@@ -252,9 +252,9 @@ export function ProfilesSectionBuilder() {
 						onReorder={handleReorder}
 						keyExtractor={(item) => item.id}
 						renderItem={(profile) => (
-							<SortableItem key={profile.id} id={profile.id} className="group border-gray-200 border-b last:border-b-0">
-								<div className="flex items-center gap-4 p-4 transition-all hover:bg-gray-50">
-									<DragHandle className="shrink-0 p-1 text-gray-400 transition-colors hover:text-gray-600" />
+							<SortableItem key={profile.id} id={profile.id} className="group border-gray-200 dark:border-border border-b last:border-b-0">
+								<div className="flex items-center gap-4 p-4 transition-all hover:bg-gray-50 dark:hover:bg-muted/50">
+									<DragHandle className="shrink-0 p-1 text-gray-400 dark:text-gray-500 transition-colors hover:text-gray-600 dark:hover:text-gray-400" />
 									<div
 										className={cn(
 											"flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
@@ -264,13 +264,13 @@ export function ProfilesSectionBuilder() {
 										{getNetworkIcon(profile.network)}
 									</div>
 									<div className="min-w-0 flex-1">
-										<h4 className="font-semibold text-gray-900 text-sm">{profile.network}</h4>
-										<p className="truncate text-gray-600 text-sm">{profile.username}</p>
+										<h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{profile.network}</h4>
+										<p className="truncate text-gray-600 dark:text-gray-400 text-sm">{profile.username}</p>
 									</div>
 									<div className="flex shrink-0 items-center gap-2">
 										<button
 											onClick={() => startEditing(profile)}
-											className="rounded-lg p-2 text-gray-600 transition-all hover:bg-emerald-50 hover:text-emerald-600"
+											className="rounded-lg p-2 text-gray-600 dark:text-gray-400 transition-all hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400"
 											title="Edit"
 											type="button"
 										>
@@ -285,7 +285,7 @@ export function ProfilesSectionBuilder() {
 										</button>
 										<button
 											onClick={() => handleDeleteProfile(profile.id)}
-											className="rounded-lg p-2 text-gray-600 transition-all hover:bg-red-50 hover:text-red-600"
+											className="rounded-lg p-2 text-gray-600 dark:text-gray-400 transition-all hover:bg-red-50 hover:text-red-600"
 											title="Delete"
 											type="button"
 										>
@@ -306,9 +306,9 @@ export function ProfilesSectionBuilder() {
 
 					{/* Add/Edit Form */}
 					{(isAddingProfile || editingId) && (
-						<div className="border-gray-200 border-t bg-white p-6">
+						<div className="border-gray-200 dark:border-border border-t bg-white dark:bg-card p-6">
 							<div className="mb-4 flex items-center justify-between">
-								<h4 className="font-semibold text-gray-900 text-sm">
+								<h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
 									{editingId ? "Edit Profile" : "Add New Profile"}
 								</h4>
 							</div>
@@ -317,7 +317,7 @@ export function ProfilesSectionBuilder() {
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									{/* Network Selection */}
 									<div className="space-y-1.5">
-										<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Network</label>
+										<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Network</label>
 										<Input
 											type="text"
 											list="network-options"
@@ -334,7 +334,7 @@ export function ProfilesSectionBuilder() {
 
 									{/* Username */}
 									<div className="space-y-1.5">
-										<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Username</label>
+										<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Username</label>
 										<Input
 											type="text"
 											value={formData.username}
@@ -346,7 +346,7 @@ export function ProfilesSectionBuilder() {
 
 								{/* URL */}
 								<div className="space-y-1.5">
-									<label className="font-bold text-gray-500 text-xs uppercase tracking-wider">Profile URL</label>
+									<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Profile URL</label>
 									<Input
 										type="url"
 										value={formData.url}
@@ -359,14 +359,14 @@ export function ProfilesSectionBuilder() {
 								<div className="flex items-center gap-3 pt-2">
 									<button
 										onClick={editingId ? handleUpdateProfile : handleAddProfile}
-										className="flex h-10 flex-1 items-center justify-center rounded-xl bg-[#0f1c23] font-medium text-sm text-white transition-all hover:bg-gray-800"
+										className="flex h-10 flex-1 items-center justify-center rounded-xl bg-[#0f1c23] dark:bg-muted font-medium text-sm text-white transition-all hover:bg-gray-800"
 										type="button"
 									>
 										{editingId ? "Save Changes" : "Add Profile"}
 									</button>
 									<button
 										onClick={cancelForm}
-										className="flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-6 font-medium text-gray-700 text-sm transition-all hover:bg-gray-50"
+										className="flex h-10 items-center justify-center rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-6 font-medium text-gray-700 dark:text-gray-300 text-sm transition-all hover:bg-gray-50 dark:hover:bg-muted/50"
 										type="button"
 									>
 										Cancel
@@ -379,7 +379,7 @@ export function ProfilesSectionBuilder() {
 					{/* Add Network Default View */}
 					{!isAddingProfile && !editingId && (
 						<div className="flex flex-col gap-4 p-5">
-							<div className="flex items-center gap-2 font-bold text-gray-500 text-xs uppercase tracking-widest">
+							<div className="flex items-center gap-2 font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest">
 								<span>&bull;</span> ADD A NETWORK
 							</div>
 
@@ -392,14 +392,14 @@ export function ProfilesSectionBuilder() {
 											setIsAddingProfile(true);
 										}}
 										className={cn(
-											"flex items-center gap-2 rounded-full border px-4 py-2 font-medium text-sm transition-colors hover:bg-gray-50",
+											"flex items-center gap-2 rounded-full border px-4 py-2 font-medium text-sm transition-colors hover:bg-gray-50 dark:hover:bg-muted/50",
 											network.borderColor,
 										)}
 										type="button"
 									>
 										<span className={network.iconColor}>{network.iconNode}</span>
-										<span className="text-gray-900">{network.name}</span>
-										<PlusIcon className="h-4 w-4 text-gray-500" weight="bold" />
+										<span className="text-gray-900 dark:text-gray-100">{network.name}</span>
+										<PlusIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" weight="bold" />
 									</button>
 								))}
 							</div>
@@ -420,7 +420,7 @@ export function ProfilesSectionBuilder() {
 											setIsAddingProfile(true);
 										}
 									}}
-									className="flex w-full items-center justify-center rounded-[20px] border-2 border-cyan-200 border-dashed p-4 text-center font-medium text-gray-600 text-sm transition-all placeholder:text-gray-600 hover:bg-gray-50 focus:border-cyan-400 focus:text-left focus:outline-none focus:ring-4 focus:ring-cyan-50 focus:placeholder:text-gray-400"
+									className="flex w-full items-center justify-center rounded-[20px] border-2 border-cyan-200 border-dashed p-4 text-center font-medium text-gray-600 dark:text-gray-400 text-sm transition-all placeholder:text-gray-600 dark:placeholder:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50 focus:border-cyan-400 focus:text-left focus:outline-none focus:ring-4 focus:ring-cyan-50 focus:placeholder:text-gray-400"
 								/>
 							</div>
 						</div>

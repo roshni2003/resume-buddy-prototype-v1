@@ -165,7 +165,7 @@ function InlineProjectForm({
 					name="name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 								<FolderOpenIcon className="h-3.5 w-3.5" />
 								<Trans>Project Name</Trans>
 							</FormLabel>
@@ -173,7 +173,7 @@ function InlineProjectForm({
 								<Input
 									{...field}
 									placeholder="My Awesome Project"
-									className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+									className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
 								/>
 							</FormControl>
 							<FormMessage />
@@ -188,7 +188,7 @@ function InlineProjectForm({
 						name="period"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<TagIcon className="h-3.5 w-3.5" />
 									<Trans>Period / Year</Trans>
 								</FormLabel>
@@ -196,7 +196,7 @@ function InlineProjectForm({
 									<Input
 										{...field}
 										placeholder="Jan 2024 – Mar 2024"
-										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -209,7 +209,7 @@ function InlineProjectForm({
 						name="techStack"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<CodeIcon className="h-3.5 w-3.5" />
 									<Trans>Tech Stack</Trans>
 								</FormLabel>
@@ -217,7 +217,7 @@ function InlineProjectForm({
 									<Input
 										{...field}
 										placeholder="React, Node.js, PostgreSQL"
-										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -233,7 +233,7 @@ function InlineProjectForm({
 						name="website.url"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<GlobeIcon className="h-3.5 w-3.5" />
 									<Trans>Live URL</Trans>
 								</FormLabel>
@@ -241,7 +241,7 @@ function InlineProjectForm({
 									<Input
 										{...field}
 										placeholder="https://myproject.com"
-										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -254,7 +254,7 @@ function InlineProjectForm({
 						name="website.label"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<LinkIcon className="h-3.5 w-3.5" />
 									<Trans>Link Label</Trans>
 								</FormLabel>
@@ -262,7 +262,7 @@ function InlineProjectForm({
 									<Input
 										{...field}
 										placeholder="Live Demo"
-										className="rounded-xl border-gray-200 bg-white/70 focus:border-violet-400 focus:ring-violet-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -278,10 +278,10 @@ function InlineProjectForm({
 					render={({ field }) => (
 						<FormItem>
 							<div className="flex items-end justify-between">
-								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<Trans>Description</Trans>
 								</FormLabel>
-								<div className="relative mb-2 rounded-xl bg-gray-50 p-1">
+								<div className="relative mb-2 rounded-xl bg-gray-50 dark:bg-muted/50 p-1">
 									{isPulsing && (
 										<>
 											<div className="absolute -inset-1 rounded-full bg-violet-400/40 blur-md animate-ai-glow" />
@@ -311,7 +311,7 @@ function InlineProjectForm({
 									<SparkleIcon weight="fill" className="h-3 w-3" />
 									AI Assisted
 								</span>
-								<span className="text-xs text-gray-400">
+								<span className="text-xs text-gray-400 dark:text-gray-500">
 									Zoe can sharpen your project pitch
 								</span>
 							</div>
@@ -325,7 +325,7 @@ function InlineProjectForm({
 							</FormControl>
 
 							{/* Word / char count */}
-							<p className="flex justify-between text-xs text-gray-400">
+							<p className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
 								<span>
 									{wordCount} words · {charCount} chars
 								</span>
@@ -363,7 +363,7 @@ function InlineProjectForm({
 					<Button
 						type="button"
 						variant="ghost"
-						className="rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50"
+						className="rounded-xl border border-gray-200 dark:border-border text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50"
 						onClick={onCancel}
 					>
 						<Trans>Cancel</Trans>
@@ -405,9 +405,9 @@ function ProjectCard({
 
 	return (
 		<div
-			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
+			className={`rounded-2xl border bg-white dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
 				? "border-violet-300 shadow-violet-100 shadow-md"
-				: "border-gray-100 hover:border-gray-200 hover:shadow"
+				: "border-gray-100 dark:border-border hover:border-gray-200 hover:shadow"
 				}`}
 		>
 			{/* ── Header ── */}
@@ -417,28 +417,28 @@ function ProjectCard({
 				className="flex w-full items-center gap-3 px-5 py-4 text-left"
 			>
 				<span
-					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-violet-500" : "bg-gray-100"
+					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-violet-500" : "bg-gray-100 dark:bg-muted"
 						}`}
 				>
 					<FolderOpenIcon
 						weight="fill"
-						className={`h-5 w-5 ${isExpanded ? "text-white" : "text-gray-400"}`}
+						className={`h-5 w-5 ${isExpanded ? "text-white" : "text-gray-400 dark:text-gray-500"}`}
 					/>
 				</span>
 
 				<div className="min-w-0 flex-1">
 					<p
-						className={`truncate font-semibold leading-tight ${isExpanded ? "text-violet-800" : "text-gray-800"
+						className={`truncate font-semibold leading-tight ${isExpanded ? "text-violet-800" : "text-gray-800 dark:text-gray-200"
 							}`}
 					>
 						{item.name || "New Project"}
 					</p>
 					{subtitle && (
-						<p className="truncate text-sm text-gray-400">{subtitle}</p>
+						<p className="truncate text-sm text-gray-400 dark:text-gray-500">{subtitle}</p>
 					)}
 				</div>
 
-				<span className="shrink-0 text-gray-400">
+				<span className="shrink-0 text-gray-400 dark:text-gray-500">
 					{isExpanded ? (
 						<CaretUpIcon className="h-4 w-4" />
 					) : (
@@ -458,7 +458,7 @@ function ProjectCard({
 						transition={{ duration: 0.25, ease: "easeInOut" }}
 						className="overflow-hidden"
 					>
-						<div className="border-t border-gray-100 px-5 pb-6 pt-5">
+						<div className="border-t border-gray-100 dark:border-border px-5 pb-6 pt-5">
 							<div className="mb-4 flex justify-end">
 								<button
 									type="button"
@@ -511,7 +511,7 @@ function AddNewPanel({
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -8 }}
 			transition={{ duration: 0.2 }}
-			className="rounded-2xl border border-violet-300 bg-gradient-to-b from-white to-violet-50/30 p-5 shadow-md shadow-violet-100"
+			className="rounded-2xl border border-violet-300 dark:border-violet-700/50 bg-gradient-to-b from-white dark:from-card to-violet-50/30 dark:to-muted/30 p-5 shadow-md shadow-violet-100 dark:shadow-none"
 		>
 			<div className="mb-4 flex items-center gap-2">
 				<span className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-500 text-white shadow-sm">
@@ -605,7 +605,7 @@ export function ProjectsSectionBuilder() {
 					<button
 						type="button"
 						onClick={() => setPanelState({ mode: "create" })}
-						className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-4 text-sm font-medium text-gray-400 transition-all hover:border-violet-300 hover:bg-violet-50/30 hover:text-violet-600"
+						className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 dark:border-border py-4 text-sm font-medium text-gray-400 dark:text-gray-500 transition-all hover:border-violet-300 hover:bg-violet-50/30 hover:text-violet-600"
 					>
 						<PlusIcon className="h-4 w-4" />
 						<Trans>Add a new project</Trans>

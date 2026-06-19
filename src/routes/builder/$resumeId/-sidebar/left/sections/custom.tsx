@@ -54,16 +54,16 @@ export function CustomSectionBuilder() {
 			</AnimatePresence>
 
 			{customSections.length === 0 && (
-				<div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-emerald-200 py-12 text-center text-emerald-500">
+				<div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-emerald-200 dark:border-emerald-800/50 py-12 text-center text-emerald-500 dark:text-emerald-400">
 					<Sparkle className="h-6 w-6" weight="fill" />
-					<p className="font-medium text-gray-700 text-sm">
+					<p className="font-medium text-gray-700 dark:text-gray-300 text-sm">
 						<Trans>No custom blocks yet — design one your way.</Trans>
 					</p>
 				</div>
 			)}
 
 			{/* Add Custom Section Button */}
-			<SectionAddItemButton type="custom" variant="outline" className="rounded-full border-dashed border-emerald-200 text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600">
+			<SectionAddItemButton type="custom" variant="outline" className="rounded-full border-dashed border-emerald-200 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400">
 				<Trans>Add a new custom section</Trans>
 			</SectionAddItemButton>
 		</SectionBase>
@@ -136,7 +136,7 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 		});
 	};
 
-	const inputCls = "rounded-xl border border-gray-200 bg-white px-3 py-2.5 h-11 text-sm shadow-sm focus:border-teal-300 focus:ring-1 focus:ring-teal-200 w-full";
+	const inputCls = "rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 h-11 text-sm shadow-sm focus:border-teal-300 focus:ring-1 focus:ring-teal-200 w-full";
 
 	const getIcon = () => {
 		switch (section.type) {
@@ -156,11 +156,11 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 	};
 
 	return (
-		<div className="rounded-2xl border border-emerald-100 bg-emerald-50/30 shadow-sm overflow-hidden mb-4">
+		<div className="rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/30 dark:bg-emerald-900/20 shadow-sm overflow-hidden mb-4">
 			{/* Section Header */}
 			<div className="group flex select-none items-center p-4">
 				<div className="flex flex-1 items-center gap-4">
-					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-500">
+					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-500 dark:text-emerald-400">
 						<Icon className="h-5 w-5" weight="fill" />
 					</div>
 					<div className="flex flex-col items-start justify-center">
@@ -168,13 +168,13 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 							type="button"
 							onClick={onUpdateSection}
 							className={cn(
-								"line-clamp-1 text-wrap font-medium text-base text-gray-900 transition-opacity hover:text-emerald-600 focus:outline-none",
+								"line-clamp-1 text-wrap font-medium text-base text-gray-900 dark:text-gray-100 transition-opacity hover:text-emerald-600 dark:hover:text-emerald-400 focus:outline-none",
 								section.hidden && "opacity-50"
 							)}
 						>
 							{section.title || <Trans>Untitled Section</Trans>}
 						</button>
-						<div className="flex items-center text-[10px] font-bold tracking-wider text-gray-500 uppercase mt-0.5 gap-1.5">
+						<div className="flex items-center text-[10px] font-bold tracking-wider text-gray-500 dark:text-gray-400 uppercase mt-0.5 gap-1.5">
 							<span>{section.type === "custom" ? "Generic" : section.type}</span>
 							<span>&middot;</span>
 							<Plural value={section.items.length} one="# item" other="# items" />
@@ -196,12 +196,12 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 								<Reorder.Item
 									key={item.id}
 									value={item}
-									className="relative flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-white p-4"
+									className="relative flex flex-col gap-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-card p-4"
 								>
 									<button
 										type="button"
 										onClick={() => handleDelete(item.id)}
-										className="absolute right-3 top-3 text-gray-400 hover:text-gray-700 transition-colors z-10"
+										className="absolute right-3 top-3 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors z-10"
 									>
 										<XIcon className="h-4 w-4" weight="bold" />
 									</button>
@@ -219,7 +219,7 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 															label={k}
 															value={v as string}
 															onChange={(val) => handleChange(item.id, k, val)}
-															className="rounded-xl border border-gray-200 bg-white"
+															className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
 														/>
 													</div>
 												);
@@ -257,7 +257,7 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 				<button
 					type="button"
 					onClick={handleAdd}
-					className="mt-2 flex h-10 w-full items-center justify-center rounded-full border border-dashed border-emerald-200 text-emerald-500 transition-colors hover:bg-emerald-50 hover:text-emerald-600 font-medium text-sm"
+					className="mt-2 flex h-10 w-full items-center justify-center rounded-full border border-dashed border-emerald-200 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium text-sm"
 				>
 					<PlusIcon className="mr-2 h-4 w-4" weight="bold" />
 					<Trans>Add {section.type === "generic" || section.type === "custom" ? "item" : section.type + " item"}</Trans>
@@ -319,7 +319,7 @@ function CustomSectionDropdownMenu({ section }: { section: CustomSection }) {
 			<DropdownMenuTrigger asChild>
 				<button
 					type="button"
-					className="flex cursor-context-menu items-center px-4 py-2 opacity-40 transition-[background-color,opacity] hover:bg-gray-200 focus:outline-none focus-visible:ring-1 group-hover:opacity-100"
+					className="flex cursor-context-menu items-center px-4 py-2 opacity-40 transition-[background-color,opacity] hover:bg-gray-200 dark:hover:bg-muted/80 focus:outline-none focus-visible:ring-1 group-hover:opacity-100"
 				>
 					<DotsThreeVerticalIcon className="h-5 w-5" />
 				</button>

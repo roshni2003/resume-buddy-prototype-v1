@@ -100,20 +100,20 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 	};
 
 	return (
-		<DialogContent className="max-w-xl p-6 sm:rounded-3xl border-gray-200 bg-white">
+		<DialogContent className="max-w-xl p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
 			<div className="flex items-start justify-between mb-4">
 				<div>
-					<h2 className="font-serif text-3xl font-semibold tracking-tight text-gray-900">Add languages</h2>
-					<p className="mt-1 text-sm text-gray-500">Pick several at once and set their fluency together.</p>
+					<h2 className="font-serif text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Add languages</h2>
+					<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Pick several at once and set their fluency together.</p>
 				</div>
-				<button onClick={closeDialog} className="text-gray-400 hover:text-gray-700 transition-colors">
+				<button onClick={closeDialog} className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
 					<X className="h-5 w-5" />
 				</button>
 			</div>
 
 			<div className="space-y-6">
 				<div>
-					<p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Suggestions · Multi-select</p>
+					<p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Suggestions · Multi-select</p>
 					<div className="flex flex-wrap gap-2">
 						{predefinedLanguages.map((lang) => {
 							const isSelected = selectedLanguages.includes(lang);
@@ -126,7 +126,7 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 										"rounded-full border px-4 py-1.5 text-sm transition-all",
 										isSelected
 											? "border-cyan-200 bg-cyan-50 text-cyan-700 font-medium shadow-sm"
-											: "border-gray-200 bg-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+											: "border-gray-200 dark:border-border bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50 hover:text-gray-900 dark:hover:text-gray-100"
 									)}
 								>
 									{lang}
@@ -137,7 +137,7 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 				</div>
 
 				<div>
-					<p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Add your own (Comma-separated)</p>
+					<p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Add your own (Comma-separated)</p>
 					<input
 						type="text"
 						placeholder="e.g. Swahili, Tagalog"
@@ -146,13 +146,13 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 							setCustomLanguages(e.target.value);
 							if (error) setError("");
 						}}
-						className={cn("w-full rounded-xl border bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1", error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-200 focus:border-cyan-500 focus:ring-cyan-500")}
+						className={cn("w-full rounded-xl border bg-gray-50 dark:bg-muted/50 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1", error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-border focus:border-cyan-500 focus:ring-cyan-500")}
 					/>
 					{error && <p className="mt-1.5 text-xs font-medium text-red-500">{error}</p>}
 				</div>
 
-				<div className="rounded-xl border border-gray-200 bg-gray-50 p-4 pt-5 pb-6">
-					<div className="mb-4 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-gray-500">
+				<div className="rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted/50 p-4 pt-5 pb-6">
+					<div className="mb-4 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
 						<span>Level</span>
 						<span className="text-cyan-600">{level} · {fluencyLabels[level] || "Unknown"}</span>
 					</div>
@@ -164,7 +164,7 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 						onValueChange={(val) => setLevel(val[0])}
 						className="[&>span:first-child]:bg-cyan-100 [&_[data-slot=slider-range]]:bg-cyan-500 [&_[data-slot=slider-thumb]]:border-cyan-500 [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-thumb]]:h-5 [&_[data-slot=slider-thumb]]:w-5"
 					/>
-					<div className="mt-3 flex justify-between px-1 text-xs text-gray-500 font-medium">
+					<div className="mt-3 flex justify-between px-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
 						<span>0</span>
 						<span>1</span>
 						<span>2</span>
@@ -176,7 +176,7 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 			</div>
 
 			<div className="mt-8 flex justify-end gap-3">
-				<button onClick={closeDialog} className="rounded-full px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">
+				<button onClick={closeDialog} className="rounded-full px-5 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-muted transition-colors">
 					Cancel
 				</button>
 				<button

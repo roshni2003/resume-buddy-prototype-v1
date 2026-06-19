@@ -74,10 +74,10 @@ function formatDate(dateString: string | undefined): string {
 ───────────────────────────────────────────── */
 function ZoeTipsCard() {
 	return (
-		<div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 shadow-sm">
+		<div className="rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-50 dark:from-emerald-900/20 to-teal-50 p-5 shadow-sm">
 			<div className="mb-3 flex items-center gap-2">
-				<SparkleIcon weight="fill" className="h-5 w-5 text-emerald-500" />
-				<span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+				<SparkleIcon weight="fill" className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
+				<span className="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
 					Zoe Tips
 				</span>
 				<SparkleIcon
@@ -85,7 +85,7 @@ function ZoeTipsCard() {
 					className="ml-auto h-8 w-8 text-emerald-100"
 				/>
 			</div>
-			<ul className="space-y-2 text-sm text-emerald-800">
+			<ul className="space-y-2 text-sm text-emerald-800 dark:text-emerald-300">
 				{[
 					"Start each bullet with a strong action verb",
 					"Add numbers — % growth, team size, revenue saved",
@@ -98,7 +98,7 @@ function ZoeTipsCard() {
 					</li>
 				))}
 			</ul>
-			<p className="mt-4 text-xs italic text-emerald-600">
+			<p className="mt-4 text-xs italic text-emerald-600 dark:text-emerald-400">
 				Zoe will polish tone, tighten verbs, and quantify impact for you. Look
 				for the magic button above!
 			</p>
@@ -194,7 +194,7 @@ function InlineExperienceForm({
 						name="company"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<BuildingsIcon className="h-3.5 w-3.5" />
 									<Trans>Company</Trans>
 								</FormLabel>
@@ -202,7 +202,7 @@ function InlineExperienceForm({
 									<Input
 										{...field}
 										placeholder="Acme Corp"
-										className="rounded-xl border-gray-200 bg-white/70 focus:border-emerald-400 focus:ring-emerald-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-emerald-400 focus:ring-emerald-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -215,7 +215,7 @@ function InlineExperienceForm({
 						name="position"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<BriefcaseIcon className="h-3.5 w-3.5" />
 									<Trans>Position</Trans>
 								</FormLabel>
@@ -223,7 +223,7 @@ function InlineExperienceForm({
 									<Input
 										{...field}
 										placeholder="Senior Engineer"
-										className="rounded-xl border-gray-200 bg-white/70 focus:border-emerald-400 focus:ring-emerald-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-emerald-400 focus:ring-emerald-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -238,7 +238,7 @@ function InlineExperienceForm({
 					name="location"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 								<MapPinIcon className="h-3.5 w-3.5" />
 								<Trans>Location</Trans>
 							</FormLabel>
@@ -246,7 +246,7 @@ function InlineExperienceForm({
 								<Input
 									{...field}
 									placeholder="San Francisco, CA"
-									className="rounded-xl border-gray-200 bg-white/70 focus:border-emerald-400 focus:ring-emerald-200"
+									className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-emerald-400 focus:ring-emerald-200"
 								/>
 							</FormControl>
 							<FormMessage />
@@ -261,7 +261,7 @@ function InlineExperienceForm({
 						name="startDate"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<CalendarBlankIcon className="h-3.5 w-3.5" />
 									<Trans>Start Date</Trans>
 								</FormLabel>
@@ -269,7 +269,7 @@ function InlineExperienceForm({
 									<Input
 										type="date"
 										{...field}
-										className="rounded-xl border-gray-200 bg-white/70 focus:border-emerald-400 focus:ring-emerald-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-emerald-400 focus:ring-emerald-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -282,7 +282,7 @@ function InlineExperienceForm({
 						name="endDate"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<CalendarBlankIcon className="h-3.5 w-3.5" />
 									<Trans>End Date</Trans>
 								</FormLabel>
@@ -291,7 +291,7 @@ function InlineExperienceForm({
 										type="date"
 										{...field}
 										disabled={currentlyWorking}
-										className="rounded-xl border-gray-200 bg-white/70 disabled:opacity-40 focus:border-emerald-400 focus:ring-emerald-200"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 disabled:opacity-40 focus:border-emerald-400 focus:ring-emerald-200"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -304,7 +304,7 @@ function InlineExperienceForm({
 						name="currentlyWorkingHere"
 						render={({ field }) => (
 							<FormItem className="flex flex-col justify-end pb-0.5">
-								<FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									&nbsp;
 								</FormLabel>
 								<div className="flex items-center gap-2">
@@ -314,7 +314,7 @@ function InlineExperienceForm({
 											onCheckedChange={field.onChange}
 										/>
 									</FormControl>
-									<span className="text-sm text-gray-600">
+									<span className="text-sm text-gray-600 dark:text-gray-400">
 										<Trans>Currently here</Trans>
 									</span>
 								</div>
@@ -329,7 +329,7 @@ function InlineExperienceForm({
 					name="website.url"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 								<LinkIcon className="h-3.5 w-3.5" />
 								<Trans>Website / Portfolio URL</Trans>
 							</FormLabel>
@@ -337,7 +337,7 @@ function InlineExperienceForm({
 								<Input
 									{...field}
 									placeholder="https://company.com"
-									className="rounded-xl border-gray-200 bg-white/70 focus:border-emerald-400 focus:ring-emerald-200"
+									className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-emerald-400 focus:ring-emerald-200"
 								/>
 							</FormControl>
 							<FormMessage />
@@ -352,10 +352,10 @@ function InlineExperienceForm({
 					render={({ field }) => (
 						<FormItem>
 							<div className="flex items-end justify-between">
-								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<Trans>Description</Trans>
 								</FormLabel>
-								<div className="relative mb-2 rounded-xl bg-gray-50 p-1">
+								<div className="relative mb-2 rounded-xl bg-gray-50 dark:bg-muted/50 p-1">
 									{isPulsing && (
 										<>
 											<div className="absolute -inset-1 rounded-full bg-emerald-400/40 blur-md animate-ai-glow" />
@@ -375,18 +375,18 @@ function InlineExperienceForm({
 										maxRounds={maxRounds}
 										isWordCountValid={isWordCountValid}
 										disabled={roundsUsed >= maxRounds || !isWordCountValid}
-										className="relative z-10 border border-emerald-300 font-bold text-black shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 hover:text-white"
+										className="relative z-10 border border-emerald-300 dark:border-emerald-700/50 font-bold text-black shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 hover:text-white"
 									/>
 								</div>
 							</div>
 
 							{/* AI badge */}
 							<div className="flex items-center gap-2">
-								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
 									<SparkleIcon weight="fill" className="h-3 w-3" />
 									AI Assisted
 								</span>
-								<span className="text-xs text-gray-400">
+								<span className="text-xs text-gray-400 dark:text-gray-500">
 									Zoe can sharpen your experience description
 								</span>
 							</div>
@@ -400,7 +400,7 @@ function InlineExperienceForm({
 							</FormControl>
 
 							{/* Word / char count */}
-							<p className="flex justify-between text-xs text-gray-400">
+							<p className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
 								<span>
 									{wordCount} words · {charCount} chars
 								</span>
@@ -438,7 +438,7 @@ function InlineExperienceForm({
 					<Button
 						type="button"
 						variant="ghost"
-						className="rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50"
+						className="rounded-xl border border-gray-200 dark:border-border text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50"
 						onClick={onCancel}
 					>
 						<Trans>Cancel</Trans>
@@ -487,9 +487,9 @@ function ExperienceCard({
 
 	return (
 		<div
-			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
-					? "border-emerald-300 shadow-emerald-100 shadow-md"
-					: "border-gray-100 hover:border-gray-200 hover:shadow"
+			className={`rounded-2xl border bg-white dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
+					? "border-emerald-300 dark:border-emerald-700/50 shadow-emerald-100 shadow-md"
+					: "border-gray-100 dark:border-border hover:border-gray-200 hover:shadow"
 				}`}
 		>
 			{/* ── Header (always visible) ── */}
@@ -500,33 +500,33 @@ function ExperienceCard({
 			>
 				{/* Icon bubble */}
 				<span
-					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-indigo-100" : "bg-gray-100"
+					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-indigo-100" : "bg-gray-100 dark:bg-muted"
 						}`}
 				>
 					<BriefcaseIcon
 						weight="fill"
-						className={`h-6 w-6 ${isExpanded ? "text-indigo-600" : "text-gray-500"
+						className={`h-6 w-6 ${isExpanded ? "text-indigo-600" : "text-gray-500 dark:text-gray-400"
 							}`}
 					/>
 				</span>
 
 				<div className="min-w-0 flex-1">
 					<p
-						className={`truncate font-semibold leading-tight ${isExpanded ? "text-indigo-800" : "text-gray-800"
+						className={`truncate font-semibold leading-tight ${isExpanded ? "text-indigo-800" : "text-gray-800 dark:text-gray-200"
 							}`}
 					>
 						{item.position || "New Position"}
 					</p>
-					<p className="truncate text-sm text-gray-500">
+					<p className="truncate text-sm text-gray-500 dark:text-gray-400">
 						{[item.company, item.location].filter(Boolean).join(" · ")}
 						{dateRange && (
-							<span className="ml-2 text-xs text-gray-400">{dateRange}</span>
+							<span className="ml-2 text-xs text-gray-400 dark:text-gray-500">{dateRange}</span>
 						)}
 					</p>
 				</div>
 
 				{/* Expand / collapse chevron */}
-				<span className="shrink-0 text-gray-400">
+				<span className="shrink-0 text-gray-400 dark:text-gray-500">
 					{isExpanded ? (
 						<CaretUpIcon className="h-4 w-4" />
 					) : (
@@ -546,7 +546,7 @@ function ExperienceCard({
 						transition={{ duration: 0.25, ease: "easeInOut" }}
 						className="overflow-hidden"
 					>
-						<div className="border-t border-gray-100 px-5 pb-6 pt-5">
+						<div className="border-t border-gray-100 dark:border-border px-5 pb-6 pt-5">
 							{/* Delete link */}
 							<div className="mb-4 flex justify-end">
 								<button
@@ -605,13 +605,13 @@ function AddNewPanel({
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -8 }}
 			transition={{ duration: 0.2 }}
-			className="rounded-2xl border border-emerald-300 bg-gradient-to-b from-white to-emerald-50/30 p-5 shadow-md shadow-emerald-100"
+			className="rounded-2xl border border-emerald-300 dark:border-emerald-700/50 bg-gradient-to-b from-white dark:from-card to-emerald-50/30 dark:to-muted/30 p-5 shadow-md shadow-emerald-100 dark:shadow-none"
 		>
 			<div className="mb-4 flex items-center gap-2">
 				<span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm">
 					<PlusIcon weight="bold" className="h-4 w-4" />
 				</span>
-				<p className="font-semibold text-emerald-800">
+				<p className="font-semibold text-emerald-800 dark:text-emerald-300">
 					<Trans>New Experience</Trans>
 				</p>
 			</div>
@@ -704,7 +704,7 @@ export function ExperienceSectionBuilder() {
 					<button
 						type="button"
 						onClick={() => setPanel({ mode: "create" })}
-						className="group flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-4 text-sm font-medium text-gray-400 transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600"
+						className="group flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 dark:border-border py-4 text-sm font-medium text-gray-400 dark:text-gray-500 transition-all hover:border-emerald-300 dark:hover:border-emerald-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400"
 					>
 						<PlusIcon className="h-4 w-4 transition-transform group-hover:scale-125" />
 						<Trans>Add a new experience</Trans>
