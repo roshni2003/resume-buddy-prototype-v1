@@ -7,7 +7,7 @@ export const Route = createFileRoute("/dashboard/settings/")({
 });
 
 function SettingsRouteComponent() {
-	const { backgroundTheme, uiDensity, setBackgroundTheme, setUIDensity } = useSettingsStore();
+	const { backgroundTheme, setBackgroundTheme } = useSettingsStore();
 	const { theme: colorMode, setTheme: setColorMode } = useTheme();
 
 	return (
@@ -101,25 +101,6 @@ function SettingsRouteComponent() {
 					</div>
 				</section>
 
-				{/* UI Density */}
-				<section>
-					<h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">UI Density</h2>
-					<div className="flex rounded-xl bg-muted p-1 border border-border">
-						{(["compact", "comfortable", "spacious"] as const).map((density) => (
-							<button
-								key={density}
-								onClick={() => setUIDensity(density)}
-								className={`cursor-pointer flex-1 rounded-lg py-2.5 text-sm font-medium transition-all capitalize ${
-									uiDensity === density
-										? "bg-emerald-500 text-white shadow-sm"
-										: "text-muted-foreground hover:text-foreground"
-								}`}
-							>
-								{density}
-							</button>
-						))}
-					</div>
-				</section>
 			</div>
 		</div>
 	);

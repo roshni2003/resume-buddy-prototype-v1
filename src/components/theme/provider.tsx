@@ -15,7 +15,7 @@ type Props = PropsWithChildren<{ theme: Theme }>;
 
 export function ThemeProvider({ children, theme: defaultTheme }: Props) {
 	const router = useRouter();
-	const { colorMode, backgroundTheme, uiDensity } = useSettingsStore();
+	const { colorMode, backgroundTheme } = useSettingsStore();
 
 	useEffect(() => {
 		const root = document.documentElement;
@@ -29,16 +29,7 @@ export function ThemeProvider({ children, theme: defaultTheme }: Props) {
 		
 		// Background Theme
 		root.setAttribute("data-theme", backgroundTheme);
-		
-		// UI Density
-		const densityMap = {
-			compact: "14px",
-			comfortable: "16px",
-			spacious: "18px"
-		};
-		root.style.fontSize = densityMap[uiDensity];
-		
-	}, [colorMode, backgroundTheme, uiDensity]);
+	}, [colorMode, backgroundTheme]);
 
 	async function setTheme(value: Theme, options: { playSound?: boolean } = {}) {
 		const { playSound = true } = options;
