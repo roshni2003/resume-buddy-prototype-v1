@@ -106,7 +106,7 @@ export function AIGenerateButton({
 			},
 			{
 				onSuccess: (response) => {
-					const content = Object.values(response)[0];
+					let content = Object.values(response)[0];
 					console.log("Generation successful, content length:", content?.length);
 
 					// ✅ ADD THIS MIXPANEL TRACKING
@@ -124,6 +124,36 @@ export function AIGenerateButton({
 						toast.error(t`Generated content is too short. Please try again.`, { id: toastId });
 						return;
 					}
+
+					// Format AI response to proper HTML list if it contains bullets
+					const formatAIResponse = (text: string): string => {
+						if (!text) return "";
+						if (text.includes("<p>") || text.includes("<ul>") || text.includes("<li>")) {
+							return text;
+						}
+						
+						let lines = text.split("\n");
+						if (lines.length === 1 && (text.includes("•") || text.includes("- "))) {
+							lines = text.split(/•|- /).filter(Boolean);
+						}
+						
+						lines = lines.map((l) => l.trim()).filter((l) => l.length > 0);
+						
+						// Assume it's a list if we found bullets or multiple lines
+						const isList = lines.length > 1 || text.includes("•") || text.includes("- ");
+						
+						if (isList) {
+							const listItems = lines.map((line) => {
+								const cleanLine = line.replace(/^[•-]\s*/, "");
+								return `<li><p>${cleanLine}</p></li>`;
+							});
+							return `<ul>${listItems.join("")}</ul>`;
+						}
+						
+						return `<p>${lines.join("<br>")}</p>`;
+					};
+
+					content = formatAIResponse(content);
 
 					toast.success(t`Content generated successfully!`, { id: toastId });
 					onGenerated(content);

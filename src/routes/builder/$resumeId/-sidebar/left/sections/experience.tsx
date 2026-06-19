@@ -16,7 +16,6 @@ import {
 	CaretDownIcon,
 	CaretUpIcon,
 	CheckIcon,
-	LinkIcon,
 	MapPinIcon,
 	PlusIcon,
 	SparkleIcon,
@@ -325,28 +324,6 @@ function InlineExperienceForm({
 					/>
 				</div>
 
-				{/* ── Row 4: Website ── */}
-				<FormField
-					control={form.control}
-					name="website.url"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-								<LinkIcon className="h-3.5 w-3.5" />
-								<Trans>Website / Portfolio URL</Trans>
-							</FormLabel>
-							<FormControl>
-								<Input
-									{...field}
-									placeholder="https://company.com"
-									className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-emerald-400 focus:ring-emerald-200"
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
 				{/* ── Description + AI ── */}
 				<FormField
 					control={form.control}
@@ -392,8 +369,8 @@ function InlineExperienceForm({
 									<SparkleIcon weight="fill" className="h-3 w-3" />
 									AI Assisted
 								</span>
-								<span className="text-xs text-gray-400 dark:text-gray-500">
-									Zoe can sharpen your experience description
+								<span className="text-xs text-slate-700">
+									Turn your work into impactful resume bullet points.
 								</span>
 							</div>
 
@@ -601,7 +578,6 @@ function AddNewPanel({
 		endDate: "",
 		currentlyWorkingHere: false,
 		description: "",
-		website: { url: "", label: "" },
 		period: "",
 	};
 

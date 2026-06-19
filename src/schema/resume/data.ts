@@ -148,7 +148,6 @@ export const experienceItemSchema = baseItemSchema.extend({
 	currentlyWorkingHere: z.boolean().optional().describe("Whether the user is currently working here."),
 	description: z.string().describe("The description of the experience. This should be a HTML-formatted string."),
 	period: z.string().describe("The period of time the experience was obtained over."),
-	website: urlSchema.describe("The website of the company or organization, if any."),
 });
 
 export const interestItemSchema = baseItemSchema.extend({

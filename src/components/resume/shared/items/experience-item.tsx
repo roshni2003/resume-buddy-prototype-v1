@@ -29,11 +29,39 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 	const descriptionRef = useRef<HTMLDivElement>(null);
 
+	// Format description correctly into HTML if it is plain text
+	const formatDescription = (text: string): string => {
+		if (!text) return "";
+		if (
+			text.includes("<p>") ||
+			text.includes("<ul>") ||
+			text.includes("<li>") ||
+			text.includes("<strong>") ||
+			text.includes("<b>")
+		) {
+			return text;
+		}
+
+		const lines = text.split("\n").filter((line) => line.trim() !== "");
+		const hasBulletMarkers = lines.some((line) => line.trim().match(/^[*\-•]\s+/));
+
+		if (hasBulletMarkers) {
+			const listItems = lines.map((line) => {
+				const cleanLine = line.replace(/^[*\-•]\s+/, "").trim();
+				return `<li><p>${cleanLine}</p></li>`;
+			});
+			return `<ul>${listItems.join("")}</ul>`;
+		}
+
+		return lines.map((p) => `<p>${p}</p>`).join("");
+	};
+
 	// Update description content when item.description changes
 	useEffect(() => {
-		if (descriptionRef.current && descriptionRef.current.innerHTML !== item.description) {
-			if (document.activeElement !== descriptionRef.current) {
-				descriptionRef.current.innerHTML = item.description;
+		if (descriptionRef.current) {
+			const formatted = formatDescription(item.description);
+			if (descriptionRef.current.innerHTML !== formatted && document.activeElement !== descriptionRef.current) {
+				descriptionRef.current.innerHTML = formatted;
 			}
 		}
 	}, [item.description]);
@@ -86,57 +114,6 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 		}
 	};
 
-	// Function to render description based on content
-	const renderDescription = () => {
-		if (!item.description) return null;
-
-		const text = item.description;
-
-		// Case 1: If it looks like HTML (contains <p>, <ul>, <li>, <strong>, or <b>), render it as HTML
-		if (
-			text.includes("<p>") ||
-			text.includes("<ul>") ||
-			text.includes("<li>") ||
-			text.includes("<strong>") ||
-			text.includes("<b>")
-		) {
-			return (
-				<div
-					className="section-item-description tiptap-content"
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: This content is managed by Tiptap and sanitized before display
-					dangerouslySetInnerHTML={{ __html: text }}
-				/>
-			);
-		}
-
-		// Case 2: Check for bullet point markers in plain text (fallback)
-		const lines = text.split("\n").filter((line) => line.trim() !== "");
-		const hasBulletMarkers = lines.some((line) => line.trim().match(/^[*\-•]\s+/));
-
-		if (hasBulletMarkers) {
-			const listItems = lines.map((line) => line.replace(/^[*\-•]\s+/, "").trim());
-
-			return (
-				<ul className="list-disc pl-5">
-					{listItems.map((item, index) => (
-						<li key={index}>{item}</li>
-					))}
-				</ul>
-			);
-		}
-
-		// Case 3: Plain text with line breaks
-		return (
-			<div className="section-item-description whitespace-pre-wrap">
-				{lines.map((paragraph, index) => (
-					<p key={index} className="mb-2 last:mb-0">
-						{paragraph}
-					</p>
-				))}
-			</div>
-		);
-	};
-
 	return (
 		<div className={cn("experience-item group/item", className)}>
 			{/* Header */}
@@ -179,17 +156,18 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 				</div>
 			</div>
 
-			{/* Description - Smart rendering based on content */}
+			{/* Description */}
 			<div
 				ref={descriptionRef}
 				contentEditable
 				suppressContentEditableWarning
 				onInput={handleDescriptionChange}
 				onClick={handleContentEditableLinkClick}
-				className="tiptap-content cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-			>
-				{renderDescription()}
-			</div>
+				className={cn(
+					"section-item-description experience-item-description tiptap-content cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
+					!item.description && "hidden"
+				)}
+			/>
 
 			{/* Website */}
 			{item.website?.label && (

@@ -30,13 +30,11 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { projectItemSchema } from "@/schema/resume/data";
 import { SectionBase } from "../shared/section-base";
 import { generateId } from "@/utils/string";
 
-/* ─────────────────────────────────────────────
-   Types
-───────────────────────────────────────────── */
 type FormValues = z.infer<typeof projectItemSchema>;
 
 type PanelState =
@@ -44,9 +42,6 @@ type PanelState =
 	| { mode: "create" }
 	| { mode: "edit"; id: string };
 
-/* ─────────────────────────────────────────────
-   ZOE TIPS CARD
-───────────────────────────────────────────── */
 function ZoeTipsCard() {
 	return (
 		<div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50 p-5 shadow-sm">
@@ -81,9 +76,6 @@ function ZoeTipsCard() {
 	);
 }
 
-/* ─────────────────────────────────────────────
-   INLINE FORM
-───────────────────────────────────────────── */
 interface InlineFormProps {
 	defaultValues: FormValues;
 	onSave: (values: FormValues) => void;
@@ -206,31 +198,6 @@ function InlineProjectForm({
 							</FormItem>
 						)}
 					/>
-
-					<FormField
-						control={form.control}
-						name="techStack"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-									<CodeIcon className="h-3.5 w-3.5" />
-									<Trans>Tech Stack</Trans>
-								</FormLabel>
-								<FormControl>
-									<Input
-										{...field}
-										placeholder="React, Node.js, PostgreSQL"
-										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				{/* ── Row 3: Website URL + Label ── */}
-				<div className="grid gap-4 sm:grid-cols-2">
 					<FormField
 						control={form.control}
 						name="website.url"
@@ -238,7 +205,7 @@ function InlineProjectForm({
 							<FormItem>
 								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<GlobeIcon className="h-3.5 w-3.5" />
-									<Trans>Live URL</Trans>
+									<Trans>Website</Trans>
 								</FormLabel>
 								<FormControl>
 									<Input
@@ -251,28 +218,32 @@ function InlineProjectForm({
 							</FormItem>
 						)}
 					/>
+				</div>
 
-					<FormField
-						control={form.control}
-						name="website.label"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-									<LinkIcon className="h-3.5 w-3.5" />
-									<Trans>Link Label</Trans>
-								</FormLabel>
+				{/* ── Row 4: Show Link in Title Toggle ── */}
+				<FormField
+					control={form.control}
+					name="options.showLinkInTitle"
+					render={({ field }) => (
+						<FormItem className="flex flex-col">
+							<FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<Trans>Display Options</Trans>
+							</FormLabel>
+							<div className="flex items-center gap-2">
 								<FormControl>
-									<Input
-										{...field}
-										placeholder="Live Demo"
-										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
+									<Switch
+										checked={field.value}
+										onCheckedChange={field.onChange}
 									/>
 								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
+								<span className="text-sm text-gray-600">
+									<Trans>Show link in title</Trans>
+								</span>
+							</div>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
 				{/* ── Description + AI ── */}
 				<FormField
@@ -318,8 +289,8 @@ function InlineProjectForm({
 									<SparkleIcon weight="fill" className="h-3 w-3" />
 									AI Assisted
 								</span>
-								<span className="text-xs text-gray-400 dark:text-gray-500">
-									Zoe can sharpen your project pitch
+								<span className="text-xs text-slate-700">
+									Turn your project details into standout resume bullet points.
 								</span>
 							</div>
 
@@ -505,6 +476,7 @@ function AddNewPanel({
 	const newDefaults: FormValues = {
 		id: generateId(),
 		hidden: false,
+		options: { showLinkInTitle: false },
 		name: "",
 		period: "",
 		techStack: "",

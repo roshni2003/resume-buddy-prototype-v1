@@ -131,8 +131,8 @@ export function SummarySectionBuilder() {
 								AI Assisted
 							</div>
 
-							<span className="text-xs text-gray-500 dark:text-gray-400">
-								Zoe can improve tone and impact
+							<span className="text-xs text-slate-700">
+								Create a recruiter-ready summary in seconds.
 							</span>
 						</div>
 
