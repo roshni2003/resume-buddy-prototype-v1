@@ -131,17 +131,17 @@ export function AIGenerateButton({
 						if (text.includes("<p>") || text.includes("<ul>") || text.includes("<li>")) {
 							return text;
 						}
-						
+
 						let lines = text.split("\n");
 						if (lines.length === 1 && (text.includes("•") || text.includes("- "))) {
 							lines = text.split(/•|- /).filter(Boolean);
 						}
-						
+
 						lines = lines.map((l) => l.trim()).filter((l) => l.length > 0);
-						
+
 						// Assume it's a list if we found bullets or multiple lines
 						const isList = lines.length > 1 || text.includes("•") || text.includes("- ");
-						
+
 						if (isList) {
 							const listItems = lines.map((line) => {
 								const cleanLine = line.replace(/^[•-]\s*/, "");
@@ -149,7 +149,7 @@ export function AIGenerateButton({
 							});
 							return `<ul>${listItems.join("")}</ul>`;
 						}
-						
+
 						return `<p>${lines.join("<br>")}</p>`;
 					};
 
