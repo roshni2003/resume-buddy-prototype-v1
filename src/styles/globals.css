@@ -374,3 +374,86 @@ input.dark-input:-webkit-autofill:active {
 		background-color: var(--color-foreground);
 	}
 }
+
+.animate-ai-glow {
+  animation: aiGlow 1.8s ease-in-out infinite;
+}
+
+.animate-ai-glow-ring {
+  animation: aiGlowRing 1.8s ease-in-out infinite;
+}
+
+.ai-blink {
+  animation: subtle-blink 1.5s ease-in-out infinite;
+}
+
+.ai-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes subtle-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+}
+
+/* Existing animations remain */
+@keyframes aiGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+    filter: blur(6px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+    filter: blur(8px);
+  }
+}
+
+@keyframes aiGlowRing {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+
+/* Hover state - border pulse effect */
+.ask-zoe-button-wrapper:hover .ask-zoe-glow {
+  animation: aiGlow 1.2s ease-in-out infinite;
+}
+
+.ask-zoe-button-wrapper:hover .ask-zoe-glow-ring {
+  animation: aiGlowRing 1.2s ease-in-out infinite;
+}
+
+/* Optional: make the glow more visible on hover */
+.ask-zoe-button-wrapper:hover .ask-zoe-glow {
+  opacity: 0.8 !important;
+}
+
+.ask-zoe-button-wrapper:hover .ask-zoe-glow-ring {
+  opacity: 1 !important;
+}

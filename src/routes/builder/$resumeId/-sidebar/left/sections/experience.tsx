@@ -123,6 +123,7 @@ function InlineExperienceForm({
 	isNew = false,
 }: InlineFormProps) {
 	const [isPulsing, setIsPulsing] = useState(true);
+	const [isHovering, setIsHovering] = useState(false);
 
 	useEffect(() => {
 		const timer = setTimeout(() => setIsPulsing(false), 5000);
@@ -180,6 +181,7 @@ function InlineExperienceForm({
 	};
 
 	const currentlyWorking = form.watch("currentlyWorkingHere");
+	const shouldGlow = isPulsing || isHovering;
 
 	return (
 		<Form {...form}>
@@ -355,8 +357,12 @@ function InlineExperienceForm({
 								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<Trans>Description</Trans>
 								</FormLabel>
-								<div className="relative mb-2 rounded-xl bg-gray-50 dark:bg-muted/50 p-1">
-									{isPulsing && (
+								<div
+									className="relative mb-2 rounded-xl bg-gray-50 p-1"
+									onMouseEnter={() => setIsHovering(true)}
+									onMouseLeave={() => setIsHovering(false)}
+								>
+									{shouldGlow && (
 										<>
 											<div className="absolute -inset-1 rounded-full bg-emerald-400/40 blur-md animate-ai-glow" />
 											<div className="absolute -inset-2 rounded-full border border-emerald-300/50 animate-ai-glow-ring" />
@@ -375,7 +381,7 @@ function InlineExperienceForm({
 										maxRounds={maxRounds}
 										isWordCountValid={isWordCountValid}
 										disabled={roundsUsed >= maxRounds || !isWordCountValid}
-										className="relative z-10 border border-emerald-300 dark:border-emerald-700/50 font-bold text-black shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 hover:text-white"
+										className="relative z-10 border border-emerald-300 font-bold text-black shadow-lg shadow-emerald-500/30 hover:text-black"
 									/>
 								</div>
 							</div>
@@ -487,9 +493,9 @@ function ExperienceCard({
 
 	return (
 		<div
-			className={`rounded-2xl border bg-white dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
-					? "border-emerald-300 dark:border-emerald-700/50 shadow-emerald-100 shadow-md"
-					: "border-gray-100 dark:border-border hover:border-gray-200 hover:shadow"
+			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
+				? "border-emerald-300 shadow-emerald-100 shadow-md"
+				: "border-gray-100 hover:border-gray-200 hover:shadow"
 				}`}
 		>
 			{/* ── Header (always visible) ── */}
