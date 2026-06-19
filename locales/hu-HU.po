@@ -71,6 +71,8 @@ msgstr "{column, plural, one {# oszlop} other {# oszlop}}"
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 msgstr ""
 
@@ -94,6 +96,11 @@ msgstr "Egy szenvedélyprojekt <0>Amruth Pillai</0> tollából."
 msgid "A4"
 msgstr "A4"
 
+#. placeholder {0}: section.type === "generic" || section.type === "custom" ? "item" : section.type + " item"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Add {0}"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "Egyéni mező hozzáadása"
@@ -106,34 +113,17 @@ msgstr "Adj címkét az URL‑hez"
 msgid "Add a new award"
 msgstr "Új díj hozzáadása"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
-msgid "Add a new certification"
-msgstr "Új tanúsítvány hozzáadása"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Add a new custom section"
 msgstr "Új egyéni szekció hozzáadása"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
-msgid "Add a new education"
-msgstr "Új tanulmányi bejegyzés hozzáadása"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Add a new experience"
 msgstr "Új szakmai tapasztalat hozzáadása"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/interests.tsx
-msgid "Add a new interest"
-msgstr "Új érdeklődési kör hozzáadása"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Add a new item"
 msgstr "Elem hozzáadása"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/languages.tsx
-msgid "Add a new language"
-msgstr "Új nyelv hozzáadása"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Add a new project"
@@ -147,30 +137,41 @@ msgstr "Új publikáció hozzáadása"
 msgid "Add a new reference"
 msgstr "Új referencia hozzáadása"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/skills.tsx
-msgid "Add a new skill"
-msgstr "Új készség hozzáadása"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+msgid "Add certification"
+msgstr ""
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
-msgid "Add a new volunteer experience"
-msgstr "Új önkéntes tapasztalat hozzáadása"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Add education"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Add Experience"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
 msgstr "Oldal hozzáadása"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Add Project"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
+msgid "Add volunteer work"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Afrikaans"
 msgstr "afrikaans"
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "AI"
-msgstr "AI"
-
 #. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "ai.review.loading"
+msgstr ""
+
+#: src/dialogs/resume/import.tsx
+msgid "AI-powered import for PDF and Word documents is currently being moved to the backend. Please try again later or use JSON import."
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
@@ -240,22 +241,10 @@ msgstr "Biztosan el akarod távolítani a jelszóvédelmet?"
 msgid "Area of Study"
 msgstr "Tanulmányok területe"
 
+#: src/components/ui/ai-generate-button.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 msgid "Ask Zoe"
 msgstr ""
-
-#. placeholder {0}: roundsRemaining === 1 ? "round" : "rounds"
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe ({roundsRemaining} {0} remaining)"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe (Used)"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Aspect Ratio"
-msgstr "Méretarány"
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -292,18 +281,6 @@ msgstr "Törzsszöveg"
 msgid "Bold"
 msgstr "Félkövér"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Radius"
-msgstr "Szegély lekerekítése"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Width"
-msgstr "Szegély vastagsága"
-
 #: src/components/command-palette/index.tsx
 msgid "Builder Command Palette"
 msgstr "Szerkesztő parancskereső"
@@ -329,8 +306,6 @@ msgstr "A közösség által, a közösségért."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/profile.tsx
@@ -340,7 +315,6 @@ msgstr "A közösség által, a közösségért."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
@@ -348,6 +322,9 @@ msgstr "A közösség által, a közösségért."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
@@ -372,10 +349,6 @@ msgstr "kínai (hagyományos)"
 #: src/components/level/combobox.tsx
 msgid "Circle"
 msgstr "Kör"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Circle (100pt)"
-msgstr ""
 
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
@@ -403,6 +376,7 @@ msgid "Coming Soon!"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Company"
 msgstr "Cég"
 
@@ -440,13 +414,10 @@ msgstr ""
 #: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
@@ -465,10 +436,6 @@ msgstr "Új tanúsítvány létrehozása"
 msgid "Create a new cover letter"
 msgstr ""
 
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Create a new custom section"
-msgstr "Új egyéni szekció létrehozása"
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Create a new education"
 msgstr "Új tanulmányi bejegyzés létrehozása"
@@ -476,14 +443,6 @@ msgstr "Új tanulmányi bejegyzés létrehozása"
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Create a new experience"
 msgstr "Új szakmai tapasztalat létrehozása"
-
-#: src/dialogs/resume/sections/interest.tsx
-msgid "Create a new interest"
-msgstr "Új érdeklődési kör létrehozása"
-
-#: src/dialogs/resume/sections/language.tsx
-msgid "Create a new language"
-msgstr "Új nyelv létrehozása"
 
 #: src/dialogs/resume/sections/profile.tsx
 msgid "Create a new profile"
@@ -502,14 +461,9 @@ msgid "Create a new reference"
 msgstr "Új referencia létrehozása"
 
 #: src/components/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
 msgstr "Új önéletrajz létrehozása"
-
-#: src/dialogs/resume/sections/skill.tsx
-msgid "Create a new skill"
-msgstr "Új készség létrehozása"
 
 #: src/dialogs/resume/sections/summary.tsx
 msgid "Create a new summary"
@@ -530,6 +484,10 @@ msgstr "Önéletrajz létrehozása..."
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Critical Issues"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Currently here"
 msgstr ""
 
 #: src/dialogs/resume/sections/education.tsx
@@ -594,6 +552,8 @@ msgstr "Önéletrajz törlése..."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Description"
 msgstr "Leírás"
 
@@ -614,14 +574,6 @@ msgstr "Letöltés"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download a copy of your resume in PDF format. Use this file for printing or to easily share your resume with recruiters."
 msgstr "Töltsd le az önéletrajzod egy példányát PDF formátumban. Használd ezt a fájlt nyomtatáshoz, vagy az önéletrajzod egyszerű megosztásához a toborzókkal."
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download PDF"
-msgstr "PDF letöltése"
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download Word"
-msgstr ""
 
 #: src/routes/$username/$slug.tsx
 msgid "Downloading..."
@@ -686,6 +638,7 @@ msgid "Enabling password protection..."
 msgstr "Jelszóvédelem engedélyezése..."
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "End Date"
 msgstr ""
 
@@ -712,10 +665,6 @@ msgstr ""
 #: src/components/ui/ai-generate-button.tsx
 msgid "Failed to generate content"
 msgstr ""
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Filter by"
-msgstr "Szűrés alapja"
 
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
@@ -776,6 +725,10 @@ msgctxt "Page Format (A4, Letter or Free-Form)"
 msgid "Format"
 msgstr "Formátum"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Frame"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Free-Form"
 msgstr "Szabad forma"
@@ -783,6 +736,10 @@ msgstr "Szabad forma"
 #: src/utils/locale.ts
 msgid "French"
 msgstr "francia"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+msgid "Full Name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
@@ -893,6 +850,10 @@ msgstr "Ikon"
 msgid "Image size should be less than 10MB"
 msgstr ""
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Image URL"
+msgstr ""
+
 #: src/dialogs/resume/import.tsx
 msgid "Import"
 msgstr "Importálás"
@@ -969,10 +930,6 @@ msgstr "koreai"
 msgid "Label"
 msgstr "Címke"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Landscape"
-msgstr "Fekvő"
-
 #: src/components/user/dropdown-menu.tsx
 #: src/dialogs/resume/sections/language.tsx
 msgid "Language"
@@ -991,7 +948,6 @@ msgstr "Utoljára letöltve ekkor: {0}"
 msgid "Last Update"
 msgstr ""
 
-#: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Last updated on {updatedAt}"
 msgstr "Utoljára frissítve ekkor: {updatedAt}"
@@ -1050,6 +1006,10 @@ msgstr "Világos"
 msgid "Line Height"
 msgstr "Sorköz"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Link Label"
+msgstr ""
+
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Link Status"
@@ -1058,6 +1018,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "Lithuanian"
 msgstr "litván"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Live URL"
+msgstr ""
 
 #: src/components/command-palette/pages/resumes.tsx
 msgid "Loading resumes..."
@@ -1071,6 +1035,7 @@ msgstr "Betöltés..."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Location"
 msgstr "Helyszín"
 
@@ -1124,13 +1089,16 @@ msgstr "Áthelyezés ide"
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "Név"
 
 #: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Name your section and choose a layout type."
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1141,13 +1109,29 @@ msgstr "nepáli"
 msgid "Network"
 msgstr "Hálózat"
 
+#: src/dialogs/resume/sections/custom.tsx
+msgid "New custom section"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "New Experience"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Page"
 msgstr "Új oldal"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "New Project"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Section"
 msgstr "Új szekció"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "No custom blocks yet — design one your way."
+msgstr ""
 
 #: src/components/ui/combobox.tsx
 #: src/components/ui/multiple-combobox.tsx
@@ -1214,6 +1198,10 @@ msgstr "A jelszóvédelem be lett kapcsolva."
 msgid "Period"
 msgstr "Időszak"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Period / Year"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Persian"
 msgstr "perzsa"
@@ -1233,19 +1221,11 @@ msgid "Picture"
 msgstr "Fénykép"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture Customization"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture removed"
 msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture uploaded successfully!"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture URL"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1291,10 +1271,6 @@ msgstr ""
 msgid "Polish"
 msgstr "lengyel"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Portrait"
-msgstr "Álló"
-
 #: src/utils/locale.ts
 msgid "Portuguese (Brazil)"
 msgstr "portugál (Brazília)"
@@ -1305,6 +1281,7 @@ msgstr "portugál (Portugália)"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/reference.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Position"
 msgstr "Pozíció"
 
@@ -1327,10 +1304,6 @@ msgstr "Jártasság"
 msgid "Profile"
 msgstr "Profil"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Profile Picture"
-msgstr ""
-
 #: src/utils/resume/section.tsx
 msgid "Profiles"
 msgstr "Profilok"
@@ -1338,6 +1311,10 @@ msgstr "Profilok"
 #: src/components/level/combobox.tsx
 msgid "Progress Bar"
 msgstr "Folyamatjelző sáv"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Project Name"
+msgstr ""
 
 #: src/utils/resume/section.tsx
 msgid "Projects"
@@ -1382,6 +1359,11 @@ msgstr "Referenciák"
 #: src/components/layout/error-screen.tsx
 msgid "Refresh"
 msgstr "Frissítés"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Remove"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
@@ -1447,14 +1429,6 @@ msgstr ""
 msgid "Romanian"
 msgstr "román"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rotation"
-msgstr "Forgatás"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rounded (10pt)"
-msgstr ""
-
 #: src/utils/locale.ts
 msgid "Russian"
 msgstr "orosz"
@@ -1475,6 +1449,9 @@ msgstr "orosz"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Save Changes"
 msgstr "Változtatások mentése"
@@ -1504,6 +1481,10 @@ msgid "Search..."
 msgstr "Keresés..."
 
 #: src/dialogs/resume/sections/custom.tsx
+msgid "Section Title"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
 msgstr "Szekció típusa"
 
@@ -1525,14 +1506,6 @@ msgstr "Jelszó beállítása"
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "Beállítások"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Width"
-msgstr "Árnyék vastagsága"
 
 #: src/utils/resume/section.tsx
 msgid "Sharing"
@@ -1619,13 +1592,8 @@ msgid "Spanish"
 msgstr "spanyol"
 
 #: src/components/level/combobox.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Square"
 msgstr "Négyzet"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Square (0pt)"
-msgstr ""
 
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
@@ -1636,12 +1604,12 @@ msgstr "Adj csillagot nekünk GitHubon (új lapon nyílik meg)"
 msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
 msgstr "Adj csillagot nekünk GitHubon, jelenleg {0} csillag (új lapon nyílik meg)"
 
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
 msgstr "Kezdd el az önéletrajzod építését a nulláról"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Start Date"
 msgstr ""
 
@@ -1690,6 +1658,10 @@ msgstr "Váltás világos témára"
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "tamil"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Tech Stack"
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Telugu"
@@ -1752,11 +1724,6 @@ msgstr ""
 msgid "This action cannot be undone."
 msgstr "Ez a művelet nem vonható vissza."
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
-msgstr "Ehhez a funkcióhoz engedélyezett AI integráció szükséges. Kérjük, engedélyezd a beállításokban."
-
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr ""
@@ -1772,14 +1739,6 @@ msgstr "Ez néhány percet igénybe vehet, az AI szolgáltató válaszidejétől
 msgid "This may take a while depending on the server capacity. Please do not close the window or refresh the page."
 msgstr "Ez eltarthat egy ideig a szerver kapacitásától függően. Kérjük, ne zárd be az ablakot, és ne frissítsd az oldalt."
 
-#: src/routes/dashboard/resumes/index.tsx
-msgid "This month"
-msgstr ""
-
-#: src/components/resume/store/resume.ts
-msgid "This resume is locked and cannot be updated."
-msgstr "Ez az önéletrajz zárolva van, és nem frissíthető."
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
 msgstr "Ez a szekció az adott önéletrajzhoz tartozó személyes jegyzeteidnek van fenntartva. A tartalma privát marad, és senkivel sem osztjuk meg."
@@ -1790,7 +1749,6 @@ msgstr "Tipp: Az önéletrajzot elnevezheted a megpályázott pozícióról is."
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Title"
 msgstr "Cím"
@@ -1888,6 +1846,10 @@ msgstr ""
 msgid "Unlock"
 msgstr "Feloldás"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Untitled Section"
+msgstr ""
+
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Unverified"
 msgstr "Nem hitelesített"
@@ -1909,10 +1871,6 @@ msgstr "Meglévő tanúsítvány frissítése"
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Update an existing cover letter"
 msgstr ""
-
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Update an existing custom section"
-msgstr "Meglévő egyéni szekció frissítése"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Update an existing education"
@@ -1957,6 +1915,14 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Meglévő önkéntes tapasztalat frissítése"
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update custom section"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update your section name or change layout type."
+msgstr ""
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
@@ -2006,6 +1972,10 @@ msgstr "Önkéntesség"
 msgid "Website"
 msgstr "Weboldal"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Website / Portfolio URL"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
 msgstr "Mire szeretnéd átnevezni ezt a szekciót?"
@@ -2017,12 +1987,16 @@ msgstr "Ha az önéletrajz zárolva van, nem frissíthető és nem törölhető.
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Write at least 5 words to enable Ask Zoe"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "You have 1 more AI suggestion left for this text."
 msgstr ""
 

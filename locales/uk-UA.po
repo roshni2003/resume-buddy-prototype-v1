@@ -71,6 +71,8 @@ msgstr "{column, plural, one {# Стовпчик} few {# Стовпці} many {#
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 msgstr ""
 
@@ -94,6 +96,11 @@ msgstr "Зроблено з любовʼю від <0>Amruth Pillai</0>."
 msgid "A4"
 msgstr "A4"
 
+#. placeholder {0}: section.type === "generic" || section.type === "custom" ? "item" : section.type + " item"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Add {0}"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "Додати користувацьке поле"
@@ -106,34 +113,17 @@ msgstr "Додати мітку до посилання"
 msgid "Add a new award"
 msgstr "Додати нову нагороду"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
-msgid "Add a new certification"
-msgstr "Додати нову сертифікацію"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Add a new custom section"
 msgstr "Додати новий користувацький розділ"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
-msgid "Add a new education"
-msgstr "Додати нову освіту"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Add a new experience"
 msgstr "Додати новий досвід"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/interests.tsx
-msgid "Add a new interest"
-msgstr "Додати новий інтерес"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Add a new item"
 msgstr "Додати новий елемент"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/languages.tsx
-msgid "Add a new language"
-msgstr "Додати нову мову"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Add a new project"
@@ -147,30 +137,41 @@ msgstr "Додати нову публікацію"
 msgid "Add a new reference"
 msgstr "Додати нову рекомендацію"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/skills.tsx
-msgid "Add a new skill"
-msgstr "Додати нове вміння"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+msgid "Add certification"
+msgstr ""
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
-msgid "Add a new volunteer experience"
-msgstr "Додати новий волонтерський досвід"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Add education"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Add Experience"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
 msgstr "Додати сторінку"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Add Project"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
+msgid "Add volunteer work"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Afrikaans"
 msgstr "Африканська"
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "AI"
-msgstr "ШІ"
-
 #. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "ai.review.loading"
+msgstr ""
+
+#: src/dialogs/resume/import.tsx
+msgid "AI-powered import for PDF and Word documents is currently being moved to the backend. Please try again later or use JSON import."
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
@@ -240,22 +241,10 @@ msgstr "Ви впевнені, що хочете зняти захист пар�
 msgid "Area of Study"
 msgstr "Освітня програма"
 
+#: src/components/ui/ai-generate-button.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 msgid "Ask Zoe"
 msgstr ""
-
-#. placeholder {0}: roundsRemaining === 1 ? "round" : "rounds"
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe ({roundsRemaining} {0} remaining)"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe (Used)"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Aspect Ratio"
-msgstr "Пропорції"
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -292,18 +281,6 @@ msgstr "Основний текст"
 msgid "Bold"
 msgstr "Жирний"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Radius"
-msgstr "Округлення кутів"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Width"
-msgstr "Товщина рамки"
-
 #: src/components/command-palette/index.tsx
 msgid "Builder Command Palette"
 msgstr "Палітра команд Конструктора"
@@ -329,8 +306,6 @@ msgstr "Спільнотою, для спільноти."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/profile.tsx
@@ -340,7 +315,6 @@ msgstr "Спільнотою, для спільноти."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
@@ -348,6 +322,9 @@ msgstr "Спільнотою, для спільноти."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
@@ -372,10 +349,6 @@ msgstr "Китайська (традиційна)"
 #: src/components/level/combobox.tsx
 msgid "Circle"
 msgstr "Кругле"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Circle (100pt)"
-msgstr ""
 
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
@@ -403,6 +376,7 @@ msgid "Coming Soon!"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Company"
 msgstr "Компанія"
 
@@ -440,13 +414,10 @@ msgstr ""
 #: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
@@ -465,10 +436,6 @@ msgstr "Створити нову сертифікацію"
 msgid "Create a new cover letter"
 msgstr ""
 
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Create a new custom section"
-msgstr "Створити новий користувацький розділ"
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Create a new education"
 msgstr "Створити нову освіту"
@@ -476,14 +443,6 @@ msgstr "Створити нову освіту"
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Create a new experience"
 msgstr "Створити новий досвід"
-
-#: src/dialogs/resume/sections/interest.tsx
-msgid "Create a new interest"
-msgstr "Створити новий інтерес"
-
-#: src/dialogs/resume/sections/language.tsx
-msgid "Create a new language"
-msgstr "Створити нову мову"
 
 #: src/dialogs/resume/sections/profile.tsx
 msgid "Create a new profile"
@@ -502,14 +461,9 @@ msgid "Create a new reference"
 msgstr "Створити нову рекомендацію"
 
 #: src/components/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
 msgstr "Створіть нове резюме"
-
-#: src/dialogs/resume/sections/skill.tsx
-msgid "Create a new skill"
-msgstr "Створити нову навичку"
 
 #: src/dialogs/resume/sections/summary.tsx
 msgid "Create a new summary"
@@ -530,6 +484,10 @@ msgstr "Створення вашого резюме..."
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Critical Issues"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Currently here"
 msgstr ""
 
 #: src/dialogs/resume/sections/education.tsx
@@ -594,6 +552,8 @@ msgstr "Видалення вашого резюме..."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Description"
 msgstr "Опис"
 
@@ -614,14 +574,6 @@ msgstr "Завантажити"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download a copy of your resume in PDF format. Use this file for printing or to easily share your resume with recruiters."
 msgstr "Завантажте копію свого резюме у форматі PDF. Використовуйте цей файл для друку або для легкого поширення резюме рекрутерам."
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download PDF"
-msgstr "Завантажити в PDF"
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download Word"
-msgstr ""
 
 #: src/routes/$username/$slug.tsx
 msgid "Downloading..."
@@ -686,6 +638,7 @@ msgid "Enabling password protection..."
 msgstr "Увімкнення захисту паролем..."
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "End Date"
 msgstr ""
 
@@ -712,10 +665,6 @@ msgstr ""
 #: src/components/ui/ai-generate-button.tsx
 msgid "Failed to generate content"
 msgstr ""
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Filter by"
-msgstr "Фільтрувати за"
 
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
@@ -776,6 +725,10 @@ msgctxt "Page Format (A4, Letter or Free-Form)"
 msgid "Format"
 msgstr "Формат"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Frame"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Free-Form"
 msgstr "Вільна форма"
@@ -783,6 +736,10 @@ msgstr "Вільна форма"
 #: src/utils/locale.ts
 msgid "French"
 msgstr "Французька"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+msgid "Full Name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
@@ -893,6 +850,10 @@ msgstr "Іконка"
 msgid "Image size should be less than 10MB"
 msgstr ""
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Image URL"
+msgstr ""
+
 #: src/dialogs/resume/import.tsx
 msgid "Import"
 msgstr "Імпортувати"
@@ -969,10 +930,6 @@ msgstr "Корейська"
 msgid "Label"
 msgstr "Мітка"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Landscape"
-msgstr "Альбомна орієнтація"
-
 #: src/components/user/dropdown-menu.tsx
 #: src/dialogs/resume/sections/language.tsx
 msgid "Language"
@@ -991,7 +948,6 @@ msgstr "Востаннє завантажено {0}"
 msgid "Last Update"
 msgstr ""
 
-#: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Last updated on {updatedAt}"
 msgstr "Останнє оновлення {updatedAt}"
@@ -1050,6 +1006,10 @@ msgstr "Світлий"
 msgid "Line Height"
 msgstr "Інтервал між рядками"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Link Label"
+msgstr ""
+
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Link Status"
@@ -1058,6 +1018,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "Lithuanian"
 msgstr "Литовська"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Live URL"
+msgstr ""
 
 #: src/components/command-palette/pages/resumes.tsx
 msgid "Loading resumes..."
@@ -1071,6 +1035,7 @@ msgstr "Завантаження..."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Location"
 msgstr "Місцеперебування"
 
@@ -1124,13 +1089,16 @@ msgstr "Перемістити до"
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "Назва"
 
 #: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Name your section and choose a layout type."
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1141,13 +1109,29 @@ msgstr "Непальська"
 msgid "Network"
 msgstr "Мережа"
 
+#: src/dialogs/resume/sections/custom.tsx
+msgid "New custom section"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "New Experience"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Page"
 msgstr "Нова сторінка"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "New Project"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Section"
 msgstr "Нова секція"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "No custom blocks yet — design one your way."
+msgstr ""
 
 #: src/components/ui/combobox.tsx
 #: src/components/ui/multiple-combobox.tsx
@@ -1214,6 +1198,10 @@ msgstr "Захист паролем увімкнено."
 msgid "Period"
 msgstr "Період"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Period / Year"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Persian"
 msgstr "Перська"
@@ -1233,19 +1221,11 @@ msgid "Picture"
 msgstr "Фото"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture Customization"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture removed"
 msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture uploaded successfully!"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture URL"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1291,10 +1271,6 @@ msgstr ""
 msgid "Polish"
 msgstr "Польська"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Portrait"
-msgstr "Портрет"
-
 #: src/utils/locale.ts
 msgid "Portuguese (Brazil)"
 msgstr "Португальська (Бразилія)"
@@ -1305,6 +1281,7 @@ msgstr "Португальська (Португалія)"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/reference.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Position"
 msgstr "Посада"
 
@@ -1327,10 +1304,6 @@ msgstr "Рівень володіння"
 msgid "Profile"
 msgstr "Профіль"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Profile Picture"
-msgstr ""
-
 #: src/utils/resume/section.tsx
 msgid "Profiles"
 msgstr "Профілі"
@@ -1338,6 +1311,10 @@ msgstr "Профілі"
 #: src/components/level/combobox.tsx
 msgid "Progress Bar"
 msgstr "Індикатор прогресу"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Project Name"
+msgstr ""
 
 #: src/utils/resume/section.tsx
 msgid "Projects"
@@ -1382,6 +1359,11 @@ msgstr "Рекомендації"
 #: src/components/layout/error-screen.tsx
 msgid "Refresh"
 msgstr "Оновити"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Remove"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
@@ -1447,14 +1429,6 @@ msgstr ""
 msgid "Romanian"
 msgstr "Румунська"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rotation"
-msgstr "Обертання"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rounded (10pt)"
-msgstr ""
-
 #: src/utils/locale.ts
 msgid "Russian"
 msgstr "Російська"
@@ -1475,6 +1449,9 @@ msgstr "Російська"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Save Changes"
 msgstr "Зберегти зміни"
@@ -1504,6 +1481,10 @@ msgid "Search..."
 msgstr "Пошук..."
 
 #: src/dialogs/resume/sections/custom.tsx
+msgid "Section Title"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
 msgstr "Тип секції"
 
@@ -1525,14 +1506,6 @@ msgstr "Встановити пароль"
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "Налаштування"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Width"
-msgstr "Ширина тіні"
 
 #: src/utils/resume/section.tsx
 msgid "Sharing"
@@ -1619,13 +1592,8 @@ msgid "Spanish"
 msgstr "Іспанська"
 
 #: src/components/level/combobox.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Square"
 msgstr "Квадратне"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Square (0pt)"
-msgstr ""
 
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
@@ -1636,12 +1604,12 @@ msgstr "Поставте нам зірку на GitHub (відкриється �
 msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
 msgstr "Поставте нам зірку на GitHub, наразі {0} зірок (відкриється у новій вкладці)"
 
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
 msgstr "Почати створення резюме з нуля"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Start Date"
 msgstr ""
 
@@ -1690,6 +1658,10 @@ msgstr "Перемкнути на світлу тему"
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Тамільська"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Tech Stack"
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Telugu"
@@ -1752,11 +1724,6 @@ msgstr ""
 msgid "This action cannot be undone."
 msgstr "Цю дію неможливо скасувати."
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
-msgstr "Ця функція вимагає активації інтеграції з AI. Будь ласка, увімкніть її в налаштуваннях."
-
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr ""
@@ -1772,14 +1739,6 @@ msgstr "Це може зайняти кілька хвилин, залежно �
 msgid "This may take a while depending on the server capacity. Please do not close the window or refresh the page."
 msgstr "Це може зайняти певний час залежно від завантаженості сервера. Будь ласка, не закривайте вікно і не оновлюйте сторінку."
 
-#: src/routes/dashboard/resumes/index.tsx
-msgid "This month"
-msgstr ""
-
-#: src/components/resume/store/resume.ts
-msgid "This resume is locked and cannot be updated."
-msgstr "Це резюме заблоковано і не може бути оновлене."
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
 msgstr "Тут можна зберігати персональні нотатки щодо цього резюме. Їхній вміст буде приватним і не розкриватиметься іншим."
@@ -1790,7 +1749,6 @@ msgstr "Порада: Ви можете назвати резюме відпов
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Title"
 msgstr "Назва"
@@ -1888,6 +1846,10 @@ msgstr ""
 msgid "Unlock"
 msgstr "Розблокувати"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Untitled Section"
+msgstr ""
+
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Unverified"
 msgstr "Непідтверджена"
@@ -1909,10 +1871,6 @@ msgstr "Оновити наявну сертифікацію"
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Update an existing cover letter"
 msgstr ""
-
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Update an existing custom section"
-msgstr "Оновити власний розділ"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Update an existing education"
@@ -1957,6 +1915,14 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Оновити досвід волонтерства"
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update custom section"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update your section name or change layout type."
+msgstr ""
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
@@ -2006,6 +1972,10 @@ msgstr "Волонтер"
 msgid "Website"
 msgstr "Вебсайт"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Website / Portfolio URL"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
 msgstr "На яку назву ви хочете перейменувати цей розділ?"
@@ -2017,12 +1987,16 @@ msgstr "Коли резюме заблоковано, його неможлив�
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Write at least 5 words to enable Ask Zoe"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "You have 1 more AI suggestion left for this text."
 msgstr ""
 

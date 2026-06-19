@@ -71,6 +71,8 @@ msgstr "{column, plural, one {# स्तंभ} other {# स्तंभ}}"
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 msgstr ""
 
@@ -94,6 +96,11 @@ msgstr "<0>Amruth Pillai</0> यांचा प्रचंड आवडीच�
 msgid "A4"
 msgstr "A4"
 
+#. placeholder {0}: section.type === "generic" || section.type === "custom" ? "item" : section.type + " item"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Add {0}"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "सानुकूल फील्ड जोडा"
@@ -106,34 +113,17 @@ msgstr "URL ला लेबल जोडा"
 msgid "Add a new award"
 msgstr "नवीन पुरस्कार जोडा"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
-msgid "Add a new certification"
-msgstr "नवीन प्रमाणपत्र जोडा"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Add a new custom section"
 msgstr "नवीन सानुकूल विभाग जोडा"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
-msgid "Add a new education"
-msgstr "नवीन शैक्षणिक माहिती जोडा"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Add a new experience"
 msgstr "नवीन अनुभव जोडा"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/interests.tsx
-msgid "Add a new interest"
-msgstr "नवीन आवड जोडा"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Add a new item"
 msgstr "नवीन वस्तू जोडा"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/languages.tsx
-msgid "Add a new language"
-msgstr "नवीन भाषा जोडा"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Add a new project"
@@ -147,30 +137,41 @@ msgstr "नवीन प्रकाशन जोडा"
 msgid "Add a new reference"
 msgstr "नवीन रेफरन्स जोडा"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/skills.tsx
-msgid "Add a new skill"
-msgstr "नवीन कौशल्य जोडा"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+msgid "Add certification"
+msgstr ""
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
-msgid "Add a new volunteer experience"
-msgstr "नवीन स्वयंसेवी अनुभव जोडा"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Add education"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Add Experience"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
 msgstr "पान जोडा"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Add Project"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
+msgid "Add volunteer work"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Afrikaans"
 msgstr "आफ्रिकान्स"
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "AI"
-msgstr "AI"
-
 #. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "ai.review.loading"
+msgstr ""
+
+#: src/dialogs/resume/import.tsx
+msgid "AI-powered import for PDF and Word documents is currently being moved to the backend. Please try again later or use JSON import."
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
@@ -240,22 +241,10 @@ msgstr "तुम्हाला पासवर्ड संरक्षण न
 msgid "Area of Study"
 msgstr "अभ्यासाचे क्षेत्र"
 
+#: src/components/ui/ai-generate-button.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 msgid "Ask Zoe"
 msgstr ""
-
-#. placeholder {0}: roundsRemaining === 1 ? "round" : "rounds"
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe ({roundsRemaining} {0} remaining)"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe (Used)"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Aspect Ratio"
-msgstr "प्रसर गुणोत्तर"
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -292,18 +281,6 @@ msgstr "बॉडी"
 msgid "Bold"
 msgstr "जाड (Bold)"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Radius"
-msgstr "सीमेची त्रिज्या"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Width"
-msgstr "सीमेची जाडी"
-
 #: src/components/command-palette/index.tsx
 msgid "Builder Command Palette"
 msgstr "बिल्डर कमांड पॅलेट"
@@ -329,8 +306,6 @@ msgstr "समाजाने, समाजासाठी."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/profile.tsx
@@ -340,7 +315,6 @@ msgstr "समाजाने, समाजासाठी."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
@@ -348,6 +322,9 @@ msgstr "समाजाने, समाजासाठी."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
@@ -372,10 +349,6 @@ msgstr "चीनी (परंपरागत)"
 #: src/components/level/combobox.tsx
 msgid "Circle"
 msgstr "गोलाकार"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Circle (100pt)"
-msgstr ""
 
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
@@ -403,6 +376,7 @@ msgid "Coming Soon!"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Company"
 msgstr "कंपनी"
 
@@ -440,13 +414,10 @@ msgstr ""
 #: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
@@ -465,10 +436,6 @@ msgstr "नवीन प्रमाणपत्र बनवा"
 msgid "Create a new cover letter"
 msgstr ""
 
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Create a new custom section"
-msgstr "नवीन सानुकूल विभाग बनवा"
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Create a new education"
 msgstr "नवीन शैक्षणिक नोंद बनवा"
@@ -476,14 +443,6 @@ msgstr "नवीन शैक्षणिक नोंद बनवा"
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Create a new experience"
 msgstr "नवीन अनुभव बनवा"
-
-#: src/dialogs/resume/sections/interest.tsx
-msgid "Create a new interest"
-msgstr "नवीन आवड बनवा"
-
-#: src/dialogs/resume/sections/language.tsx
-msgid "Create a new language"
-msgstr "नवीन भाषा बनवा"
 
 #: src/dialogs/resume/sections/profile.tsx
 msgid "Create a new profile"
@@ -502,14 +461,9 @@ msgid "Create a new reference"
 msgstr "नवीन रेफरन्स बनवा"
 
 #: src/components/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
 msgstr "नवीन रेझ्युमे बनवा"
-
-#: src/dialogs/resume/sections/skill.tsx
-msgid "Create a new skill"
-msgstr "नवीन कौशल्य बनवा"
 
 #: src/dialogs/resume/sections/summary.tsx
 msgid "Create a new summary"
@@ -530,6 +484,10 @@ msgstr "तुमचा रेझ्युमे तयार केला ज�
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Critical Issues"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Currently here"
 msgstr ""
 
 #: src/dialogs/resume/sections/education.tsx
@@ -594,6 +552,8 @@ msgstr "तुमचा रेझ्युमे हटवला जात आ�
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Description"
 msgstr "वर्णन"
 
@@ -614,14 +574,6 @@ msgstr "डाउनलोड"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download a copy of your resume in PDF format. Use this file for printing or to easily share your resume with recruiters."
 msgstr "तुमचा रेझ्युमे PDF फॉर्मॅटमध्ये कॉपी म्हणून डाउनलोड करा. ही फाईल प्रिंट करण्यासाठी किंवा रिक्रूटर्सना सहजपणे शेअर करण्यासाठी वापरा."
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download PDF"
-msgstr "PDF डाउनलोड करा"
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download Word"
-msgstr ""
 
 #: src/routes/$username/$slug.tsx
 msgid "Downloading..."
@@ -686,6 +638,7 @@ msgid "Enabling password protection..."
 msgstr "पासवर्ड संरक्षण सक्षम केले जात आहे..."
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "End Date"
 msgstr ""
 
@@ -712,10 +665,6 @@ msgstr ""
 #: src/components/ui/ai-generate-button.tsx
 msgid "Failed to generate content"
 msgstr ""
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Filter by"
-msgstr "यावरून फिल्टर करा"
 
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
@@ -776,6 +725,10 @@ msgctxt "Page Format (A4, Letter or Free-Form)"
 msgid "Format"
 msgstr "स्वरूप"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Frame"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Free-Form"
 msgstr "मुक्त-स्वरूप"
@@ -783,6 +736,10 @@ msgstr "मुक्त-स्वरूप"
 #: src/utils/locale.ts
 msgid "French"
 msgstr "फ्रेंच"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+msgid "Full Name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
@@ -893,6 +850,10 @@ msgstr "आयकन"
 msgid "Image size should be less than 10MB"
 msgstr ""
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Image URL"
+msgstr ""
+
 #: src/dialogs/resume/import.tsx
 msgid "Import"
 msgstr "आयात करा"
@@ -969,10 +930,6 @@ msgstr "कोरियन"
 msgid "Label"
 msgstr "लेबल"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Landscape"
-msgstr "लँडस्केप"
-
 #: src/components/user/dropdown-menu.tsx
 #: src/dialogs/resume/sections/language.tsx
 msgid "Language"
@@ -991,7 +948,6 @@ msgstr "शेवटचे डाउनलोड केलेले: {0}"
 msgid "Last Update"
 msgstr ""
 
-#: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Last updated on {updatedAt}"
 msgstr "शेवटचे अपडेट {updatedAt} रोजी केले"
@@ -1050,6 +1006,10 @@ msgstr "हलकी"
 msgid "Line Height"
 msgstr "रेषेची उंची"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Link Label"
+msgstr ""
+
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Link Status"
@@ -1058,6 +1018,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "Lithuanian"
 msgstr "लिथुआनियन"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Live URL"
+msgstr ""
 
 #: src/components/command-palette/pages/resumes.tsx
 msgid "Loading resumes..."
@@ -1071,6 +1035,7 @@ msgstr "लोड करत आहे..."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Location"
 msgstr "स्थान"
 
@@ -1124,13 +1089,16 @@ msgstr "येथे हलवा"
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "नाव"
 
 #: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Name your section and choose a layout type."
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1141,13 +1109,29 @@ msgstr "नेपाळी"
 msgid "Network"
 msgstr "नेटवर्क"
 
+#: src/dialogs/resume/sections/custom.tsx
+msgid "New custom section"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "New Experience"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Page"
 msgstr "नवीन पान"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "New Project"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Section"
 msgstr "नवीन विभाग"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "No custom blocks yet — design one your way."
+msgstr ""
 
 #: src/components/ui/combobox.tsx
 #: src/components/ui/multiple-combobox.tsx
@@ -1214,6 +1198,10 @@ msgstr "पासवर्ड संरक्षण सक्षम केले
 msgid "Period"
 msgstr "कालावधी"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Period / Year"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Persian"
 msgstr "फारसी"
@@ -1233,19 +1221,11 @@ msgid "Picture"
 msgstr "चित्र"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture Customization"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture removed"
 msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture uploaded successfully!"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture URL"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1291,10 +1271,6 @@ msgstr ""
 msgid "Polish"
 msgstr "पोलिश"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Portrait"
-msgstr "पोर्ट्रेट"
-
 #: src/utils/locale.ts
 msgid "Portuguese (Brazil)"
 msgstr "पोर्तुगीज (ब्राझील)"
@@ -1305,6 +1281,7 @@ msgstr "पोर्तुगीज (पोर्तुगाल)"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/reference.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Position"
 msgstr "पद"
 
@@ -1327,10 +1304,6 @@ msgstr "प्रभावीता"
 msgid "Profile"
 msgstr "प्रोफाईल"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Profile Picture"
-msgstr ""
-
 #: src/utils/resume/section.tsx
 msgid "Profiles"
 msgstr "प्रोफाईल्स"
@@ -1338,6 +1311,10 @@ msgstr "प्रोफाईल्स"
 #: src/components/level/combobox.tsx
 msgid "Progress Bar"
 msgstr "प्रगती पट्टी"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Project Name"
+msgstr ""
 
 #: src/utils/resume/section.tsx
 msgid "Projects"
@@ -1382,6 +1359,11 @@ msgstr "रेफरन्सेस"
 #: src/components/layout/error-screen.tsx
 msgid "Refresh"
 msgstr "ताजेतवाने करा"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Remove"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
@@ -1447,14 +1429,6 @@ msgstr ""
 msgid "Romanian"
 msgstr "रोमानियन"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rotation"
-msgstr "रोटेशन"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rounded (10pt)"
-msgstr ""
-
 #: src/utils/locale.ts
 msgid "Russian"
 msgstr "रशियन"
@@ -1475,6 +1449,9 @@ msgstr "रशियन"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Save Changes"
 msgstr "बदल सेव्ह करा"
@@ -1504,6 +1481,10 @@ msgid "Search..."
 msgstr "शोधा..."
 
 #: src/dialogs/resume/sections/custom.tsx
+msgid "Section Title"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
 msgstr "विभागाचा प्रकार"
 
@@ -1525,14 +1506,6 @@ msgstr "पासवर्ड सेट करा"
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "सेटिंग"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Width"
-msgstr "शॅडोची जाडी"
 
 #: src/utils/resume/section.tsx
 msgid "Sharing"
@@ -1619,13 +1592,8 @@ msgid "Spanish"
 msgstr "स्पॅनिश"
 
 #: src/components/level/combobox.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Square"
 msgstr "चौकोन"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Square (0pt)"
-msgstr ""
 
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
@@ -1636,12 +1604,12 @@ msgstr "GitHub वर आम्हाला स्टार द्या (नव
 msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
 msgstr "GitHub वर आम्हाला स्टार द्या, सध्या {0} स्टार आहेत (नवीन टॅबमध्ये उघडतो)"
 
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
 msgstr "शून्यापासून तुमचा रेझ्युमे बनवायला सुरू करा"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Start Date"
 msgstr ""
 
@@ -1690,6 +1658,10 @@ msgstr "हलकी थीमवर स्विच करा"
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "तमिळ"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Tech Stack"
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Telugu"
@@ -1752,11 +1724,6 @@ msgstr ""
 msgid "This action cannot be undone."
 msgstr "ही क्रिया उलट करता येणार नाही."
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
-msgstr "या फिचरसाठी AI इंटिग्रेशन सक्षम असणे आवश्यक आहे. कृपया सेटिंगमध्ये ते सक्षम करा."
-
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr ""
@@ -1772,14 +1739,6 @@ msgstr "AI प्रोव्हायडरच्या प्रतिसा�
 msgid "This may take a while depending on the server capacity. Please do not close the window or refresh the page."
 msgstr "सर्व्हर क्षमतेवर अवलंबून, यासाठी थोडा वेळ लागू शकतो. कृपया विंडो बंद करू नका किंवा पान रीफ्रेश करू नका."
 
-#: src/routes/dashboard/resumes/index.tsx
-msgid "This month"
-msgstr ""
-
-#: src/components/resume/store/resume.ts
-msgid "This resume is locked and cannot be updated."
-msgstr "हा रेझ्युमे लॉक केलेला आहे आणि अपडेट करता किंवा हटवता येणार नाही."
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
 msgstr "हा भाग या रेझ्युमेशी संबंधित असलेल्या तुमच्या खाजगी टिपांसाठी आरक्षित आहे. यातला सर्व काँटेंट खाजगी राहतो व तो इतर कोणाशीही शेअर केला जात नाही."
@@ -1790,7 +1749,6 @@ msgstr "टीप: तुम्ही रेझ्युमेला तुम�
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Title"
 msgstr "शीर्षक"
@@ -1888,6 +1846,10 @@ msgstr ""
 msgid "Unlock"
 msgstr "कुलूप उघडा"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Untitled Section"
+msgstr ""
+
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Unverified"
 msgstr "न पडताळलेले"
@@ -1909,10 +1871,6 @@ msgstr "अस्तित्वातील प्रमाणपत्र अ�
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Update an existing cover letter"
 msgstr ""
-
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Update an existing custom section"
-msgstr "अस्तित्वातील सानुकूल विभाग अपडेट करा"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Update an existing education"
@@ -1957,6 +1915,14 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "अस्तित्वातील स्वयंसेवी अनुभव अपडेट करा"
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update custom section"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update your section name or change layout type."
+msgstr ""
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
@@ -2006,6 +1972,10 @@ msgstr "स्वयंसेवा"
 msgid "Website"
 msgstr "संकेतस्थळ"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Website / Portfolio URL"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
 msgstr "हा विभाग तुम्हाला कोणत्या नावाने पुन्हा नाव द्यायचा आहे?"
@@ -2017,12 +1987,16 @@ msgstr "रेझ्युमे लॉक केल्यावर तो अ�
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Write at least 5 words to enable Ask Zoe"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "You have 1 more AI suggestion left for this text."
 msgstr ""
 

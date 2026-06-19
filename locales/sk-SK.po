@@ -71,6 +71,8 @@ msgstr "{column, plural, one {# stĺpec} few {# stĺpce} many {# stĺpcov} other
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 msgstr ""
 
@@ -94,6 +96,11 @@ msgstr "Nadšenecký projekt od <0>Amruth Pillai</0>."
 msgid "A4"
 msgstr "A4"
 
+#. placeholder {0}: section.type === "generic" || section.type === "custom" ? "item" : section.type + " item"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Add {0}"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "Pridať vlastné pole"
@@ -106,34 +113,17 @@ msgstr "Pridaj k URL adrese popisný štítok"
 msgid "Add a new award"
 msgstr "Pridať nové ocenenie"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
-msgid "Add a new certification"
-msgstr "Pridať novú certifikáciu"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Add a new custom section"
 msgstr "Pridať novú vlastnú sekciu"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
-msgid "Add a new education"
-msgstr "Pridať nové vzdelanie"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Add a new experience"
 msgstr "Pridať novú pracovnú skúsenosť"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/interests.tsx
-msgid "Add a new interest"
-msgstr "Pridať nový záujem"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Add a new item"
 msgstr "Pridať novú položku"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/languages.tsx
-msgid "Add a new language"
-msgstr "Pridať nový jazyk"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Add a new project"
@@ -147,30 +137,41 @@ msgstr "Pridať novú publikáciu"
 msgid "Add a new reference"
 msgstr "Pridať novú referenciu"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/skills.tsx
-msgid "Add a new skill"
-msgstr "Pridať novú zručnosť"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+msgid "Add certification"
+msgstr ""
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
-msgid "Add a new volunteer experience"
-msgstr "Pridať novú dobrovoľnícku skúsenosť"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Add education"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Add Experience"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
 msgstr "Pridať stranu"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Add Project"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
+msgid "Add volunteer work"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Afrikaans"
 msgstr "Afrikánčina"
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "AI"
-msgstr "AI"
-
 #. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "ai.review.loading"
+msgstr ""
+
+#: src/dialogs/resume/import.tsx
+msgid "AI-powered import for PDF and Word documents is currently being moved to the backend. Please try again later or use JSON import."
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
@@ -240,22 +241,10 @@ msgstr "Naozaj chceš odstrániť ochranu heslom?"
 msgid "Area of Study"
 msgstr "Študijný odbor"
 
+#: src/components/ui/ai-generate-button.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 msgid "Ask Zoe"
 msgstr ""
-
-#. placeholder {0}: roundsRemaining === 1 ? "round" : "rounds"
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe ({roundsRemaining} {0} remaining)"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe (Used)"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Aspect Ratio"
-msgstr "Pomer strán"
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -292,18 +281,6 @@ msgstr "Telo"
 msgid "Bold"
 msgstr "Tučné"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Radius"
-msgstr "Zaoblenie okrajov"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Width"
-msgstr "Šírka okraja"
-
 #: src/components/command-palette/index.tsx
 msgid "Builder Command Palette"
 msgstr "Príkazová paleta editora"
@@ -329,8 +306,6 @@ msgstr "Komunitou vytvorené pre komunitu."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/profile.tsx
@@ -340,7 +315,6 @@ msgstr "Komunitou vytvorené pre komunitu."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
@@ -348,6 +322,9 @@ msgstr "Komunitou vytvorené pre komunitu."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
@@ -372,10 +349,6 @@ msgstr "Čínština (tradičná)"
 #: src/components/level/combobox.tsx
 msgid "Circle"
 msgstr "Kruh"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Circle (100pt)"
-msgstr ""
 
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
@@ -403,6 +376,7 @@ msgid "Coming Soon!"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Company"
 msgstr "Spoločnosť"
 
@@ -440,13 +414,10 @@ msgstr ""
 #: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
@@ -465,10 +436,6 @@ msgstr "Vytvoriť novú certifikáciu"
 msgid "Create a new cover letter"
 msgstr ""
 
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Create a new custom section"
-msgstr "Vytvoriť novú vlastnú sekciu"
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Create a new education"
 msgstr "Vytvoriť nové vzdelanie"
@@ -476,14 +443,6 @@ msgstr "Vytvoriť nové vzdelanie"
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Create a new experience"
 msgstr "Vytvoriť novú pracovnú skúsenosť"
-
-#: src/dialogs/resume/sections/interest.tsx
-msgid "Create a new interest"
-msgstr "Vytvoriť nový záujem"
-
-#: src/dialogs/resume/sections/language.tsx
-msgid "Create a new language"
-msgstr "Vytvoriť nový jazyk"
 
 #: src/dialogs/resume/sections/profile.tsx
 msgid "Create a new profile"
@@ -502,14 +461,9 @@ msgid "Create a new reference"
 msgstr "Vytvoriť novú referenciu"
 
 #: src/components/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
 msgstr "Vytvoriť nový životopis"
-
-#: src/dialogs/resume/sections/skill.tsx
-msgid "Create a new skill"
-msgstr "Vytvoriť novú zručnosť"
 
 #: src/dialogs/resume/sections/summary.tsx
 msgid "Create a new summary"
@@ -530,6 +484,10 @@ msgstr "Vytváram tvoj životopis..."
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Critical Issues"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Currently here"
 msgstr ""
 
 #: src/dialogs/resume/sections/education.tsx
@@ -594,6 +552,8 @@ msgstr "Vymazávam tvoj životopis..."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Description"
 msgstr "Popis"
 
@@ -614,14 +574,6 @@ msgstr "Stiahnuť"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download a copy of your resume in PDF format. Use this file for printing or to easily share your resume with recruiters."
 msgstr "Stiahni si kópiu svojho životopisu vo formáte PDF. Tento súbor použi na tlač alebo jednoduché zdieľanie životopisu s náborármi."
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download PDF"
-msgstr "Stiahnuť PDF"
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download Word"
-msgstr ""
 
 #: src/routes/$username/$slug.tsx
 msgid "Downloading..."
@@ -686,6 +638,7 @@ msgid "Enabling password protection..."
 msgstr "Zapínam ochranu heslom..."
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "End Date"
 msgstr ""
 
@@ -712,10 +665,6 @@ msgstr ""
 #: src/components/ui/ai-generate-button.tsx
 msgid "Failed to generate content"
 msgstr ""
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Filter by"
-msgstr "Filtrovať podľa"
 
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
@@ -776,6 +725,10 @@ msgctxt "Page Format (A4, Letter or Free-Form)"
 msgid "Format"
 msgstr "Formát"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Frame"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Free-Form"
 msgstr "Voľná forma"
@@ -783,6 +736,10 @@ msgstr "Voľná forma"
 #: src/utils/locale.ts
 msgid "French"
 msgstr "Francúzština"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+msgid "Full Name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
@@ -893,6 +850,10 @@ msgstr "Ikona"
 msgid "Image size should be less than 10MB"
 msgstr ""
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Image URL"
+msgstr ""
+
 #: src/dialogs/resume/import.tsx
 msgid "Import"
 msgstr "Importovať"
@@ -969,10 +930,6 @@ msgstr "Kórejčina"
 msgid "Label"
 msgstr "Štítok"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Landscape"
-msgstr "Na šírku"
-
 #: src/components/user/dropdown-menu.tsx
 #: src/dialogs/resume/sections/language.tsx
 msgid "Language"
@@ -991,7 +948,6 @@ msgstr "Naposledy stiahnuté {0}"
 msgid "Last Update"
 msgstr ""
 
-#: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Last updated on {updatedAt}"
 msgstr "Naposledy aktualizované {updatedAt}"
@@ -1050,6 +1006,10 @@ msgstr "Svetlá"
 msgid "Line Height"
 msgstr "Riadkovanie"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Link Label"
+msgstr ""
+
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Link Status"
@@ -1058,6 +1018,10 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "Lithuanian"
 msgstr "Litovčina"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Live URL"
+msgstr ""
 
 #: src/components/command-palette/pages/resumes.tsx
 msgid "Loading resumes..."
@@ -1071,6 +1035,7 @@ msgstr "Načítava sa..."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Location"
 msgstr "Lokalita"
 
@@ -1124,13 +1089,16 @@ msgstr "Presunúť do"
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "Názov"
 
 #: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Name your section and choose a layout type."
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1141,13 +1109,29 @@ msgstr "Nepálčina"
 msgid "Network"
 msgstr "Sieť"
 
+#: src/dialogs/resume/sections/custom.tsx
+msgid "New custom section"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "New Experience"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Page"
 msgstr "Nová strana"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "New Project"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Section"
 msgstr "Nová sekcia"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "No custom blocks yet — design one your way."
+msgstr ""
 
 #: src/components/ui/combobox.tsx
 #: src/components/ui/multiple-combobox.tsx
@@ -1214,6 +1198,10 @@ msgstr "Ochrana heslom bola zapnutá."
 msgid "Period"
 msgstr "Obdobie"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Period / Year"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Persian"
 msgstr "Perzština"
@@ -1233,19 +1221,11 @@ msgid "Picture"
 msgstr "Fotografia"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture Customization"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture removed"
 msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture uploaded successfully!"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture URL"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1291,10 +1271,6 @@ msgstr ""
 msgid "Polish"
 msgstr "Poľština"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Portrait"
-msgstr "Na výšku"
-
 #: src/utils/locale.ts
 msgid "Portuguese (Brazil)"
 msgstr "Portugalčina (Brazília)"
@@ -1305,6 +1281,7 @@ msgstr "Portugalčina (Portugalsko)"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/reference.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Position"
 msgstr "Pozícia"
 
@@ -1327,10 +1304,6 @@ msgstr "Úroveň znalosti"
 msgid "Profile"
 msgstr "Profil"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Profile Picture"
-msgstr ""
-
 #: src/utils/resume/section.tsx
 msgid "Profiles"
 msgstr "Profily"
@@ -1338,6 +1311,10 @@ msgstr "Profily"
 #: src/components/level/combobox.tsx
 msgid "Progress Bar"
 msgstr "Ukazovateľ priebehu"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Project Name"
+msgstr ""
 
 #: src/utils/resume/section.tsx
 msgid "Projects"
@@ -1382,6 +1359,11 @@ msgstr "Referencie"
 #: src/components/layout/error-screen.tsx
 msgid "Refresh"
 msgstr "Obnoviť"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Remove"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
@@ -1447,14 +1429,6 @@ msgstr ""
 msgid "Romanian"
 msgstr "Rumunčina"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rotation"
-msgstr "Otočenie"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rounded (10pt)"
-msgstr ""
-
 #: src/utils/locale.ts
 msgid "Russian"
 msgstr "Ruština"
@@ -1475,6 +1449,9 @@ msgstr "Ruština"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Save Changes"
 msgstr "Uložiť zmeny"
@@ -1504,6 +1481,10 @@ msgid "Search..."
 msgstr "Hľadať..."
 
 #: src/dialogs/resume/sections/custom.tsx
+msgid "Section Title"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
 msgstr "Typ sekcie"
 
@@ -1525,14 +1506,6 @@ msgstr "Nastaviť heslo"
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "Nastavenia"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Width"
-msgstr "Šírka tieňa"
 
 #: src/utils/resume/section.tsx
 msgid "Sharing"
@@ -1619,13 +1592,8 @@ msgid "Spanish"
 msgstr "Španielčina"
 
 #: src/components/level/combobox.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Square"
 msgstr "Štvorec"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Square (0pt)"
-msgstr ""
 
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
@@ -1636,12 +1604,12 @@ msgstr "Daj nám hviezdičku na GitHube (otvorí sa na novej karte)"
 msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
 msgstr "Daj nám hviezdičku na GitHube, momentálne {0} hviezdičiek (otvorí sa na novej karte)"
 
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
 msgstr "Začni vytvárať svoj životopis od nuly"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Start Date"
 msgstr ""
 
@@ -1690,6 +1658,10 @@ msgstr "Prepnúť na svetlú tému"
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Tamilčina"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Tech Stack"
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Telugu"
@@ -1752,11 +1724,6 @@ msgstr ""
 msgid "This action cannot be undone."
 msgstr "Túto akciu nemožno vrátiť späť."
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
-msgstr "Táto funkcia vyžaduje povolenú AI integráciu. Prosím, povoľ ju v nastaveniach."
-
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr ""
@@ -1772,14 +1739,6 @@ msgstr "Môže to trvať niekoľko minút v závislosti od odozvy poskytovateľa
 msgid "This may take a while depending on the server capacity. Please do not close the window or refresh the page."
 msgstr "Môže to chvíľu trvať v závislosti od kapacity servera. Prosím, nezatváraj okno ani neobnovuj stránku."
 
-#: src/routes/dashboard/resumes/index.tsx
-msgid "This month"
-msgstr ""
-
-#: src/components/resume/store/resume.ts
-msgid "This resume is locked and cannot be updated."
-msgstr "Tento životopis je uzamknutý a nemožno ho aktualizovať."
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
 msgstr "Táto sekcia je určená pre tvoje osobné poznámky k tomuto životopisu. Obsah zostáva súkromný a nezdieľa sa s nikým iným."
@@ -1790,7 +1749,6 @@ msgstr "Tip: Životopis môžeš pomenovať podľa pracovnej pozície, na ktorú
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Title"
 msgstr "Názov"
@@ -1888,6 +1846,10 @@ msgstr ""
 msgid "Unlock"
 msgstr "Odomknúť"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Untitled Section"
+msgstr ""
+
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Unverified"
 msgstr "Neoverené"
@@ -1909,10 +1871,6 @@ msgstr "Aktualizovať existujúcu certifikáciu"
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Update an existing cover letter"
 msgstr ""
-
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Update an existing custom section"
-msgstr "Aktualizovať existujúcu vlastnú sekciu"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Update an existing education"
@@ -1957,6 +1915,14 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Aktualizovať existujúcu dobrovoľnícku skúsenosť"
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update custom section"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update your section name or change layout type."
+msgstr ""
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
@@ -2006,6 +1972,10 @@ msgstr "Dobrovoľníctvo"
 msgid "Website"
 msgstr "Webová stránka"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Website / Portfolio URL"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
 msgstr "Ako chceš túto sekciu premenovať?"
@@ -2017,12 +1987,16 @@ msgstr "Keď je životopis uzamknutý, nemožno ho aktualizovať ani vymazať."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Write at least 5 words to enable Ask Zoe"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "You have 1 more AI suggestion left for this text."
 msgstr ""
 
