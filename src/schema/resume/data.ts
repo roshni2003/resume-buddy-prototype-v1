@@ -127,16 +127,28 @@ export const certificationItemSchema = baseItemSchema.extend({
 });
 
 export const educationItemSchema = baseItemSchema.extend({
-	educationType: z.enum(["School", "College"]).default("College").describe("The type of education."),
-	school: z.string().min(1).describe("The name of the school or institution."),
-	degree: z.string().describe("The degree or qualification obtained."),
-	area: z.string().describe("The area of study or specialization."),
-	grade: z.string().describe("The grade or score achieved."),
-	location: z.string().describe("The location of the school or institution."),
-	period: z.string().describe("The period of time the education was obtained over."),
-	website: urlSchema.describe("The website of the school or institution, if any."),
-	description: z.string().describe("The description of the education. This should be a HTML-formatted string."),
-	currentlyStudyingHere: z.boolean().describe("Indicates if the user is currently studying at this institution."),
+	educationType: z.enum(["School", "College"]).default("College"),
+	school: z.string().min(1),
+	degree: z.string(),
+	area: z.string(),
+	grade: z.string(),
+	location: z.string(),
+
+	startDate: z.string().optional(),
+	endDate: z.string().optional(),
+
+	// Dedicated fields for School to prevent data overlap with College
+	schoolName: z.string().optional(),
+	schoolBoard: z.string().optional(),
+	schoolGrade: z.string().optional(),
+	schoolStartDate: z.string().optional(),
+	schoolEndDate: z.string().optional(),
+	schoolCurrentlyStudyingHere: z.boolean().optional(),
+
+	period: z.string(),
+	website: urlSchema,
+	description: z.string(),
+	currentlyStudyingHere: z.boolean(),
 });
 
 export const experienceItemSchema = baseItemSchema.extend({

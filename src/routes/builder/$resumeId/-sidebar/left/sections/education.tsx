@@ -27,6 +27,13 @@ export function EducationSectionBuilder() {
 				currentlyStudyingHere: false,
 				startDate: "",
 				endDate: "",
+				website: {
+					url: "",
+					label: "",
+				},
+				options: {
+					showLinkInTitle: false,
+				},
 			});
 		});
 	};
@@ -37,6 +44,8 @@ export function EducationSectionBuilder() {
 			if (index !== -1) draft.sections.education.items.splice(index, 1);
 		});
 	};
+
+
 
 	const handleChange = (id: string, field: string, value: any) => {
 		updateResumeData((draft) => {
@@ -54,15 +63,19 @@ export function EducationSectionBuilder() {
 
 	const inputCls = "rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 h-auto text-sm shadow-sm focus:border-emerald-300 focus:ring-1 focus:ring-emerald-200";
 
-	// Helper function to format date
+	// Helper function to show dates correctly formatted
 	const formatDate = (dateString: string | undefined): string => {
 		if (!dateString) return "";
-		try {
-			const d = new Date(dateString);
-			return d.toLocaleString("en-US", { month: "short", year: "numeric" });
-		} catch {
-			return dateString;
+		if (/^\d{4}-\d{2}$/.test(dateString)) {
+			try {
+				const [year, month] = dateString.split('-');
+				const date = new Date(parseInt(year), parseInt(month) - 1);
+				return date.toLocaleString("en-US", { month: "long", year: "numeric" });
+			} catch {
+				return dateString;
+			}
 		}
+		return dateString;
 	};
 
 	return (
@@ -70,13 +83,18 @@ export function EducationSectionBuilder() {
 			<div className="flex flex-col gap-4 p-4">
 
 				{section.items.map((item) => {
-					// Calculate date range display
+					// Calculate date range display for the toggle
+					const isSchool = item.educationType === "School";
+					const startForToggle = isSchool ? (item.schoolStartDate ?? item.startDate) : item.startDate;
+					const endForToggle = isSchool ? (item.schoolEndDate ?? item.endDate) : item.endDate;
+					const currentlyStudyingForToggle = isSchool ? (item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere) : item.currentlyStudyingHere;
+
 					const dateRange = [
-						formatDate(item.startDate),
-						item.currentlyStudyingHere
+						formatDate(startForToggle),
+						currentlyStudyingForToggle
 							? "Present"
-							: item.endDate
-								? formatDate(item.endDate)
+							: endForToggle
+								? formatDate(endForToggle)
 								: "",
 					]
 						.filter(Boolean)
@@ -88,30 +106,40 @@ export function EducationSectionBuilder() {
 							className="relative flex items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4"
 							style={{ borderLeft: "4px solid #10b981" }}
 						>
-							{/* Timeline dot — vertically aligned to first input row */}
+							{/* Timeline dot */}
 							<div className="mt-2 flex-shrink-0 h-3.5 w-3.5 rounded-full border-[3px] border-emerald-100 bg-emerald-500" />
 
 							{/* All fields */}
 							<div className="flex flex-1 flex-col gap-3 min-w-0">
-								{/* Row 1: Institution + Degree */}
+								{/* Education Type Toggle */}
 								<div className="flex rounded-lg bg-gray-100 p-1 w-max">
 									<button
 										type="button"
 										onClick={() => handleChange(item.id, "educationType", "School")}
-										className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", item.educationType === "School" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+										className={cn(
+											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
+											item.educationType === "School"
+												? "bg-white text-emerald-600 shadow-sm"
+												: "text-gray-500 hover:text-gray-700"
+										)}
 									>
 										School
 									</button>
 									<button
 										type="button"
 										onClick={() => handleChange(item.id, "educationType", "College")}
-										className={cn("px-4 py-1.5 rounded-md text-xs font-semibold transition-all", (!item.educationType || item.educationType === "College") ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+										className={cn(
+											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
+											(!item.educationType || item.educationType === "College")
+												? "bg-white text-emerald-600 shadow-sm"
+												: "text-gray-500 hover:text-gray-700"
+										)}
 									>
 										College/University
 									</button>
 								</div>
 
-								{/* Row 2: Period + Grade */}
+								{/* School Fields */}
 								{item.educationType === "School" ? (
 									<>
 										<div className="grid grid-cols-2 gap-3">
@@ -121,8 +149,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. Delhi Public School"
-													value={item.school}
-													onChange={(e) => handleChange(item.id, "school", e.target.value)}
+													value={item.schoolName ?? item.school}
+													onChange={(e) => handleChange(item.id, "schoolName", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -132,8 +160,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. CBSE, ICSE"
-													value={item.degree}
-													onChange={(e) => handleChange(item.id, "degree", e.target.value)}
+													value={item.schoolBoard ?? item.degree}
+													onChange={(e) => handleChange(item.id, "schoolBoard", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -141,30 +169,44 @@ export function EducationSectionBuilder() {
 										<div className="grid grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-													<Trans>Passing Year</Trans>
+													<Trans>Start Date</Trans>
 												</label>
 												<Input
-													type="date"
-													placeholder="Passing Year"
-													value={item.period}
-													onChange={(e) => handleChange(item.id, "period", e.target.value)}
+													type="month"
+													value={item.schoolStartDate ?? item.startDate ?? ""}
+													onChange={(e) => handleChange(item.id, "schoolStartDate", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
+											<div>
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+													<Trans>End Date</Trans>
+												</label>
+												<Input
+													type="month"
+													value={item.schoolEndDate ?? item.endDate ?? ""}
+													onChange={(e) => handleChange(item.id, "schoolEndDate", e.target.value)}
+													disabled={item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere ?? false}
+													className={cn(inputCls, (item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere) && "opacity-40")}
+												/>
+											</div>
+										</div>
+										<div className="grid grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
 													<Trans>Percentage / CGPA</Trans>
 												</label>
 												<Input
 													placeholder="e.g. 85%, 9.2 CGPA"
-													value={item.grade}
-													onChange={(e) => handleChange(item.id, "grade", e.target.value)}
+													value={item.schoolGrade ?? item.grade}
+													onChange={(e) => handleChange(item.id, "schoolGrade", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
 										</div>
 									</>
 								) : (
+									/* College Fields */
 									<>
 										<div className="grid grid-cols-2 gap-3">
 											<div>
@@ -220,7 +262,7 @@ export function EducationSectionBuilder() {
 													<Trans>Start Date</Trans>
 												</label>
 												<Input
-													type="date"
+													type="month"
 													value={item.startDate || ""}
 													onChange={(e) => handleChange(item.id, "startDate", e.target.value)}
 													className={inputCls}
@@ -231,7 +273,7 @@ export function EducationSectionBuilder() {
 													<Trans>End Date</Trans>
 												</label>
 												<Input
-													type="date"
+													type="month"
 													value={item.endDate || ""}
 													onChange={(e) => handleChange(item.id, "endDate", e.target.value)}
 													disabled={item.currentlyStudyingHere}
@@ -253,12 +295,29 @@ export function EducationSectionBuilder() {
 									</>
 								)}
 
-								{/* Currently studying toggle */}
+								{/* Currently studying toggle - WORKS FOR BOTH */}
 								<div className="flex items-center gap-2 pl-0.5">
-									<Switch
-										checked={item.currentlyStudyingHere}
-										onCheckedChange={(val) => handleChange(item.id, "currentlyStudyingHere", val)}
-									/>
+									{isSchool ? (
+										<Switch
+											checked={item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere ?? false}
+											onCheckedChange={(val) => {
+												handleChange(item.id, "schoolCurrentlyStudyingHere", val);
+												if (val) {
+													handleChange(item.id, "schoolEndDate", "");
+												}
+											}}
+										/>
+									) : (
+										<Switch
+											checked={item.currentlyStudyingHere || false}
+											onCheckedChange={(val) => {
+												handleChange(item.id, "currentlyStudyingHere", val);
+												if (val) {
+													handleChange(item.id, "endDate", "");
+												}
+											}}
+										/>
+									)}
 									<span className="text-sm text-gray-600 font-medium">
 										<Trans>Currently studying here</Trans>
 									</span>
@@ -273,15 +332,14 @@ export function EducationSectionBuilder() {
 										<Trans>Description</Trans>
 									</label>
 									<RichInput
-										value={item.description}
+										value={item.description || ""}
 										onChange={(val) => handleChange(item.id, "description", val)}
 										className="rounded-xl border border-gray-200 bg-white"
-										placeholder="Describe your academic achievements, relevant coursework, or extracurricular activities..."
 									/>
 								</div>
 							</div>
 
-							{/* X button — top-right, flex sibling so it never overlaps inputs */}
+							{/* X button */}
 							<button
 								type="button"
 								onClick={() => handleDelete(item.id)}
@@ -294,7 +352,7 @@ export function EducationSectionBuilder() {
 					);
 				})}
 
-				{/* Add button — fixed with proper icon */}
+				{/* Add button */}
 				<button
 					type="button"
 					onClick={handleAdd}
