@@ -250,14 +250,14 @@ export const skillItemSchema = baseItemSchema.extend({
 		.describe("The keywords associated with the skill, if any. These are displayed as tags below the name."),
 });
 
+// In schema/resume/data.ts
+
 export const volunteerItemSchema = baseItemSchema.extend({
 	organization: z.string().min(1).describe("The name of the organization or company."),
 	location: z.string().describe("The location of the organization or company."),
 	period: z.string().describe("The period of time the author was volunteered at the organization or company."),
 	website: urlSchema.describe("The link to the organization or company, if any."),
-	description: z
-		.string()
-		.describe("The description of the volunteer experience. This should be a HTML-formatted string."),
+	description: z.string().describe("The description of the volunteer experience. This should be a HTML-formatted string."),
 });
 
 export const coverLetterItemSchema = baseItemSchema.extend({

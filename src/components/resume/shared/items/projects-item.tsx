@@ -4,6 +4,7 @@ import { useResumeStore } from "@/components/resume/store/resume";
 import type { SectionItem } from "@/schema/resume/data";
 import { handleContentEditableLinkClick } from "@/utils/resume/event";
 import { cn } from "@/utils/style";
+import { InlineEditableText } from "../inline-editable-text";
 import { PageLink } from "../page-link";
 
 type ProjectsItemProps = SectionItem<"projects"> & {
@@ -94,21 +95,32 @@ export function ProjectsItem({ className, ...item }: ProjectsItemProps) {
 			<div className="section-item-header projects-item-header">
 				{/* Row 1 */}
 				<div className="flex items-start justify-between gap-x-2">
-					<span
-						contentEditable
-						suppressContentEditableWarning
-						onBlur={handleNameChange}
-						className="section-item-title projects-item-title cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-					>
-						{item.name}
-					</span>
-					<span
-						contentEditable
-						suppressContentEditableWarning
-						onBlur={handlePeriodChange}
-						className="section-item-metadata projects-item-period shrink-0 cursor-text text-end outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
-					>
-						{item.period}
+					<strong className="section-item-title projects-item-title">
+						<InlineEditableText
+							value={item.name}
+							placeholder="Project Name"
+							onChange={(value) => {
+								updateResumeData((draft) => {
+									const project = draft.sections.projects.items.find((p) => p.id === item.id);
+									if (project) project.name = value;
+								});
+							}}
+							as={item.website?.url && item.options?.showLinkInTitle ? "a" : "span"}
+							href={item.website?.url}
+							className={item.website?.url && item.options?.showLinkInTitle ? "hover:underline" : ""}
+						/>
+					</strong>
+					<span className="section-item-metadata projects-item-period shrink-0 text-end">
+						<InlineEditableText
+							value={item.period}
+							placeholder="Period"
+							onChange={(value) => {
+								updateResumeData((draft) => {
+									const project = draft.sections.projects.items.find((p) => p.id === item.id);
+									if (project) project.period = value;
+								});
+							}}
+						/>
 					</span>
 				</div>
 			</div>

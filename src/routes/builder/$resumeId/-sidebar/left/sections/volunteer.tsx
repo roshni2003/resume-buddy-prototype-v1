@@ -4,6 +4,7 @@ import { Heart } from "@phosphor-icons/react";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Input } from "@/components/ui/input";
 import { RichInput } from "@/components/input/rich-input";
+import { Switch } from "@/components/ui/switch";
 import { SectionBase } from "../shared/section-base";
 
 export function VolunteerSectionBuilder() {
@@ -19,7 +20,13 @@ export function VolunteerSectionBuilder() {
 				location: "",
 				period: "",
 				description: "",
-				website: { url: "", label: "" },
+				website: {
+					url: "",
+					label: ""
+				},
+				options: {
+					showLinkInTitle: false,
+				},
 			});
 		});
 	};
@@ -37,6 +44,9 @@ export function VolunteerSectionBuilder() {
 			if (item) {
 				if (field.includes(".")) {
 					const [parent, child] = field.split(".");
+					if (!(item as any)[parent]) {
+						(item as any)[parent] = {};
+					}
 					(item as any)[parent][child] = value;
 				} else {
 					(item as any)[field] = value;
@@ -44,6 +54,8 @@ export function VolunteerSectionBuilder() {
 			}
 		});
 	};
+
+	const inputCls = "rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 h-auto text-sm shadow-sm focus:border-rose-300 focus:ring-1 focus:ring-rose-200";
 
 	return (
 		<SectionBase type="volunteer">
@@ -56,7 +68,7 @@ export function VolunteerSectionBuilder() {
 						style={{ borderLeft: "4px solid #f87171" }}
 					>
 						{/* Heart icon — vertically centred to the first row of inputs */}
-						<div className="mt-1 flex-shrink-0">
+						<div className="mt-2 flex-shrink-0">
 							<Heart
 								weight="fill"
 								className="h-5 w-5 text-rose-400"
@@ -65,44 +77,80 @@ export function VolunteerSectionBuilder() {
 
 						{/* Fields */}
 						<div className="flex flex-1 flex-col gap-3 min-w-0">
-							{/* Row 1: Organization + Role */}
+							{/* Row 1: Organization + Location */}
 							<div className="grid grid-cols-2 gap-3">
+								<div>
+									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+										<Trans>Organization</Trans>
+									</label>
+									<Input
+										placeholder="e.g. Red Cross"
+										value={item.organization}
+										onChange={(e) => handleChange(item.id, "organization", e.target.value)}
+										className={inputCls}
+									/>
+								</div>
+								<div>
+									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+										<Trans>Location</Trans>
+									</label>
+									<Input
+										placeholder="e.g. San Francisco, CA"
+										value={item.location}
+										onChange={(e) => handleChange(item.id, "location", e.target.value)}
+										className={inputCls}
+									/>
+								</div>
+							</div>
+
+							{/* Row 2: Period */}
+							<div>
+								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<Trans>Period</Trans>
+								</label>
 								<Input
-									placeholder="Organization"
-									value={item.organization}
-									onChange={(e) => handleChange(item.id, "organization", e.target.value)}
-									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
-								/>
-								<Input
-									placeholder="Role"
-									value={item.location}
-									onChange={(e) => handleChange(item.id, "location", e.target.value)}
-									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
+									placeholder="e.g. 3 months, 2 years, Jan 2024 - Present"
+									value={item.period}
+									onChange={(e) => handleChange(item.id, "period", e.target.value)}
+									className={inputCls}
 								/>
 							</div>
 
-							{/* Row 2: Dates + Cause */}
-							<div className="grid grid-cols-2 gap-3">
+							{/* Website URL */}
+							<div>
+								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<Trans>Website</Trans>
+								</label>
 								<Input
-									placeholder="Dates"
-									value={item.period}
-									onChange={(e) => handleChange(item.id, "period", e.target.value)}
-									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
-								/>
-								<Input
-									placeholder="Cause"
-									value={item.website?.url}
+									placeholder="e.g. https://redcross.org"
+									value={item.website?.url || ""}
 									onChange={(e) => handleChange(item.id, "website.url", e.target.value)}
-									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-sm h-auto shadow-sm"
+									className={inputCls}
 								/>
+							</div>
+
+							{/* Show link in title toggle */}
+							<div className="flex items-center gap-2 pl-0.5">
+								<Switch
+									checked={item.options?.showLinkInTitle || false}
+									onCheckedChange={(val) => handleChange(item.id, "options.showLinkInTitle", val)}
+								/>
+								<span className="text-sm text-gray-600 font-medium">
+									<Trans>Show link in title</Trans>
+								</span>
 							</div>
 
 							{/* Description rich input */}
-							<RichInput
-								value={item.description}
-								onChange={(val) => handleChange(item.id, "description", val)}
-								className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
-							/>
+							<div>
+								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<Trans>Description</Trans>
+								</label>
+								<RichInput
+									value={item.description || ""}
+									onChange={(val) => handleChange(item.id, "description", val)}
+									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
+								/>
+							</div>
 						</div>
 
 						{/* X button — top-right corner of the card */}
@@ -121,16 +169,9 @@ export function VolunteerSectionBuilder() {
 				<button
 					type="button"
 					onClick={handleAdd}
-					className="
-					mt-2 flex w-full items-center justify-center gap-2
-					rounded-2xl border border-dashed border-rose-300 dark:border-rose-800/50
-					bg-rose-50/50 dark:bg-rose-900/20
-					py-2 text-sm font-medium text-rose-500 dark:text-rose-400
-					transition-all duration-150
-					hover:border-rose-400 dark:hover:border-rose-700/50 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:shadow-sm
-					active:scale-[0.99]"
+					className="group flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-rose-300 dark:border-rose-800/50 py-2 text-sm font-medium text-rose-500 dark:text-rose-400 transition-all hover:border-rose-400 dark:hover:border-rose-700/50 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:shadow-sm"
 				>
-					<Plus className="h-4 w-4" strokeWidth={2} />
+					<Plus className="h-4 w-4 transition-transform group-hover:scale-125" strokeWidth={2} />
 					<Trans>Add volunteer work</Trans>
 				</button>
 			</div>
