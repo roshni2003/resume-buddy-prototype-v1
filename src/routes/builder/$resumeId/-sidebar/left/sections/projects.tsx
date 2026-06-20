@@ -3,10 +3,8 @@ import { Trans } from "@lingui/react/macro";
 import {
 	CaretDownIcon,
 	CaretUpIcon,
-	CodeIcon,
 	FolderOpenIcon,
 	GlobeIcon,
-	LinkIcon,
 	PlusIcon,
 	SparkleIcon,
 	TagIcon,
@@ -479,7 +477,6 @@ function AddNewPanel({
 		options: { showLinkInTitle: false },
 		name: "",
 		period: "",
-		techStack: "",
 		description: "",
 		website: { url: "", label: "" },
 	};

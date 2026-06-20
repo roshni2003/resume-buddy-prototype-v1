@@ -78,7 +78,6 @@ const detectNetworkFromUrl = (url: string) => {
 		const urlObj = new URL(cleanUrl);
 		const hostname = urlObj.hostname.toLowerCase();
 
-		// Remove www. prefix for better matching
 		const domain = hostname.replace(/^www\./, "");
 
 		let network = "Portfolio";

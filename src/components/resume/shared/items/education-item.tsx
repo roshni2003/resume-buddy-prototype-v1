@@ -148,7 +148,7 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
             />
 
             {/* Website */}
-            {!item.options?.showLinkInTitle && (
+            {item.website && !item.options?.showLinkInTitle && (
                 <div className="section-item-website education-item-website">
                     <PageLink {...item.website} label={item.website.label} />
                 </div>

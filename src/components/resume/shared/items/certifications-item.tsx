@@ -88,7 +88,7 @@ export function CertificationsItem({ className, ...item }: CertificationsItemPro
 			/>
 
 			{/* Website */}
-			{!item.options?.showLinkInTitle && (
+			{item.website && !item.options?.showLinkInTitle && (
 				<div className="section-item-website certifications-item-website">
 					<PageLink {...item.website} label={item.website.label} />
 				</div>

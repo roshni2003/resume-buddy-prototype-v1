@@ -92,7 +92,7 @@ export function VolunteerItem({ className, ...item }: VolunteerItemProps) {
 			/>
 
 			{/* Website */}
-			{!item.options?.showLinkInTitle && (
+			{item.website && !item.options?.showLinkInTitle && (
 				<div className="section-item-website volunteer-item-website">
 					<PageLink {...item.website} label={item.website.label} />
 				</div>

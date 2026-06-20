@@ -83,7 +83,7 @@ export function ReferencesItem({ className, ...item }: ReferencesItemProps) {
 				<span className="section-item-metadata references-item-phone inline-block">{item.phone}</span>
 
 				{/* Row 2 */}
-				{!item.options?.showLinkInTitle && (
+				{item.website && !item.options?.showLinkInTitle && (
 					<PageLink
 						{...item.website}
 						label={item.website.label}

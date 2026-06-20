@@ -127,7 +127,7 @@ export function ProjectsItem({ className, ...item }: ProjectsItemProps) {
 			/>
 
 			{/* Website */}
-			{!item.options?.showLinkInTitle && (
+			{item.website && !item.options?.showLinkInTitle && (
 				<div className="section-item-website projects-item-website">
 					<PageLink {...item.website} label={item.website.label} />
 				</div>
