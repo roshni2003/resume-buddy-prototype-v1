@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/utils/style";
@@ -82,8 +82,9 @@ export function LanguagesSectionBuilder() {
 				<div className="flex items-stretch">
 					<SectionAddItemButton
 						type="languages"
-						className="mt-0 w-full h-full rounded-2xl border-2 border-dashed border-cyan-300 bg-cyan-50/30 p-6 text-sm font-semibold text-cyan-600 transition-all hover:border-cyan-400 hover:bg-cyan-50 hover:shadow-md flex items-center justify-center gap-2 cursor-pointer group [&>svg:first-child]:hidden"
+						className="mt-0 w-full h-full rounded-2xl border-2 border-dashed border-cyan-300 bg-cyan-50/30 p-2 text-sm font-semibold text-cyan-600 transition-all hover:border-cyan-400 hover:bg-cyan-50 hover:shadow-md flex items-center justify-center gap-2 cursor-pointer group [&>svg:first-child]:hidden"
 					>
+						<Plus className="h-3.5 w-3.5 stroke-[2.5]" />
 						<span>Add Language</span>
 					</SectionAddItemButton>
 				</div>

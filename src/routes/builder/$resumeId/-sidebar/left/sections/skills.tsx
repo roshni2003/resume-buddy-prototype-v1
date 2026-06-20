@@ -84,8 +84,9 @@ export function SkillsSectionBuilder() {
 				<div className="flex items-stretch">
 					<SectionAddItemButton
 						type="skills"
-						className="mt-0 w-full h-full rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/30 p-6 text-sm font-semibold text-teal-600 transition-all hover:border-teal-400 hover:bg-teal-50 hover:shadow-md flex items-center justify-center gap-2 cursor-pointer group [&>svg:first-child]:hidden"
+						className="mt-0 w-full h-full rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/30 p-2 text-sm font-semibold text-teal-600 transition-all hover:border-teal-400 hover:bg-teal-50 hover:shadow-md flex items-center justify-center gap-2 cursor-pointer group [&>svg:first-child]:hidden"
 					>
+						<Plus className="h-3.5 w-3.5 stroke-[2.5]" />
 						<span>Add Skill</span>
 					</SectionAddItemButton>
 				</div>

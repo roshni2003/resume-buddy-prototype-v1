@@ -80,7 +80,7 @@ export function CreateCustomSectionDialog({ data }: DialogProps<"resume.sections
 		<DialogContent {...blockEvents}>
 			<DialogHeader>
 				<DialogTitle className="flex flex-col gap-y-1">
-					<span className="font-serif text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+					<span className="font-ibm Plex text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
 						<Trans>New custom section</Trans>
 					</span>
 				</DialogTitle>
@@ -208,8 +208,8 @@ function CustomSectionForm({ isUpdate = false }: { isUpdate?: boolean }) {
 											onClick={() => !isUpdate && field.onChange(option.value)}
 											disabled={isUpdate}
 											className={`flex items-start gap-4 rounded-2xl border p-4 text-left transition-all ${isSelected
-													? "border-emerald-500 bg-emerald-50/50 shadow-sm"
-													: "border-gray-200 dark:border-border bg-white dark:bg-card hover:border-emerald-200 hover:bg-gray-50 dark:hover:bg-muted/50"
+												? "border-emerald-500 bg-emerald-50/50 shadow-sm"
+												: "border-gray-200 dark:border-border bg-white dark:bg-card hover:border-emerald-200 hover:bg-gray-50 dark:hover:bg-muted/50"
 												} ${isUpdate ? "opacity-75 cursor-not-allowed" : "cursor-pointer"}`}
 										>
 											<div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isSelected ? "bg-emerald-500 text-white" : "bg-emerald-50 text-emerald-600"}`}>
