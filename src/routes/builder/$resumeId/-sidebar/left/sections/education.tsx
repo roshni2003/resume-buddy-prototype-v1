@@ -103,7 +103,7 @@ export function EducationSectionBuilder() {
 					return (
 						<div
 							key={item.id}
-							className="relative flex items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4"
+							className="relative flex items-start gap-3 rounded-2xl border border-gray-100 dark:border-border bg-gray-50 dark:bg-card p-4"
 							style={{ borderLeft: "4px solid #10b981" }}
 						>
 							{/* Timeline dot */}
@@ -112,15 +112,15 @@ export function EducationSectionBuilder() {
 							{/* All fields */}
 							<div className="flex flex-1 flex-col gap-3 min-w-0">
 								{/* Education Type Toggle */}
-								<div className="flex rounded-lg bg-gray-100 p-1 w-max">
+								<div className="flex rounded-lg bg-gray-100 dark:bg-muted p-1 w-max">
 									<button
 										type="button"
 										onClick={() => handleChange(item.id, "educationType", "School")}
 										className={cn(
 											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
 											item.educationType === "School"
-												? "bg-white text-emerald-600 shadow-sm"
-												: "text-gray-500 hover:text-gray-700"
+												? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm"
+												: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
 										)}
 									>
 										School
@@ -131,8 +131,8 @@ export function EducationSectionBuilder() {
 										className={cn(
 											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
 											(!item.educationType || item.educationType === "College")
-												? "bg-white text-emerald-600 shadow-sm"
-												: "text-gray-500 hover:text-gray-700"
+												? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm"
+												: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
 										)}
 									>
 										College/University
@@ -144,7 +144,7 @@ export function EducationSectionBuilder() {
 									<>
 										<div className="grid grid-cols-2 gap-3">
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>School Name</Trans>
 												</label>
 												<Input
@@ -155,7 +155,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Board</Trans>
 												</label>
 												<Input
@@ -168,7 +168,7 @@ export function EducationSectionBuilder() {
 										</div>
 										<div className="grid grid-cols-2 gap-3">
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Start Date</Trans>
 												</label>
 												<Input
@@ -179,7 +179,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>End Date</Trans>
 												</label>
 												<Input
@@ -193,7 +193,7 @@ export function EducationSectionBuilder() {
 										</div>
 										<div className="grid grid-cols-2 gap-3">
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Percentage / CGPA</Trans>
 												</label>
 												<Input
@@ -210,7 +210,7 @@ export function EducationSectionBuilder() {
 									<>
 										<div className="grid grid-cols-2 gap-3">
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Institution Name</Trans>
 												</label>
 												<Input
@@ -221,7 +221,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Degree</Trans>
 												</label>
 												<Input
@@ -234,7 +234,7 @@ export function EducationSectionBuilder() {
 										</div>
 										<div className="grid grid-cols-2 gap-3">
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Specialization</Trans>
 												</label>
 												<Input
@@ -245,7 +245,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>CGPA / Percentage</Trans>
 												</label>
 												<Input
@@ -258,7 +258,7 @@ export function EducationSectionBuilder() {
 										</div>
 										<div className="grid grid-cols-3 gap-3">
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Start Date</Trans>
 												</label>
 												<Input
@@ -269,7 +269,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>End Date</Trans>
 												</label>
 												<Input
@@ -281,7 +281,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 											<div>
-												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Location</Trans>
 												</label>
 												<Input
@@ -318,23 +318,23 @@ export function EducationSectionBuilder() {
 											}}
 										/>
 									)}
-									<span className="text-sm text-gray-600 font-medium">
+									<span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
 										<Trans>Currently studying here</Trans>
 									</span>
 									{dateRange && (
-										<span className="ml-2 text-xs text-gray-400">{dateRange}</span>
+										<span className="ml-2 text-xs text-gray-400 dark:text-gray-500">{dateRange}</span>
 									)}
 								</div>
 
 								{/* Description */}
 								<div>
-									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 										<Trans>Description</Trans>
 									</label>
 									<RichInput
 										value={item.description || ""}
 										onChange={(val) => handleChange(item.id, "description", val)}
-										className="rounded-xl border border-gray-200 bg-white"
+										className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-muted/50"
 									/>
 								</div>
 							</div>
@@ -343,7 +343,7 @@ export function EducationSectionBuilder() {
 							<button
 								type="button"
 								onClick={() => handleDelete(item.id)}
-								className="flex-shrink-0 mt-0.5 text-gray-400 hover:text-gray-700 transition-colors"
+								className="flex-shrink-0 mt-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 								aria-label="Remove education entry"
 							>
 								<X className="h-4 w-4" strokeWidth={2} />
@@ -356,7 +356,7 @@ export function EducationSectionBuilder() {
 				<button
 					type="button"
 					onClick={handleAdd}
-					className="group flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-2 text-sm font-medium text-gray-400 transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600"
+					className="group flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 dark:border-border py-2 text-sm font-medium text-gray-400 dark:text-gray-500 transition-all hover:border-emerald-300 dark:hover:border-emerald-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400"
 				>
 					<Plus className="h-4 w-4 transition-transform group-hover:scale-125" strokeWidth={2} />
 					<Trans>Add education</Trans>

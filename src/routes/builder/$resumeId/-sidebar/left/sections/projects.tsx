@@ -287,7 +287,7 @@ function InlineProjectForm({
 									<SparkleIcon weight="fill" className="h-3 w-3" />
 									AI Assisted
 								</span>
-								<span className="text-xs text-slate-700">
+								<span className="text-xs text-slate-700 dark:text-gray-400">
 									Turn your project details into standout resume bullet points.
 								</span>
 							</div>
@@ -592,7 +592,7 @@ export function ProjectsSectionBuilder() {
 				{generatingIds.size > 0 && (
 					<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
 						<div className="flex items-start gap-4">
-							<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
+							<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
 								<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
 							</div>
 							<div>

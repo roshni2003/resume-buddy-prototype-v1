@@ -208,15 +208,15 @@ function CustomSectionForm({ isUpdate = false }: { isUpdate?: boolean }) {
 											onClick={() => !isUpdate && field.onChange(option.value)}
 											disabled={isUpdate}
 											className={`flex items-start gap-4 rounded-2xl border p-4 text-left transition-all ${isSelected
-												? "border-emerald-500 bg-emerald-50/50 shadow-sm"
+												? "border-emerald-500 dark:border-emerald-600 bg-emerald-50/50 dark:bg-emerald-900/30 shadow-sm"
 												: "border-gray-200 dark:border-border bg-white dark:bg-card hover:border-emerald-200 hover:bg-gray-50 dark:hover:bg-muted/50"
 												} ${isUpdate ? "opacity-75 cursor-not-allowed" : "cursor-pointer"}`}
 										>
-											<div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isSelected ? "bg-emerald-500 text-white" : "bg-emerald-50 text-emerald-600"}`}>
+											<div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isSelected ? "bg-emerald-500 text-white" : "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"}`}>
 												<Icon className="h-5 w-5" weight={isSelected ? "bold" : "regular"} />
 											</div>
 											<div className="flex flex-col gap-0.5">
-												<span className={`font-semibold ${isSelected ? "text-emerald-900" : "text-gray-900 dark:text-gray-100"}`}>{option.label}</span>
+												<span className={`font-semibold ${isSelected ? "text-emerald-900 dark:text-emerald-300" : "text-gray-900 dark:text-gray-100"}`}>{option.label}</span>
 												<span className="text-xs text-gray-500 dark:text-gray-400">{option.description}</span>
 											</div>
 										</button>

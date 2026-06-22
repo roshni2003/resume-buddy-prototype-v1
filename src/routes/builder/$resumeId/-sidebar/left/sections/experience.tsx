@@ -335,7 +335,7 @@ function InlineExperienceForm({
 									<Trans>Description</Trans>
 								</FormLabel>
 								<div
-									className="relative mb-2 rounded-xl bg-gray-50 p-1"
+									className="relative mb-2 rounded-xl bg-gray-50 dark:bg-muted/50 p-1"
 									onMouseEnter={() => setIsHovering(true)}
 									onMouseLeave={() => setIsHovering(false)}
 								>
@@ -365,11 +365,11 @@ function InlineExperienceForm({
 
 							{/* AI badge */}
 							<div className="flex items-center gap-2">
-								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
 									<SparkleIcon weight="fill" className="h-3 w-3" />
 									AI Assisted
 								</span>
-								<span className="text-xs text-slate-700">
+								<span className="text-xs text-slate-700 dark:text-gray-400">
 									Turn your work into impactful resume bullet points.
 								</span>
 							</div>
@@ -470,9 +470,9 @@ function ExperienceCard({
 
 	return (
 		<div
-			className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 ${isExpanded
-				? "border-emerald-300 shadow-emerald-100 shadow-md"
-				: "border-gray-100 hover:border-gray-200 hover:shadow"
+			className={`rounded-2xl border dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
+				? "bg-white border-emerald-300 dark:border-emerald-700/50 shadow-emerald-100 dark:shadow-none shadow-md"
+				: "bg-white dark:bg-card border-gray-100 dark:border-border hover:border-gray-200 dark:hover:border-border/80 hover:shadow"
 				}`}
 		>
 			{/* ── Header (always visible) ── */}
@@ -483,19 +483,19 @@ function ExperienceCard({
 			>
 				{/* Icon bubble */}
 				<span
-					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-indigo-100" : "bg-gray-100 dark:bg-muted"
+					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-gray-100 dark:bg-muted"
 						}`}
 				>
 					<BriefcaseIcon
 						weight="fill"
-						className={`h-6 w-6 ${isExpanded ? "text-indigo-600" : "text-gray-500 dark:text-gray-400"
+						className={`h-6 w-6 ${isExpanded ? "text-indigo-600 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"
 							}`}
 					/>
 				</span>
 
 				<div className="min-w-0 flex-1">
 					<p
-						className={`truncate font-semibold leading-tight ${isExpanded ? "text-indigo-800" : "text-gray-800 dark:text-gray-200"
+						className={`truncate font-semibold leading-tight ${isExpanded ? "text-indigo-800 dark:text-indigo-300" : "text-gray-800 dark:text-gray-200"
 							}`}
 					>
 						{item.position || "New Position"}

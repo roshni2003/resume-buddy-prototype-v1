@@ -1,13 +1,13 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { JDMatchResult } from "@/utils/api";
 import {
 	ArrowLeftIcon,
 	CheckCircleIcon,
 	SparkleIcon,
 	UploadSimpleIcon,
 	CheckIcon,
-	PlusIcon,
 	FileTextIcon,
 	XCircleIcon,
 } from "@phosphor-icons/react";
@@ -46,6 +46,8 @@ function MatchToJobRouteComponent() {
 	
 	const [step, setStep] = useState<MatchStep>("paste_job");
 	const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
+	const [matchResult, setMatchResult] = useState<JDMatchResult | null>(null);
+	const [matchError, setMatchError] = useState<string | null>(null);
 	
 	const [role, setRole] = useState("");
 	const [company, setCompany] = useState("");
@@ -93,15 +95,24 @@ function MatchToJobRouteComponent() {
 		{ value: "10+ years", label: "10+ years" },
 	];
 
-	// Step 4 Simulation
-	useEffect(() => {
-		if (step === "loading") {
-			const timer = setTimeout(() => {
+	// Call real JD Match API when entering loading step
+	const handleRunMatch = async () => {
+		if (!selectedResumeId || selectedResumeId === "file_upload") return;
+		setMatchError(null);
+		setStep("loading");
+		try {
+			const res = await api.jdMatch({ resume_id: selectedResumeId, jd_text: jobDescription });
+			if (res.success) {
+				setMatchResult(res.jdMatch);
 				setStep("report");
-			}, 3000);
-			return () => clearTimeout(timer);
+			} else {
+				throw new Error("Match failed");
+			}
+		} catch (e: any) {
+			setMatchError(e?.message ?? "Something went wrong. Please try again.");
+			setStep("pick_resume");
 		}
-	}, [step]);
+	};
 
 	const isStep1Valid = role.trim() !== "" && company.trim() !== "" && jobDescription.trim() !== "";
 	
@@ -363,12 +374,15 @@ function MatchToJobRouteComponent() {
 						>
 							Back
 						</Button>
+						{matchError && (
+							<p className="text-sm text-rose-400 self-center">{matchError}</p>
+						)}
 						<Button
-							disabled={!selectedResumeId || (selectedResumeId === "file_upload" && !!fileError)}
-							onClick={() => setStep("loading")}
+							disabled={!selectedResumeId || selectedResumeId === "file_upload" || !!fileError}
+							onClick={handleRunMatch}
 							className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							Tailor with Zoe
+							Match with Zoe
 						</Button>
 					</div>
 				</div>
@@ -507,22 +521,26 @@ function MatchToJobRouteComponent() {
 							{/* Match Score */}
 							<div className="rounded-3xl border border-border bg-card/40 p-8 flex items-center gap-8">
 								<div className="relative size-28 shrink-0 flex items-center justify-center">
-									{/* Background Circle */}
 									<svg className="absolute inset-0 size-full -rotate-90 text-slate-800" viewBox="0 0 120 120">
 										<circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" />
 									</svg>
-									{/* Progress Circle (78% of circumference 326.7 = 254.8) */}
 									<svg className="absolute inset-0 size-full -rotate-90 text-emerald-500" viewBox="0 0 120 120">
-										<circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray="326.7" strokeDashoffset="71.8" strokeLinecap="round" className="transition-all duration-1000 ease-out" />
+										<circle
+											cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8"
+											strokeDasharray="326.7"
+											strokeDashoffset={326.7 - (326.7 * (matchResult?.match_score ?? 0)) / 100}
+											strokeLinecap="round"
+											className="transition-all duration-1000 ease-out"
+										/>
 									</svg>
 									<div className="text-center relative z-10">
-										<span className="text-3xl font-bold text-emerald-400">78%</span>
+										<span className="text-3xl font-bold text-emerald-400">{matchResult?.match_score ?? 0}%</span>
 										<span className="block text-[10px] font-bold text-emerald-500/70 uppercase tracking-wider mt-0.5">Match</span>
 									</div>
 								</div>
 								<div>
 									<div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-3">
-										<CheckCircleIcon weight="fill" /> Strong Match
+										<CheckCircleIcon weight="fill" /> {matchResult?.verdict ?? "Analyzing..."}
 									</div>
 									<h2 className="text-2xl font-bold mb-1">{role || "Role"} <span className="text-muted-foreground">at</span> {company || "Company"}</h2>
 									<p className="text-sm text-muted-foreground">Here's how your profile lines up against the job description.</p>
@@ -530,34 +548,38 @@ function MatchToJobRouteComponent() {
 							</div>
 
 							{/* Missing Keywords */}
+							{((matchResult?.missing_keywords?.length ?? 0) > 0 || (matchResult?.missing_skills?.length ?? 0) > 0) && (
 							<div className="rounded-2xl border border-rose-500/20 bg-card/40 p-6">
 								<div className="flex items-center justify-between mb-4">
 									<h3 className="font-bold text-rose-400">Missing Keywords</h3>
-									<span className="text-xs text-foreground0">5 critical skills missing</span>
+									<span className="text-xs text-muted-foreground">{(matchResult?.missing_keywords?.length ?? 0) + (matchResult?.missing_skills?.length ?? 0)} missing</span>
 								</div>
 								<div className="flex flex-wrap gap-2">
-									{["Kubernetes", "AWS Lambda", "GraphQL Federation", "Terraform", "gRPC"].map(k => (
-										<span key={k} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium cursor-pointer hover:bg-rose-500/20 transition-colors">
-											{k} <PlusIcon />
+									{[...(matchResult?.missing_keywords ?? []), ...(matchResult?.missing_skills ?? [])].map(k => (
+										<span key={k} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
+											{k}
 										</span>
 									))}
 								</div>
 							</div>
+							)}
 
 							{/* Matched Keywords */}
+							{(matchResult?.matched_keywords?.length ?? 0) > 0 && (
 							<div className="rounded-2xl border border-emerald-500/20 bg-card/40 p-6">
 								<div className="flex items-center justify-between mb-4">
 									<h3 className="font-bold text-emerald-400">Matched Keywords</h3>
-									<span className="text-xs text-foreground0">8 skills matched</span>
+									<span className="text-xs text-muted-foreground">{matchResult?.matched_keywords?.length} matched</span>
 								</div>
 								<div className="flex flex-wrap gap-2">
-									{["React", "TypeScript", "Node.js", "PostgreSQL", "CI/CD", "REST APIs", "Docker", "Agile"].map(k => (
+									{(matchResult?.matched_keywords ?? []).map(k => (
 										<span key={k} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
 											<CheckIcon weight="bold" /> {k}
 										</span>
 									))}
 								</div>
 							</div>
+							)}
 						</div>
 
 						{/* Right Column */}
@@ -571,12 +593,7 @@ function MatchToJobRouteComponent() {
 									<h3 className="font-bold text-lg text-foreground">Zoe's Action Plan</h3>
 								</div>
 								<div className="space-y-3">
-									{[
-										"Highlight your experience with AWS in the first job description.",
-										"Mention your Kubernetes project to improve score by +12%.",
-										"Surface measurable outcomes (latency, conversion) in your top bullet.",
-										"Add a 'Cloud Infrastructure' line to your skills section.",
-									].map((task, i) => (
+									{(matchResult?.suggestions ?? []).map((task, i) => (
 										<div key={i} className="flex gap-4 p-4 rounded-xl bg-muted/50">
 											<div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold">
 												{i + 1}
@@ -587,18 +604,13 @@ function MatchToJobRouteComponent() {
 								</div>
 							</div>
 
-							{/* Transferable Skills */}
+							{/* Summary */}
+							{matchResult?.summary && (
 							<div className="rounded-2xl border border-border bg-card/40 p-6">
-								<h3 className="font-bold mb-1 text-foreground">Transferable Skills</h3>
-								<p className="text-xs text-muted-foreground mb-4">Soft skills from your background that strengthen this role.</p>
-								<div className="flex flex-wrap gap-2">
-									{["Cross-team Leadership", "Mentorship", "System Design", "Stakeholder Comms"].map(k => (
-										<span key={k} className="px-3 py-1.5 rounded-lg bg-muted border border-border text-foreground/80 text-xs font-medium">
-											{k}
-										</span>
-									))}
-								</div>
+								<h3 className="font-bold mb-2 text-foreground">AI Summary</h3>
+								<p className="text-sm text-muted-foreground leading-relaxed">{matchResult.summary}</p>
 							</div>
+							)}
 						</div>
 					</div>
 
