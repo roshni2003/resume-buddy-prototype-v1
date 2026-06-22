@@ -131,7 +131,7 @@ export function SummarySectionBuilder() {
 								AI Assisted
 							</div>
 
-							<span className="text-xs text-slate-700">
+							<span className="text-xs text-slate-700 dark:text-gray-400">
 								Create a recruiter-ready summary in seconds.
 							</span>
 						</div>

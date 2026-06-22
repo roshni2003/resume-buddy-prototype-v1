@@ -64,11 +64,11 @@ export function CertificationsSectionBuilder() {
 				{section.items.map((item) => (
 					<div
 						key={item.id}
-						className="relative flex items-start gap-4 rounded-3xl border border-gray-100 dark:border-border bg-gray-50/50 p-4"
+						className="relative flex items-start gap-4 rounded-3xl border border-gray-100 dark:border-border bg-gray-50/50 dark:bg-card p-4"
 						style={{ borderLeft: "4px solid #10b981" }}
 					>
 						{/* Left Icon */}
-						<div className="flex-shrink-0 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-200/50">
+						<div className="flex-shrink-0 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/30">
 							<SealCheck weight="fill" className="h-6 w-6 text-emerald-500" />
 						</div>
 
@@ -76,7 +76,7 @@ export function CertificationsSectionBuilder() {
 						<div className="flex flex-1 flex-col gap-3 min-w-0">
 							{/* Row 1: Certification Title */}
 							<div>
-								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<Trans>Title</Trans>
 								</label>
 								<Input
@@ -90,7 +90,7 @@ export function CertificationsSectionBuilder() {
 							{/* Row 2: Issuer + Date */}
 							<div className="grid grid-cols-2 gap-3">
 								<div>
-									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 										<Trans>Issuer</Trans>
 									</label>
 									<Input
@@ -101,7 +101,7 @@ export function CertificationsSectionBuilder() {
 									/>
 								</div>
 								<div>
-									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 										<Trans>Date</Trans>
 									</label>
 									<Input
@@ -115,7 +115,7 @@ export function CertificationsSectionBuilder() {
 
 							{/* Row 3: Website */}
 							<div>
-								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<Trans>Website</Trans>
 								</label>
 								<Input
@@ -132,14 +132,14 @@ export function CertificationsSectionBuilder() {
 									checked={item.options?.showLinkInTitle || false}
 									onCheckedChange={(val) => handleChange(item.id, "options.showLinkInTitle", val)}
 								/>
-								<span className="text-sm text-gray-600 font-medium">
+								<span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
 									<Trans>Show link in title</Trans>
 								</span>
 							</div>
 
 							{/* Description */}
 							<div>
-								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 									<Trans>Description</Trans>
 								</label>
 								<RichInput

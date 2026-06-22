@@ -64,10 +64,10 @@ export function SectionBase({ type, className, ...props }: Props) {
 					"group/accordion overflow-hidden rounded-[32px] border transition-all duration-300 transform",
 					!collapsed
 						? cn("scale-[1.01] my-2 z-10", colors.activeClasses)
-						: "border-gray-100 dark:border-border bg-white dark:bg-card hover:border-gray-300 hover:shadow-md",
+						: "border-gray-100 dark:border-border bg-white dark:bg-card hover:border-gray-300 dark:hover:border-border/80 hover:shadow-md",
 				)}
 			>
-				<div className="flex items-center gap-2 p-3 transition-colors hover:bg-gray-50/50 sm:p-4">
+				<div className="flex items-center gap-2 p-3 transition-colors hover:bg-gray-50/50 dark:hover:bg-muted/40 sm:p-4">
 					{/* Drag handle */}
 					{!["picture", "basics"].includes(type) && <DragHandle className="ml-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />}
 
@@ -76,7 +76,7 @@ export function SectionBase({ type, className, ...props }: Props) {
 							{/* Left side: Chevron + Icon + Title */}
 							<div className="flex flex-1 items-center gap-2">
 								{/* Chevron Arrow - Right when closed, Down when open */}
-								<div className="flex items-center justify-center text-gray-400 dark:text-gray-500 transition-colors group-hover/accordion:text-gray-700">
+								<div className="flex items-center justify-center text-gray-400 dark:text-gray-500 transition-colors group-hover/accordion:text-gray-700 dark:group-hover/accordion:text-gray-300">
 									{collapsed ? (
 										<ChevronRight className="h-4 w-4 transition-transform duration-300" />
 									) : (
