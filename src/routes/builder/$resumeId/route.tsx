@@ -13,6 +13,7 @@ import { useResumeStore } from "@/components/resume/store/resume";
 import { ResizableGroup, ResizablePanel, ResizableSeparator } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { api } from "@/utils/api";
+import { CoachMarks } from "@/components/editor/CoachMarks";
 import { BuilderHeader } from "./-components/header";
 import { BuilderSidebarLeft } from "./-sidebar/left";
 import { useBuilderSidebar, useBuilderSidebarStore } from "./-store/sidebar";
@@ -131,6 +132,7 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 	if (isMobile) {
 		return (
 			<div className="flex h-svh flex-col" {...props}>
+				<CoachMarks />
 				<BuilderHeader />
 
 				{/* Mobile Layout - Main content always visible */}
@@ -164,6 +166,7 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 
 	return (
 		<div className="flex h-svh flex-col" style={style} {...props}>
+			<CoachMarks />
 			<BuilderHeader />
 
 			<ResizableGroup orientation="horizontal" className="flex-1" onLayoutChange={onLayoutChange}>

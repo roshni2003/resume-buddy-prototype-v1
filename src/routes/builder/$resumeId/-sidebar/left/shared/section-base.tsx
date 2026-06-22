@@ -60,6 +60,7 @@ export function SectionBase({ type, className, ...props }: Props) {
 		>
 			<AccordionItem
 				value={type}
+				data-tour={`section-${type}`}
 				className={cn(
 					"group/accordion overflow-hidden rounded-[32px] border transition-all duration-300 transform",
 					!collapsed

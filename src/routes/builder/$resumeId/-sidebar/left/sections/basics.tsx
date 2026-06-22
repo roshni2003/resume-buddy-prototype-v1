@@ -18,11 +18,9 @@ import { basicsSchema } from "@/schema/resume/data";
 import { SectionBase } from "../shared/section-base";
 import { CustomFieldsSection } from "./custom-fields";
 
-/* ─── Types ─────────────────────────────────────────────── */
 const formSchema = basicsSchema;
 type FormValues = z.infer<typeof formSchema>;
 
-/* ─── Styled label ───────────────────────────────────────── */
 function FieldLabel({ children }: { children: React.ReactNode }) {
 	return (
 		<label className="block text-[10.5px] font-semibold tracking-widest text-gray-500 dark:text-gray-400 uppercase mb-1.5">
@@ -31,7 +29,6 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 	);
 }
 
-/* ─── Styled input ───────────────────────────────────────── */
 function StyledInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
 	return (
 		<input

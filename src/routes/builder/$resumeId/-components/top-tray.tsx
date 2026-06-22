@@ -295,6 +295,7 @@ export function BuilderTopTray() {
 							variant="outline"
 							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
 							aria-label="Colors"
+							data-tour="btn-colors"
 						>
 							<PaletteIcon className="h-4 w-4" />
 							<span className="hidden lg:inline">
@@ -326,6 +327,7 @@ export function BuilderTopTray() {
 							variant="outline"
 							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
 							aria-label="Fonts"
+							data-tour="btn-fonts"
 						>
 							<TextTIcon className="h-4 w-4" />
 							<span className="hidden lg:inline">
@@ -355,6 +357,7 @@ export function BuilderTopTray() {
 					onClick={() => openDialog("resume.template.gallery", undefined)}
 					className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
 					aria-label="Templates"
+					data-tour="btn-templates"
 				>
 					<SwapIcon className="h-4 w-4" />
 					<span className="hidden lg:inline">
@@ -380,6 +383,7 @@ export function BuilderTopTray() {
 									reviewAttempts >= 2 && "!bg-gray-400 !text-white hover:!bg-gray-400 cursor-not-allowed",
 								)}
 								onClick={onFinalReview}
+								data-tour="btn-final-review"
 							>
 								{isReviewing ? (
 									<CircleNotchIcon className="animate-spin" />
@@ -436,6 +440,7 @@ export function BuilderTopTray() {
 							disabled={isPrinting}
 							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-3 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 sm:h-9 sm:w-auto sm:gap-2 sm:px-4 transition-all"
 							aria-label="Download"
+							data-tour="btn-download"
 						>
 							{isPrinting ? (
 								<CircleNotchIcon className="size-4 animate-spin" />

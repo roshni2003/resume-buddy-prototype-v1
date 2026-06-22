@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useBuilderSidebar, useBuilderSidebarStore } from "../-store/sidebar";
 import { BuilderTopTray } from "./top-tray.tsx";
+import { openZoeTour } from "@/components/editor/CoachMarks";
 
 export function BuilderHeader() {
 	const isMobile = useIsMobile();
@@ -55,7 +56,9 @@ export function BuilderHeader() {
 					<Button
 						variant="outline"
 						size="sm"
+						onClick={openZoeTour}
 						className="
+							zoe-tour-trigger
 							hidden sm:flex
 							items-center gap-2
 							rounded-full
@@ -69,22 +72,7 @@ export function BuilderHeader() {
 					>
 						✨ How to Use Zoe
 					</Button>
-					{/* <Button
-						size="sm"
-						variant="outline"
-						onClick={openZoeTour}
-						className="
-						hidden sm:flex
-						items-center gap-2
-						rounded-full
-						border-yellow-400/40
-						bg-yellow-400/10
-						text-yellow-600
-						hover:bg-yellow-400/20
-					"
-					>
-						✨ How to Use Zoe
-					</Button> */}
+
 				</div>
 
 			</div>
