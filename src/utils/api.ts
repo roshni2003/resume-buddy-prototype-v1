@@ -166,6 +166,22 @@ export interface AIInvocationsResponse {
 	invocations: AIInvocationItem[];
 }
 
+// JD Match
+export interface JDMatchResult {
+	match_score: number;
+	verdict: string;
+	matched_keywords: string[];
+	missing_keywords: string[];
+	missing_skills: string[];
+	suggestions: string[];
+	summary: string;
+}
+
+export interface JDMatchResponse {
+	success: boolean;
+	jdMatch: JDMatchResult;
+}
+
 // ----- Helpers -----
 
 /** Safely parse any date-like value into a valid Date. Handles the backend bug where hour=24 is returned. */
@@ -382,5 +398,27 @@ export const api = {
 	// 15. GET: /auth/me (Current user profile)
 	fetchProfile: async () => {
 		return request<{ id: string; email: string; name?: string }>("/auth/me");
+	},
+
+	// 16. POST: /ai/jd-match
+	// NOTE: VITE_AI_BASE_URL_DEV ends with /openapi but jd-match lives at /api/ai/jd-match.
+	// We derive the correct base by removing the trailing /openapi segment.
+	jdMatch: (payload: { resume_id: string; jd_text: string }) => {
+		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
+		const token = getAuthToken();
+		return fetch(`${baseUrl}/ai/jd-match`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				...(token ? { Authorization: `Bearer ${token}` } : {}),
+			},
+			body: JSON.stringify(payload),
+		}).then(async (res) => {
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.message || `Request failed with status ${res.status}`);
+			}
+			return res.json() as Promise<JDMatchResponse>;
+		});
 	},
 };
