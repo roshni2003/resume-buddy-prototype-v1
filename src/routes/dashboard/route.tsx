@@ -162,7 +162,7 @@ function DashboardHeader() {
 						src="/zoe-icon.png"
 						alt="Resume Buddy"
 						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9"
-						style={{ boxShadow: "0 0 0 2px rgba(0,208,156,0.3)" }}
+					// style={{ boxShadow: "0 0 0 2px rgba(0,208,156,0.3)" }}
 					/>
 					<span
 						className={`font-bold text-base sm:text-lg ${theme === "light" ? "text-slate-900" : "text-white"}`}
@@ -192,7 +192,7 @@ function DashboardHeader() {
 						</Link>
 					</nav>
 
-					<Link 
+					<Link
 						to="/dashboard/settings"
 						activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
 						className={`flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}

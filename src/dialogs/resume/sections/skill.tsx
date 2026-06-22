@@ -102,7 +102,7 @@ export function CreateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 	};
 
 	return (
-		<DialogContent className="max-w-lg p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
+		<DialogContent className="!w-[576px] !max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
 			<div className="flex items-start justify-between mb-4">
 				<div>
 					<h2 className="font-ibm-plex-sans text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Forge new skills</h2>
@@ -227,7 +227,7 @@ export function UpdateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 	const { blockEvents, requestClose } = useFormBlocker(form);
 
 	return (
-		<DialogContent {...blockEvents}>
+		<DialogContent {...blockEvents} className="!w-[576px] !max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-x-2">
 					<PencilSimpleLineIcon />
