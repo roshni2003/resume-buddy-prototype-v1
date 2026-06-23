@@ -2,19 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
 import {
 	PencilSimpleLineIcon,
-	PlusIcon,
 	Article,
 	Briefcase,
 	GraduationCap,
 	Certificate,
-	Folder,
-	Star,
-	Translate,
-	Heart,
-	Trophy,
-	Book,
-	HandHeart,
-	Users
 } from "@phosphor-icons/react";
 import { useForm, useFormContext } from "react-hook-form";
 import type z from "zod";

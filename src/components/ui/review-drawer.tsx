@@ -95,7 +95,6 @@ function MiniScoreRing({ value }: { value: number }) {
 	);
 }
 
-// ─── Issue Row ────────────────────────────────────────────────────────────────
 type Tone = "critical" | "important" | "suggestion" | "strength";
 
 const TONE_STYLES: Record<Tone, { text: string; btn: string }> = {

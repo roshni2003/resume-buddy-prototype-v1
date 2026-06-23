@@ -1,12 +1,3 @@
-/**
- * ExperienceSectionBuilder — inline (no dialog) redesign
- * Mirrors the Summary section UX: click an item or "Add" to expand it
- * in-place with a tips card + AI button.
- *
- * Drop-in replacement for the existing ExperienceSectionBuilder file.
- * The Create/Update dialogs are no longer needed for the main flow.
- */
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
 import {
@@ -44,20 +35,12 @@ import { Switch } from "@/components/ui/switch";
 import { experienceItemSchema } from "@/schema/resume/data";
 import { SectionBase } from "../shared/section-base";
 import { generateId } from "@/utils/string";
-
-/* ─────────────────────────────────────────────
-   Types
-───────────────────────────────────────────── */
 type FormValues = z.infer<typeof experienceItemSchema>;
 
 type PanelState =
 	| { mode: "idle" }
 	| { mode: "create" }
 	| { mode: "edit"; id: string };
-
-/* ─────────────────────────────────────────────
-   Helpers
-───────────────────────────────────────────── */
 function formatDate(dateString: string | undefined): string {
 	if (!dateString) return "";
 	try {
@@ -68,9 +51,6 @@ function formatDate(dateString: string | undefined): string {
 	}
 }
 
-/* ─────────────────────────────────────────────
-   ZOE TIPS CARD  (matches Summary section style)
-───────────────────────────────────────────── */
 function ZoeTipsCard() {
 	return (
 		<div className="rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-50 dark:from-emerald-900/20 to-teal-50 p-5 shadow-sm">
@@ -105,9 +85,6 @@ function ZoeTipsCard() {
 	);
 }
 
-/* ─────────────────────────────────────────────
-   INLINE FORM (create or edit)
-───────────────────────────────────────────── */
 interface InlineFormProps {
 	defaultValues: FormValues;
 	onSave: (values: FormValues) => void;
