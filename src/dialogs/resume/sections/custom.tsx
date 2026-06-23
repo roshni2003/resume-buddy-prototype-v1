@@ -77,7 +77,7 @@ export function CreateCustomSectionDialog({ data }: DialogProps<"resume.sections
 	const { blockEvents, requestClose } = useFormBlocker(form);
 
 	return (
-		<DialogContent {...blockEvents} className="!w-[576px] !max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
+		<DialogContent {...blockEvents}>
 			<DialogHeader>
 				<DialogTitle className="flex flex-col gap-y-1">
 					<span className="font-ibm Plex text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
@@ -136,7 +136,7 @@ export function UpdateCustomSectionDialog({ data }: DialogProps<"resume.sections
 	const { blockEvents, requestClose } = useFormBlocker(form);
 
 	return (
-		<DialogContent {...blockEvents} className="!w-[576px] !max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
+		<DialogContent {...blockEvents}>
 			<DialogHeader>
 				<DialogTitle className="flex flex-col gap-y-1">
 					<span className="font-serif text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">

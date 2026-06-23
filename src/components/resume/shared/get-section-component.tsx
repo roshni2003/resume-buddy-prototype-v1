@@ -165,7 +165,7 @@ export const CustomSectionComponent = ({
 	if (visibleItems.length === 0) return null;
 
 	return (
-		<section className={cn(`page-section page-section-custom page-section-${id}`, sectionClassName)}>
+		<section data-section-id={id} className={cn(`page-section page-section-custom page-section-${id}`, sectionClassName)}>
 			{customSection.type !== "summary" && customSection.type !== "cover-letter" && (
 				<h6 className="mb-1.5 text-(--page-primary-color)">
 					<InlineEditableText

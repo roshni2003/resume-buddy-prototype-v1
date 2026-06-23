@@ -9,6 +9,7 @@ import { ResumePreview } from "@/components/resume/preview";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BuilderDock } from "./-components/dock";
 import { useBuilderSidebarStore } from "./-store/sidebar";
+import { useSectionStore } from "./-store/section";
 
 export const Route = createFileRoute("/builder/$resumeId/")({
 	component: RouteComponent,
@@ -21,6 +22,8 @@ function RouteComponent() {
 	const isLeftSidebarCollapsed = useBuilderSidebarStore((state) => state.isLeftSidebarCollapsed);
 	const isMobile = useIsMobile();
 	const { width: windowWidth = 0 } = useWindowSize();
+	const navigateToSection = useSectionStore((state) => state.navigateToSection);
+	const setLeftSidebarCollapsed = useBuilderSidebarStore((state) => state.setLeftSidebarCollapsed);
 
 	// Compute the active scale factor in JS so we can set the correct wrapper dimensions
 	const scale = useMemo(() => {
@@ -49,10 +52,74 @@ function RouteComponent() {
 	const scaledWidth = RESUME_WIDTH * scale;
 	const scaledHeight = unscaledHeight * scale;
 
+	// ── Click-to-Navigate ──────────────────────────────────────────────────────
+	// Walk up the DOM from the click target to find a [data-section-id] element.
+	// Then expand + scroll to the matching sidebar accordion.
+	const findSectionId = (target: HTMLElement | null, container: HTMLElement): string | null => {
+		let el = target;
+		while (el && el !== container) {
+			const id = el.getAttribute("data-section-id");
+			if (id) return id;
+			el = el.parentElement;
+		}
+		return null;
+	};
+
+	const handlePreviewClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		const sectionId = findSectionId(e.target as HTMLElement, e.currentTarget);
+		if (!sectionId) return;
+
+		// On mobile, ensure the sidebar drawer is open first
+		if (isMobile) {
+			setLeftSidebarCollapsed(false);
+		}
+
+		// Expand the accordion and scroll it into view
+		navigateToSection(sectionId);
+	};
+
+	// ── Hover highlight ────────────────────────────────────────────────────────
+	// Highlight the hovered section with a subtle emerald ring.
+	const handlePreviewMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		const container = previewRef.current;
+		if (!container) return;
+
+		const sectionId = findSectionId(e.target as HTMLElement, e.currentTarget);
+
+		// Remove previous highlight
+		const prev = container.querySelector("[data-section-highlight='true']");
+		if (prev) prev.removeAttribute("data-section-highlight");
+
+		if (sectionId) {
+			// Use innermost [data-section-id] for precise highlighting
+			const el = (e.target as HTMLElement).closest("[data-section-id]");
+			if (el) el.setAttribute("data-section-highlight", "true");
+		}
+	};
+
+	const handlePreviewMouseLeave = () => {
+		const container = previewRef.current;
+		if (!container) return;
+		const prev = container.querySelector("[data-section-highlight='true']");
+		if (prev) prev.removeAttribute("data-section-highlight");
+	};
+
 	return (
-		<div
-			className="relative h-full w-full overflow-x-auto overflow-y-auto bg-muted/30"
-		>
+		<div className="relative h-full w-full overflow-x-auto overflow-y-auto bg-muted/30">
+			{/* Click-to-Navigate styles */}
+			<style>{`
+				.resume-preview-container [data-section-id] {
+					cursor: pointer;
+					transition: outline 0.12s ease, box-shadow 0.12s ease;
+					border-radius: 3px;
+				}
+				.resume-preview-container [data-section-highlight="true"] {
+					outline: 2px solid rgba(16, 185, 129, 0.55);
+					outline-offset: 4px;
+					box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.08);
+				}
+			`}</style>
+
 			{/* Outer flex container: centres the wrapper horizontally */}
 			<div
 				className="flex min-h-full flex-col items-start p-2 transition-[padding] duration-300 ease-in-out md:p-6 lg:p-8"
@@ -89,6 +156,9 @@ function RouteComponent() {
 							flexShrink: 0,
 						}}
 						pageClassName="overflow-hidden rounded-sm shadow-lg sm:rounded-md sm:shadow-xl"
+						onClick={handlePreviewClick}
+						onMouseMove={handlePreviewMouseMove}
+						onMouseLeave={handlePreviewMouseLeave}
 					/>
 				</div>
 			</div>
