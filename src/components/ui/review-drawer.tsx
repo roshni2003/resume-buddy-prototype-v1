@@ -1,5 +1,5 @@
 import { Trans } from "@lingui/react/macro";
-import { CheckCircleIcon, LightbulbIcon, ShieldWarningIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CheckCircleIcon, LightbulbIcon, ShieldWarningIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import type { FinalReviewResult } from "@/components/resume/store/resume";
@@ -7,16 +7,115 @@ import { useResumeStore } from "@/components/resume/store/resume";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useSectionStore } from "@/routes/builder/$resumeId/-store/section";
 import { cn } from "@/utils/style";
 
 type ReviewDrawerProps = {
 	result: FinalReviewResult;
 };
 
+// ─── Keyword → Sidebar Section mapping ──────────────────────────────────────
+// Used to determine which sidebar section to navigate to based on issue text.
+const SECTION_KEYWORD_MAP: Array<{ keywords: string[]; section: string }> = [
+	// Specific sections first to avoid generic keywords (like "url" in basics) overriding them
+	{ keywords: ["project", "portfolio", "github", "repo", "repository"], section: "projects" },
+	{ keywords: ["experience", "job", "work", "role", "position", "company", "employer", "employment"], section: "experience" },
+	{ keywords: ["education", "degree", "university", "college", "school", "gpa", "grade", "course"], section: "education" },
+	{ keywords: ["skill", "technology", "tool", "language", "framework", "programming"], section: "skills" },
+	{ keywords: ["certification", "certificate", "licence", "license", "course", "award"], section: "certifications" },
+	{ keywords: ["language", "fluent", "native", "proficiency"], section: "languages" },
+	{ keywords: ["interest", "hobby", "hobbies", "activities"], section: "interests" },
+	{ keywords: ["volunteer", "volunteering", "community", "service"], section: "volunteer" },
+	{ keywords: ["publication", "paper", "article", "research"], section: "publications" },
+	{ keywords: ["reference", "referee"], section: "references" },
+	{ keywords: ["summary", "objective", "about"], section: "summary" },
+	// Generic sections last
+	{ keywords: ["name", "email", "phone", "address", "location", "linkedin", "website", "url", "link", "headline", "photo", "picture", "contact", "profile", "basic"], section: "basics" },
+];
+
+function inferSectionFromText(issueText: string): string | null {
+	const lower = issueText.toLowerCase();
+	for (const { keywords, section } of SECTION_KEYWORD_MAP) {
+		if (keywords.some((kw) => lower.includes(kw))) {
+			return section;
+		}
+	}
+	return null;
+}
+
+function inferTargetFromText(issueText: string): string | undefined {
+	// Fake target inference until backend provides it natively
+	const lower = issueText.toLowerCase();
+	if (lower.includes("name")) return "name";
+	if (lower.includes("email")) return "email";
+	if (lower.includes("phone")) return "phone";
+	if (lower.includes("date") || lower.includes("period")) return "date";
+	if (lower.includes("school") || lower.includes("university") || lower.includes("institution")) return "institution";
+	if (lower.includes("degree")) return "degree";
+	if (lower.includes("grade") || lower.includes("cgpa") || lower.includes("percentage")) return "percentage";
+	if (lower.includes("company") || lower.includes("employer")) return "company";
+	if (lower.includes("summary") || lower.includes("objective")) return "summary";
+	if (lower.includes("role") || lower.includes("position")) return "role";
+	return undefined;
+}
+
+// ─── Issue Item Card ─────────────────────────────────────────────────────────
+type IssueItemProps = {
+	text: string;
+	variant: "critical" | "important" | "suggestion" | "strength";
+	onGoToField?: (sectionId: string, targetField?: string) => void;
+};
+
+function IssueItem({ text, variant, onGoToField }: IssueItemProps) {
+	const inferredSection = inferSectionFromText(text);
+	const inferredTarget = inferTargetFromText(text);
+
+	const colorMap = {
+		critical: "text-red-900",
+		important: "text-orange-900",
+		suggestion: "text-blue-900",
+		strength: "text-green-900",
+	};
+
+	const buttonColorMap = {
+		critical: "border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400",
+		important: "border-orange-300 text-orange-700 hover:bg-orange-100 hover:border-orange-400",
+		suggestion: "border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400",
+		strength: "border-green-300 text-green-700 hover:bg-green-100",
+	};
+
+	return (
+		<div className={cn("flex flex-col gap-1.5 text-sm", colorMap[variant])}>
+			<div className="flex items-start gap-2">
+				<span className="mt-0.5 shrink-0">•</span>
+				<span className="flex-1 leading-relaxed">{text}</span>
+			</div>
+			{/* "Go to Field" button — shown when we can infer the target section */}
+			{inferredSection && onGoToField && (
+				<div className="ml-4">
+					<button
+						type="button"
+						onClick={() => onGoToField(inferredSection, inferredTarget)}
+						className={cn(
+							"inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors",
+							buttonColorMap[variant],
+						)}
+					>
+						<ArrowRightIcon className="h-3 w-3" weight="bold" />
+						<Trans>Go to Field</Trans>
+					</button>
+				</div>
+			)}
+		</div>
+	);
+}
+
+// ─── Main Drawer ─────────────────────────────────────────────────────────────
 export function ReviewDrawer({ result }: ReviewDrawerProps) {
 	const showDrawer = useResumeStore((state) => state.showReviewDrawer);
 	const setShowDrawer = useResumeStore((state) => state.setShowReviewDrawer);
 	const [showDetails, setShowDetails] = useState(false);
+	const navigateToSection = useSectionStore((state) => state.navigateToSection);
 
 	const getStatusColor = () => {
 		if (result.final_verdict === "READY") return "text-green-600 bg-green-50 border-green-200";
@@ -28,6 +127,15 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 		if (result.final_verdict === "READY") return "Ready to Export";
 		if (result.final_verdict === "NEEDS_MINOR_FIXES") return "Needs Minor Fixes";
 		return "Needs Major Work";
+	};
+
+	// Close drawer and navigate to the section in the sidebar
+	const handleGoToField = (sectionId: string, targetField?: string) => {
+		setShowDrawer(false);
+		// Small delay to let the drawer animate out before scrolling
+		setTimeout(() => {
+			navigateToSection(sectionId, targetField);
+		}, 300);
 	};
 
 	return (
@@ -98,12 +206,14 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 													{result.critical.length}
 												</Badge>
 											</div>
-											<div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3">
+											<div className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-3">
 												{result.critical.map((issue, index) => (
-													<div key={index} className="flex items-start gap-2 text-red-900 text-sm">
-														<span className="mt-0.5">•</span>
-														<span className="flex-1">{issue}</span>
-													</div>
+													<IssueItem
+														key={index}
+														text={issue}
+														variant="critical"
+														onGoToField={handleGoToField}
+													/>
 												))}
 											</div>
 										</div>
@@ -121,12 +231,14 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 													{result.important.length}
 												</Badge>
 											</div>
-											<div className="space-y-2 rounded-lg border border-orange-200 bg-orange-50 p-3">
+											<div className="space-y-3 rounded-lg border border-orange-200 bg-orange-50 p-3">
 												{result.important.map((issue, index) => (
-													<div key={index} className="flex items-start gap-2 text-orange-900 text-sm">
-														<span className="mt-0.5">•</span>
-														<span className="flex-1">{issue}</span>
-													</div>
+													<IssueItem
+														key={index}
+														text={issue}
+														variant="important"
+														onGoToField={handleGoToField}
+													/>
 												))}
 											</div>
 										</div>
@@ -144,12 +256,14 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 													{result.suggestions.length}
 												</Badge>
 											</div>
-											<div className="space-y-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
+											<div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
 												{result.suggestions.map((suggestion, index) => (
-													<div key={index} className="flex items-start gap-2 text-blue-900 text-sm">
-														<span className="mt-0.5">•</span>
-														<span className="flex-1">{suggestion}</span>
-													</div>
+													<IssueItem
+														key={index}
+														text={suggestion}
+														variant="suggestion"
+														onGoToField={handleGoToField}
+													/>
 												))}
 											</div>
 										</div>
@@ -167,12 +281,13 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 													{result.strengths.length}
 												</Badge>
 											</div>
-											<div className="space-y-2 rounded-lg border border-green-200 bg-green-50 p-3">
+											<div className="space-y-3 rounded-lg border border-green-200 bg-green-50 p-3">
 												{result.strengths.map((strength, index) => (
-													<div key={index} className="flex items-start gap-2 text-green-900 text-sm">
-														<span className="mt-0.5">•</span>
-														<span className="flex-1">{strength}</span>
-													</div>
+													<IssueItem
+														key={index}
+														text={strength}
+														variant="strength"
+													/>
 												))}
 											</div>
 										</div>

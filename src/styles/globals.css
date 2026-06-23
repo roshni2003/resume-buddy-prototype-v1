@@ -457,3 +457,22 @@ input.dark-input:-webkit-autofill:active {
 .ask-zoe-button-wrapper:hover .ask-zoe-glow-ring {
   opacity: 1 !important;
 }
+
+/* Field Focus Animation for "Go to Field" */
+.animate-field-focus {
+  animation: field-focus-pulse 2s ease-out 2;
+}
+
+@keyframes field-focus-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    border-color: #10b981;
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    border-color: #10b981;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
