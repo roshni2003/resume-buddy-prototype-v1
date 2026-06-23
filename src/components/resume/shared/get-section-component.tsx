@@ -15,6 +15,7 @@ import { InlineEditableText } from "./inline-editable-text";
 import { AwardsItem } from "./items/awards-item";
 import { CertificationsItem } from "./items/certifications-item";
 import { CoverLetterItem } from "./items/cover-letter-item";
+import { CustomItem } from "./items/custom-item";
 import { EducationItem } from "./items/education-item";
 import { ExperienceItem } from "./items/experience-item";
 import { InterestsItem } from "./items/interests-item";
@@ -57,6 +58,7 @@ function renderItemByType(type: CustomSectionType, item: CustomSectionItem, item
 		.with("volunteer", () => <VolunteerItem {...(item as SectionItem<"volunteer">)} className={itemClassName} />)
 		.with("references", () => <ReferencesItem {...(item as SectionItem<"references">)} className={itemClassName} />)
 		.with("cover-letter", () => <CoverLetterItem {...(item as CoverLetterItemType)} className={itemClassName} />)
+		.with("custom", () => <CustomItem {...(item as any)} className={itemClassName} />)
 		.exhaustive();
 }
 
