@@ -671,12 +671,6 @@ function MatchToJobRouteComponent() {
 						</Button>
 						<div className="flex gap-3">
 							<Button
-								variant="outline"
-								className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
-							>
-								Export Score Report
-							</Button>
-							<Button
 								onClick={handleGenerateTailored}
 								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white"
 							>
