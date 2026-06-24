@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState, useCallback } from "react";
-import { Sparkles, ChevronLeft, ChevronRight, X, Wand2 } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight, Wand2 } from "lucide-react";
 import { cn } from "@/utils/style";
 
 export type CoachStep = {
@@ -40,8 +40,8 @@ export const ZOE_STEPS: CoachStep[] = [
 	{
 		id: "colors",
 		target: "btn-colors",
-		title: "Paint your résumé 🎨",
-		body: "Pick from beautifully curated palettes — your résumé restyles instantly.",
+		title: "Paint your resume 🎨",
+		body: "Pick from beautifully curated palettes — your resume restyles instantly.",
 		emoji: "🎨",
 	},
 	{
@@ -136,7 +136,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 		const onResize = () => measure();
 		window.addEventListener("resize", onResize);
 		window.addEventListener("scroll", onResize, true);
-		const interval = setInterval(measure, 300); // keep position fresh during animations
+		const interval = setInterval(measure, 300);
 		return () => {
 			window.removeEventListener("resize", onResize);
 			window.removeEventListener("scroll", onResize, true);
@@ -237,7 +237,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 						style={{
 							...highlightStyle,
 							boxShadow:
-								"0 0 0 2px rgba(168,85,247,0.9), 0 0 0 6px rgba(168,85,247,0.25), 0 0 40px rgba(168,85,247,0.45)",
+								"0 0 0 2px rgba(168,85,247,0.9), 0 0 0 3px rgba(168,85,247,0.25), 0 0 40px rgba(168,85,247,0.45)",
 							transition: "all 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
 						}}
 					/>
@@ -253,7 +253,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 					<div
 						className="pointer-events-none absolute zoe-float"
 						style={{
-							top: highlightStyle.top - 18,
+							top: highlightStyle.top < 20 ? highlightStyle.top + highlightStyle.height - 18 : highlightStyle.top - 18,
 							left: highlightStyle.left + highlightStyle.width - 18,
 							transition: "all 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
 						}}
@@ -268,7 +268,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 			{/* Tooltip card */}
 			<div
 				key={step.id}
-				className="zoe-tip-enter pointer-events-auto absolute rounded-2xl border border-white/15 bg-gradient-to-br from-[#1a1530] via-[#1a1a2e] to-[#0f0d20] p-5 text-white shadow-[0_30px_80px_-20px_rgba(168,85,247,0.6)] backdrop-blur-xl"
+				className="zoe-tip-enter pointer-events-auto absolute rounded-2xl border border-white/15 bg-gradient-to-br from-[#1a1530] via-[#1a1a2e] to-[#0f0d20] p-5 text-white shadow-[0_10px_60px_-20px_rgba(168,85,247,0.6)] backdrop-blur-xl"
 				style={{ ...tipStyle, width: TOOLTIP_W }}
 			>
 				<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/70 to-transparent" />
@@ -282,13 +282,6 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 							Zoe · step {idx + 1}/{steps.length}
 						</span>
 					</div>
-					<button
-						onClick={finish}
-						aria-label="Skip"
-						className="rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
-					>
-						<X className="h-4 w-4" />
-					</button>
 				</div>
 
 				<h3 className="font-display text-lg leading-snug">

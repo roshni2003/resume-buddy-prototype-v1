@@ -213,7 +213,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 									)}
 
 									{/* Detailed Checks - Collapsible */}
-									<div className="space-y-2">
+									{/* <div className="space-y-2">
 										<Button
 											variant="outline"
 											size="sm"
@@ -266,7 +266,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 												</motion.div>
 											)}
 										</AnimatePresence>
-									</div>
+									</div> */}
 								</div>
 							</div>
 

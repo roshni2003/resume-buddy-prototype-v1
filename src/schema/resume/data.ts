@@ -341,6 +341,7 @@ export type SectionData<T extends SectionType = SectionType> = z.infer<typeof se
 export type SectionItem<T extends SectionType = SectionType> = SectionData<T>["items"][number];
 
 export const sectionTypeSchema = z.enum([
+	"custom",
 	"summary",
 	"profiles",
 	"experience",
@@ -358,6 +359,11 @@ export const sectionTypeSchema = z.enum([
 ]);
 
 export type CustomSectionType = z.infer<typeof sectionTypeSchema>;
+
+export const customItemSchema = baseItemSchema.extend({
+	name: z.string().optional().describe("The name or title of the custom item."),
+	description: z.string().optional().describe("The description or content of the custom item."),
+});
 
 export const customSectionItemSchema = z.union([
 	// coverLetterItemSchema must come before summaryItemSchema because both have 'content',
@@ -377,6 +383,7 @@ export const customSectionItemSchema = z.union([
 	publicationItemSchema,
 	volunteerItemSchema,
 	referenceItemSchema,
+	customItemSchema,
 ]);
 
 export type CustomSectionItem = z.infer<typeof customSectionItemSchema>;

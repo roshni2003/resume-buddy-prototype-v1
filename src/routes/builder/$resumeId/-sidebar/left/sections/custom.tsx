@@ -13,7 +13,7 @@ import {
 	Article,
 	Briefcase,
 	GraduationCap,
-	Certificate
+	Certificate,
 } from "@phosphor-icons/react";
 import { AnimatePresence, Reorder } from "motion/react";
 import { useResumeStore } from "@/components/resume/store/resume";

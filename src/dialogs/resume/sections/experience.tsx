@@ -39,7 +39,7 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 			currentlyWorkingHere: data?.item?.currentlyWorkingHere ?? false,
 			description: data?.item?.description ?? "",
 			website: data?.item?.website ?? { url: "", label: "" },
-			period: data?.item?.period ?? "", // Ensure 'period' has a default value
+			period: data?.item?.period ?? "",
 		},
 	});
 
