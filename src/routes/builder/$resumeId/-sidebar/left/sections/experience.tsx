@@ -6,12 +6,10 @@ import {
 	CalendarBlankIcon,
 	CaretDownIcon,
 	CaretUpIcon,
-	CheckIcon,
 	MapPinIcon,
 	PlusIcon,
 	SparkleIcon,
 	TrashIcon,
-	XIcon,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
