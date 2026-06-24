@@ -2,17 +2,12 @@ import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import {
 	CheckCircleIcon,
-	CircleNotchIcon,
 	LightbulbIcon,
-	MagicWandIcon,
 	ShieldWarningIcon,
-	StarIcon,
 	WarningCircleIcon,
 	XIcon,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
-import { toast } from "sonner";
 import type { FinalReviewResult } from "@/components/resume/store/resume";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { useSectionStore } from "@/routes/builder/$resumeId/-store/section";
@@ -231,11 +226,7 @@ function ReviewSection({
 export function ReviewDrawer({ result }: ReviewDrawerProps) {
 	const showDrawer = useResumeStore((state) => state.showReviewDrawer);
 	const setShowDrawer = useResumeStore((state) => state.setShowReviewDrawer);
-	const autoFixResumeIssues = useResumeStore((state) => state.autoFixResumeIssues);
 	const navigateToSection = useSectionStore((state) => state.navigateToSection);
-	const [detailsOpen, setDetailsOpen] = useState(false);
-	const [isFixing, setIsFixing] = useState(false);
-
 	const verdict =
 		result.final_verdict === "READY"
 			? "Looking Sharp"
@@ -254,29 +245,6 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 		setShowDrawer(false);
 		setTimeout(() => navigateToSection(sectionId, targetField), 300);
 	};
-
-	const handleAutoFix = async () => {
-		setIsFixing(true);
-		const toastId = toast.loading(t`Fixing issues automatically...`);
-		try {
-			await autoFixResumeIssues();
-			toast.success(t`Issues fixed successfully!`, {
-				id: toastId,
-				description: t`Your resume has been automatically improved. Review the changes.`,
-			});
-		} catch (error) {
-			console.error("Auto-fix failed:", error);
-			toast.error(t`Failed to fix issues automatically`, {
-				id: toastId,
-				description: t`Please try fixing issues manually or contact support.`,
-			});
-		} finally {
-			setIsFixing(false);
-		}
-	};
-
-	const hasIssues =
-		result.critical.length > 0 || result.important.length > 0 || result.suggestions.length > 0;
 
 	return (
 		<AnimatePresence>
@@ -388,64 +356,10 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 								items={result.strengths}
 								withAction={false}
 							/>
-
-							{/* Detailed Checks */}
-							<button
-								type="button"
-								onClick={() => setDetailsOpen((o) => !o)}
-								className="flex w-full items-center justify-between rounded-2xl border border-white/5 bg-zinc-800/80 p-4 text-sm font-semibold text-zinc-400 transition hover:text-white"
-							>
-								<span className="flex items-center gap-2">
-									<StarIcon className="h-4 w-4 text-fuchsia-300" weight="fill" />
-									<Trans>Detailed Checks</Trans>
-								</span>
-								<motion.span animate={{ rotate: detailsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-									▼
-								</motion.span>
-							</button>
-
-							<AnimatePresence>
-								{detailsOpen && (
-									<motion.div
-										initial={{ height: 0, opacity: 0 }}
-										animate={{ height: "auto", opacity: 1 }}
-										exit={{ height: 0, opacity: 0 }}
-										transition={{ duration: 0.2 }}
-										className="overflow-hidden"
-									>
-										<div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-[12px] leading-relaxed text-zinc-400">
-											<Trans>
-												Full diagnostic report including ATS compatibility, keyword density, section ordering,
-												formatting consistency and grammar checks.
-											</Trans>
-										</div>
-									</motion.div>
-								)}
-							</AnimatePresence>
 						</div>
 
 						{/* Footer */}
 						<div className="border-t border-white/5 bg-zinc-900/95 p-5 backdrop-blur-xl">
-							{hasIssues && (
-								<button
-									type="button"
-									onClick={handleAutoFix}
-									disabled={isFixing}
-									className="group relative mb-3 w-full overflow-hidden rounded-2xl bg-emerald-500 py-3.5 text-sm font-bold text-neutral-950 shadow-[0_10px_30px_-8px_rgba(16,185,129,0.5)] transition hover:bg-emerald-400 active:scale-[0.98] disabled:opacity-70"
-								>
-									{isFixing ? (
-										<span className="inline-flex items-center gap-2">
-											<CircleNotchIcon className="h-4 w-4 animate-spin" />
-											<Trans>Fixing Issues...</Trans>
-										</span>
-									) : (
-										<span className="inline-flex items-center gap-2">
-											<MagicWandIcon className="h-4 w-4" />
-											<Trans>Auto-fix with Zoe AI</Trans>
-										</span>
-									)}
-								</button>
-							)}
 							<button
 								type="button"
 								onClick={() => setShowDrawer(false)}

@@ -70,7 +70,7 @@ export const ZOE_STEPS: CoachStep[] = [
 		id: "download",
 		target: "btn-download",
 		title: "Ready? Download! ⬇️",
-		body: "Export a print-perfect PDF in one click. Go land that interview.",
+		body: "Export a print-perfect PDF or editable DOCX in one click. Go land that interview.",
 		emoji: "⬇️",
 	},
 ];
