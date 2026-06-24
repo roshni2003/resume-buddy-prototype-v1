@@ -246,6 +246,10 @@ msgstr "Область обучения"
 msgid "Ask Zoe"
 msgstr ""
 
+#: src/components/ui/review-drawer.tsx
+msgid "Auto-fix with Zoe AI"
+msgstr ""
+
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
 msgid "Awarder"
@@ -271,6 +275,10 @@ msgstr "Основное"
 #: src/utils/locale.ts
 msgid "Bengali"
 msgstr "Бенгальский"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Board"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
@@ -337,6 +345,10 @@ msgstr "Каталанский"
 #: src/utils/resume/section.tsx
 msgid "Certifications"
 msgstr "Сертификаты"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "CGPA / Percentage"
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
@@ -491,6 +503,7 @@ msgid "Currently here"
 msgstr ""
 
 #: src/dialogs/resume/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 msgid "Currently studying here"
 msgstr ""
 
@@ -522,10 +535,12 @@ msgstr "Темная"
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/publication.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
 msgid "Date"
 msgstr "Дата"
 
 #: src/dialogs/resume/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 msgid "Degree"
 msgstr "Степень"
 
@@ -552,8 +567,11 @@ msgstr "Удаление вашего резюме..."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Description"
 msgstr "Описание"
 
@@ -561,9 +579,12 @@ msgstr "Описание"
 msgid "Design"
 msgstr "Дизайн"
 
-#: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 msgid "Detailed Checks"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Display Options"
 msgstr ""
 
 #: src/routes/$username/$slug.tsx
@@ -638,6 +659,8 @@ msgid "Enabling password protection..."
 msgstr "Включение защиты паролем..."
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "End Date"
 msgstr ""
@@ -659,6 +682,7 @@ msgid "Export"
 msgstr "Экспорт"
 
 #: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
 msgid "Failed to fix issues automatically"
 msgstr ""
 
@@ -681,10 +705,12 @@ msgid "Fix Issues Automatically"
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
 msgid "Fixing issues automatically..."
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
 msgid "Fixing Issues..."
 msgstr ""
 
@@ -737,6 +763,10 @@ msgstr "Произвольная форма"
 msgid "French"
 msgstr "Французский"
 
+#: src/components/ui/review-drawer.tsx
+msgid "Full diagnostic report including ATS compatibility, keyword density, section ordering, formatting consistency and grammar checks."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Full Name"
 msgstr ""
@@ -774,14 +804,13 @@ msgstr ""
 msgid "Go Back"
 msgstr "Назад"
 
+#: src/components/ui/review-drawer.tsx
+msgid "Go to Field"
+msgstr ""
+
 #: src/dialogs/resume/sections/education.tsx
 msgid "Grade"
 msgstr "Оценка"
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Grammar & Tense"
-msgstr ""
 
 #: src/utils/locale.ts
 msgid "Greek"
@@ -881,15 +910,21 @@ msgstr "Импорт..."
 msgid "Indonesian"
 msgstr "Индонезийский"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Institution Name"
+msgstr ""
+
 #: src/utils/resume/section.tsx
 msgid "Interests"
 msgstr "Интересы"
 
 #: src/dialogs/resume/sections/certification.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
 msgid "Issuer"
 msgstr "Выдавший"
 
 #: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
 msgid "Issues fixed successfully!"
 msgstr ""
 
@@ -1006,22 +1041,9 @@ msgstr "Светлая"
 msgid "Line Height"
 msgstr "Высота строки"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
-msgid "Link Label"
-msgstr ""
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Link Status"
-msgstr ""
-
 #: src/utils/locale.ts
 msgid "Lithuanian"
 msgstr "Литовский"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
-msgid "Live URL"
-msgstr ""
 
 #: src/components/command-palette/pages/resumes.tsx
 msgid "Loading resumes..."
@@ -1035,7 +1057,9 @@ msgstr "Загрузка..."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Location"
 msgstr "Местоположение"
 
@@ -1163,6 +1187,7 @@ msgid "Optionally, set a password so that only people with the password can view
 msgstr "При желании вы можете установить пароль, чтобы просматривать резюме по ссылке могли только пользователи с паролем."
 
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Organization"
 msgstr "Организация"
 
@@ -1192,9 +1217,14 @@ msgstr "Защита паролем отключена."
 msgid "Password protection has been enabled."
 msgstr "Защита паролем включена."
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Percentage / CGPA"
+msgstr ""
+
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Period"
 msgstr "Период"
 
@@ -1210,11 +1240,6 @@ msgstr "Персидский"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Phone"
 msgstr "Телефон"
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Photo Verdict"
-msgstr ""
 
 #: src/utils/resume/section.tsx
 msgid "Picture"
@@ -1242,6 +1267,7 @@ msgid "Please select a valid image file (PNG, JPG, WEBP, etc.)"
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
 msgid "Please try fixing issues manually or contact support."
 msgstr ""
 
@@ -1400,7 +1426,6 @@ msgid "Resume Colours"
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
 msgid "Resume Score"
 msgstr ""
 
@@ -1459,6 +1484,10 @@ msgstr "Сохранить изменения"
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "Учебное заведение"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "School Name"
+msgstr ""
 
 #. placeholder {0}: result.overall_score
 #. placeholder {1}: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"
@@ -1525,6 +1554,9 @@ msgstr "Показать"
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Show link in title"
 msgstr ""
 
@@ -1591,6 +1623,10 @@ msgstr "Интервал (по вертикали)"
 msgid "Spanish"
 msgstr "Испанский"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Specialization"
+msgstr ""
+
 #: src/components/level/combobox.tsx
 msgid "Square"
 msgstr "Квадрат"
@@ -1609,6 +1645,8 @@ msgid "Start building your resume from scratch"
 msgstr "Начните делать свое резюме с нуля"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Start Date"
 msgstr ""
@@ -1658,10 +1696,6 @@ msgstr "Переключиться на светлую тему"
 #: src/utils/locale.ts
 msgid "Tamil"
 msgstr "Тамильский"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
-msgid "Tech Stack"
-msgstr ""
 
 #: src/utils/locale.ts
 msgid "Telugu"
@@ -1750,6 +1784,7 @@ msgstr "Совет: Вы можете назвать резюме в соотв�
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/publication.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
 msgid "Title"
 msgstr "Название"
 
@@ -1969,12 +2004,11 @@ msgstr "Волонтерство"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Website"
 msgstr "Сайт"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
-msgid "Website / Portfolio URL"
-msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
@@ -2022,6 +2056,7 @@ msgid "Your profile has been updated successfully."
 msgstr "Ваш профиль был успешно обновлен."
 
 #: src/components/ui/review-drawer-fixed.tsx
+#: src/components/ui/review-drawer.tsx
 msgid "Your resume has been automatically improved. Review the changes."
 msgstr ""
 
@@ -2053,6 +2088,14 @@ msgstr "Ваше резюме было успешно обновлено."
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Your resume's public link is currently protected by a password. Share the password only with people you trust."
 msgstr "Публичная ссылка на ваше резюме в данный момент защищена паролем. Делитесь паролем только с людьми, которым вы доверяете."
+
+#: src/components/ui/review-drawer.tsx
+msgid "Zoe AI Active"
+msgstr ""
+
+#: src/components/ui/review-drawer.tsx
+msgid "Zoe found several critical gaps that might stop your resume from passing ATS."
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Zulu"
