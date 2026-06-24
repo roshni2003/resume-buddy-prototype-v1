@@ -162,7 +162,6 @@ function DashboardHeader() {
 						src="/zoe-icon.png"
 						alt="Resume Buddy"
 						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9"
-					// style={{ boxShadow: "0 0 0 2px rgba(0,208,156,0.3)" }}
 					/>
 					<span
 						className={`font-bold text-base sm:text-lg ${theme === "light" ? "text-slate-900" : "text-white"}`}
@@ -175,13 +174,6 @@ function DashboardHeader() {
 				{/* Right: Settings & User menu */}
 				<div className="flex items-center gap-2 sm:gap-4">
 					<nav className="hidden items-center gap-1 sm:flex">
-						<Link
-							to="/dashboard/resumes"
-							activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
-							className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
-						>
-							Resumes
-						</Link>
 						{/* TODO: Add logic to conditionally render Analytics link for admins only if needed */}
 						<Link
 							to="/dashboard/admin/analytics"
