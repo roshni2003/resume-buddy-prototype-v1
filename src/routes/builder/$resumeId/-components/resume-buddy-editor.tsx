@@ -636,12 +636,6 @@ export function ResumeBuddyEditor() {
 	);
 }
 
-/* ============================================================================
- * Inline Form Components
- * ============================================================================ */
-
-// Summary Inline Form
-// Summary Inline Form - Updated
 function SummaryInlineForm() {
 	const summary = useResumeStore((state) => state.resume.data.summary);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);

@@ -198,6 +198,7 @@ export const profileItemSchema = baseItemSchema.extend({
 
 export const projectItemSchema = baseItemSchema.extend({
 	name: z.string().min(1).describe("The name of the project."),
+	role: z.string().describe("The role of the author in the project."),
 	period: z.string().describe("The period of time the project was worked on."),
 	website: urlSchema.describe("The link to the project, if any."),
 	description: z.string().describe("The description of the project. This should be a HTML-formatted string."),

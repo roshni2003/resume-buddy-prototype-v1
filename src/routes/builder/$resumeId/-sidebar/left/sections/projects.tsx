@@ -42,33 +42,34 @@ type PanelState =
 
 function ZoeTipsCard() {
 	return (
-		<div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50 p-5 shadow-sm">
-			<div className="mb-3 flex items-center gap-2">
-				<SparkleIcon weight="fill" className="h-5 w-5 text-violet-500" />
-				<span className="text-xs font-bold uppercase tracking-widest text-violet-700">
-					Zoe Tips
-				</span>
-				<SparkleIcon
-					weight="fill"
-					className="ml-auto h-8 w-8 text-violet-100"
-				/>
+		<div className="relative overflow-hidden rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-linear-to-br from-emerald-50 dark:from-emerald-900/20 to-teal-50/50 dark:to-teal-900/20 p-5 shadow-sm">
+			<div className="absolute top-0 right-0 p-4 opacity-10">
+				<SparkleIcon weight="fill" className="h-24 w-24 text-emerald-600 dark:text-emerald-400" />
 			</div>
-			<ul className="space-y-2 text-sm text-violet-800">
-				{[
-					"Lead with what the project does, not how you built it",
-					"Mention the tech stack concisely (3–5 keywords)",
-					"Highlight impact — users, scale, or problem solved",
-					"Include a live link or GitHub repo if public",
-				].map((tip) => (
-					<li key={tip} className="flex items-start gap-2">
-						<span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-violet-400" />
-						{tip}
-					</li>
-				))}
+			<div className="mb-3 flex items-center gap-2">
+				<SparkleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" weight="fill" />
+				<h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm uppercase tracking-widest">Zoe Tips</h4>
+			</div>
+			<ul className="mb-4 space-y-2 font-medium text-emerald-900 dark:text-emerald-200 text-sm">
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Lead with what the project does, not how you built it
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Mention the tech stack concisely (3–5 keywords)
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Highlight impact — users, scale, or problem solved
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Include a live link or GitHub repo if public
+				</li>
 			</ul>
-			<p className="mt-4 text-xs italic text-violet-600">
-				Zoe will sharpen your project pitch and highlight the impact. Look for
-				the magic button above!
+			<p className="font-serif text-emerald-700 dark:text-emerald-400 text-sm italic">
+				Zoe will sharpen your project pitch and highlight the impact. Look for the magic button above!
 			</p>
 		</div>
 	);
@@ -153,27 +154,48 @@ function InlineProjectForm({
 		<Form {...form}>
 			<form className="space-y-5" onSubmit={form.handleSubmit(onSave)}>
 				{/* ── Row 1: Project name ── */}
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-								<FolderOpenIcon className="h-3.5 w-3.5" />
-								<Trans>Project Name</Trans>
-							</FormLabel>
-							<FormControl>
-								<Input
-									{...field}
-									placeholder="My Awesome Project"
-									className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
+				<div className="grid gap-4 sm:grid-cols-2">
+					<FormField
+						control={form.control}
+						name="name"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+									<FolderOpenIcon className="h-3.5 w-3.5" />
+									<Trans>Project Name</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="My Awesome Project"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="role"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+									<FolderOpenIcon className="h-3.5 w-3.5" />
+									<Trans>Role</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="My Awesome Project"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
 				{/* ── Row 2: Period + Tech stack ── */}
 				<div className="grid gap-4 sm:grid-cols-2">
 					<FormField
@@ -276,19 +298,19 @@ function InlineProjectForm({
 										maxRounds={maxRounds}
 										isWordCountValid={isWordCountValid}
 										disabled={roundsUsed >= maxRounds || !isWordCountValid}
-										className="relative z-10 border border-violet-300 font-bold text-black shadow-lg shadow-violet-500/30 hover:text-black"
+										className="relative z-10 font-bold text-black shadow-lg shadow-violet-500/30 hover:text-black"
 									/>
 								</div>
 							</div>
 
 							{/* AI badge */}
 							<div className="flex items-center gap-2">
-								<span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-semibold text-violet-700">
+								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
 									<SparkleIcon weight="fill" className="h-3 w-3" />
 									AI Assisted
 								</span>
 								<span className="text-xs text-slate-700 dark:text-gray-400">
-									Turn your project details into standout resume bullet points.
+									Turn projects into standout resume bullets.
 								</span>
 							</div>
 
@@ -318,7 +340,7 @@ function InlineProjectForm({
 								</p>
 							)}
 							{roundsUsed >= maxRounds && (
-								<p className="text-xs font-medium text-red-500">
+								<p className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600">
 									<Trans>
 										✓ You've used both AI suggestions. Edit the text to get new
 										suggestions.
@@ -347,7 +369,7 @@ function InlineProjectForm({
 					<Button
 						type="submit"
 						disabled={form.formState.isSubmitting}
-						className="rounded-xl bg-violet-500 text-white hover:bg-violet-600 disabled:opacity-50"
+						className="rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
 					>
 						{isNew ? <Trans>Add Project</Trans> : <Trans>Save Changes</Trans>}
 					</Button>
@@ -357,9 +379,6 @@ function InlineProjectForm({
 	);
 }
 
-/* ─────────────────────────────────────────────
-   PROJECT CARD  (collapsed / expanded)
-───────────────────────────────────────────── */
 interface ProjectCardProps {
 	item: FormValues;
 	isExpanded: boolean;
@@ -381,9 +400,9 @@ function ProjectCard({
 
 	return (
 		<div
-			className={`rounded-2xl border bg-white dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
-				? "border-violet-300 shadow-violet-100 shadow-md"
-				: "border-gray-100 dark:border-border hover:border-gray-200 hover:shadow"
+			className={`rounded-2xl border dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
+				? "bg-white dark:border-emerald-700/50 shadow-md"
+				: "bg-white dark:bg-card dark:border-border hover:border-gray-200 dark:hover:border-border/80 hover:shadow"
 				}`}
 		>
 			{/* ── Header ── */}
@@ -461,9 +480,7 @@ function ProjectCard({
 	);
 }
 
-/* ─────────────────────────────────────────────
-   ADD NEW PANEL
-───────────────────────────────────────────── */
+
 function AddNewPanel({
 	onSave,
 	onCancel,
@@ -476,6 +493,7 @@ function AddNewPanel({
 		hidden: false,
 		options: { showLinkInTitle: false },
 		name: "",
+		role: "",
 		period: "",
 		description: "",
 		website: { url: "", label: "" },
