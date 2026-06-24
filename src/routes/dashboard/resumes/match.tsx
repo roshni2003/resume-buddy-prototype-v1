@@ -10,12 +10,14 @@ import {
 	CheckIcon,
 	FileTextIcon,
 	XCircleIcon,
+	WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
 import { api } from "@/utils/api";
 import { useDialogStore } from "@/dialogs/store";
+import { templates } from "@/dialogs/resume/template/data";
 
 const ACCEPTED_TYPES = [
 	"application/pdf",
@@ -38,7 +40,7 @@ export const Route = createFileRoute("/dashboard/resumes/match")({
 	component: MatchToJobRouteComponent,
 });
 
-type MatchStep = "paste_job" | "resume_choice" | "pick_resume" | "start_fresh" | "loading" | "report";
+type MatchStep = "paste_job" | "resume_choice" | "pick_resume" | "start_fresh" | "loading" | "report" | "low_score_warning" | "choose_template";
 
 function MatchToJobRouteComponent() {
 	const navigate = useNavigate();
@@ -48,6 +50,7 @@ function MatchToJobRouteComponent() {
 	const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
 	const [matchResult, setMatchResult] = useState<JDMatchResult | null>(null);
 	const [matchError, setMatchError] = useState<string | null>(null);
+	const [selectedTemplate, setSelectedTemplate] = useState<string>("ditto");
 	
 	const [role, setRole] = useState("");
 	const [company, setCompany] = useState("");
@@ -97,11 +100,19 @@ function MatchToJobRouteComponent() {
 
 	// Call real JD Match API when entering loading step
 	const handleRunMatch = async () => {
-		if (!selectedResumeId || selectedResumeId === "file_upload") return;
+		if (!selectedResumeId) return;
+		if (selectedResumeId === "file_upload" && !uploadingFile) return;
+
 		setMatchError(null);
 		setStep("loading");
 		try {
-			const res = await api.jdMatch({ resume_id: selectedResumeId, jd_text: jobDescription });
+			let res;
+			if (selectedResumeId === "file_upload") {
+				res = await api.jdMatchUpload({ resume_upload: uploadingFile!, jd_text: jobDescription });
+			} else {
+				res = await api.jdMatch({ resume_id: selectedResumeId, jd_text: jobDescription });
+			}
+
 			if (res.success) {
 				setMatchResult(res.jdMatch);
 				setStep("report");
@@ -122,8 +133,32 @@ function MatchToJobRouteComponent() {
 	const [isCreating, setIsCreating] = useState(false);
 
 	const handleGenerateTailored = async () => {
+		if ((matchResult?.match_score ?? 0) < 30) {
+			setStep("low_score_warning");
+			return;
+		}
+		setStep("choose_template");
+	};
+
+	const handleConfirmTemplate = async () => {
 		if (selectedResumeId && selectedResumeId !== "file_upload") {
-			navigate({ to: "/builder/$resumeId", params: { resumeId: selectedResumeId } });
+			try {
+				setIsCreating(true);
+				const createdResume = await api.fetchResume(selectedResumeId);
+				const updatedData = {
+					...createdResume.data,
+					metadata: {
+						...createdResume.data.metadata,
+						template: selectedTemplate,
+					},
+				};
+				await api.updateResume(selectedResumeId, { data: updatedData });
+				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
+				navigate({ to: "/builder/$resumeId", params: { resumeId: selectedResumeId } });
+			} catch(e) {
+				console.error(e);
+				setIsCreating(false);
+			}
 		} else {
 			try {
 				setIsCreating(true);
@@ -132,6 +167,17 @@ function MatchToJobRouteComponent() {
 					slug: `tailored-${Date.now().toString(36)}`,
 					withSampleData: true,
 				});
+				
+				const createdResume = await api.fetchResume(resume.id);
+				const updatedData = {
+					...createdResume.data,
+					metadata: {
+						...createdResume.data.metadata,
+						template: selectedTemplate,
+					},
+				};
+				await api.updateResume(resume.id, { data: updatedData });
+				
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id } });
 			} catch (e) {
@@ -378,7 +424,7 @@ function MatchToJobRouteComponent() {
 							<p className="text-sm text-rose-400 self-center">{matchError}</p>
 						)}
 						<Button
-							disabled={!selectedResumeId || selectedResumeId === "file_upload" || !!fileError}
+							disabled={!selectedResumeId || (selectedResumeId === "file_upload" && (!uploadingFile || !!fileError))}
 							onClick={handleRunMatch}
 							className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
 						>
@@ -625,16 +671,113 @@ function MatchToJobRouteComponent() {
 						</Button>
 						<div className="flex gap-3">
 							<Button
-								variant="outline"
-								className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
-							>
-								Export Score Report
-							</Button>
-							<Button
 								onClick={handleGenerateTailored}
 								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white"
 							>
 								Generate Tailored Resume
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Step 3.5: Low Score Warning */}
+			{step === "low_score_warning" && (
+				<div className="overflow-hidden rounded-2xl border border-red-500/20 bg-card/60 shadow-2xl backdrop-blur-md max-w-xl mx-auto mt-12">
+					<div className="flex flex-col items-center gap-4 bg-red-500/5 px-6 py-8 text-center">
+						<div className="flex size-16 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-4 ring-red-500/10">
+							<WarningCircleIcon weight="fill" className="size-8" />
+						</div>
+						<div>
+							<h1 className="font-bold text-foreground text-2xl">Low Match Score</h1>
+							<p className="mt-2 text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
+								Your profile only matches <span className="font-bold text-foreground">{matchResult?.match_score}%</span> of the job description. Tailoring a resume might be challenging without the core required skills.
+							</p>
+						</div>
+					</div>
+
+					<div className="p-6 bg-card border-t border-red-500/10">
+						<p className="text-center font-medium text-foreground mb-6">
+							Would you still like to proceed and create a tailored resume?
+						</p>
+
+						<div className="flex items-center justify-center gap-4">
+							<Button
+								variant="outline"
+								onClick={() => setStep("report")}
+								className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground w-32"
+							>
+								Cancel
+							</Button>
+							<Button
+								onClick={() => setStep("choose_template")}
+								className="cursor-pointer bg-red-600 hover:bg-red-500 text-white w-40"
+							>
+								Proceed Anyway
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Step 4: Choose Template */}
+			{step === "choose_template" && (
+				<div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md">
+					<div className="flex flex-col items-center gap-4 border-border border-b bg-card/80 px-6 py-8 text-center">
+						<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
+							<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover" />
+						</div>
+						<div>
+							<h1 className="font-bold text-foreground text-2xl">Choose a Template</h1>
+							<p className="mt-1 text-muted-foreground text-sm">
+								Select a template to generate your tailored resume.
+							</p>
+						</div>
+					</div>
+
+					<div className="p-6">
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+							{Object.entries(templates).map(([key, template]) => (
+								<div
+									key={key}
+									onClick={() => setSelectedTemplate(key)}
+									className={`cursor-pointer rounded-xl border p-2 transition-all ${
+										selectedTemplate === key
+											? "border-emerald-500 bg-emerald-500/5 ring-2 ring-emerald-500/20"
+											: "border-border hover:border-emerald-500/50 hover:bg-muted/40"
+									}`}
+								>
+									<img
+										src={template.imageUrl}
+										alt={template.name}
+										className="w-full rounded-md object-cover aspect-[210/297]"
+									/>
+									<p className="mt-2 text-center text-sm font-medium">{template.name}</p>
+								</div>
+							))}
+						</div>
+
+						<div className="flex items-center justify-between pt-8 border-t border-border/50 mt-8">
+							<Button
+								variant="outline"
+								onClick={() => setStep("report")}
+								className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
+							>
+								<ArrowLeftIcon className="mr-2" /> Back to Report
+							</Button>
+							<Button
+								onClick={handleConfirmTemplate}
+								disabled={isCreating}
+								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white min-w-32"
+							>
+								{isCreating ? (
+									<>
+										<SpinnerGapIcon className="mr-2 size-4 animate-spin" />
+										Generating...
+									</>
+								) : (
+									"Create Resume"
+								)}
 							</Button>
 						</div>
 					</div>

@@ -421,4 +421,27 @@ export const api = {
 			return res.json() as Promise<JDMatchResponse>;
 		});
 	},
+	// 17. POST: /ai/jd-match-upload
+	jdMatchUpload: (payload: { resume_upload: File; jd_text: string }) => {
+		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
+		const token = getAuthToken();
+		
+		const formData = new FormData();
+		formData.append("resume_upload", payload.resume_upload);
+		formData.append("jd_text", payload.jd_text);
+
+		return fetch(`${baseUrl}/ai/jd-match-upload`, {
+			method: "POST",
+			headers: {
+				...(token ? { Authorization: `Bearer ${token}` } : {}),
+			},
+			body: formData,
+		}).then(async (res) => {
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.message || `Request failed with status ${res.status}`);
+			}
+			return res.json() as Promise<JDMatchResponse>;
+		});
+	},
 };
