@@ -662,7 +662,7 @@ function SummaryInlineForm() {
 			const resume = useResumeStore.getState().resume;
 			const response = await api.generateAIContent({
 				resume_id: resume.id,
-				type: "Summary",
+				type: "summary",
 				value: stripHtml(`Name: ${resume.data.basics.name}, Headline: ${resume.data.basics.headline}`),
 			});
 
@@ -1103,7 +1103,6 @@ function ExperienceInlineForm({
 			currentlyWorkingHere: currentItem?.currentlyWorkingHere ?? false,
 			description: currentItem?.description ?? "",
 			period: currentItem?.period ?? "",
-			website: currentItem?.website ?? { url: "", label: "" },
 		},
 	});
 
@@ -1121,7 +1120,6 @@ function ExperienceInlineForm({
 				currentlyWorkingHere: currentItem.currentlyWorkingHere,
 				description: currentItem.description,
 				period: currentItem.period,
-				website: currentItem.website ?? { url: "", label: "" },
 			});
 		} else {
 			form.reset({
@@ -1136,7 +1134,6 @@ function ExperienceInlineForm({
 				currentlyWorkingHere: false,
 				description: "",
 				period: "",
-				website: { url: "", label: "" },
 			});
 		}
 	}, [editId, currentItem]);
@@ -1403,7 +1400,7 @@ function ProjectsInlineForm({
 		try {
 			const response = await api.generateAIContent({
 				resume_id: useResumeStore.getState().resume.id,
-				type: "ProjectDescription",
+				type: "ProjectsDescription",
 				value: stripHtml(`${name}`),
 			});
 
