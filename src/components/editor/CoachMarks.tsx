@@ -226,7 +226,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 						)}
 					</mask>
 				</defs>
-				<rect x="0" y="0" width="100%" height="100%" fill="rgba(8,10,20,0.72)" mask="url(#zoe-mask)" />
+				<rect x="0" y="0" width="100%" height="100%" className="fill-slate-900/30 dark:fill-[rgba(8,10,20,0.72)]" mask="url(#zoe-mask)" />
 			</svg>
 
 			{/* Animated ring around highlight */}
@@ -265,10 +265,9 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 				</>
 			)}
 
-			{/* Tooltip card */}
 			<div
 				key={step.id}
-				className="zoe-tip-enter pointer-events-auto absolute rounded-2xl border border-white/15 bg-gradient-to-br from-[#1a1530] via-[#1a1a2e] to-[#0f0d20] p-5 text-white shadow-[0_10px_60px_-20px_rgba(168,85,247,0.6)] backdrop-blur-xl"
+				className="zoe-tip-enter pointer-events-auto absolute rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-[0_10px_60px_-20px_rgba(168,85,247,0.4)] backdrop-blur-xl dark:border-white/15 dark:bg-transparent dark:bg-gradient-to-br dark:from-[#1a1530] dark:via-[#1a1a2e] dark:to-[#0f0d20] dark:text-white dark:shadow-[0_10px_60px_-20px_rgba(168,85,247,0.6)]"
 				style={{ ...tipStyle, width: TOOLTIP_W }}
 			>
 				<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/70 to-transparent" />
@@ -278,7 +277,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 						<span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 to-violet-600 text-[14px] zoe-bob">
 							{step.emoji ?? "✨"}
 						</span>
-						<span className="font-mono text-[10px] uppercase tracking-[0.25em] text-fuchsia-300/90">
+						<span className="font-mono text-[10px] uppercase tracking-[0.25em] text-fuchsia-600 dark:text-fuchsia-300/90">
 							Zoe · step {idx + 1}/{steps.length}
 						</span>
 					</div>
@@ -287,16 +286,16 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 				<h3 className="font-display text-lg leading-snug">
 					{step.title}
 				</h3>
-				<p className="mt-1.5 text-sm leading-relaxed text-white/75">{step.body}</p>
+				<p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-white/75">{step.body}</p>
 
 				{step.ai && (
-					<div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-fuchsia-200">
+					<div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-fuchsia-700 dark:border-fuchsia-400/40 dark:bg-fuchsia-500/10 dark:text-fuchsia-200">
 						<Wand2 className="h-3 w-3" /> Powered by Zoe AI
 					</div>
 				)}
 
 				{missing && (
-					<p className="mt-2 text-xs text-amber-300/90">
+					<p className="mt-2 text-xs text-amber-600 dark:text-amber-300/90">
 						Couldn't locate this element on the page — it might be off-screen.
 					</p>
 				)}
@@ -308,7 +307,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 							key={s.id}
 							className={cn(
 								"h-1.5 rounded-full transition-all",
-								i === idx ? "w-6 bg-fuchsia-400" : i < idx ? "w-1.5 bg-fuchsia-400/70" : "w-1.5 bg-white/20",
+								i === idx ? "w-6 bg-fuchsia-500 dark:bg-fuchsia-400" : i < idx ? "w-1.5 bg-fuchsia-400 dark:bg-fuchsia-400/70" : "w-1.5 bg-slate-200 dark:bg-white/20",
 							)}
 						/>
 					))}
@@ -317,7 +316,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 				<div className="mt-4 flex items-center justify-between gap-2">
 					<button
 						onClick={finish}
-						className="rounded-full px-3 py-1.5 text-xs text-white/70 transition hover:text-white"
+						className="rounded-full px-3 py-1.5 text-xs text-slate-500 transition hover:text-slate-900 dark:text-white/70 dark:hover:text-white"
 					>
 						Skip tour
 					</button>
@@ -326,15 +325,16 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 							onClick={() => setIdx((i) => Math.max(0, i - 1))}
 							disabled={isFirst}
 							className={cn(
-								"flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs transition",
-								isFirst ? "opacity-40" : "hover:bg-white/10",
+								"flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs transition",
+								isFirst ? "opacity-40" : "hover:bg-slate-100 dark:hover:bg-white/10",
+								"border-slate-200 bg-white text-slate-700 dark:border-white/15 dark:bg-white/5 dark:text-white"
 							)}
 						>
 							<ChevronLeft className="h-3.5 w-3.5" /> Previous
 						</button>
 						<button
 							onClick={() => (isLast ? finish() : setIdx((i) => Math.min(steps.length - 1, i + 1)))}
-							className="group flex items-center gap-1 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 px-4 py-1.5 text-xs font-medium shadow-[0_8px_24px_-8px_rgba(168,85,247,0.8)] transition hover:scale-[1.03]"
+							className="group flex items-center gap-1 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 px-4 py-1.5 text-xs font-medium text-white shadow-[0_8px_24px_-8px_rgba(168,85,247,0.6)] transition hover:scale-[1.03] dark:shadow-[0_8px_24px_-8px_rgba(168,85,247,0.8)]"
 						>
 							{isLast ? "Finish 🎉" : (
 								<>
