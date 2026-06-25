@@ -180,7 +180,7 @@ export function SummarySectionBuilder() {
 							<Button
 								type="button"
 								variant="ghost"
-								className="rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50"
+								className="rounded-xl border border-gray-200 dark:border-border text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50"
 								onClick={onCancel}
 							>
 								<Trans>Cancel</Trans>
