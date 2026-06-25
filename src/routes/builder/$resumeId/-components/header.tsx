@@ -70,7 +70,7 @@ export function BuilderHeader() {
 						// 		animate-pulse
 						// 	"
 						// >
-						className="group ml-2 hidden items-center gap-2 rounded-full border border-fuchsia-400/40 bg-gradient-to-r from-fuchsia-500/15 to-violet-500/15 px-3 py-1.5 text-xs font-medium text-fuchsia-200 backdrop-blur-md transition hover:scale-[1.03] hover:from-fuchsia-500/25 hover:to-violet-500/25 md:inline-flex">
+						className="group ml-2 hidden items-center gap-2 rounded-full border border-fuchsia-400/40 bg-gradient-to-r from-fuchsia-500/15 to-violet-500/15 px-3 py-1.5 text-xs font-medium text-fuchsia-700 dark:text-fuchsia-200 backdrop-blur-md transition hover:scale-[1.03] hover:from-fuchsia-500/25 hover:to-violet-500/25 md:inline-flex">
 						✨ How to Use Zoe
 					</Button>
 
