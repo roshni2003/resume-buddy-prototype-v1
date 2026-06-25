@@ -50,7 +50,7 @@ export function OnboardingDialog() {
 							Build from scratch
 						</h3>
 						<p className="mt-1 text-muted-foreground text-xs leading-snug">
-							Start from a blank canvas and design step by step.
+							Start fresh and build a standout resume step-by-step with Zoe's help.
 						</p>
 					</div>
 				</button>
@@ -69,7 +69,7 @@ export function OnboardingDialog() {
 							Upload resume
 						</h3>
 						<p className="mt-1 text-muted-foreground text-xs leading-snug">
-							Upload an existing PDF or Word file and rewrite it.
+							Instantly import your existing document to reformat and enhance it with AI.
 						</p>
 					</div>
 				</button>
@@ -91,7 +91,7 @@ export function OnboardingDialog() {
 							Match to a job
 						</h3>
 						<p className="mt-1 text-muted-foreground text-xs leading-snug">
-							Paste a job description to tailor your resume fields.
+							Tailor your resume to a specific job description to boost your ATS score.
 						</p>
 					</div>
 				</button>

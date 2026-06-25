@@ -178,7 +178,7 @@ function UploadRouteComponent() {
 				if (next < 35) setProgressText("Extracting raw text from document...");
 				else if (next < 60) setProgressText("Analyzing career history and education details...");
 				else if (next < 85) setProgressText("Identifying skills and contact details...");
-				else setProgressText("Structuring JSON schema mapping...");
+				else setProgressText("Finalizing resume content...");
 
 				return next;
 			});
@@ -279,7 +279,7 @@ function UploadRouteComponent() {
 						<div>
 							<h1 className="font-bold text-foreground text-xl">Upload & Parse Resume</h1>
 							<p className="mt-0.5 text-muted-foreground text-sm">
-								Zoe reads your document and populates the editor with structured, optimized content.
+								Zoe reads your document and seamlessly organizes your information, ready for you to review and enhance.
 							</p>
 						</div>
 					</div>
@@ -449,7 +449,7 @@ function UploadRouteComponent() {
 									<div>
 										<h3 className="font-bold text-emerald-300 text-sm">Resume successfully read by Zoe!</h3>
 										<p className="mt-0.5 text-emerald-500/80 text-xs">
-											Review the extracted information below before creating your resume in the editor.
+											Take a quick look at your imported details. You can make full edits in the next step.
 										</p>
 									</div>
 								</div>
@@ -570,7 +570,7 @@ function UploadRouteComponent() {
 										) : (
 											<>
 												<CheckCircleIcon className="mr-1.5 size-4" />
-												Confirm & Import to Builder
+												Confirm & Open in Editor
 											</>
 										)}
 									</Button>
