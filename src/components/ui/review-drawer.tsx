@@ -61,7 +61,7 @@ function MiniScoreRing({ value }: { value: number }) {
 	const r = 34;
 	const c = 2 * Math.PI * r;
 	const offset = c - (value / 100) * c;
-	const color = value < 40 ? "#f43f5e" : value < 70 ? "#f59e0b" : "#10b981";
+	const color = value < 30 ? "#f43f5e" : value < 60 ? "#f59e0b" : "#10b981";
 	return (
 		<div className="relative grid h-20 w-20 shrink-0 place-items-center">
 			<svg className="absolute inset-0 -rotate-90" viewBox="0 0 80 80">
@@ -228,16 +228,16 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 	const setShowDrawer = useResumeStore((state) => state.setShowReviewDrawer);
 	const navigateToSection = useSectionStore((state) => state.navigateToSection);
 	const verdict =
-		result.final_verdict === "READY"
+		result.overall_score >= 60
 			? "Looking Sharp"
-			: result.final_verdict === "NEEDS_MINOR_FIXES"
+			: result.overall_score >= 30
 				? "Getting There"
 				: "Needs Major Work";
 
 	const verdictColor =
-		result.final_verdict === "READY"
+		result.overall_score >= 60
 			? "bg-emerald-500"
-			: result.final_verdict === "NEEDS_MINOR_FIXES"
+			: result.overall_score >= 30
 				? "bg-amber-500"
 				: "bg-rose-500";
 
