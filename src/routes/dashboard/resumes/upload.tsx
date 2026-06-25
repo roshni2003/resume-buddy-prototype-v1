@@ -274,10 +274,7 @@ function UploadRouteComponent() {
 					{/* Card Header */}
 					<div className="flex items-center gap-4 border-border border-b bg-card/80 px-6 py-5">
 						<div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
-							<>
-								<img src="/zoe-icon.png" alt="Zoe AI" className="size-9 rounded-full object-cover dark:hidden" />
-								<img src="/zoe-icon-dark.png" alt="Zoe AI" className="size-9 rounded-full object-cover hidden dark:block" />
-							</>
+							<img src="/zoe-icon.png" alt="Zoe AI" className="size-9 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
 						</div>
 						<div>
 							<h1 className="font-bold text-foreground text-xl">Upload & Parse Resume</h1>

@@ -745,10 +745,7 @@ function MatchToJobRouteComponent() {
 				<div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md">
 					<div className="flex flex-col items-center gap-4 border-border border-b bg-card/80 px-6 py-8 text-center">
 						<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
-							<>
-								<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover dark:hidden" />
-								<img src="/zoe-icon-dark.png" alt="Zoe AI" className="size-10 rounded-full object-cover hidden dark:block" />
-							</>
+							<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
 						</div>
 						<div>
 							<h1 className="font-bold text-foreground text-2xl">Choose a Template</h1>
