@@ -1,12 +1,6 @@
 import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
-import {
-	CheckCircleIcon,
-	LightbulbIcon,
-	ShieldWarningIcon,
-	WarningCircleIcon,
-	XIcon,
-} from "@phosphor-icons/react";
+import { CheckCircleIcon, LightbulbIcon, ShieldWarningIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { FinalReviewResult } from "@/components/resume/store/resume";
 import { useResumeStore } from "@/components/resume/store/resume";
@@ -20,8 +14,14 @@ type ReviewDrawerProps = {
 // ─── Keyword → Sidebar Section mapping ───────────────────────────────────────
 const SECTION_KEYWORD_MAP: Array<{ keywords: string[]; section: string }> = [
 	{ keywords: ["project", "portfolio", "github", "repo", "repository"], section: "projects" },
-	{ keywords: ["experience", "job", "work", "role", "position", "company", "employer", "employment"], section: "experience" },
-	{ keywords: ["education", "degree", "university", "college", "school", "gpa", "grade", "course"], section: "education" },
+	{
+		keywords: ["experience", "job", "work", "role", "position", "company", "employer", "employment"],
+		section: "experience",
+	},
+	{
+		keywords: ["education", "degree", "university", "college", "school", "gpa", "grade", "course"],
+		section: "education",
+	},
 	{ keywords: ["skill", "technology", "tool", "language", "framework", "programming"], section: "skills" },
 	{ keywords: ["certification", "certificate", "licence", "license", "course", "award"], section: "certifications" },
 	{ keywords: ["language", "fluent", "native", "proficiency"], section: "languages" },
@@ -30,7 +30,26 @@ const SECTION_KEYWORD_MAP: Array<{ keywords: string[]; section: string }> = [
 	{ keywords: ["publication", "paper", "article", "research"], section: "publications" },
 	{ keywords: ["reference", "referee"], section: "references" },
 	{ keywords: ["summary", "objective", "about"], section: "summary" },
-	{ keywords: ["name", "email", "phone", "address", "location", "linkedin", "website", "url", "link", "headline", "photo", "picture", "contact", "profile", "basic"], section: "basics" },
+	{
+		keywords: [
+			"name",
+			"email",
+			"phone",
+			"address",
+			"location",
+			"linkedin",
+			"website",
+			"url",
+			"link",
+			"headline",
+			"photo",
+			"picture",
+			"contact",
+			"profile",
+			"basic",
+		],
+		section: "basics",
+	},
 ];
 
 function inferSectionFromText(issueText: string): string | null {
@@ -65,7 +84,7 @@ function MiniScoreRing({ value }: { value: number }) {
 	return (
 		<div className="relative grid h-20 w-20 shrink-0 place-items-center">
 			<svg className="absolute inset-0 -rotate-90" viewBox="0 0 80 80">
-				<circle cx="40" cy="40" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+				<circle cx="40" cy="40" r={r} fill="none" className="stroke-zinc-200 dark:stroke-white/10" strokeWidth="6" />
 				<circle
 					cx="40"
 					cy="40"
@@ -83,8 +102,8 @@ function MiniScoreRing({ value }: { value: number }) {
 				/>
 			</svg>
 			<div className="relative z-10 text-center">
-				<p className="text-xl font-bold leading-none text-white">{value}</p>
-				<p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/35">/100</p>
+				<p className="font-bold text-xl text-zinc-900 leading-none dark:text-white">{value}</p>
+				<p className="mt-0.5 text-[9px] text-zinc-500 uppercase tracking-widest dark:text-white/35">/100</p>
 			</div>
 		</div>
 	);
@@ -94,19 +113,19 @@ type Tone = "critical" | "important" | "suggestion" | "strength";
 
 const TONE_STYLES: Record<Tone, { text: string; btn: string }> = {
 	critical: {
-		text: "text-zinc-300",
-		btn: "border-rose-500/30 text-rose-400 hover:bg-rose-500/10",
+		text: "text-zinc-700 dark:text-zinc-300",
+		btn: "border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10",
 	},
 	important: {
-		text: "text-zinc-300",
-		btn: "border-amber-500/30 text-amber-400 hover:bg-amber-500/10",
+		text: "text-zinc-700 dark:text-zinc-300",
+		btn: "border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10",
 	},
 	suggestion: {
-		text: "text-zinc-300",
-		btn: "border-sky-500/30 text-sky-400 hover:bg-sky-500/10",
+		text: "text-zinc-700 dark:text-zinc-300",
+		btn: "border-sky-500/30 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10",
 	},
 	strength: {
-		text: "text-zinc-300",
+		text: "text-zinc-700 dark:text-zinc-300",
 		btn: "",
 	},
 };
@@ -125,14 +144,14 @@ function IssueRow({
 	const styles = TONE_STYLES[tone];
 
 	return (
-		<div className="border-b border-white/5 p-4 last:border-b-0">
+		<div className="border-zinc-200 border-b p-4 last:border-b-0 dark:border-white/5">
 			<p className={cn("mb-2.5 text-[13px] leading-relaxed", styles.text)}>{text}</p>
 			{inferredSection && onGoToField && (
 				<button
 					type="button"
 					onClick={() => onGoToField(inferredSection, inferredTarget)}
 					className={cn(
-						"inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition",
+						"inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-semibold text-[11px] transition",
 						styles.btn,
 					)}
 				>
@@ -152,31 +171,31 @@ const SECTION_STYLES: Record<
 	{ title: string; border: string; badgeBg: string; badgeText: string; icon: React.ReactNode }
 > = {
 	critical: {
-		title: "text-rose-400",
+		title: "text-rose-600 dark:text-rose-400",
 		border: "border-rose-500/20",
-		badgeBg: "bg-rose-500/15 border-rose-500/30 text-rose-400",
-		badgeText: "text-rose-400",
+		badgeBg: "bg-rose-500/15 border-rose-500/30 text-rose-600 dark:text-rose-400",
+		badgeText: "text-rose-600 dark:text-rose-400",
 		icon: <ShieldWarningIcon className="h-4 w-4" weight="fill" />,
 	},
 	important: {
-		title: "text-amber-400",
+		title: "text-amber-600 dark:text-amber-400",
 		border: "border-amber-500/20",
-		badgeBg: "bg-amber-500/15 border-amber-500/30 text-amber-400",
-		badgeText: "text-amber-400",
+		badgeBg: "bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400",
+		badgeText: "text-amber-600 dark:text-amber-400",
 		icon: <WarningCircleIcon className="h-4 w-4" weight="fill" />,
 	},
 	suggestion: {
-		title: "text-sky-400",
+		title: "text-sky-600 dark:text-sky-400",
 		border: "border-sky-500/20",
-		badgeBg: "bg-sky-500/15 border-sky-500/30 text-sky-400",
-		badgeText: "text-sky-400",
+		badgeBg: "bg-sky-500/15 border-sky-500/30 text-sky-600 dark:text-sky-400",
+		badgeText: "text-sky-600 dark:text-sky-400",
 		icon: <LightbulbIcon className="h-4 w-4" weight="fill" />,
 	},
 	strength: {
-		title: "text-emerald-400",
+		title: "text-emerald-600 dark:text-emerald-400",
 		border: "border-emerald-500/20",
-		badgeBg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-400",
-		badgeText: "text-emerald-400",
+		badgeBg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
+		badgeText: "text-emerald-600 dark:text-emerald-400",
 		icon: <CheckCircleIcon className="h-4 w-4" weight="fill" />,
 	},
 };
@@ -200,22 +219,22 @@ function ReviewSection({
 	return (
 		<section className="space-y-2.5">
 			<div className="flex items-center justify-between px-1">
-				<div className={cn("flex items-center gap-2 text-sm font-semibold", s.title)}>
+				<div className={cn("flex items-center gap-2 font-semibold text-sm", s.title)}>
 					{s.icon}
 					{title}
 				</div>
-				<span className={cn("rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold", s.badgeBg)}>
+				<span className={cn("rounded-full border px-2 py-0.5 font-mono font-semibold text-[10px]", s.badgeBg)}>
 					{items.length}
 				</span>
 			</div>
-			<div className={cn("divide-y divide-white/5 rounded-2xl border bg-zinc-800/40 backdrop-blur-xl", s.border)}>
+			<div
+				className={cn(
+					"divide-y divide-zinc-200 rounded-2xl border bg-white shadow-sm backdrop-blur-xl dark:divide-white/5 dark:bg-zinc-800/40 dark:shadow-none",
+					s.border,
+				)}
+			>
 				{items.map((item, i) => (
-					<IssueRow
-						key={i}
-						text={item}
-						tone={tone}
-						onGoToField={withAction ? onGoToField : undefined}
-					/>
+					<IssueRow key={i} text={item} tone={tone} onGoToField={withAction ? onGoToField : undefined} />
 				))}
 			</div>
 		</section>
@@ -228,18 +247,10 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 	const setShowDrawer = useResumeStore((state) => state.setShowReviewDrawer);
 	const navigateToSection = useSectionStore((state) => state.navigateToSection);
 	const verdict =
-		result.overall_score >= 60
-			? "Looking Sharp"
-			: result.overall_score >= 30
-				? "Getting There"
-				: "Needs Major Work";
+		result.overall_score >= 60 ? "Looking Sharp" : result.overall_score >= 30 ? "Getting There" : "Needs Major Work";
 
 	const verdictColor =
-		result.overall_score >= 60
-			? "bg-emerald-500"
-			: result.overall_score >= 30
-				? "bg-amber-500"
-				: "bg-rose-500";
+		result.overall_score >= 60 ? "bg-emerald-500" : result.overall_score >= 30 ? "bg-amber-500" : "bg-rose-500";
 
 	const handleGoToField = (sectionId: string, targetField?: string) => {
 		setShowDrawer(false);
@@ -266,21 +277,21 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 						animate={{ x: 0 }}
 						exit={{ x: "100%" }}
 						transition={{ type: "spring", damping: 25, stiffness: 200 }}
-						className="fixed top-0 right-0 z-101 flex h-full w-full max-w-[440px] flex-col overflow-hidden border-l border-white/10 bg-zinc-900 text-white shadow-2xl"
+						className="fixed top-0 right-0 z-101 flex h-full w-full max-w-[440px] flex-col overflow-hidden border-zinc-200 border-l bg-zinc-50 text-zinc-900 shadow-2xl dark:border-white/10 dark:bg-zinc-900 dark:text-white"
 					>
 						{/* Header */}
-						<div className="flex items-start justify-between border-b border-white/7 px-6 pb-4 pt-7">
+						<div className="flex items-start justify-between border-zinc-200 border-b px-6 pt-7 pb-4 dark:border-white/7">
 							<div>
 								<div className="mb-1 flex items-center gap-2">
 									<span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-									<span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400/80">
+									<span className="font-bold text-[10px] text-emerald-600 dark:text-emerald-400/80 uppercase tracking-[0.18em]">
 										<Trans>Zoe AI Active</Trans>
 									</span>
 								</div>
-								<h2 className="font-bold text-2xl tracking-tight text-white">
+								<h2 className="font-bold text-2xl text-zinc-900 tracking-tight dark:text-white">
 									<Trans>Final Review</Trans>
 								</h2>
-								<p className="text-sm text-zinc-400">
+								<p className="text-sm text-zinc-500 dark:text-zinc-400">
 									<Trans>AI-powered resume analysis</Trans>
 								</p>
 							</div>
@@ -288,25 +299,25 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 								type="button"
 								onClick={() => setShowDrawer(false)}
 								aria-label="Close drawer"
-								className="mt-1 rounded-lg p-1.5 text-zinc-400 transition hover:bg-white/10 hover:text-white"
+								className="mt-1 rounded-lg p-1.5 text-zinc-500 transition hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
 							>
 								<XIcon className="h-5 w-5" />
 							</button>
 						</div>
 
 						{/* Score Hero */}
-						<div className="mx-6 mt-4 flex items-center gap-5 rounded-2xl border border-white/5 bg-gradient-to-br from-rose-500/10 via-fuchsia-500/5 to-transparent px-4 py-4">
+						<div className="mx-6 mt-4 flex items-center gap-5 rounded-2xl border border-zinc-200 bg-gradient-to-br from-rose-500/5 via-fuchsia-500/5 to-transparent px-4 py-4 shadow-sm dark:border-white/5 dark:from-rose-500/10 dark:via-fuchsia-500/5 dark:shadow-none">
 							<MiniScoreRing value={result.overall_score} />
 							<div className="flex-1">
 								<span
 									className={cn(
-										"mb-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white",
+										"mb-1.5 inline-block rounded-full px-2.5 py-0.5 font-bold text-[10px] text-white uppercase tracking-wider",
 										verdictColor,
 									)}
 								>
 									{verdict}
 								</span>
-								<p className="text-[11px] leading-relaxed text-zinc-400">
+								<p className="text-[11px] text-zinc-600 leading-relaxed dark:text-zinc-400">
 									<Trans>Zoe found several critical gaps that might stop your resume from passing ATS.</Trans>
 								</p>
 							</div>
@@ -315,17 +326,17 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 						{/* Stat Strip */}
 						<div className="mx-6 mt-3 grid grid-cols-4 gap-1.5">
 							{[
-								{ n: result.critical.length, label: "Critical", color: "text-rose-300" },
-								{ n: result.important.length, label: "Important", color: "text-amber-300" },
-								{ n: result.suggestions.length, label: "Tips", color: "text-sky-300" },
-								{ n: result.strengths.length, label: "Strong", color: "text-emerald-300" },
+								{ n: result.critical.length, label: "Critical", color: "text-rose-600 dark:text-rose-300" },
+								{ n: result.important.length, label: "Important", color: "text-amber-600 dark:text-amber-300" },
+								{ n: result.suggestions.length, label: "Tips", color: "text-sky-600 dark:text-sky-300" },
+								{ n: result.strengths.length, label: "Strong", color: "text-emerald-600 dark:text-emerald-300" },
 							].map((s) => (
 								<div
 									key={s.label}
-									className="rounded-xl border border-white/5 bg-white/[0.03] px-2 py-2 text-center"
+									className="rounded-xl border border-zinc-200 bg-white px-2 py-2 text-center shadow-sm dark:border-white/5 dark:bg-white/[0.03] dark:shadow-none"
 								>
-									<p className={cn("text-lg font-bold leading-none", s.color)}>{s.n}</p>
-									<p className="mt-1 text-[9px] uppercase tracking-wider text-white/40">{s.label}</p>
+									<p className={cn("font-bold text-lg leading-none", s.color)}>{s.n}</p>
+									<p className="mt-1 text-[9px] text-zinc-500 uppercase tracking-wider dark:text-white/40">{s.label}</p>
 								</div>
 							))}
 						</div>
@@ -350,20 +361,15 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 								items={result.suggestions}
 								onGoToField={handleGoToField}
 							/>
-							<ReviewSection
-								tone="strength"
-								title={t`Strengths`}
-								items={result.strengths}
-								withAction={false}
-							/>
+							<ReviewSection tone="strength" title={t`Strengths`} items={result.strengths} withAction={false} />
 						</div>
 
 						{/* Footer */}
-						<div className="border-t border-white/5 bg-zinc-900/95 p-5 backdrop-blur-xl">
+						<div className="border-zinc-200 border-t bg-white/95 p-5 backdrop-blur-xl dark:border-white/5 dark:bg-zinc-900/95">
 							<button
 								type="button"
 								onClick={() => setShowDrawer(false)}
-								className="w-full rounded-2xl border border-white/10 py-3 text-sm font-semibold text-zinc-400 transition hover:border-white/20 hover:text-white"
+								className="w-full rounded-2xl border border-zinc-200 py-3 font-semibold text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/20 dark:hover:bg-transparent dark:hover:text-white"
 							>
 								<Trans>Close Review</Trans>
 							</button>
