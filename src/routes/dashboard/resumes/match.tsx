@@ -156,7 +156,7 @@ function MatchToJobRouteComponent() {
 				};
 				await api.updateResume(selectedResumeId, { data: updatedData });
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
-				navigate({ to: "/builder/$resumeId", params: { resumeId: selectedResumeId } });
+				navigate({ to: "/builder/$resumeId", params: { resumeId: selectedResumeId }, replace: true });
 			} catch(e) {
 				console.error(e);
 				setIsCreating(false);
@@ -194,7 +194,7 @@ function MatchToJobRouteComponent() {
 				await api.updateResume(resume.id, { data: updatedData });
 				
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
-				navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id } });
+				navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id }, replace: true });
 			} catch (e) {
 				console.error("Failed to create resume", e);
 				setIsCreating(false);
