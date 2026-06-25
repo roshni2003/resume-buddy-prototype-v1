@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { slugify } from "@/utils/string";
+import { defaultResumeData } from "@/schema/resume/data";
 
 // ---------------------------------------------------------------------------
 // Route Definition
@@ -135,6 +136,7 @@ function UploadRouteComponent() {
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [parsedData, setParsedData] = useState<ParsedResumeData | null>(null);
 	const [uploadError, setUploadError] = useState<string | null>(null);
+	const [fullResumeData, setFullResumeData] = useState<any>(null);
 	const [progressText, setProgressText] = useState("Initializing Zoe AI reader...");
 	const [progressPercent, setProgressPercent] = useState(10);
 	const isCreating = uploadState === "creating";
@@ -193,11 +195,36 @@ function UploadRouteComponent() {
 		setUploadError(null);
 
 		try {
-			await new Promise((r) => setTimeout(r, 2500));
-			setParsedData(MOCK_PARSED_DATA);
+			const parsedRaw = await api.resumeUpload({ resume_upload: file });
+			setFullResumeData(parsedRaw);
+
+			// Map to ParsedResumeData for preview UI
+			const resumeData = parsedRaw.data || {};
+			const mappedData: ParsedResumeData = {
+				fullName: resumeData.basics?.name || "Parsed User",
+				professionalTitle: resumeData.basics?.headline || "",
+				email: resumeData.basics?.email || "",
+				phone: resumeData.basics?.phone || "",
+				location: resumeData.basics?.location || "",
+				summary: resumeData.summary?.content || "",
+				experience: (resumeData.sections?.experience?.items || []).map((item: any) => ({
+					company: item.company || "",
+					role: item.position || "",
+					duration: item.period || "",
+					description: item.description || "",
+				})),
+				education: (resumeData.sections?.education?.items || []).map((item: any) => ({
+					institution: item.institution || "",
+					degree: `${item.degree || ""} ${item.area || ""}`.trim(),
+					year: item.period || "",
+				})),
+				skills: (resumeData.sections?.skills?.items || []).flatMap((item: any) => item.keywords || [item.name]).filter(Boolean),
+			};
+
+			setParsedData(mappedData);
 			setUploadState("parsed");
-		} catch {
-			setUploadError("Something went wrong while parsing your resume. Please try again.");
+		} catch (e: any) {
+			setUploadError(e.message || "Something went wrong while parsing your resume. Please try again.");
 			setUploadState("idle");
 		}
 	};
@@ -214,6 +241,7 @@ function UploadRouteComponent() {
 				name: resumeName,
 				slug: uniqueSlug,
 				tags: ["AI Uploaded"],
+				data: fullResumeData?.data ? { ...defaultResumeData, ...fullResumeData.data, metadata: defaultResumeData.metadata, picture: defaultResumeData.picture } : undefined,
 				withSampleData: false,
 			});
 

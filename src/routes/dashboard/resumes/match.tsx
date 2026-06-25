@@ -18,6 +18,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { api } from "@/utils/api";
 import { useDialogStore } from "@/dialogs/store";
 import { templates } from "@/dialogs/resume/template/data";
+import { defaultResumeData } from "@/schema/resume/data";
 
 const ACCEPTED_TYPES = [
 	"application/pdf",
@@ -162,10 +163,23 @@ function MatchToJobRouteComponent() {
 		} else {
 			try {
 				setIsCreating(true);
+				let resumeDataPayload: any = undefined;
+				
+				if (uploadingFile) {
+					const parsedRaw = await api.resumeUpload({ resume_upload: uploadingFile });
+					resumeDataPayload = parsedRaw.data ? { 
+						...defaultResumeData, 
+						...parsedRaw.data, 
+						metadata: defaultResumeData.metadata, 
+						picture: defaultResumeData.picture 
+					} : undefined;
+				}
+
 				const resume = await api.createResume({
 					name: uploadingFile?.name ? `Tailored: ${uploadingFile.name}` : "Tailored Resume",
 					slug: `tailored-${Date.now().toString(36)}`,
-					withSampleData: true,
+					data: resumeDataPayload,
+					withSampleData: !uploadingFile,
 				});
 				
 				const createdResume = await api.fetchResume(resume.id);

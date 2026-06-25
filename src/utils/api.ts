@@ -444,4 +444,27 @@ export const api = {
 			return res.json() as Promise<JDMatchResponse>;
 		});
 	},
+
+	// 18. POST: /ai/resume-upload
+	resumeUpload: (payload: { resume_upload: File }) => {
+		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
+		const token = getAuthToken();
+		
+		const formData = new FormData();
+		formData.append("resume_upload", payload.resume_upload);
+
+		return fetch(`${baseUrl}/ai/resume-upload`, {
+			method: "POST",
+			headers: {
+				...(token ? { Authorization: `Bearer ${token}` } : {}),
+			},
+			body: formData,
+		}).then(async (res) => {
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.message || `Request failed with status ${res.status}`);
+			}
+			return res.json() as Promise<any>;
+		});
+	},
 };
