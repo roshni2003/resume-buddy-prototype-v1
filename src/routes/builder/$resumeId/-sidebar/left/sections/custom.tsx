@@ -216,7 +216,6 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 												return (
 													<div key={k} className="col-span-2">
 														<RichInput
-															label={k}
 															value={v as string}
 															onChange={(val) => handleChange(item.id, k, val)}
 															className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
@@ -260,7 +259,7 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 					className="mt-2 flex h-10 w-full items-center justify-center rounded-full border border-dashed border-emerald-200 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium text-sm"
 				>
 					<PlusIcon className="mr-2 h-4 w-4" weight="bold" />
-					<Trans>Add {section.type === "generic" || section.type === "custom" ? "item" : section.type + " item"}</Trans>
+					<Trans>Add {section.type === "custom" ? "item" : section.type + " item"}</Trans>
 				</button>
 			</div>
 		</div>

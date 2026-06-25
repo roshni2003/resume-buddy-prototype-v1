@@ -611,7 +611,7 @@ export function ProjectsSectionBuilder() {
 					<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
 						<div className="flex items-start gap-4">
 							<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-								<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8 dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+								<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8 dark:invert" />
 							</div>
 							<div>
 								<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>

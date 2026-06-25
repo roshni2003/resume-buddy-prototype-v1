@@ -28,7 +28,7 @@ export function CustomItem({ className, ...item }: CustomItemProps) {
 		updateResumeData((draft) => {
 			for (const section of draft.customSections) {
 				const sectionItem = section.items.find((i) => i.id === item.id);
-				if (sectionItem && (section.type === "custom" || section.type === "generic")) {
+				if (sectionItem && section.type === "custom") {
 					(sectionItem as any).name = value;
 					break;
 				}
@@ -42,7 +42,7 @@ export function CustomItem({ className, ...item }: CustomItemProps) {
 			updateResumeData((draft) => {
 				for (const section of draft.customSections) {
 					const sectionItem = section.items.find((i) => i.id === item.id);
-					if (sectionItem && (section.type === "custom" || section.type === "generic")) {
+					if (sectionItem && section.type === "custom") {
 						(sectionItem as any).description = newValue;
 						break;
 					}

@@ -169,12 +169,6 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 				)}
 			/>
 
-			{/* Website */}
-			{item.website?.label && (
-				<div className="section-item-website experience-item-website">
-					<PageLink {...item.website} label={item.website.label} />
-				</div>
-			)}
 		</div>
 	);
 }

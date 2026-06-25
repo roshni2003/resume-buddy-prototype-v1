@@ -494,6 +494,8 @@ export class ReactiveResumeV4JSONImporter {
 							.map((item) => ({
 								id: item.id ?? generateId(),
 								hidden: !(item.visible ?? true),
+								educationType: "College",
+								currentlyStudyingHere: false,
 								school: item.institution!,
 								degree: item.studyType ?? "",
 								area: item.area ?? "",
@@ -517,6 +519,7 @@ export class ReactiveResumeV4JSONImporter {
 								id: item.id ?? generateId(),
 								hidden: !(item.visible ?? true),
 								name: item.name!,
+								role: "",
 								period: item.date ?? "",
 								website: {
 									url: item.url?.href ?? "",

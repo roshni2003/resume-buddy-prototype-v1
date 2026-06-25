@@ -7,12 +7,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useDialogStore } from "@/dialogs/store";
-import type { RouterOutput } from "@/integrations/orpc/client";
+import type { ResumeSummary as Resume } from "@/utils/api";
 import { ResumeDropdownMenu } from "./menus/dropdown-menu";
 
 dayjs.extend(relativeTime);
-
-type Resume = RouterOutput["resume"]["list"][number];
 
 type Props = {
 	resumes: Resume[];

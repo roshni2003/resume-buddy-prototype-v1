@@ -202,7 +202,7 @@ export function AIGenerateButton({
 			disabled={isDisabled}
 			className={`flex items-center gap-1 rounded-lg bg-gray-100 px-1 py-1 font-medium text-gray-700 text-sm shadow-sm transition-all hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 ${className || ""}`}
 		>
-			<img src="/zoe-talking.png" alt="" className="h-7 w-6 dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+			<img src="/zoe-talking.png" alt="" className="h-7 w-6 dark:invert" />
 			<span>{getButtonText()}</span>
 			{isLoading && (
 				<span className="ml-1 h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />

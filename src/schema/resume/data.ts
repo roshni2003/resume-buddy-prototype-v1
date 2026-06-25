@@ -127,7 +127,7 @@ export const certificationItemSchema = baseItemSchema.extend({
 });
 
 export const educationItemSchema = baseItemSchema.extend({
-	educationType: z.enum(["School", "College"]).default("College"),
+	educationType: z.enum(["School", "College"]),
 	school: z.string().min(1),
 	degree: z.string(),
 	area: z.string(),

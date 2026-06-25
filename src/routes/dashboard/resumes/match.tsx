@@ -19,6 +19,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { api } from "@/utils/api";
 import { useDialogStore } from "@/dialogs/store";
 import { templates } from "@/dialogs/resume/template/data";
+import type { Template } from "@/schema/templates";
 import { defaultResumeData } from "@/schema/resume/data";
 
 const ACCEPTED_TYPES = [
@@ -52,7 +53,7 @@ function MatchToJobRouteComponent() {
 	const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
 	const [matchResult, setMatchResult] = useState<JDMatchResult | null>(null);
 	const [matchError, setMatchError] = useState<string | null>(null);
-	const [selectedTemplate, setSelectedTemplate] = useState<string>("ditto");
+	const [selectedTemplate, setSelectedTemplate] = useState<Template>("ditto");
 	
 	const [role, setRole] = useState("");
 	const [company, setCompany] = useState("");
@@ -156,7 +157,9 @@ function MatchToJobRouteComponent() {
 				};
 				await api.updateResume(selectedResumeId, { data: updatedData });
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
-				navigate({ to: "/builder/$resumeId", params: { resumeId: selectedResumeId }, replace: true });
+				// Force the history stack to have Dashboard before Builder so back button works correctly
+				window.history.replaceState(null, "", "/dashboard/resumes");
+				navigate({ to: "/builder/$resumeId", params: { resumeId: selectedResumeId } });
 			} catch(e) {
 				console.error(e);
 				setIsCreating(false);
@@ -194,7 +197,9 @@ function MatchToJobRouteComponent() {
 				await api.updateResume(resume.id, { data: updatedData });
 				
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
-				navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id }, replace: true });
+				// Force the history stack to have Dashboard before Builder so back button works correctly
+				window.history.replaceState(null, "", "/dashboard/resumes");
+				navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id } });
 			} catch (e) {
 				console.error("Failed to create resume", e);
 				setIsCreating(false);
@@ -740,7 +745,7 @@ function MatchToJobRouteComponent() {
 				<div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md">
 					<div className="flex flex-col items-center gap-4 border-border border-b bg-card/80 px-6 py-8 text-center">
 						<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
-							<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+							<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover dark:invert" />
 						</div>
 						<div>
 							<h1 className="font-bold text-foreground text-2xl">Choose a Template</h1>
@@ -755,7 +760,7 @@ function MatchToJobRouteComponent() {
 							{Object.entries(templates).map(([key, template]) => (
 								<div
 									key={key}
-									onClick={() => setSelectedTemplate(key)}
+									onClick={() => setSelectedTemplate(key as Template)}
 									className={`cursor-pointer rounded-xl border p-2 transition-all ${
 										selectedTemplate === key
 											? "border-emerald-500 bg-emerald-500/5 ring-2 ring-emerald-500/20"

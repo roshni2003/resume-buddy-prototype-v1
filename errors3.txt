@@ -1,0 +1,58 @@
+
+> reactive-resume@5.0.5 typecheck /home/navgurukul-pune/Desktop/zoe-resume-builder
+> tsc --noEmit
+
+src/components/input/github-stars-button.tsx(3,1): error TS6133: 'useQuery' is declared but its value is never read.
+src/components/input/github-stars-button.tsx(5,1): error TS6133: 'orpc' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(71,35): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(77,37): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(83,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(89,35): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(95,33): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(101,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(107,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(113,33): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(120,2): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(130,39): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(136,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(142,37): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/items/custom-item.tsx(31,54): error TS2367: This comparison appears to be unintentional because the types '"profiles" | "experience" | "education" | "projects" | "skills" | "languages" | "interests" | "awards" | "certifications" | "publications" | "volunteer" | "references" | "summary" | "cover-letter"' and '"generic"' have no overlap.
+src/components/resume/shared/items/custom-item.tsx(45,55): error TS2367: This comparison appears to be unintentional because the types '"profiles" | "experience" | "education" | "projects" | "skills" | "languages" | "interests" | "awards" | "certifications" | "publications" | "volunteer" | "references" | "summary" | "cover-letter"' and '"generic"' have no overlap.
+src/components/resume/shared/items/education-item.tsx(125,11): error TS6133: 'educationTitle' is declared but its value is never read.
+src/components/resume/shared/items/experience-item.tsx(8,1): error TS6133: 'PageLink' is declared but its value is never read.
+src/components/resume/shared/items/projects-item.tsx(72,8): error TS6133: 'handleNameChange' is declared but its value is never read.
+src/components/resume/shared/items/projects-item.tsx(82,8): error TS6133: 'handlePeriodChange' is declared but its value is never read.
+src/components/theme/provider.tsx(16,50): error TS6133: 'defaultTheme' is declared but its value is never read.
+src/components/ui/ai-generate-button.tsx(52,8): error TS6133: 'roundsRemaining' is declared but its value is never read.
+src/components/ui/review-drawer-fixed.tsx(1,1): error TS6133: 't' is declared but its value is never read.
+src/components/ui/review-drawer-fixed.tsx(5,2): error TS6133: 'CircleNotchIcon' is declared but its value is never read.
+src/components/ui/review-drawer-fixed.tsx(7,2): error TS6133: 'MagicWandIcon' is declared but its value is never read.
+src/components/ui/review-drawer-fixed.tsx(13,1): error TS6133: 'useState' is declared but its value is never read.
+src/components/ui/review-drawer-fixed.tsx(14,1): error TS6133: 'toast' is declared but its value is never read.
+src/dialogs/resume/sections/custom.tsx(20,15): error TS6133: 'CustomSectionType' is declared but its value is never read.
+src/dialogs/resume/sections/interest.tsx(3,32): error TS6133: 'PlusIcon' is declared but its value is never read.
+src/dialogs/resume/sections/language.tsx(4,32): error TS6133: 'PlusIcon' is declared but its value is never read.
+src/dialogs/resume/sections/skill.tsx(4,32): error TS6133: 'PlusIcon' is declared but its value is never read.
+src/routes/_home/index.tsx(16,10): error TS6133: 'RouteComponent' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx(13,2): error TS6133: 'FormLabel' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx(16,1): error TS6133: 'Input' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx(8,1): error TS6133: 'cn' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/interests.tsx(1,1): error TS6133: 'Trans' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx(105,31): error TS2339: Property 'id' does not exist on type '{ picture: { hidden: boolean; url: string; size: number; rotation: number; aspectRatio: number; borderRadius: number; borderColor: string; borderWidth: number; shadowColor: string; shadowWidth: number; }; ... 4 more ...; metadata: { ...; }; }'.
+src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx(3,1): error TS6133: 'useMemo' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx(8,68): error TS6133: 'leftSidebarSections' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx(37,8): error TS6133: 'layout' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx(124,8): error TS6133: 'colors' is declared but its value is never read.
+src/routes/dashboard/admin/mixpanel.tsx(92,8): error TS6133: 'totalTokens' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(5,29): error TS6133: 'TagIcon' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(11,1): error TS6133: 'Badge' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(13,1): error TS6133: 'MultipleCombobox' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(18,1): error TS6133: 'cn' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(144,8): error TS6133: 'tagOptions' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(193,8): error TS6133: 'handleFilterChange' is declared but its value is never read.
+src/routes/dashboard/resumes/match.tsx(50,8): error TS6133: 'openDialog' is declared but its value is never read.
+src/routes/dashboard/resumes/upload.tsx(49,7): error TS6133: 'MOCK_PARSED_DATA' is declared but its value is never read.
+src/routes/printer/$resumeId.tsx(31,2): error TS2322: Type '({ params, search }: BeforeLoadContextOptions<Register, RootRoute<Register, undefined, RouterContext, AnyContext, () => Promise<{ theme: "dark" | "light"; locale: "en-US" | "zu-ZA" | ... 50 more ... | "zh-TW"; session: AuthSession | null; flags: FeatureFlags | { ...; }; }>, ... 6 more ..., undefined>, ... 6 more ......' is not assignable to type '(ctx: BeforeLoadContextOptions<Register, RootRoute<Register, undefined, RouterContext, AnyContext, () => Promise<{ theme: "dark" | "light"; locale: "en-US" | "zu-ZA" | ... 50 more ... | "zh-TW"; session: AuthSession | null; flags: FeatureFlags | { ...; }; }>, ... 6 more ..., undefined>, ... 6 more ..., undefined>) =...'.
+  Type '{} | undefined' is not assignable to type 'never'.
+    Type 'undefined' is not assignable to type 'never'.
+ ELIFECYCLE  Command failed with exit code 2.

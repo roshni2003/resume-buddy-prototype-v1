@@ -12,7 +12,7 @@ const steps: {
 	icon: React.ElementType;
 	action: (
 		navigate: ReturnType<typeof useNavigate>,
-		openDialog: ReturnType<typeof useDialogStore>["openDialog"],
+		openDialog: (type: any, data?: any) => void,
 	) => void;
 }[] = [
 	{

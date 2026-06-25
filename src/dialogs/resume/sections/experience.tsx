@@ -38,7 +38,6 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 			endDate: data?.item?.endDate ?? "",
 			currentlyWorkingHere: data?.item?.currentlyWorkingHere ?? false,
 			description: data?.item?.description ?? "",
-			website: data?.item?.website ?? { url: "", label: "" },
 			period: data?.item?.period ?? "",
 		},
 	});
@@ -104,7 +103,6 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 			endDate: data.item.endDate ?? "",
 			currentlyWorkingHere: data.item.currentlyWorkingHere ?? false,
 			description: data.item.description,
-			website: data.item.website ?? { url: "", label: "" },
 			period: data?.item?.period ?? "", // Ensure 'period' has a default value
 		},
 	});

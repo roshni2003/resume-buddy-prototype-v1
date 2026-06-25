@@ -11,6 +11,7 @@ import { Trans } from "@lingui/react/macro";
 export function SummarySectionBuilder() {
 	const summary = useResumeStore((state) => state.resume.data.summary);
 	const resumeData = useResumeStore((state) => state.resume.data);
+	const resumeId = useResumeStore((state) => state.resume.id);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
 	const form = useForm({
@@ -102,7 +103,7 @@ export function SummarySectionBuilder() {
 								)}
 
 								<AIGenerateButton
-									resumeId={resumeData.id}
+									resumeId={resumeId}
 									type="summary"
 									data={{
 										name: resumeData.basics.name,
