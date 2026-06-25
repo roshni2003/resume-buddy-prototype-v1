@@ -305,7 +305,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 				{/* Header with Zoe */}
 				<div className="mb-6 flex items-start gap-4 border-border border-b pb-6">
 					<div className="shrink-0">
-						<img src="/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full border border-border dark:invert dark:hue-rotate-180" />
+						<img src="/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full border border-border dark:invert dark:hue-rotate-180 dark:brightness-110" />
 					</div>
 					<div>
 						<h2 className="mb-1 font-bold text-foreground text-xl">Let's build your resume</h2>
@@ -584,7 +584,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 			{/* Header */}
 			<div className="mb-8 text-center">
 				<div className="mb-4 flex items-center justify-center gap-2">
-					<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full border border-border dark:invert dark:hue-rotate-180" />
+					<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full border border-border dark:invert dark:hue-rotate-180 dark:brightness-110" />
 					<span className="font-medium text-muted-foreground text-sm">Zoe AI - Resume Builder Assistant</span>
 				</div>
 				<h1 className="mb-2 font-bold text-3xl text-foreground">Choose Your Template</h1>

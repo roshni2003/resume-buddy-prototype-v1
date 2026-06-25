@@ -41,7 +41,7 @@ function RouteComponent() {
 						className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-sm"
 						style={{ backgroundColor: "#E2E8F0" }}
 					>
-						<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full dark:invert dark:hue-rotate-180" />
+						<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full dark:invert dark:hue-rotate-180 dark:brightness-110" />
 						<span className="font-medium text-gray-700 text-sm">Powered by Zoe AI Assistant</span>
 					</div>
 				</div>
@@ -139,7 +139,7 @@ function RouteComponent() {
 							{/* AI Assistant Tooltip */}
 							<div className="absolute -bottom-4 left-4 max-w-xs rounded-xl bg-white p-4 shadow-2xl lg:bottom-0 lg:left-0">
 								<div className="flex items-start gap-3">
-									<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full dark:invert dark:hue-rotate-180" />
+									<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full dark:invert dark:hue-rotate-180 dark:brightness-110" />
 									<div>
 										<p className="mb-1 font-semibold text-gray-900 text-sm">Zoe says:</p>
 										<p className="text-gray-600 text-sm">"Great job! Your resume is 85% optimized."</p>
