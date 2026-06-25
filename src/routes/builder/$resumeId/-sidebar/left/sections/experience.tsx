@@ -6,12 +6,10 @@ import {
 	CalendarBlankIcon,
 	CaretDownIcon,
 	CaretUpIcon,
-	CheckIcon,
 	MapPinIcon,
 	PlusIcon,
 	SparkleIcon,
 	TrashIcon,
-	XIcon,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -53,33 +51,34 @@ function formatDate(dateString: string | undefined): string {
 
 function ZoeTipsCard() {
 	return (
-		<div className="rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-50 dark:from-emerald-900/20 to-teal-50 p-5 shadow-sm">
-			<div className="mb-3 flex items-center gap-2">
-				<SparkleIcon weight="fill" className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
-				<span className="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
-					Zoe Tips
-				</span>
-				<SparkleIcon
-					weight="fill"
-					className="ml-auto h-8 w-8 text-emerald-100"
-				/>
+		<div className="relative overflow-hidden rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-linear-to-br from-emerald-50 dark:from-emerald-900/20 to-teal-50/50 dark:to-teal-900/20 p-5 shadow-sm">
+			<div className="absolute top-0 right-0 p-4 opacity-10">
+				<SparkleIcon weight="fill" className="h-24 w-24 text-emerald-600 dark:text-emerald-400" />
 			</div>
-			<ul className="space-y-2 text-sm text-emerald-800 dark:text-emerald-300">
-				{[
-					"Start each bullet with a strong action verb",
-					"Add numbers — % growth, team size, revenue saved",
-					"Focus on impact, not just responsibilities",
-					"Keep descriptions under 80 words",
-				].map((tip) => (
-					<li key={tip} className="flex items-start gap-2">
-						<span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
-						{tip}
-					</li>
-				))}
+			<div className="mb-3 flex items-center gap-2">
+				<SparkleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" weight="fill" />
+				<h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm uppercase tracking-widest">Zoe Tips</h4>
+			</div>
+			<ul className="mb-4 space-y-2 font-medium text-emerald-900 dark:text-emerald-200 text-sm">
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Start each bullet with a strong action verb
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Add numbers — % growth, team size, revenue saved
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Focus on impact, not just responsibilities
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Keep descriptions under 80 words
+				</li>
 			</ul>
-			<p className="mt-4 text-xs italic text-emerald-600 dark:text-emerald-400">
-				Zoe will polish tone, tighten verbs, and quantify impact for you. Look
-				for the magic button above!
+			<p className="font-serif text-emerald-700 dark:text-emerald-400 text-sm italic">
+				Zoe will polish tone, tighten verbs, and quantify impact for you. Look for the magic button above!
 			</p>
 		</div>
 	);
@@ -276,30 +275,30 @@ function InlineExperienceForm({
 							</FormItem>
 						)}
 					/>
-
-					<FormField
-						control={form.control}
-						name="currentlyWorkingHere"
-						render={({ field }) => (
-							<FormItem className="flex flex-col justify-end pb-0.5">
-								<FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-									&nbsp;
-								</FormLabel>
-								<div className="flex items-center gap-2">
-									<FormControl>
-										<Switch
-											checked={field.value}
-											onCheckedChange={field.onChange}
-										/>
-									</FormControl>
-									<span className="text-sm text-gray-600 dark:text-gray-400">
-										<Trans>Currently here</Trans>
-									</span>
-								</div>
-							</FormItem>
-						)}
-					/>
 				</div>
+
+				<FormField
+					control={form.control}
+					name="currentlyWorkingHere"
+					render={({ field }) => (
+						<FormItem className="flex flex-col justify-end pb-0.5">
+							<FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+								&nbsp;
+							</FormLabel>
+							<div className="flex items-center gap-2">
+								<FormControl>
+									<Switch
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
+								</FormControl>
+								<span className="text-sm text-gray-600 dark:text-gray-400">
+									<Trans>Currently here</Trans>
+								</span>
+							</div>
+						</FormItem>
+					)}
+				/>
 
 				{/* ── Description + AI ── */}
 				<FormField
@@ -335,7 +334,7 @@ function InlineExperienceForm({
 										maxRounds={maxRounds}
 										isWordCountValid={isWordCountValid}
 										disabled={roundsUsed >= maxRounds || !isWordCountValid}
-										className="relative z-10 border border-emerald-300 font-bold text-black shadow-lg shadow-emerald-500/30 hover:text-black"
+										className="relative z-10 font-bold text-black shadow-lg shadow-emerald-500/30 hover:text-black"
 									/>
 								</div>
 							</div>
@@ -377,7 +376,7 @@ function InlineExperienceForm({
 								</p>
 							)}
 							{roundsUsed >= maxRounds && (
-								<p className="text-xs font-medium text-red-500">
+								<p className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600">
 									<Trans>
 										✓ You've used both AI suggestions. Edit the text to get new
 										suggestions.
@@ -448,7 +447,7 @@ function ExperienceCard({
 	return (
 		<div
 			className={`rounded-2xl border dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
-				? "bg-white border-emerald-300 dark:border-emerald-700/50 shadow-emerald-100 dark:shadow-none shadow-md"
+				? "bg-white dark:border-emerald-700/50 shadow-emerald-100 dark:shadow-none shadow-md"
 				: "bg-white dark:bg-card border-gray-100 dark:border-border hover:border-gray-200 dark:hover:border-border/80 hover:shadow"
 				}`}
 		>

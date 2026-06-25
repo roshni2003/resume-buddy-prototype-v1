@@ -10,11 +10,6 @@ import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthTok
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
-// On some devices (iOS Safari private mode, Facebook/Instagram in-app browsers) the
-// localStorage write committed in beforeLoad doesn't reflect immediately on the next read.
-// Instead of redirecting back to Zuvy on the first miss, render <AuthGate /> and keep
-// retrying for up to 60s before giving up. This breaks the redirect loop in the common
-// case where the storage write succeeds a moment later.
 const AUTH_GATE_TIMEOUT_MS = 60_000;
 const AUTH_GATE_POLL_MS = 500;
 

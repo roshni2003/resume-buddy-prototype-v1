@@ -46,12 +46,15 @@ export function SummarySectionBuilder() {
 		previousContentRef.current = content;
 	}, [content, resetRounds]);
 
-	const isWordCountValid =
-		typeof content === "string" &&
-		content
+	const wordCount = content
+		? content
 			.replace(/<[^>]*>?/gm, "")
 			.split(/\s+/)
-			.filter(Boolean).length >= 5;
+			.filter(Boolean).length
+		: 0;
+	const charCount = content ? content.replace(/<[^>]*>?/gm, "").length : 0;
+
+	const isWordCountValid = wordCount >= 5;
 
 	const handleAIGenerated = (aiSummary: string) => {
 		if (aiSummary && aiSummary.length > 10) {
@@ -72,14 +75,6 @@ export function SummarySectionBuilder() {
 		form.reset({ content: summary.content ?? "" });
 	};
 
-	const wordCount = content
-		? content
-			.replace(/<[^>]*>?/gm, "")
-			.split(/\s+/)
-			.filter(Boolean).length
-		: 0;
-	const charCount = content ? content.replace(/<[^>]*>?/gm, "").length : 0;
-
 	// Determine if glow should be active
 	const shouldGlow = isPulsing || isHovering;
 
@@ -89,7 +84,9 @@ export function SummarySectionBuilder() {
 				<FormProvider {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<div className="mb-3 flex items-end justify-between">
-							<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest">Professional Summary</label>
+							<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest">
+								Professional Summary
+							</label>
 
 							<div
 								className="relative mb-2 rounded-xl bg-gray-50 p-1"
@@ -119,17 +116,17 @@ export function SummarySectionBuilder() {
 									maxRounds={maxRounds}
 									isWordCountValid={isWordCountValid}
 									disabled={roundsUsed >= maxRounds || !isWordCountValid}
-									className="relative z-10 border border-amber-300 font-bold text-black shadow-lg shadow-amber-500/30 hover:text-black"
+									className="relative z-10 font-bold text-black shadow-lg shadow-amber-500/30 hover:text-black"
 								/>
 							</div>
 						</div>
 
 						{/* AI Chip */}
 						<div className="mb-3 flex items-center gap-2">
-							<div className="flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
+							<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
 								<SparkleIcon weight="fill" className="h-3 w-3" />
 								AI Assisted
-							</div>
+							</span>
 
 							<span className="text-xs text-slate-700 dark:text-gray-400">
 								Create a recruiter-ready summary in seconds.
@@ -146,18 +143,33 @@ export function SummarySectionBuilder() {
 							/>
 						</div>
 
-						{/* Footer Stats */}
-						<div className="mb-4 flex flex-col gap-1 font-mono text-gray-500 dark:text-gray-400 text-xs sm:flex-row sm:items-center sm:justify-between">
+						{/* Footer Stats - Updated to match Experience section style */}
+						<div className="mb-1 flex flex-col gap-1 text-xs text-gray-400 dark:text-gray-500 sm:flex-row sm:items-center sm:justify-between">
 							<div>
-								{wordCount} words &nbsp;·&nbsp; {charCount} chars
+								{wordCount} words · {charCount} chars
 							</div>
-							<div className="text-right font-sans">
-								{!isWordCountValid && wordCount < 5 && wordCount > 0 && (
-									<span className="text-amber-600">Write at least 5 words to enable Ask Zoe</span>
+
+						</div>
+						<div className="mb-4 flex flex-col gap-1 text-xs text-gray-400 dark:text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+
+							<div className="font-sans">
+								{!isWordCountValid && content && (
+									<span className="text-amber-500">
+										<Trans>Write at least 5 words to enable Ask Zoe</Trans>
+									</span>
 								)}
-								{roundsUsed === 1 && <span className="font-medium text-blue-600">1 more AI suggestion left.</span>}
+								{roundsUsed === 1 && (
+									<span className="text-blue-500">
+										<Trans>You have 1 more AI suggestion left for this text.</Trans>
+									</span>
+								)}
 								{roundsUsed >= maxRounds && (
-									<span className="font-medium text-red-600">Used both AI suggestions. Edit text to reset.</span>
+									<span className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600">
+										<Trans>
+											✓ You've used both AI suggestions. Edit the text to get new
+											suggestions.
+										</Trans>
+									</span>
 								)}
 							</div>
 						</div>
