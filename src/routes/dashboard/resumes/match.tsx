@@ -595,12 +595,12 @@ function MatchToJobRouteComponent() {
 										/>
 									</svg>
 									<div className="text-center relative z-10">
-										<span className="text-3xl font-bold text-emerald-400">{matchResult?.match_score ?? 0}%</span>
-										<span className="block text-[10px] font-bold text-emerald-500/70 uppercase tracking-wider mt-0.5">Match</span>
+										<span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{matchResult?.match_score ?? 0}%</span>
+										<span className="block text-[10px] font-bold text-emerald-700/70 dark:text-emerald-500/70 uppercase tracking-wider mt-0.5">Match</span>
 									</div>
 								</div>
 								<div>
-									<div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-3">
+									<div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium mb-3">
 										<CheckCircleIcon weight="fill" /> {matchResult?.verdict ?? "Analyzing..."}
 									</div>
 									<h2 className="text-2xl font-bold mb-1">{role || "Role"} <span className="text-muted-foreground">at</span> {company || "Company"}</h2>
@@ -612,12 +612,12 @@ function MatchToJobRouteComponent() {
 							{((matchResult?.missing_keywords?.length ?? 0) > 0 || (matchResult?.missing_skills?.length ?? 0) > 0) && (
 							<div className="rounded-2xl border border-rose-500/20 bg-card/40 p-6">
 								<div className="flex items-center justify-between mb-4">
-									<h3 className="font-bold text-rose-400">Missing Keywords</h3>
+									<h3 className="font-bold text-rose-600 dark:text-rose-400">Missing Keywords</h3>
 									<span className="text-xs text-muted-foreground">{(matchResult?.missing_keywords?.length ?? 0) + (matchResult?.missing_skills?.length ?? 0)} missing</span>
 								</div>
 								<div className="flex flex-wrap gap-2">
 									{[...(matchResult?.missing_keywords ?? []), ...(matchResult?.missing_skills ?? [])].map(k => (
-										<span key={k} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
+										<span key={k} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs font-medium">
 											{k}
 										</span>
 									))}
@@ -629,12 +629,12 @@ function MatchToJobRouteComponent() {
 							{(matchResult?.matched_keywords?.length ?? 0) > 0 && (
 							<div className="rounded-2xl border border-emerald-500/20 bg-card/40 p-6">
 								<div className="flex items-center justify-between mb-4">
-									<h3 className="font-bold text-emerald-400">Matched Keywords</h3>
+									<h3 className="font-bold text-emerald-600 dark:text-emerald-400">Matched Keywords</h3>
 									<span className="text-xs text-muted-foreground">{matchResult?.matched_keywords?.length} matched</span>
 								</div>
 								<div className="flex flex-wrap gap-2">
 									{(matchResult?.matched_keywords ?? []).map(k => (
-										<span key={k} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+										<span key={k} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
 											<CheckIcon weight="bold" /> {k}
 										</span>
 									))}
@@ -648,7 +648,7 @@ function MatchToJobRouteComponent() {
 							{/* Action Plan */}
 							<div className="rounded-3xl border border-border bg-card/40 p-6">
 								<div className="flex items-center gap-2 mb-6">
-									<div className="flex size-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400">
+									<div className="flex size-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
 										<SparkleIcon weight="fill" />
 									</div>
 									<h3 className="font-bold text-lg text-foreground">Zoe's Action Plan</h3>
@@ -656,7 +656,7 @@ function MatchToJobRouteComponent() {
 								<div className="space-y-3">
 									{(matchResult?.suggestions ?? []).map((task, i) => (
 										<div key={i} className="flex gap-4 p-4 rounded-xl bg-muted/50">
-											<div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold">
+											<div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-bold">
 												{i + 1}
 											</div>
 											<p className="text-sm text-foreground/80 leading-relaxed">{task}</p>
