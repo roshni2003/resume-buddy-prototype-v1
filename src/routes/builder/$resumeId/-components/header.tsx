@@ -43,7 +43,7 @@ export function BuilderHeader() {
 						<img
 							src="/zoe-icon.png"
 							alt="Resume Buddy"
-							className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8"
+							className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8 dark:bg-slate-100 dark:p-[2px] dark:rounded-full"
 						/>
 						<span
 							className="hidden font-bold text-foreground text-sm sm:block sm:text-base"

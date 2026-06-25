@@ -114,7 +114,7 @@ function AuthGate() {
 			style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
 		>
 			<div className="flex max-w-md flex-col items-center gap-6 text-center">
-				<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover" />
+				<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
 				<div className="size-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
 				<div>
 					<h1 className="mb-2 font-bold text-white text-xl">Logging you in...</h1>
@@ -155,7 +155,7 @@ function DashboardHeader() {
 					<img
 						src="/zoe-icon.png"
 						alt="Resume Buddy"
-						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9"
+						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9 dark:bg-slate-100 dark:p-[2px] dark:rounded-full"
 					/>
 					<span
 						className={`font-bold text-base sm:text-lg ${theme === "light" ? "text-slate-900" : "text-white"}`}
