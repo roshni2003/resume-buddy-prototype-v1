@@ -33,8 +33,8 @@ export const Route = createFileRoute("/$username/$slug")({
 			{
 				title:
 					loaderData && "resume" in loaderData && loaderData.resume
-						? `${loaderData.resume.name} - Zoe Resume Builder`
-						: "Zoe Resume Builder",
+						? `${loaderData.resume.name} - Resume Buddy`
+						: "Resume Buddy",
 			},
 		],
 	}),
