@@ -114,7 +114,10 @@ function AuthGate() {
 			style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
 		>
 			<div className="flex max-w-md flex-col items-center gap-6 text-center">
-				<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:invert dark:hue-rotate-180 dark:brightness-110" />
+				<>
+								<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:hidden" />
+								<img src="/zoe-icon-dark.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover hidden dark:block" />
+							</>
 				<div className="size-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
 				<div>
 					<h1 className="mb-2 font-bold text-white text-xl">Logging you in...</h1>
@@ -152,11 +155,18 @@ function DashboardHeader() {
 					to="/dashboard/resumes"
 					className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
 				>
-					<img
+					<>
+								<img
 						src="/zoe-icon.png"
 						alt="Resume Buddy"
-						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9 dark:invert dark:hue-rotate-180 dark:brightness-110"
+						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9 dark:hidden"
 					/>
+								<img
+						src="/zoe-icon-dark.png"
+						alt="Resume Buddy"
+						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9 hidden dark:block"
+					/>
+							</>
 					<span
 						className={`font-bold text-base sm:text-lg ${theme === "light" ? "text-slate-900" : "text-white"}`}
 						style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}

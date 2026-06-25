@@ -25,7 +25,10 @@ export function OnboardingDialog() {
 		<DialogContent className="max-w-xl rounded-xl border border-border bg-background/95 p-6 text-foreground shadow-2xl backdrop-blur-md">
 			<DialogHeader className="mb-4">
 				<div className="flex items-center gap-3">
-					<img src="/zoe-icon.png" alt="Zoe AI" className="size-9 rounded-full border border-border object-cover dark:invert dark:hue-rotate-180 dark:brightness-110" />
+					<>
+								<img src="/zoe-icon.png" alt="Zoe AI" className="size-9 rounded-full border border-border object-cover dark:hidden" />
+								<img src="/zoe-icon-dark.png" alt="Zoe AI" className="size-9 rounded-full border border-border object-cover hidden dark:block" />
+							</>
 					<div>
 						<DialogTitle className="font-bold text-foreground text-xl">How would you like to start?</DialogTitle>
 						<DialogDescription className="mt-0.5 text-muted-foreground text-sm">

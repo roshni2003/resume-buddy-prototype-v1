@@ -40,11 +40,18 @@ export function BuilderHeader() {
 						to="/dashboard/resumes"
 						className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
 					>
-						<img
+						<>
+								<img
 							src="/zoe-icon.png"
 							alt="Resume Buddy"
-							className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8 dark:invert dark:hue-rotate-180 dark:brightness-110"
+							className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8 dark:hidden"
 						/>
+								<img
+							src="/zoe-icon-dark.png"
+							alt="Resume Buddy"
+							className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8 hidden dark:block"
+						/>
+							</>
 						<span
 							className="hidden font-bold text-foreground text-sm sm:block sm:text-base"
 							style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
