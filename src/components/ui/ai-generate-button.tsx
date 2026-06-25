@@ -56,17 +56,17 @@ export function AIGenerateButton({
 		// Prevent multiple clicks while generating
 		if (isLoading) {
 			console.log("Already generating, ignoring click");
-			toast.info(t`Please wait for the current generation to complete.`);
+			toast.info("Please wait for the current generation to complete.");
 			return;
 		}
 
 		if (!isWordCountValid) {
-			toast.error(t`Please write at least 5 words before asking Zoe.`);
+			toast.error("Please write at least 5 words before asking Zoe.");
 			return;
 		}
 
 		if (hasReachedLimit) {
-			toast.error(t`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`);
+			toast.error(`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`);
 			return;
 		}
 
@@ -74,8 +74,8 @@ export function AIGenerateButton({
 
 		const toastId = toast.loading(
 			roundsUsed === 0
-				? t`Generating first suggestion...`
-				: t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`,
+				? "Generating first suggestion..."
+				: `Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`,
 		);
 
 		// Map simpler internal types to what the API expects
@@ -121,7 +121,7 @@ export function AIGenerateButton({
 
 					// Check if content is valid
 					if (!content || content.length < 10) {
-						toast.error(t`Generated content is too short. Please try again.`, { id: toastId });
+						toast.error("Generated content is too short. Please try again.", { id: toastId });
 						return;
 					}
 
@@ -155,7 +155,7 @@ export function AIGenerateButton({
 
 					content = formatAIResponse(content);
 
-					toast.success(t`Content generated successfully!`, { id: toastId });
+					toast.success("Content generated successfully!", { id: toastId });
 					onGenerated(content);
 
 					// Record the round
@@ -178,7 +178,7 @@ export function AIGenerateButton({
 						date: new Date().toISOString().split("T")[0],
 					});
 
-					toast.error(error.message || t`Failed to generate content`, { id: toastId });
+					toast.error(error.message || "Failed to generate content", { id: toastId });
 				},
 			},
 		);
@@ -186,9 +186,9 @@ export function AIGenerateButton({
 
 	// Determine button text based on state
 	const getButtonText = () => {
-		if (isLoading) return t`Generating...`;
+		if (isLoading) return "Generating...";
 
-		return t`Ask Zoe AI`;
+		return "Ask Zoe AI";
 	};
 
 	const isDisabled = disabled || isLoading || !isWordCountValid || hasReachedLimit;
