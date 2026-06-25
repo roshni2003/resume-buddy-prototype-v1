@@ -208,7 +208,7 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
+										className={`flex h-16 w-16 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
 									>
 										<div
 											className={`h-5 w-5 rounded-full ${aspectRatio === 1 && borderRadius === 100 ? "bg-gray-500" : "bg-gray-500"}`}
@@ -232,7 +232,7 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
+										className={`flex h-16 w-16 items-center justify-center rounded-xl transition-all ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
 									>
 										<div
 											className={`h-6 w-5 rounded-full ${aspectRatio === 0.75 && borderRadius === 100 ? "bg-gray-500" : "bg-gray-500"}`}
@@ -256,7 +256,7 @@ export function PictureSectionForm() {
 									}}
 								>
 									<div
-										className={`flex h-16 w-20 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
+										className={`flex h-16 w-16 items-center justify-center rounded-xl transition-all ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-200 dark:bg-muted/80" : "bg-transparent hover:bg-gray-50 dark:hover:bg-muted/50"}`}
 									>
 										<div
 											className={`h-5 w-5 rounded-sm ${aspectRatio === 1 && borderRadius === 10 ? "bg-gray-500" : "bg-gray-500"}`}
