@@ -68,6 +68,7 @@ msgstr "{column, plural, one {# Column} other {# Columns}}"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 msgid "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 msgstr "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 
@@ -91,7 +92,7 @@ msgstr "A passion project by <0>Amruth Pillai</0>."
 msgid "A4"
 msgstr "A4"
 
-#. placeholder {0}: section.type === "generic" || section.type === "custom" ? "item" : section.type + " item"
+#. placeholder {0}: section.type === "custom" ? "item" : section.type + " item"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Add {0}"
 msgstr "Add {0}"
@@ -236,14 +237,9 @@ msgstr "Are you sure you want to remove password protection?"
 msgid "Area of Study"
 msgstr "Area of Study"
 
-#: src/components/ui/ai-generate-button.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx
 msgid "Ask Zoe"
 msgstr "Ask Zoe"
-
-#: src/components/ui/review-drawer.tsx
-msgid "Auto-fix with Zoe AI"
-msgstr "Auto-fix with Zoe AI"
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -397,10 +393,6 @@ msgstr "Confirm"
 #: src/dialogs/resume/sections/summary.tsx
 msgid "Content"
 msgstr "Content"
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Content generated successfully!"
-msgstr "Content generated successfully!"
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -574,10 +566,6 @@ msgstr "Description"
 msgid "Design"
 msgstr "Design"
 
-#: src/components/ui/review-drawer.tsx
-msgid "Detailed Checks"
-msgstr "Detailed Checks"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Display Options"
 msgstr "Display Options"
@@ -678,15 +666,6 @@ msgstr "Export"
 
 #: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
-msgid "Failed to fix issues automatically"
-msgstr "Failed to fix issues automatically"
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Failed to generate content"
-msgstr "Failed to generate content"
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "Final Review"
 msgstr "Final Review"
@@ -694,20 +673,6 @@ msgstr "Final Review"
 #: src/utils/locale.ts
 msgid "Finnish"
 msgstr "Finnish"
-
-#: src/components/ui/review-drawer-fixed.tsx
-msgid "Fix Issues Automatically"
-msgstr "Fix Issues Automatically"
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Fixing issues automatically..."
-msgstr "Fixing issues automatically..."
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Fixing Issues..."
-msgstr "Fixing Issues..."
 
 #: src/dialogs/resume/sections/language.tsx
 msgid "Fluency"
@@ -758,10 +723,6 @@ msgstr "Free-Form"
 msgid "French"
 msgstr "French"
 
-#: src/components/ui/review-drawer.tsx
-msgid "Full diagnostic report including ATS compatibility, keyword density, section ordering, formatting consistency and grammar checks."
-msgstr "Full diagnostic report including ATS compatibility, keyword density, section ordering, formatting consistency and grammar checks."
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Full Name"
 msgstr "Full Name"
@@ -769,23 +730,6 @@ msgstr "Full Name"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
 msgstr "Full Width"
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generated content is too short. Please try again."
-msgstr "Generated content is too short. Please try again."
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generating first suggestion..."
-msgstr "Generating first suggestion..."
-
-#. placeholder {0}: roundsUsed + 1
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generating refinement (Round {0}/{maxRounds})..."
-msgstr "Generating refinement (Round {0}/{maxRounds})..."
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generating..."
-msgstr "Generating..."
 
 #: src/utils/locale.ts
 msgid "German"
@@ -917,11 +861,6 @@ msgstr "Interests"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
 msgid "Issuer"
 msgstr "Issuer"
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Issues fixed successfully!"
-msgstr "Issues fixed successfully!"
 
 #: src/utils/locale.ts
 msgid "Italian"
@@ -1261,15 +1200,6 @@ msgstr "Please enter the URL:"
 msgid "Please select a valid image file (PNG, JPG, WEBP, etc.)"
 msgstr "Please select a valid image file (PNG, JPG, WEBP, etc.)"
 
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Please try fixing issues manually or contact support."
-msgstr "Please try fixing issues manually or contact support."
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Please wait for the current generation to complete."
-msgstr "Please wait for the current generation to complete."
-
 #. placeholder {0}: format.toUpperCase()
 #: src/routes/builder/$resumeId/-components/section-dialogs.tsx
 msgid "Please wait while your {0} is being generated..."
@@ -1283,10 +1213,6 @@ msgstr "Please wait while your DOCX is being generated..."
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Please wait while your PDF is being generated..."
 msgstr "Please wait while your PDF is being generated..."
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Please write at least 5 words before asking Zoe."
-msgstr "Please write at least 5 words before asking Zoe."
 
 #: src/utils/locale.ts
 msgid "Polish"
@@ -1444,6 +1370,10 @@ msgstr "Review failed. Please try again."
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "Review limit reached. Resets at 12 AM."
 msgstr "Review limit reached. Resets at 12 AM."
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Role"
+msgstr "Role"
 
 #: src/utils/locale.ts
 msgid "Romanian"
@@ -1629,11 +1559,6 @@ msgstr "Square"
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
 msgstr "Star us on GitHub (opens in new tab)"
-
-#. placeholder {0}: starCount.toLocaleString()
-#: src/components/input/github-stars-button.tsx
-msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
-msgstr "Star us on GitHub, currently {0} stars (opens in new tab)"
 
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
@@ -2018,6 +1943,7 @@ msgstr "When locked, the resume cannot be updated or deleted."
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 msgid "Write at least 5 words to enable Ask Zoe"
 msgstr "Write at least 5 words to enable Ask Zoe"
 
@@ -2026,16 +1952,13 @@ msgstr "Write at least 5 words to enable Ask Zoe"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 msgid "You have 1 more AI suggestion left for this text."
 msgstr "You have 1 more AI suggestion left for this text."
 
 #: src/hooks/use-form-blocker.tsx
 msgid "You have unsaved changes that will be lost."
 msgstr "You have unsaved changes that will be lost."
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
-msgstr "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
 
 #. placeholder {0}: format.toUpperCase()
 #: src/routes/builder/$resumeId/-components/section-dialogs.tsx
@@ -2049,11 +1972,6 @@ msgstr "Your changes are saved automatically."
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Your profile has been updated successfully."
 msgstr "Your profile has been updated successfully."
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Your resume has been automatically improved. Review the changes."
-msgstr "Your resume has been automatically improved. Review the changes."
 
 #: src/dialogs/resume/index.tsx
 msgid "Your resume has been created successfully."
