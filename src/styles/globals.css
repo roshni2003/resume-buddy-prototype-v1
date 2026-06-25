@@ -484,3 +484,13 @@ input.dark-input:-webkit-autofill:active {
 .animate-pulse-ring {
   animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Invert native date picker calendar icon in dark mode */
+.dark ::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.9);
+  opacity: 0.6;
+}
+
+.dark ::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
