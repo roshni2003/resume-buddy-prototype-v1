@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { slugify } from "@/utils/string";
 import { defaultResumeData } from "@/schema/resume/data";
+import { templates } from "@/dialogs/resume/template/data";
+import type { Template } from "@/schema/templates";
 
 // ---------------------------------------------------------------------------
 // Route Definition
@@ -32,7 +34,7 @@ export const Route = createFileRoute("/dashboard/resumes/upload")({
 // Types & Mock Data
 // ---------------------------------------------------------------------------
 
-type UploadState = "idle" | "uploading" | "parsed" | "creating";
+type UploadState = "idle" | "uploading" | "parsed" | "choose_template" | "creating";
 
 interface ParsedResumeData {
 	fullName: string;
@@ -139,6 +141,7 @@ function UploadRouteComponent() {
 	const [fullResumeData, setFullResumeData] = useState<any>(null);
 	const [progressText, setProgressText] = useState("Initializing Zoe AI reader...");
 	const [progressPercent, setProgressPercent] = useState(10);
+	const [selectedTemplate, setSelectedTemplate] = useState<Template>("ditto");
 	const isCreating = uploadState === "creating";
 
 	const handleFile = (f: File) => {
@@ -241,7 +244,7 @@ function UploadRouteComponent() {
 				name: resumeName,
 				slug: uniqueSlug,
 				tags: ["AI Uploaded"],
-				data: fullResumeData?.data ? { ...defaultResumeData, ...fullResumeData.data, metadata: defaultResumeData.metadata, picture: defaultResumeData.picture } : undefined,
+				data: fullResumeData?.data ? { ...defaultResumeData, ...fullResumeData.data, metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, picture: defaultResumeData.picture } : undefined,
 				withSampleData: false,
 			});
 
@@ -558,18 +561,61 @@ function UploadRouteComponent() {
 									</Button>
 
 									<Button
+										onClick={() => setUploadState("choose_template")}
+										className="cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
+									>
+										Choose a Template
+										<ArrowLeftIcon className="ml-1.5 size-4 rotate-180" />
+									</Button>
+								</div>
+							</div>
+						)}
+
+						{/* ── STATE 4: Choose Template ── */}
+						{uploadState === "choose_template" && (
+							<div className="space-y-6">
+								<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+									{Object.entries(templates).map(([key, template]) => (
+										<div
+											key={key}
+											onClick={() => setSelectedTemplate(key as Template)}
+											className={`cursor-pointer rounded-xl border p-2 transition-all ${
+												selectedTemplate === key
+													? "border-emerald-500 bg-emerald-500/5 ring-2 ring-emerald-500/20"
+													: "border-border hover:border-emerald-500/50 hover:bg-muted/40"
+											}`}
+										>
+											<img
+												src={template.imageUrl}
+												alt={template.name}
+												className="w-full rounded-md object-cover aspect-[210/297]"
+											/>
+											<p className="mt-2 text-center text-sm font-medium">{template.name}</p>
+										</div>
+									))}
+								</div>
+
+								<div className="flex items-center justify-between border-border border-t pt-5">
+									<Button
+										variant="outline"
+										onClick={() => setUploadState("parsed")}
+										className="cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+									>
+										<ArrowLeftIcon className="mr-2" /> Back to Review
+									</Button>
+									<Button
 										onClick={handleConfirm}
 										disabled={isCreating}
-										className="cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
+										className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white min-w-32"
 									>
 										{isCreating ? (
 											<>
-												<SpinnerGapIcon className="mr-1.5 size-4 animate-spin" />
-												Creating resume...
+												<SpinnerGapIcon className="mr-2 size-4 animate-spin" />
+												Creating...
 											</>
 										) : (
 											<>
-												<CheckCircleIcon className="mr-1.5 size-4" />
+												<CheckCircleIcon className="mr-2 size-4" />
 												Confirm & Open in Editor
 											</>
 										)}
