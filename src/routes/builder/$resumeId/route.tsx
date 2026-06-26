@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getCookie, setCookie } from "@tanstack/react-start/server";
@@ -33,15 +33,23 @@ export const Route = createFileRoute("/builder/$resumeId")({
 		return { session: context.session };
 	},
 	loader: async ({ params, context }) => {
-		const [layout, resume] = await Promise.all([
-			getBuilderLayoutServerFn(),
-			context.queryClient.ensureQueryData({
+		const layout = await getBuilderLayoutServerFn();
+
+		// Use prefetchQuery instead of ensureQueryData so SSR doesn't hard-crash
+		// if the backend requires a token (since SSR has no access to localStorage).
+		// The client will retry and succeed once hydration happens.
+		try {
+			await context.queryClient.prefetchQuery({
 				queryKey: ["resumes", params.resumeId],
 				queryFn: () => api.fetchResume(params.resumeId),
-			}),
-		]);
-
-		return { layout, name: resume.name };
+			});
+			const resume = context.queryClient.getQueryData<any>(["resumes", params.resumeId]);
+			return { layout, name: resume?.name || "Resume" };
+		} catch (error) {
+			// If it fails on SSR (e.g. 401 due to missing token), just return the layout.
+			// The client will fetch it.
+			return { layout, name: "Resume" };
+		}
 	},
 	head: ({ loaderData }) => ({
 		meta: loaderData ? [{ title: `${loaderData.name} - Resume Buddy` }] : undefined,
@@ -52,7 +60,7 @@ function RouteComponent() {
 	const { layout: initialLayout } = Route.useLoaderData();
 
 	const { resumeId } = Route.useParams();
-	const { data: resume } = useSuspenseQuery({
+	const { data: resume, isLoading, isError } = useQuery({
 		queryKey: ["resumes", resumeId],
 		queryFn: () => api.fetchResume(resumeId),
 	});
