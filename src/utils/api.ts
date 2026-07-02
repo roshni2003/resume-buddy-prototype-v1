@@ -229,6 +229,7 @@ export const safeParseDate = (value: unknown): Date => {
 const mapResume = (resume: ResumeSummary): ResumeSummary => {
 	const sections = resume.data?.sections ?? {};
 	const experience = sections.experience ?? { items: [] };
+	const education = sections.education ?? { items: [] };
 
 	return {
 		...resume,
@@ -241,6 +242,69 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 			...resume.data,
 			sections: {
 				...sections,
+				education: {
+					...education,
+					items: (education.items || []).map((item: Record<string, any>) => {
+						let description = typeof item.description === "string" ? item.description : "";
+						let modeData: any = {};
+						
+						const commentMatch = description.match(/<!-- modeData: (.*?) -->/);
+						if (commentMatch) {
+							try {
+								modeData = JSON.parse(decodeURIComponent(commentMatch[1]));
+							} catch (e) {
+								// ignore
+							}
+							description = description.replace(commentMatch[0], "").trim();
+						}
+
+						// If modeData is empty (e.g. older data), populate it from current real fields based on college mode
+						if (Object.keys(modeData).length === 0) {
+							if (item.college === "School") {
+								modeData.schoolName_school = item.school || "";
+								modeData.board_school = item.degree || "";
+								modeData.percentage_school = item.grade || "";
+							} else {
+								modeData.collegeName_college = item.school || "";
+								modeData.degree_college = item.degree || "";
+								modeData.specialization_college = item.area || "";
+								modeData.cgpa_college = item.grade || "";
+							}
+						}
+
+						return {
+							...item,
+							...modeData,
+							description,
+							school: item.school === " " ? "" : (item.school || ""),
+						};
+					}) as any[],
+				},
+				projects: {
+					...(sections.projects ?? { items: [] }),
+					items: ((sections.projects?.items as Record<string, any>[]) || []).map((item) => {
+						let description = typeof item.description === "string" ? item.description : "";
+						let role = typeof item.role === "string" ? item.role : "";
+						
+						if (!role && description) {
+							const commentMatch = description.match(/<!-- role: (.*?) -->/);
+							if (commentMatch) {
+								try {
+									role = decodeURIComponent(commentMatch[1]);
+								} catch (e) {
+									role = commentMatch[1];
+								}
+								description = description.replace(commentMatch[0], "").trim();
+							}
+						}
+						
+						return {
+							...item,
+							description,
+							role,
+						};
+					}) as any[],
+				},
 				experience: {
 					...experience,
 					items: (experience.items || []).map((item: Record<string, any>) => {

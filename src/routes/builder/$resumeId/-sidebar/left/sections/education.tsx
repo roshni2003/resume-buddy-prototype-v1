@@ -16,7 +16,7 @@ export function EducationSectionBuilder() {
 			draft.sections.education.items.push({
 				id: crypto.randomUUID(),
 				hidden: false,
-				educationType: "College",
+				college: "College",
 				school: "",
 				degree: "",
 				area: "",
@@ -34,6 +34,13 @@ export function EducationSectionBuilder() {
 				options: {
 					showLinkInTitle: false,
 				},
+				schoolName_school: "",
+				board_school: "",
+				percentage_school: "",
+				collegeName_college: "",
+				degree_college: "",
+				specialization_college: "",
+				cgpa_college: "",
 			});
 		});
 	};
@@ -49,13 +56,27 @@ export function EducationSectionBuilder() {
 
 	const handleChange = (id: string, field: string, value: any) => {
 		updateResumeData((draft) => {
-			const item = draft.sections.education.items.find((i) => i.id === id);
+			const item = draft.sections.education.items.find((i) => i.id === id) as any;
 			if (item) {
 				if (field.includes(".")) {
 					const [parent, child] = field.split(".");
-					(item as any)[parent][child] = value;
+					item[parent][child] = value;
 				} else {
-					(item as any)[field] = value;
+					item[field] = value;
+				}
+
+				// Sync to real fields so PDF renders correctly instantly
+				const mode = field === "college" ? value : item.college;
+				if (mode === "School") {
+					item.school = item.schoolName_school || "";
+					item.degree = item.board_school || "";
+					item.grade = item.percentage_school || "";
+					item.area = "";
+				} else {
+					item.school = item.collegeName_college || "";
+					item.degree = item.degree_college || "";
+					item.area = item.specialization_college || "";
+					item.grade = item.cgpa_college || "";
 				}
 			}
 		});
@@ -84,10 +105,10 @@ export function EducationSectionBuilder() {
 
 				{section.items.map((item) => {
 					// Calculate date range display for the toggle
-					const isSchool = item.educationType === "School";
-					const startForToggle = isSchool ? (item.schoolStartDate ?? item.startDate) : item.startDate;
-					const endForToggle = isSchool ? (item.schoolEndDate ?? item.endDate) : item.endDate;
-					const currentlyStudyingForToggle = isSchool ? (item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere) : item.currentlyStudyingHere;
+					const isSchool = item.college === "School";
+					const startForToggle = item.startDate;
+					const endForToggle = item.endDate;
+					const currentlyStudyingForToggle = item.currentlyStudyingHere;
 
 					const dateRange = [
 						formatDate(startForToggle),
@@ -115,10 +136,10 @@ export function EducationSectionBuilder() {
 								<div className="flex rounded-lg bg-gray-100 dark:bg-muted p-1 w-max">
 									<button
 										type="button"
-										onClick={() => handleChange(item.id, "educationType", "School")}
+										onClick={() => handleChange(item.id, "college", "School")}
 										className={cn(
 											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
-											item.educationType === "School"
+											item.college === "School"
 												? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm"
 												: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
 										)}
@@ -127,10 +148,10 @@ export function EducationSectionBuilder() {
 									</button>
 									<button
 										type="button"
-										onClick={() => handleChange(item.id, "educationType", "College")}
+										onClick={() => handleChange(item.id, "college", "College")}
 										className={cn(
 											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
-											(!item.educationType || item.educationType === "College")
+											(!item.college || item.college === "College")
 												? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm"
 												: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
 										)}
@@ -140,7 +161,7 @@ export function EducationSectionBuilder() {
 								</div>
 
 								{/* School Fields */}
-								{item.educationType === "School" ? (
+								{item.college === "School" ? (
 									<>
 										<div className="grid grid-cols-2 gap-3">
 											<div>
@@ -149,8 +170,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. Delhi Public School"
-													value={item.schoolName ?? item.school}
-													onChange={(e) => handleChange(item.id, "schoolName", e.target.value)}
+													value={(item as any).schoolName_school || ""}
+													onChange={(e) => handleChange(item.id, "schoolName_school", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -160,8 +181,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. CBSE, ICSE"
-													value={item.schoolBoard ?? item.degree}
-													onChange={(e) => handleChange(item.id, "schoolBoard", e.target.value)}
+													value={(item as any).board_school || ""}
+													onChange={(e) => handleChange(item.id, "board_school", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -173,8 +194,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													type="month"
-													value={item.schoolStartDate ?? item.startDate ?? ""}
-													onChange={(e) => handleChange(item.id, "schoolStartDate", e.target.value)}
+													value={item.startDate ?? ""}
+													onChange={(e) => handleChange(item.id, "startDate", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -184,10 +205,10 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													type="month"
-													value={item.schoolEndDate ?? item.endDate ?? ""}
-													onChange={(e) => handleChange(item.id, "schoolEndDate", e.target.value)}
-													disabled={item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere ?? false}
-													className={cn(inputCls, (item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere) && "opacity-40")}
+													value={item.endDate ?? ""}
+													onChange={(e) => handleChange(item.id, "endDate", e.target.value)}
+													disabled={item.currentlyStudyingHere ?? false}
+													className={cn(inputCls, item.currentlyStudyingHere && "opacity-40")}
 												/>
 											</div>
 										</div>
@@ -198,8 +219,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. 85%, 9.2 CGPA"
-													value={item.schoolGrade ?? item.grade}
-													onChange={(e) => handleChange(item.id, "schoolGrade", e.target.value)}
+													value={(item as any).percentage_school || ""}
+													onChange={(e) => handleChange(item.id, "percentage_school", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -215,8 +236,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. Stanford University"
-													value={item.school}
-													onChange={(e) => handleChange(item.id, "school", e.target.value)}
+													value={(item as any).collegeName_college || ""}
+													onChange={(e) => handleChange(item.id, "collegeName_college", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -226,8 +247,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. B.Sc. Computer Science"
-													value={item.degree}
-													onChange={(e) => handleChange(item.id, "degree", e.target.value)}
+													value={(item as any).degree_college || ""}
+													onChange={(e) => handleChange(item.id, "degree_college", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -239,8 +260,8 @@ export function EducationSectionBuilder() {
 												</label>
 												<Input
 													placeholder="e.g. Artificial Intelligence"
-													value={item.area}
-													onChange={(e) => handleChange(item.id, "area", e.target.value)}
+													value={(item as any).specialization_college || ""}
+													onChange={(e) => handleChange(item.id, "specialization_college", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -249,9 +270,9 @@ export function EducationSectionBuilder() {
 													<Trans>CGPA / Percentage</Trans>
 												</label>
 												<Input
-													placeholder="e.g. 3.8/4.0, 92%"
-													value={item.grade}
-													onChange={(e) => handleChange(item.id, "grade", e.target.value)}
+													placeholder="e.g. 3.8"
+													value={(item as any).cgpa_college || ""}
+													onChange={(e) => handleChange(item.id, "cgpa_college", e.target.value)}
 													className={inputCls}
 												/>
 											</div>
@@ -295,29 +316,17 @@ export function EducationSectionBuilder() {
 									</>
 								)}
 
-								{/* Currently studying toggle - WORKS FOR BOTH */}
+								{/* Currently studying toggle */}
 								<div className="flex items-center gap-2 pl-0.5">
-									{isSchool ? (
-										<Switch
-											checked={item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere ?? false}
-											onCheckedChange={(val) => {
-												handleChange(item.id, "schoolCurrentlyStudyingHere", val);
-												if (val) {
-													handleChange(item.id, "schoolEndDate", "");
-												}
-											}}
-										/>
-									) : (
-										<Switch
-											checked={item.currentlyStudyingHere || false}
-											onCheckedChange={(val) => {
-												handleChange(item.id, "currentlyStudyingHere", val);
-												if (val) {
-													handleChange(item.id, "endDate", "");
-												}
-											}}
-										/>
-									)}
+									<Switch
+										checked={item.currentlyStudyingHere || false}
+										onCheckedChange={(val) => {
+											handleChange(item.id, "currentlyStudyingHere", val);
+											if (val) {
+												handleChange(item.id, "endDate", "");
+											}
+										}}
+									/>
 									<span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
 										<Trans>Currently studying here</Trans>
 									</span>

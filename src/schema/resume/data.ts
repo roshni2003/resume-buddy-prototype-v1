@@ -127,7 +127,7 @@ export const certificationItemSchema = baseItemSchema.extend({
 });
 
 export const educationItemSchema = baseItemSchema.extend({
-	educationType: z.enum(["School", "College"]),
+	college: z.string().optional(),
 	school: z.string().min(1),
 	degree: z.string(),
 	area: z.string(),
@@ -137,18 +137,19 @@ export const educationItemSchema = baseItemSchema.extend({
 	startDate: z.string().optional(),
 	endDate: z.string().optional(),
 
-	// Dedicated fields for School to prevent data overlap with College
-	schoolName: z.string().optional(),
-	schoolBoard: z.string().optional(),
-	schoolGrade: z.string().optional(),
-	schoolStartDate: z.string().optional(),
-	schoolEndDate: z.string().optional(),
-	schoolCurrentlyStudyingHere: z.boolean().optional(),
-
 	period: z.string(),
 	website: urlSchema,
 	description: z.string(),
 	currentlyStudyingHere: z.boolean(),
+
+	// UI State Fields
+	schoolName_school: z.string().optional(),
+	board_school: z.string().optional(),
+	percentage_school: z.string().optional(),
+	collegeName_college: z.string().optional(),
+	degree_college: z.string().optional(),
+	specialization_college: z.string().optional(),
+	cgpa_college: z.string().optional(),
 });
 
 export const experienceItemSchema = baseItemSchema.extend({

@@ -101,7 +101,7 @@ export const sampleResumeData: ResumeData = {
 					id: "019bef5a-93e4-7746-ad39-48455f6cef9e",
 					hidden: false,
 					school: "University of Washington",
-					educationType: "College",
+					college: "College",
 					degree: "Bachelor of Science",
 					area: "Computer Science",
 					grade: "3.6 GPA",

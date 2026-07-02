@@ -187,7 +187,8 @@ function InlineProjectForm({
 								<FormControl>
 									<Input
 										{...field}
-										placeholder="My Awesome Project"
+										value={field.value || ""}
+										placeholder="My Awesome Role"
 										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
 									/>
 								</FormControl>
@@ -353,9 +354,6 @@ function InlineProjectForm({
 					)}
 				/>
 
-				{/* ── Tips Card ── */}
-				<ZoeTipsCard />
-
 				{/* ── Actions ── */}
 				<div className="flex justify-end gap-2 pt-1">
 					<Button
@@ -371,9 +369,12 @@ function InlineProjectForm({
 						disabled={form.formState.isSubmitting}
 						className="rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
 					>
-						{isNew ? <Trans>Add Project</Trans> : <Trans>Save Changes</Trans>}
+						{isNew ? <Trans>Add Project</Trans> : <Trans>Add Project</Trans>}
 					</Button>
 				</div>
+
+				{/* ── Tips Card ── */}
+				<ZoeTipsCard />
 			</form>
 		</Form>
 	);

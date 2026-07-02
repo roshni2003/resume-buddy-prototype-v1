@@ -389,9 +389,6 @@ function InlineExperienceForm({
 					)}
 				/>
 
-				{/* ── Tips Card ── */}
-				<ZoeTipsCard />
-
 				{/* ── Actions ── */}
 				<div className="flex justify-end gap-2 pt-1">
 					<Button
@@ -410,6 +407,9 @@ function InlineExperienceForm({
 						{isNew ? <Trans>Add Experience</Trans> : <Trans>Save Changes</Trans>}
 					</Button>
 				</div>
+
+				{/* ── Tips Card ── */}
+				<ZoeTipsCard />
 			</form>
 		</Form>
 	);

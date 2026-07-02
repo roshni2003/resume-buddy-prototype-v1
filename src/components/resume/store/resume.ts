@@ -88,11 +88,55 @@ const _syncResume = (resume: Resume) => {
 	}
 
 	if (dataToSync.sections?.education?.items) {
-		dataToSync.sections.education.items = dataToSync.sections.education.items.map((item: Record<string, unknown>) => ({
-			...item,
-			startDate: item.startDate || "",
-			endDate: item.endDate || "",
-		}));
+		dataToSync.sections.education.items = dataToSync.sections.education.items.map((item: Record<string, unknown>) => {
+			const {
+				schoolName_school,
+				board_school,
+				percentage_school,
+				collegeName_college,
+				degree_college,
+				specialization_college,
+				cgpa_college,
+				...rest
+			} = item;
+
+			const modeData = {
+				schoolName_school,
+				board_school,
+				percentage_school,
+				collegeName_college,
+				degree_college,
+				specialization_college,
+				cgpa_college,
+			};
+
+			const comment = `<!-- modeData: ${encodeURIComponent(JSON.stringify(modeData))} -->`;
+			let description = typeof rest.description === "string" ? rest.description : "";
+			description = description.replace(/<!-- modeData: (.*?) -->/g, "").trim();
+
+			return {
+				...rest,
+				startDate: rest.startDate || "",
+				endDate: rest.endDate || "",
+				school: typeof rest.school === "string" && rest.school.trim() === "" ? " " : rest.school,
+				description: description ? `${description}\n${comment}` : comment,
+			};
+		});
+	}
+
+	if (dataToSync.sections?.projects?.items) {
+		dataToSync.sections.projects.items = dataToSync.sections.projects.items.map((item: Record<string, unknown>) => {
+			const { role, ...rest } = item;
+			if (typeof role === "string" && role.trim()) {
+				const comment = `<!-- role: ${encodeURIComponent(role)} -->`;
+				const description = typeof rest.description === "string" ? rest.description : "";
+				return {
+					...rest,
+					description: description ? `${description}\n${comment}` : comment,
+				};
+			}
+			return rest;
+		});
 	}
 
 	api.updateResume(resume.id, { data: dataToSync });

@@ -423,7 +423,7 @@ export class JSONResumeImporter {
 					.map((edu) => ({
 						id: generateId(),
 						hidden: false,
-						educationType: "College",
+						college: "College",
 						currentlyStudyingHere: false,
 						school: edu.institution || "",
 						degree: [edu.studyType, edu.area].filter(Boolean).join(" in ") || "",

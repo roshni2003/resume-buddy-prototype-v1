@@ -123,6 +123,23 @@ export function ProjectsItem({ className, ...item }: ProjectsItemProps) {
 						/>
 					</span>
 				</div>
+				{/* Row 2 */}
+				{item.role && (
+					<div className="flex items-start justify-between gap-x-2 mt-0.5">
+						<span className="section-item-metadata projects-item-role text-sm text-gray-700">
+							<InlineEditableText
+								value={item.role}
+								placeholder="Role"
+								onChange={(value) => {
+									updateResumeData((draft) => {
+										const project = draft.sections.projects.items.find((p) => p.id === item.id);
+										if (project) project.role = value;
+									});
+								}}
+							/>
+						</span>
+					</div>
+				)}
 			</div>
 
 			{/* Description */}

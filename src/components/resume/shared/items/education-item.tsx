@@ -20,26 +20,24 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
         }
     }, [item.description]);
 
-    const isSchool = item.educationType === "School";
+    const isSchool = item.college === "School";
 
     const handleSchoolChange = (e: React.FocusEvent<HTMLSpanElement>) => {
         const newValue = e.currentTarget.textContent || "";
-        const field = isSchool ? "schoolName" : "school";
-        if (newValue !== item[field]) {
+        if (newValue !== item.school) {
             updateResumeData((draft) => {
                 const edu = draft.sections.education.items.find((e) => e.id === item.id);
-                if (edu) (edu as any)[field] = newValue;
+                if (edu) edu.school = newValue;
             });
         }
     };
 
     const handleDegreeChange = (e: React.FocusEvent<HTMLSpanElement>) => {
         const newValue = e.currentTarget.textContent || "";
-        const field = isSchool ? "schoolBoard" : "degree";
-        if (newValue !== item[field]) {
+        if (newValue !== item.degree) {
             updateResumeData((draft) => {
                 const edu = draft.sections.education.items.find((e) => e.id === item.id);
-                if (edu) (edu as any)[field] = newValue;
+                if (edu) edu.degree = newValue;
             });
         }
     };
@@ -66,11 +64,10 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
 
     const handleGradeChange = (e: React.FocusEvent<HTMLSpanElement>) => {
         const newValue = e.currentTarget.textContent || "";
-        const field = isSchool ? "schoolGrade" : "grade";
-        if (newValue !== item[field]) {
+        if (newValue !== item.grade) {
             updateResumeData((draft) => {
                 const edu = draft.sections.education.items.find((e) => e.id === item.id);
-                if (edu) (edu as any)[field] = newValue;
+                if (edu) edu.grade = newValue;
             });
         }
     };
@@ -103,9 +100,9 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
 
     // Build date display for both School and College
     let dateDisplay = "";
-    const startForRender = isSchool ? (item.schoolStartDate ?? item.startDate) : item.startDate;
-    const endForRender = isSchool ? (item.schoolEndDate ?? item.endDate) : item.endDate;
-    const currentlyStudyingForRender = isSchool ? (item.schoolCurrentlyStudyingHere ?? item.currentlyStudyingHere) : item.currentlyStudyingHere;
+    const startForRender = item.startDate;
+    const endForRender = item.endDate;
+    const currentlyStudyingForRender = item.currentlyStudyingHere;
 
     const start = startForRender ? formatDateDisplay(startForRender) : "";
     const end = currentlyStudyingForRender
@@ -119,9 +116,9 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
     }
 
     // Build the education title
-    const schoolText = isSchool ? (item.schoolName ?? item.school) : item.school;
-    const degreeText = isSchool ? (item.schoolBoard ?? item.degree) : item.degree;
-    const gradeText = isSchool ? (item.schoolGrade ?? item.grade) : item.grade;
+    const schoolText = item.school;
+    const degreeText = item.degree;
+    const gradeText = item.grade;
     const educationTitle = [schoolText, item.area].filter(Boolean).join(", ");
 
     return (
@@ -166,8 +163,8 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                             </span>
                         )}
                         <span
-                            contentEditable={item.educationType === "School"}
-                            suppressContentEditableWarning={item.educationType === "School"}
+                            contentEditable={item.college === "School"}
+                            suppressContentEditableWarning={item.college === "School"}
                             onBlur={handlePeriodChange}
                             className="section-item-metadata education-item-location-period shrink-0 cursor-text text-end text-gray-600 outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
                         >
