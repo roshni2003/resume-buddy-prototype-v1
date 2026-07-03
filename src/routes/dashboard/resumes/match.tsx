@@ -110,10 +110,12 @@ function MatchToJobRouteComponent() {
 		setStep("loading");
 		try {
 			let res;
+			const fullJobDescription = `Role: ${role}\nCompany: ${company}\n\nJob Description:\n${jobDescription}`;
+			
 			if (selectedResumeId === "file_upload") {
-				res = await api.jdMatchUpload({ resume_upload: uploadingFile!, jd_text: jobDescription });
+				res = await api.jdMatchUpload({ resume_upload: uploadingFile!, jd_text: fullJobDescription });
 			} else {
-				res = await api.jdMatch({ resume_id: selectedResumeId, jd_text: jobDescription });
+				res = await api.jdMatch({ resume_id: selectedResumeId, jd_text: fullJobDescription });
 			}
 
 			if (res.success) {
@@ -147,21 +149,28 @@ function MatchToJobRouteComponent() {
 		if (selectedResumeId && selectedResumeId !== "file_upload") {
 			try {
 				setIsCreating(true);
-				const createdResume = await api.fetchResume(selectedResumeId);
+				const originalResume = await api.fetchResume(selectedResumeId);
 				const updatedData = {
-					...createdResume.data,
+					...originalResume.data,
 					metadata: {
-						...createdResume.data.metadata,
+						...originalResume.data.metadata,
 						template: selectedTemplate,
 					},
 				};
-				await api.updateResume(selectedResumeId, { data: updatedData });
+				
+				const newResume = await api.createResume({
+					name: `Tailored: ${originalResume.name}`,
+					slug: `tailored-${Date.now().toString(36)}`,
+					data: updatedData,
+					withSampleData: false,
+				});
+				
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				// Force the history stack to have Dashboard before Builder so back button works correctly
 				window.history.replaceState(null, "", "/dashboard/resumes");
-				navigate({ to: "/builder/$resumeId", params: { resumeId: selectedResumeId } });
+				navigate({ to: "/builder/$resumeId", params: { resumeId: newResume.id } });
 			} catch(e) {
-				console.error(e);
+				console.error("Failed to create tailored resume", e);
 				setIsCreating(false);
 			}
 		} else {
@@ -174,9 +183,15 @@ function MatchToJobRouteComponent() {
 					resumeDataPayload = parsedRaw.data ? { 
 						...defaultResumeData, 
 						...parsedRaw.data, 
-						metadata: defaultResumeData.metadata, 
+						metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
 						picture: defaultResumeData.picture 
 					} : undefined;
+				} else {
+					// Start fresh or fallback
+					resumeDataPayload = {
+						...defaultResumeData,
+						metadata: { ...defaultResumeData.metadata, template: selectedTemplate }
+					};
 				}
 
 				const resume = await api.createResume({
@@ -185,16 +200,6 @@ function MatchToJobRouteComponent() {
 					data: resumeDataPayload,
 					withSampleData: !uploadingFile,
 				});
-				
-				const createdResume = await api.fetchResume(resume.id);
-				const updatedData = {
-					...createdResume.data,
-					metadata: {
-						...createdResume.data.metadata,
-						template: selectedTemplate,
-					},
-				};
-				await api.updateResume(resume.id, { data: updatedData });
 				
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				// Force the history stack to have Dashboard before Builder so back button works correctly
