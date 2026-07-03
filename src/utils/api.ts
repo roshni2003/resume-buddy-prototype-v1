@@ -226,8 +226,37 @@ export const safeParseDate = (value: unknown): Date => {
 	return parsedDate;
 };
 
+const scrubMockStrings = (obj: any): any => {
+	if (Array.isArray(obj)) {
+		return obj.map(scrubMockStrings);
+	}
+	if (obj !== null && typeof obj === "object") {
+		const result: any = {};
+		let hasDummyString = false;
+		for (const key of Object.keys(obj)) {
+			if (typeof obj[key] === "string" && obj[key] === "string") {
+				hasDummyString = true;
+			}
+			result[key] = scrubMockStrings(obj[key]);
+		}
+		
+		// If this object had dummy strings, it's likely a mocked object.
+		// Reset its 'hidden' property to false so it doesn't appear dim.
+		if (hasDummyString && "hidden" in result) {
+			result.hidden = false;
+		}
+		
+		return result;
+	}
+	if (typeof obj === "string" && obj === "string") {
+		return "";
+	}
+	return obj;
+};
+
 const mapResume = (resume: ResumeSummary): ResumeSummary => {
-	const sections = resume.data?.sections ?? {};
+	const data = scrubMockStrings(resume.data ?? {});
+	const sections = data.sections ?? {};
 	const experience = sections.experience ?? { items: [] };
 	const education = sections.education ?? { items: [] };
 
@@ -239,7 +268,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 		createdAt: safeParseDate(resume.createdAt),
 		updatedAt: safeParseDate(resume.updatedAt),
 		data: {
-			...resume.data,
+			...data,
 			sections: {
 				...sections,
 				education: {
