@@ -21,6 +21,7 @@ import { useDialogStore } from "@/dialogs/store";
 import { templates } from "@/dialogs/resume/template/data";
 import type { Template } from "@/schema/templates";
 import { defaultResumeData } from "@/schema/resume/data";
+import { OnboardingWizard, type OnboardingAnswers, onboardingQuestions } from "./-components/OnboardingWizard";
 
 const ACCEPTED_TYPES = [
 	"application/pdf",
@@ -59,14 +60,7 @@ function MatchToJobRouteComponent() {
 	const [company, setCompany] = useState("");
 	const [jobDescription, setJobDescription] = useState("");
 	
-	// Start Fresh state
-	const [targetTitle, setTargetTitle] = useState("");
-	const [experienceLevel, setExperienceLevel] = useState("1-3 years");
-	const [recentCompany, setRecentCompany] = useState("");
-	const [recentRole, setRecentRole] = useState("");
-	const [recentBullets, setRecentBullets] = useState("");
-	const [coreSkills, setCoreSkills] = useState("");
-	const [keyProjects, setKeyProjects] = useState("");
+	const [jdMatchId, setJdMatchId] = useState<string | null>(null);
 	
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [uploadingFile, setUploadingFile] = useState<File | null>(null);
@@ -130,9 +124,31 @@ function MatchToJobRouteComponent() {
 		}
 	};
 
+	const handleRunOnboardingMatch = async (answers: OnboardingAnswers) => {
+		setMatchError(null);
+		setStep("loading");
+		try {
+			const fullJobDescription = `Role: ${role}\nCompany: ${company}\n\nJob Description:\n${jobDescription}`;
+			const res = await api.onboardingJdMatch({ 
+				jd_text: fullJobDescription,
+				onboarding_questions: onboardingQuestions,
+				onboarding_answers: answers 
+			});
+
+			if (res.success || res.jd_match_id) {
+				setMatchResult(res.jdMatch || res.report);
+				setJdMatchId(res.jd_match_id);
+				setStep("report");
+			} else {
+				throw new Error("Match failed");
+			}
+		} catch (e: any) {
+			setMatchError(e?.message ?? "Something went wrong. Please try again.");
+			setStep("start_fresh");
+		}
+	};
+
 	const isStep1Valid = role.trim() !== "" && company.trim() !== "" && jobDescription.trim() !== "";
-	
-	const isStartFreshValid = targetTitle.trim() !== "" && recentCompany.trim() !== "" && recentRole.trim() !== "" && recentBullets.trim() !== "" && coreSkills.trim() !== "" && keyProjects.trim() !== "";
 
 	const queryClient = useQueryClient();
 	const [isCreating, setIsCreating] = useState(false);
@@ -146,6 +162,35 @@ function MatchToJobRouteComponent() {
 	};
 
 	const handleConfirmTemplate = async () => {
+		if (jdMatchId) {
+			try {
+				setIsCreating(true);
+				const tailoredData = await api.tailorResume({ jd_match_id: jdMatchId, template: selectedTemplate });
+				
+				const newResume = await api.createResume({
+					name: tailoredData.name || `Tailored: ${role} at ${company}`,
+					slug: tailoredData.slug || `tailored-${Date.now().toString(36)}`,
+					data: {
+						...defaultResumeData,
+						...tailoredData.data,
+						metadata: {
+							...(tailoredData.data?.metadata || defaultResumeData.metadata),
+							template: selectedTemplate
+						}
+					},
+					withSampleData: false,
+				});
+
+				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
+				window.history.replaceState(null, "", "/dashboard/resumes");
+				navigate({ to: "/builder/$resumeId", params: { resumeId: newResume.id } });
+			} catch (e) {
+				console.error("Failed to tailor resume with onboarding", e);
+				setIsCreating(false);
+			}
+			return;
+		}
+
 		if (selectedResumeId && selectedResumeId !== "file_upload") {
 			try {
 				setIsCreating(true);
@@ -461,101 +506,7 @@ function MatchToJobRouteComponent() {
 
 			{/* Step 3B: Start Fresh */}
 			{step === "start_fresh" && (
-				<div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
-					<div>
-						<h1 className="text-3xl font-bold mb-8">Tell us about you</h1>
-					</div>
-
-					<div className="space-y-6">
-						<div className="space-y-1.5">
-							<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">What is your target or current professional title?</label>
-							<Input
-								value={targetTitle}
-								onChange={(e) => setTargetTitle(e.target.value)}
-								className="bg-muted/40 border-border/50 text-foreground text-base h-11 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50"
-								placeholder="e.g. &quot;Senior Frontend Engineer&quot;"
-							/>
-						</div>
-
-						<div className="space-y-1.5">
-							<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">How many years of experience?</label>
-							<Combobox
-								options={expOptions}
-								value={experienceLevel}
-								onValueChange={(val) => setExperienceLevel(val || "1-3 years")}
-								hideSearch
-								buttonProps={{
-									className: "w-full bg-muted/40 border border-border/50 text-foreground text-base h-11 justify-between px-3 hover:bg-muted/60 font-normal"
-								}}
-							/>
-						</div>
-
-						<div className="space-y-3">
-							<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Most recent work experience</label>
-							<div className="grid grid-cols-2 gap-4">
-								<div className="space-y-1.5">
-									<label className="text-[10px] text-muted-foreground uppercase tracking-wider">Company Name</label>
-									<Input
-										value={recentCompany}
-										onChange={(e) => setRecentCompany(e.target.value)}
-										className="bg-muted/40 border-border/50 text-foreground text-base h-11 focus-visible:ring-emerald-500/50"
-									/>
-								</div>
-								<div className="space-y-1.5">
-									<label className="text-[10px] text-muted-foreground uppercase tracking-wider">Role</label>
-									<Input
-										value={recentRole}
-										onChange={(e) => setRecentRole(e.target.value)}
-										className="bg-muted/40 border-border/50 text-foreground text-base h-11 focus-visible:ring-emerald-500/50"
-									/>
-								</div>
-							</div>
-							<textarea
-								value={recentBullets}
-								onChange={(e) => setRecentBullets(e.target.value)}
-								className="w-full h-24 rounded-xl bg-muted/40 border border-border/50 p-3 text-foreground text-sm placeholder:text-foreground0 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none transition-all"
-								placeholder="2-3 bullet points describing what you did..."
-							/>
-						</div>
-
-						<div className="space-y-1.5">
-							<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Your top 5-10 core skills (comma-separated)</label>
-							<Input
-								value={coreSkills}
-								onChange={(e) => setCoreSkills(e.target.value)}
-								className="bg-muted/40 border-border/50 text-foreground text-base h-11 focus-visible:ring-emerald-500/50"
-								placeholder="React, TypeScript, Node.js, Git, UI Design"
-							/>
-						</div>
-
-						<div className="space-y-1.5">
-							<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">1 or 2 key projects or achievements</label>
-							<textarea
-								value={keyProjects}
-								onChange={(e) => setKeyProjects(e.target.value)}
-								className="w-full h-24 rounded-xl bg-muted/40 border border-border/50 p-3 text-foreground text-sm placeholder:text-foreground0 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none transition-all"
-								placeholder="e.g. &quot;Built a task manager app using React that reduced load times by 20%&quot;"
-							/>
-						</div>
-					</div>
-
-					<div className="flex justify-end gap-3 pt-4">
-						<Button
-							variant="outline"
-							onClick={() => setStep("resume_choice")}
-							className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground rounded-full px-6"
-						>
-							Back
-						</Button>
-						<Button
-							disabled={!isStartFreshValid}
-							onClick={() => setStep("loading")}
-							className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white rounded-full px-6 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							Tailor with Zoe
-						</Button>
-					</div>
-				</div>
+				<OnboardingWizard jobRole={role} onComplete={handleRunOnboardingMatch} />
 			)}
 
 			{/* Step 4: Loading */}

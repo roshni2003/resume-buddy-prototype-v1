@@ -560,4 +560,44 @@ export const api = {
 			return res.json() as Promise<any>;
 		});
 	},
+	
+	// 19. POST: /ai/onboarding-jd-match
+	onboardingJdMatch: (payload: { jd_text: string; onboarding_questions: any; onboarding_answers: any }) => {
+		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
+		const token = getAuthToken();
+		return fetch(`${baseUrl}/ai/onboarding-jd-match`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				...(token ? { Authorization: `Bearer ${token}` } : {}),
+			},
+			body: JSON.stringify(payload),
+		}).then(async (res) => {
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.message || `Request failed with status ${res.status}`);
+			}
+			return res.json() as Promise<any>; // Should return jd_match_id and report
+		});
+	},
+
+	// 20. POST: /ai/tailor-resume
+	tailorResume: (payload: { jd_match_id: string; template?: string }) => {
+		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
+		const token = getAuthToken();
+		return fetch(`${baseUrl}/ai/tailor-resume`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				...(token ? { Authorization: `Bearer ${token}` } : {}),
+			},
+			body: JSON.stringify(payload),
+		}).then(async (res) => {
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.message || `Request failed with status ${res.status}`);
+			}
+			return res.json() as Promise<any>; // Should return the generated resume payload
+		});
+	},
 };
