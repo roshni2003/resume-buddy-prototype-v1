@@ -129,10 +129,25 @@ function MatchToJobRouteComponent() {
 		setStep("loading");
 		try {
 			const fullJobDescription = `Role: ${role}\nCompany: ${company}\n\nJob Description:\n${jobDescription}`;
+			
+			// Format answers to convert comma-separated strings back to arrays expected by the backend
+			const formattedAnswers = {
+				...answers,
+				projects: answers.projects.map(p => ({
+					...p,
+					"4.6": p["4.6"] ? p["4.6"].split(",").map(s => s.trim()).filter(Boolean) : []
+				})),
+				experience: answers.experience.map(e => ({
+					...e,
+					"5.7": e["5.7"] ? (e["5.7"] as any).split(",").map((s: string) => s.trim()).filter(Boolean) : [],
+					"5.8": e["5.8"] ? (e["5.8"] as any).split(",").map((s: string) => s.trim()).filter(Boolean) : []
+				}))
+			};
+
 			const res = await api.onboardingJdMatch({ 
 				jd_text: fullJobDescription,
 				onboarding_questions: onboardingQuestions,
-				onboarding_answers: answers 
+				onboarding_answers: formattedAnswers as any
 			});
 
 			if (res.success || res.jd_match_id) {

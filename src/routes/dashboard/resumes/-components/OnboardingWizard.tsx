@@ -17,7 +17,6 @@ export interface OnboardingAnswers {
 		"1.4": string;
 		"1.5": string;
 		"1.6": string;
-		"2.1": string; // Role applying for
 	};
 	education: Array<{
 		"3.1": string; // Degree
@@ -27,24 +26,20 @@ export interface OnboardingAnswers {
 	}>;
 	projects: Array<{
 		"4.1": string;
-		"4.2": string;
 		"4.3": string;
 		"4.4": string;
 		"4.5": string;
-		"4.6": string[];
+		"4.6": string;
 		"4.7": string;
 	}>;
 	experience: Array<{
 		"5.1": string; // Yes/No
 		"5.2"?: string;
 		"5.3"?: string;
-		"5.4"?: string;
 		"5.5"?: DateRange;
 		"5.6"?: string;
-		"5.7"?: string[];
-		"5.8"?: string[];
-		"5.9"?: string; // Yes/No
-		"5.10"?: string;
+		"5.7"?: string;
+		"5.8"?: string;
 		"5.11"?: string;
 	}>;
 }
@@ -56,41 +51,36 @@ interface Props {
 
 export const onboardingQuestions = {
 	basic_details: [
-		{ id: "1.1", question: "What is your full name?" },
-		{ id: "1.2", question: "What is your phone number?" },
-		{ id: "1.3", question: "What is your email ID?" },
-		{ id: "1.4", question: "Where are you currently located?" },
-		{ id: "1.5", question: "Do you have a LinkedIn profile?" },
-		{ id: "1.6", question: "Do you have a portfolio or GitHub link?" },
-		{ id: "2.1", question: "What role are you applying for?" },
+		{ id: "1.1", question: "Name*" },
+		{ id: "1.2", question: "Mobile No.*" },
+		{ id: "1.3", question: "Email ID*" },
+		{ id: "1.4", question: "Location*" },
+		{ id: "1.5", question: "Linkedin profile" },
+		{ id: "1.6", question: "Github link" },
 	],
 	education: [
-		{ id: "3.1", question: "What did you study?" },
-		{ id: "3.2", question: "Where did you study?" },
-		{ id: "3.3", question: "When did you study here?" },
-		{ id: "3.4", question: "Did you work on any projects as part of this course?" },
+		{ id: "3.1", question: "What did you study?*" },
+		{ id: "3.2", question: "Institution*" },
+		{ id: "3.3", question: "From - To *" },
+		{ id: "3.4", question: "Did you work on any projects as part of this course?*" },
 	],
 	projects: [
-		{ id: "4.1", question: "What is the name of the project?" },
-		{ id: "4.2", question: "What type of project was this?" },
-		{ id: "4.3", question: "Was this an individual or team project?" },
-		{ id: "4.4", question: "What problem was this project trying to solve?" },
+		{ id: "4.1", question: "What is the name of the project?*" },
+		{ id: "4.3", question: "Was this an individual or team project?*" },
+		{ id: "4.4", question: "Describe the project*" },
 		{ id: "4.5", question: "What did you work on in this project?" },
 		{ id: "4.6", question: "What tools or technologies did you use?" },
 		{ id: "4.7", question: "What was the outcome of this project?" },
 	],
 	experience: [
-		{ id: "5.1", question: "Have you worked anywhere before (internship, job, volunteer)?" },
-		{ id: "5.2", question: "Where did you work?" },
-		{ id: "5.3", question: "What was your role there?" },
-		{ id: "5.4", question: "What type of work was this?" },
-		{ id: "5.5", question: "When did you work here?" },
-		{ id: "5.6", question: "What were you mainly responsible for?" },
-		{ id: "5.7", question: "What tasks did you do regularly?" },
+		{ id: "5.1", question: "Have you worked anywhere before (internship, job, volunteer)?*" },
+		{ id: "5.2", question: "Company Name*" },
+		{ id: "5.3", question: "Role/ Designation*" },
+		{ id: "5.5", question: "From - To*" },
+		{ id: "5.6", question: "Describe your role*" },
+		{ id: "5.7", question: "What tasks did you do regularly?*" },
 		{ id: "5.8", question: "What tools or technologies did you use here?" },
-		{ id: "5.9", question: "Did anything improve because of your work?" },
-		{ id: "5.10", question: "What improved?" },
-		{ id: "5.11", question: "Can you describe the change in simple words?" },
+		{ id: "5.11", question: "What impact did your role make for the organisation?" },
 	],
 };
 
@@ -99,11 +89,11 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 	
 	const [answers, setAnswers] = useState<OnboardingAnswers>({
 		basic_details: {
-			"1.1": "", "1.2": "", "1.3": "", "1.4": "", "1.5": "", "1.6": "", "2.1": jobRole,
+			"1.1": "", "1.2": "", "1.3": "", "1.4": "", "1.5": "", "1.6": ""
 		},
 		education: [{ "3.1": "", "3.2": "", "3.3": { from: "", to: "" }, "3.4": false }],
 		projects: [],
-		experience: [{ "5.1": "No", "5.2": "", "5.3": "", "5.4": "", "5.5": { from: "", to: "" }, "5.6": "", "5.7": [], "5.8": [], "5.9": "No", "5.10": "", "5.11": "" }]
+		experience: [{ "5.1": "No", "5.2": "", "5.3": "", "5.5": { from: "", to: "" }, "5.6": "", "5.7": "", "5.8": "", "5.11": "" }]
 	});
 	
 	const [hasProjects, setHasProjects] = useState(false);
@@ -149,7 +139,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 		if (step === 1) setStep(2);
 		else if (step === 2) {
 			if (hasProjects && answers.projects.length === 0) {
-				setAnswers(prev => ({ ...prev, projects: [{ "4.1": "", "4.2": "", "4.3": "", "4.4": "", "4.5": "", "4.6": [], "4.7": "" }] }));
+				setAnswers(prev => ({ ...prev, projects: [{ "4.1": "", "4.3": "", "4.4": "", "4.5": "", "4.6": "", "4.7": "" }] }));
 				setStep(3);
 			} else if (hasProjects) {
 				setStep(3);
@@ -175,7 +165,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 	const isStepValid = () => {
 		if (step === 1) {
 			const b = answers.basic_details;
-			return !!(b["1.1"].trim() && b["1.2"].trim() && b["1.3"].trim() && b["1.4"].trim() && b["2.1"].trim());
+			return !!(b["1.1"].trim() && b["1.2"].trim() && b["1.3"].trim() && b["1.4"].trim());
 		}
 		if (step === 2) {
 			return answers.education.every(edu => 
@@ -189,7 +179,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 		}
 		if (step === 5) {
 			return answers.experience.every(exp => 
-				exp["5.2"]?.trim() && exp["5.3"]?.trim() && exp["5.5"]?.from.trim() && exp["5.5"]?.to.trim() && exp["5.6"]?.trim() && exp["5.7"] && exp["5.7"].length > 0
+				exp["5.2"]?.trim() && exp["5.3"]?.trim() && exp["5.5"]?.from.trim() && exp["5.5"]?.to.trim() && exp["5.6"]?.trim() && exp["5.7"]?.trim()
 			);
 		}
 		return true;
@@ -201,13 +191,12 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 			{step === 1 && (
 				<div className="space-y-4">
 					<h3 className="text-xl font-bold">1. Basic Details</h3>
-					<Input placeholder="Full Name *" value={answers.basic_details["1.1"]} onChange={e => handleBasicChange("1.1", e.target.value)} />
-					<Input placeholder="Mobile No *" value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value)} />
-					<Input placeholder="Email ID *" type="email" value={answers.basic_details["1.3"]} onChange={e => handleBasicChange("1.3", e.target.value)} />
-					<Input placeholder="Location *" value={answers.basic_details["1.4"]} onChange={e => handleBasicChange("1.4", e.target.value)} />
-					<Input placeholder="LinkedIn Profile" value={answers.basic_details["1.5"]} onChange={e => handleBasicChange("1.5", e.target.value)} />
-					<Input placeholder="GitHub Link" value={answers.basic_details["1.6"]} onChange={e => handleBasicChange("1.6", e.target.value)} />
-					<Input placeholder="Role Applying For *" value={answers.basic_details["2.1"]} onChange={e => handleBasicChange("2.1", e.target.value)} />
+					<Input placeholder="Name*" value={answers.basic_details["1.1"]} onChange={e => handleBasicChange("1.1", e.target.value)} />
+					<Input placeholder="Mobile No.*" value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value)} />
+					<Input placeholder="Email ID*" type="email" value={answers.basic_details["1.3"]} onChange={e => handleBasicChange("1.3", e.target.value)} />
+					<Input placeholder="Location*" value={answers.basic_details["1.4"]} onChange={e => handleBasicChange("1.4", e.target.value)} />
+					<Input placeholder="Linkedin profile" value={answers.basic_details["1.5"]} onChange={e => handleBasicChange("1.5", e.target.value)} />
+					<Input placeholder="Github link" value={answers.basic_details["1.6"]} onChange={e => handleBasicChange("1.6", e.target.value)} />
 				</div>
 			)}
 
@@ -225,14 +214,14 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 									</button>
 								)}
 							</div>
-							<Input placeholder="What did you study? *" value={edu["3.1"]} onChange={e => handleEduChange(idx, "3.1", e.target.value)} />
-							<Input placeholder="Institution *" value={edu["3.2"]} onChange={e => handleEduChange(idx, "3.2", e.target.value)} />
+							<Input placeholder="What did you study?*" value={edu["3.1"]} onChange={e => handleEduChange(idx, "3.1", e.target.value)} />
+							<Input placeholder="Institution*" value={edu["3.2"]} onChange={e => handleEduChange(idx, "3.2", e.target.value)} />
 							<div className="flex gap-2">
-								<Input type="month" placeholder="From (YYYY-MM) *" value={edu["3.3"].from} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], from: e.target.value })} />
-								<Input type="month" placeholder="To (YYYY-MM) *" value={edu["3.3"].to} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], to: e.target.value })} />
+								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="From" value={edu["3.3"].from} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], from: e.target.value })} />
+								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="To" value={edu["3.3"].to} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], to: e.target.value })} />
 							</div>
 							<div className="flex items-center gap-2">
-								<label className="text-sm">Did you work on any projects as part of this course? *</label>
+								<label className="text-sm">Did you work on any projects as part of this course?*</label>
 								<select className="border border-input rounded p-1 bg-background text-foreground" value={edu["3.4"] ? "Yes" : "No"} onChange={e => handleEduChange(idx, "3.4", e.target.value === "Yes")}>
 									<option value="No">No</option>
 									<option value="Yes">Yes</option>
@@ -258,20 +247,19 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 									</button>
 								)}
 							</div>
-							<Input placeholder="Project Name *" value={proj["4.1"]} onChange={e => handleProjChange(idx, "4.1", e.target.value)} />
-							<Input placeholder="Project Type" value={proj["4.2"]} onChange={e => handleProjChange(idx, "4.2", e.target.value)} />
+							<Input placeholder="What is the name of the project?*" value={proj["4.1"]} onChange={e => handleProjChange(idx, "4.1", e.target.value)} />
 							<select className="border border-input rounded p-1 w-full bg-background text-foreground" value={proj["4.3"]} onChange={e => handleProjChange(idx, "4.3", e.target.value)}>
-								<option value="">Individual or Team? *</option>
+								<option value="">Was this an individual or team project?*</option>
 								<option value="Individual">Individual</option>
 								<option value="Team">Team</option>
 							</select>
-							<Textarea placeholder="Describe the project (What problem was it solving?) *" value={proj["4.4"]} onChange={e => handleProjChange(idx, "4.4", e.target.value)} />
-							<Textarea placeholder="What did you work on?" value={proj["4.5"]} onChange={e => handleProjChange(idx, "4.5", e.target.value)} />
-								<Input placeholder="Tools/Technologies (comma separated)" value={proj["4.6"].join(", ")} onChange={e => handleProjChange(idx, "4.6", e.target.value.split(",").map(s => s.trim()))} />
-								<Input placeholder="What was the outcome?" value={proj["4.7"]} onChange={e => handleProjChange(idx, "4.7", e.target.value)} />
+							<Textarea placeholder="Describe the project*" value={proj["4.4"]} onChange={e => handleProjChange(idx, "4.4", e.target.value)} />
+							<Textarea placeholder="What did you work on in this project?" value={proj["4.5"]} onChange={e => handleProjChange(idx, "4.5", e.target.value)} />
+							<Input placeholder="What tools or technologies did you use?" value={proj["4.6"]} onChange={e => handleProjChange(idx, "4.6", e.target.value)} />
+							<Input placeholder="What was the outcome of this project?" value={proj["4.7"]} onChange={e => handleProjChange(idx, "4.7", e.target.value)} />
 						</div>
 					))}
-					<Button variant="outline" onClick={() => setAnswers(prev => ({ ...prev, projects: [...prev.projects, { "4.1": "", "4.2": "", "4.3": "", "4.4": "", "4.5": "", "4.6": [], "4.7": "" }] }))}>Add another project</Button>
+					<Button variant="outline" onClick={() => setAnswers(prev => ({ ...prev, projects: [...prev.projects, { "4.1": "", "4.3": "", "4.4": "", "4.5": "", "4.6": "", "4.7": "" }] }))}>Add another project</Button>
 				</div>
 			)}
 
@@ -280,7 +268,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 				<div className="space-y-4">
 					<h3 className="text-xl font-bold">4. Work Experience</h3>
 					<div className="p-4 border rounded-md space-y-3">
-						<label className="text-sm block mb-2">Have you worked anywhere before (internship, job, volunteer)?</label>
+						<label className="text-sm block mb-2">Have you worked anywhere before (internship, job, volunteer)?*</label>
 						<div className="flex gap-4">
 							<Button variant={hasExperience ? "default" : "outline"} onClick={() => { setHasExperience(true); handleExpChange(0, "5.1", "Yes"); }}>Yes</Button>
 							<Button variant={!hasExperience ? "default" : "outline"} onClick={() => { setHasExperience(false); handleExpChange(0, "5.1", "No"); }}>No</Button>
@@ -303,33 +291,19 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 									</button>
 								)}
 							</div>
-							<Input placeholder="Company Name *" value={exp["5.2"] || ""} onChange={e => handleExpChange(idx, "5.2", e.target.value)} />
-							<Input placeholder="Role / Designation *" value={exp["5.3"] || ""} onChange={e => handleExpChange(idx, "5.3", e.target.value)} />
-							<Input placeholder="Work Type (e.g. Full-time)" value={exp["5.4"] || ""} onChange={e => handleExpChange(idx, "5.4", e.target.value)} />
+							<Input placeholder="Company Name*" value={exp["5.2"] || ""} onChange={e => handleExpChange(idx, "5.2", e.target.value)} />
+							<Input placeholder="Role/ Designation*" value={exp["5.3"] || ""} onChange={e => handleExpChange(idx, "5.3", e.target.value)} />
 							<div className="flex gap-2">
-								<Input type="month" placeholder="From (YYYY-MM) *" value={exp["5.5"]?.from || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], from: e.target.value })} />
-								<Input type="month" placeholder="To (YYYY-MM) *" value={exp["5.5"]?.to || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], to: e.target.value })} />
+								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="From" value={exp["5.5"]?.from || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], from: e.target.value })} />
+								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="To" value={exp["5.5"]?.to || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], to: e.target.value })} />
 							</div>
-							<Textarea placeholder="Describe your role *" value={exp["5.6"] || ""} onChange={e => handleExpChange(idx, "5.6", e.target.value)} />
-							<Input placeholder="Tasks done regularly (comma separated) *" value={exp["5.7"]?.join(", ") || ""} onChange={e => handleExpChange(idx, "5.7", e.target.value.split(",").filter(Boolean).map(s => s.trim()))} />
-							<Input placeholder="Tools/Technologies (comma separated)" value={exp["5.8"]?.join(", ") || ""} onChange={e => handleExpChange(idx, "5.8", e.target.value.split(",").filter(Boolean).map(s => s.trim()))} />
-							
-							<div className="mt-4">
-								<label className="text-sm mb-2 block">Did anything improve because of your work?</label>
-								<select className="border border-input rounded p-1 w-full mb-2 bg-background text-foreground" value={exp["5.9"] || "No"} onChange={e => handleExpChange(idx, "5.9", e.target.value)}>
-									<option value="No">No</option>
-									<option value="Yes">Yes</option>
-								</select>
-								{exp["5.9"] === "Yes" && (
-									<>
-										<Input className="mb-2" placeholder="What improved?" value={exp["5.10"] || ""} onChange={e => handleExpChange(idx, "5.10", e.target.value)} />
-										<Textarea placeholder="Describe the change in simple words" value={exp["5.11"] || ""} onChange={e => handleExpChange(idx, "5.11", e.target.value)} />
-									</>
-								)}
-							</div>
+							<Textarea placeholder="Describe your role*" value={exp["5.6"] || ""} onChange={e => handleExpChange(idx, "5.6", e.target.value)} />
+							<Input placeholder="What tasks did you do regularly?*" value={exp["5.7"] || ""} onChange={e => handleExpChange(idx, "5.7", e.target.value)} />
+							<Input placeholder="What tools or technologies did you use here?" value={exp["5.8"] || ""} onChange={e => handleExpChange(idx, "5.8", e.target.value)} />
+							<Input placeholder="What impact did your role make for the organisation?" value={exp["5.11"] || ""} onChange={e => handleExpChange(idx, "5.11", e.target.value)} />
 						</div>
 					))}
-					<Button variant="outline" onClick={() => setAnswers(prev => ({ ...prev, experience: [...prev.experience, { "5.1": "Yes", "5.2": "", "5.3": "", "5.4": "", "5.5": { from: "", to: "" }, "5.6": "", "5.7": [], "5.8": [], "5.9": "No", "5.10": "", "5.11": "" }] }))}>Add another experience</Button>
+					<Button variant="outline" onClick={() => setAnswers(prev => ({ ...prev, experience: [...prev.experience, { "5.1": "Yes", "5.2": "", "5.3": "", "5.5": { from: "", to: "" }, "5.6": "", "5.7": "", "5.8": "", "5.11": "" }] }))}>Add another experience</Button>
 				</div>
 			)}
 
