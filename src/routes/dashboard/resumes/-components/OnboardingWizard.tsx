@@ -165,7 +165,8 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 	const isStepValid = () => {
 		if (step === 1) {
 			const b = answers.basic_details;
-			return !!(b["1.1"].trim() && b["1.2"].trim().replace(/[^\d+]/g, '').length >= 10 && b["1.3"].trim() && b["1.4"].trim());
+			const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b["1.3"].trim());
+			return !!(b["1.1"].trim() && b["1.2"].trim().replace(/[^\d+]/g, '').length >= 10 && isValidEmail && b["1.4"].trim());
 		}
 		if (step === 2) {
 			return answers.education.every(edu => 
