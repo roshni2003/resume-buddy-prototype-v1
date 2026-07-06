@@ -165,7 +165,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 	const isStepValid = () => {
 		if (step === 1) {
 			const b = answers.basic_details;
-			return !!(b["1.1"].trim() && b["1.2"].trim() && b["1.3"].trim() && b["1.4"].trim());
+			return !!(b["1.1"].trim() && b["1.2"].trim().replace(/[^\d+]/g, '').length >= 10 && b["1.3"].trim() && b["1.4"].trim());
 		}
 		if (step === 2) {
 			return answers.education.every(edu => 
@@ -192,7 +192,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 				<div className="space-y-4">
 					<h3 className="text-xl font-bold">1. Basic Details</h3>
 					<Input placeholder="Name*" value={answers.basic_details["1.1"]} onChange={e => handleBasicChange("1.1", e.target.value)} />
-					<Input placeholder="Mobile No.*" value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value)} />
+					<Input placeholder="Mobile No.*" type="tel" maxLength={10} value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value.replace(/[^\d+]/g, ''))} />
 					<Input placeholder="Email ID*" type="email" value={answers.basic_details["1.3"]} onChange={e => handleBasicChange("1.3", e.target.value)} />
 					<Input placeholder="Location*" value={answers.basic_details["1.4"]} onChange={e => handleBasicChange("1.4", e.target.value)} />
 					<Input placeholder="Linkedin profile" value={answers.basic_details["1.5"]} onChange={e => handleBasicChange("1.5", e.target.value)} />
@@ -217,8 +217,8 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 							<Input placeholder="What did you study?*" value={edu["3.1"]} onChange={e => handleEduChange(idx, "3.1", e.target.value)} />
 							<Input placeholder="Institution*" value={edu["3.2"]} onChange={e => handleEduChange(idx, "3.2", e.target.value)} />
 							<div className="flex gap-2">
-								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="From" value={edu["3.3"].from} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], from: e.target.value })} />
-								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="To" value={edu["3.3"].to} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], to: e.target.value })} />
+								<Input type="text" onFocus={e => { e.target.type = "month"; try { e.target.showPicker(); } catch (err) {} }} onClick={e => { e.currentTarget.type = "month"; try { e.currentTarget.showPicker(); } catch (err) {} }} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="From" value={edu["3.3"].from} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], from: e.target.value })} />
+								<Input type="text" onFocus={e => { e.target.type = "month"; try { e.target.showPicker(); } catch (err) {} }} onClick={e => { e.currentTarget.type = "month"; try { e.currentTarget.showPicker(); } catch (err) {} }} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="To" value={edu["3.3"].to} onChange={e => handleEduChange(idx, "3.3", { ...edu["3.3"], to: e.target.value })} />
 							</div>
 							<div className="flex items-center gap-2">
 								<label className="text-sm">Did you work on any projects as part of this course?*</label>
@@ -294,8 +294,8 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 							<Input placeholder="Company Name*" value={exp["5.2"] || ""} onChange={e => handleExpChange(idx, "5.2", e.target.value)} />
 							<Input placeholder="Role/ Designation*" value={exp["5.3"] || ""} onChange={e => handleExpChange(idx, "5.3", e.target.value)} />
 							<div className="flex gap-2">
-								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="From" value={exp["5.5"]?.from || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], from: e.target.value })} />
-								<Input type="text" onFocus={e => e.target.type = "month"} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="To" value={exp["5.5"]?.to || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], to: e.target.value })} />
+								<Input type="text" onFocus={e => { e.target.type = "month"; try { e.target.showPicker(); } catch (err) {} }} onClick={e => { e.currentTarget.type = "month"; try { e.currentTarget.showPicker(); } catch (err) {} }} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="From" value={exp["5.5"]?.from || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], from: e.target.value })} />
+								<Input type="text" onFocus={e => { e.target.type = "month"; try { e.target.showPicker(); } catch (err) {} }} onClick={e => { e.currentTarget.type = "month"; try { e.currentTarget.showPicker(); } catch (err) {} }} onBlur={e => e.target.type = e.target.value ? "month" : "text"} placeholder="To" value={exp["5.5"]?.to || ""} onChange={e => handleExpChange(idx, "5.5", { ...exp["5.5"], to: e.target.value })} />
 							</div>
 							<Textarea placeholder="Describe your role*" value={exp["5.6"] || ""} onChange={e => handleExpChange(idx, "5.6", e.target.value)} />
 							<Input placeholder="What tasks did you do regularly?*" value={exp["5.7"] || ""} onChange={e => handleExpChange(idx, "5.7", e.target.value)} />
