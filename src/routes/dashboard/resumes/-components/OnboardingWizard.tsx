@@ -166,7 +166,8 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 		if (step === 1) {
 			const b = answers.basic_details;
 			const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b["1.3"].trim());
-			return !!(b["1.1"].trim() && b["1.2"].trim().replace(/[^\d+]/g, '').length >= 10 && isValidEmail && b["1.4"].trim());
+			const isValidMobile = /^[6-9]\d{9}$/.test(b["1.2"].trim());
+			return !!(b["1.1"].trim() && isValidMobile && isValidEmail && b["1.4"].trim());
 		}
 		if (step === 2) {
 			return answers.education.every(edu => 
@@ -195,9 +196,9 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 					<Input placeholder="Name*" value={answers.basic_details["1.1"]} onChange={e => handleBasicChange("1.1", e.target.value)} />
 					
 					<div>
-						<Input placeholder="Mobile No.*" type="tel" maxLength={15} value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value.replace(/[^\d+]/g, ''))} />
-						{answers.basic_details["1.2"].length > 0 && answers.basic_details["1.2"].replace(/[^\d+]/g, '').length < 10 && (
-							<p className="text-xs text-rose-500 mt-1">Mobile number must be at least 10 digits.</p>
+						<Input placeholder="Mobile No.*" type="tel" maxLength={10} value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value.replace(/[^\d]/g, ''))} />
+						{answers.basic_details["1.2"].length > 0 && !/^[6-9]\d{9}$/.test(answers.basic_details["1.2"].trim()) && (
+							<p className="text-xs text-rose-500 mt-1">Mobile number must be 10 digits starting with 6, 7, 8, or 9.</p>
 						)}
 					</div>
 					
