@@ -193,8 +193,21 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 				<div className="space-y-4">
 					<h3 className="text-xl font-bold">1. Basic Details</h3>
 					<Input placeholder="Name*" value={answers.basic_details["1.1"]} onChange={e => handleBasicChange("1.1", e.target.value)} />
-					<Input placeholder="Mobile No.*" type="tel" maxLength={10} value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value.replace(/[^\d+]/g, ''))} />
-					<Input placeholder="Email ID*" type="email" value={answers.basic_details["1.3"]} onChange={e => handleBasicChange("1.3", e.target.value)} />
+					
+					<div>
+						<Input placeholder="Mobile No.*" type="tel" maxLength={15} value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value.replace(/[^\d+]/g, ''))} />
+						{answers.basic_details["1.2"].length > 0 && answers.basic_details["1.2"].replace(/[^\d+]/g, '').length < 10 && (
+							<p className="text-xs text-rose-500 mt-1">Mobile number must be at least 10 digits.</p>
+						)}
+					</div>
+					
+					<div>
+						<Input placeholder="Email ID*" type="email" value={answers.basic_details["1.3"]} onChange={e => handleBasicChange("1.3", e.target.value)} />
+						{answers.basic_details["1.3"].length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answers.basic_details["1.3"].trim()) && (
+							<p className="text-xs text-rose-500 mt-1">Please enter a valid email address.</p>
+						)}
+					</div>
+
 					<Input placeholder="Location*" value={answers.basic_details["1.4"]} onChange={e => handleBasicChange("1.4", e.target.value)} />
 					<Input placeholder="Linkedin profile" value={answers.basic_details["1.5"]} onChange={e => handleBasicChange("1.5", e.target.value)} />
 					<Input placeholder="Github link" value={answers.basic_details["1.6"]} onChange={e => handleBasicChange("1.6", e.target.value)} />
