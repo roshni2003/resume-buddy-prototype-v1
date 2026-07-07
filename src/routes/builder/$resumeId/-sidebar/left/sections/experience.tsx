@@ -306,50 +306,56 @@ function InlineExperienceForm({
 					name="description"
 					render={({ field }) => (
 						<FormItem>
-							<div className="flex items-end justify-between">
-								<FormLabel className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+							<div className="mb-3 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-end sm:justify-between gap-y-2 sm:gap-y-0">
+								<FormLabel className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest block w-full sm:w-auto sm:mb-2">
 									<Trans>Description</Trans>
 								</FormLabel>
-								<div
-									className="relative mb-2 rounded-xl bg-gray-50 dark:bg-muted/50 p-1"
-									onMouseEnter={() => setIsHovering(true)}
-									onMouseLeave={() => setIsHovering(false)}
-								>
-									{shouldGlow && (
-										<>
-											<div className="absolute -inset-1 rounded-full bg-emerald-400/40 blur-md animate-ai-glow" />
-											<div className="absolute -inset-2 rounded-full border border-emerald-300/50 animate-ai-glow-ring" />
-										</>
-									)}
-									<AIGenerateButton
-										resumeId={useResumeStore.getState().resume.id}
-										type="experience"
-										data={{
-											company: form.getValues("company"),
-											position: form.getValues("position"),
-											description,
-										}}
-										onGenerated={handleAIGenerated}
-										roundsUsed={roundsUsed}
-										maxRounds={maxRounds}
-										isWordCountValid={isWordCountValid}
-										disabled={roundsUsed >= maxRounds || !isWordCountValid}
-										className="relative z-10 font-bold text-black shadow-lg shadow-emerald-500/30 hover:text-black"
-									/>
+
+								<div className="w-fit origin-left sm:origin-right scale-90 sm:scale-100 order-last sm:order-none sm:ml-auto mt-1 sm:mt-0">
+									<div
+										className="relative rounded-xl bg-gray-50 p-1 sm:mb-2"
+										onMouseEnter={() => setIsHovering(true)}
+										onMouseLeave={() => setIsHovering(false)}
+									>
+										{shouldGlow && (
+											<>
+												<div className="absolute -inset-1 rounded-full bg-blue-400/40 blur-md animate-ai-glow" />
+												<div className="absolute -inset-2 rounded-full border border-blue-300/50 animate-ai-glow-ring" />
+											</>
+										)}
+
+										<AIGenerateButton
+											resumeId={useResumeStore.getState().resume.id}
+											type="experience"
+											data={{
+												position: form.getValues("position"),
+												company: form.getValues("company"),
+												summary: description,
+											}}
+											onGenerated={handleAIGenerated}
+											roundsUsed={roundsUsed}
+											maxRounds={maxRounds}
+											isWordCountValid={isWordCountValid}
+											disabled={roundsUsed >= maxRounds || !isWordCountValid}
+											className="relative z-10 font-bold text-black shadow-lg shadow-blue-500/30 hover:text-black"
+										/>
+									</div>
+								</div>
+
+								<div className="w-full flex flex-col sm:flex-row sm:items-center gap-2 order-2 sm:order-none sm:mb-3">
+									<div className="w-fit">
+										<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+											<SparkleIcon weight="fill" className="h-3 w-3" />
+											AI Assisted
+										</span>
+									</div>
+
+									<span className="text-xs text-slate-700 dark:text-gray-400">
+										Turn bullet points into standout achievements.
+									</span>
 								</div>
 							</div>
-
-							{/* AI badge */}
-							<div className="flex items-center gap-2">
-								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-									<SparkleIcon weight="fill" className="h-3 w-3" />
-									AI Assisted
-								</span>
-								<span className="text-xs text-slate-700 dark:text-gray-400">
-									Turn your work into impactful resume bullet points.
-								</span>
-							</div>
-
+							
 							<FormControl>
 								<RichInput
 									{...field}

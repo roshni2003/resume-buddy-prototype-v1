@@ -1,6 +1,6 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-// import { ChartBar} from "@phosphor-icons/react";
+import { ChartBar } from "@phosphor-icons/react";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -162,6 +162,15 @@ function DashboardHeader() {
 						Resume Buddy
 					</span>
 				</Link>
+
+				{/* <Link
+					to="/dashboard/admin/mixpanel"
+					activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+					className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
+				>
+					<ChartBar size={18} weight="bold" />
+					<span>Insights</span>
+				</Link> */}
 
 				{/* Right: Settings & User menu */}
 				<div className="flex items-center gap-2 sm:gap-4">

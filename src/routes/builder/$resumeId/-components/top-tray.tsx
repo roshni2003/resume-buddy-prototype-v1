@@ -11,6 +11,7 @@ import {
 	SwapIcon,
 	TextTIcon,
 	ListIcon,
+	DotsThreeVertical as DotsThreeVerticalIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -51,6 +52,7 @@ import { downloadFromUrl, generateFilename } from "@/utils/file";
 import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
 import { AnimatedEyes, DeadEyes } from "./animated-eyes";
+import { openZoeTour } from "@/components/editor/CoachMarks";
 
 function getWeekNumber(date: Date) {
 	const d = new Date(date);
@@ -286,7 +288,7 @@ export function BuilderTopTray() {
 		}
 	};
 
-	const buttons = (
+		const secondaryButtons = (
 		<>
 				{/* Colors Button */}
 				<Popover>
@@ -294,12 +296,12 @@ export function BuilderTopTray() {
 						<Button
 							size="sm"
 							variant="outline"
-							className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
+							className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 							aria-label="Colors"
 							data-tour="btn-colors"
 						>
 							<PaletteIcon className="h-4 w-4" />
-							<span className="inline sm:hidden lg:inline">
+							<span className="hidden sm:inline">
 								<Trans>Colors</Trans>
 							</span>
 						</Button>
@@ -326,12 +328,12 @@ export function BuilderTopTray() {
 						<Button
 							size="sm"
 							variant="outline"
-							className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
+							className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 							aria-label="Fonts"
 							data-tour="btn-fonts"
 						>
 							<TextTIcon className="h-4 w-4" />
-							<span className="inline sm:hidden lg:inline">
+							<span className="hidden sm:inline">
 								<Trans>Fonts</Trans>
 							</span>
 						</Button>
@@ -356,12 +358,12 @@ export function BuilderTopTray() {
 					size="sm"
 					variant="outline"
 					onClick={() => openDialog("resume.template.gallery", undefined)}
-					className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
+					className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 					aria-label="Templates"
 					data-tour="btn-templates"
 				>
 					<SwapIcon className="h-4 w-4" />
-					<span className="inline sm:hidden lg:inline">
+					<span className="hidden sm:inline">
 						<Trans>Templates</Trans>
 					</span>
 				</Button>
@@ -369,12 +371,12 @@ export function BuilderTopTray() {
 				{/* Final Review Button with Warning */}
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<div className="shrink-0 w-full sm:w-auto">
+						<div className="shrink-0">
 							<Button
 								size="sm"
 								variant="outline"
 								className={cn(
-									"flex w-full justify-start h-9 gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2",
+									"flex w-auto justify-center h-9 gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2",
 									"border-0 shadow-sm transition-all duration-300",
 									"!bg-gradient-to-r !from-indigo-600 !to-purple-600 !text-white",
 									"hover:!from-indigo-700 hover:!to-purple-700",
@@ -395,7 +397,7 @@ export function BuilderTopTray() {
 										<AnimatedEyes />
 									</motion.div>
 								)}
-								<span className="inline sm:hidden lg:inline">
+								<span className="hidden sm:inline">
 									<Trans>Final Review</Trans>
 								</span>
 							</Button>
@@ -421,25 +423,29 @@ export function BuilderTopTray() {
 						size="sm"
 						variant="outline"
 						onClick={() => setShowReviewDrawer(true)}
-						className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
+						className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 						aria-label="View Last Review"
 						title="View your last review results"
 					>
 						<ShieldWarningIcon className="h-4 w-4" />
-						<span className="inline sm:hidden lg:inline">
+						<span className="hidden sm:inline">
 							<Trans>View Review</Trans>
 						</span>
 					</Button>
 				)}
 
-				{/* Download Dropdown */}
+				</>
+	);
+
+	const downloadButton = (
+		<>{/* Download Dropdown */}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
 							size="sm"
 							variant="default"
 							disabled={isPrinting}
-							className="flex w-full h-9 justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2 bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition-all"
+							className="flex h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2 bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition-all"
 							aria-label="Download"
 							data-tour="btn-download"
 						>
@@ -448,7 +454,7 @@ export function BuilderTopTray() {
 							) : (
 								<DownloadSimpleIcon className="size-4" />
 							)}
-							<span className="font-medium">
+							<span className="font-medium hidden sm:inline">
 								<Trans>Download</Trans>
 							</span>
 						</Button>
@@ -463,7 +469,7 @@ export function BuilderTopTray() {
 							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
 						>
 							<FilePdfIcon className="size-4 text-red-500" />
-							<span className="font-medium">Download PDF</span>
+							<span className="font-medium hidden sm:inline">Download PDF</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={onDownloadDocx}
@@ -471,37 +477,26 @@ export function BuilderTopTray() {
 							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
 						>
 							<MicrosoftWordLogoIcon className="size-4 text-blue-500" />
-							<span className="font-medium">Download Word</span>
+							<span className="font-medium hidden sm:inline">Download Word</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
-				</DropdownMenu>
-		</>
+				</DropdownMenu></>
 	);
 
 	return (
 		<>
-			{/* Desktop View */}
-			<div className="hidden sm:flex items-center justify-end gap-2">
-				{buttons}
-			</div>
-
-			{/* Mobile View */}
-			<div className="flex items-center justify-end sm:hidden">
-				<Sheet>
-					<SheetTrigger asChild>
-						<Button size="icon" variant="ghost" aria-label="Menu" className="mr-1">
-							<ListIcon className="h-6 w-6" />
-						</Button>
-					</SheetTrigger>
-					<SheetContent side="right" className="w-[280px] p-4 flex flex-col gap-4 border-border">
-						<SheetHeader className="text-left mb-2">
-							<SheetTitle>Menu</SheetTitle>
-						</SheetHeader>
-						<div className="flex flex-col gap-3">
-							{buttons}
-						</div>
-					</SheetContent>
-				</Sheet>
+									{/* Unified Responsive View */}
+			<div className="flex items-center justify-start sm:justify-end gap-2 w-max sm:w-auto pb-1 sm:pb-0">
+				{secondaryButtons}
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={openZoeTour}
+					className="shrink-0 group flex sm:hidden items-center gap-2 rounded-full border border-fuchsia-400/40 bg-gradient-to-r from-fuchsia-500/15 to-violet-500/15 px-3 py-1.5 text-xs font-medium text-fuchsia-700 dark:text-fuchsia-200 transition"
+				>
+					✨ How to Use Zoe
+				</Button>
+				{downloadButton}
 			</div>
 
 			{/* Review Drawer */}

@@ -100,7 +100,7 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 	};
 
 	return (
-		<DialogContent className="!w-[576px] !max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
+		<DialogContent className="w-full max-w-[95vw] sm:max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
 			<div className="flex items-start justify-between mb-4">
 				<div>
 					<h2 className="font-ibm-plex-sans text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Add languages</h2>
@@ -223,7 +223,7 @@ export function UpdateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 	const { blockEvents, requestClose } = useFormBlocker(form);
 
 	return (
-		<DialogContent {...blockEvents} className="!w-[576px] !max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
+		<DialogContent {...blockEvents} className="w-full max-w-[95vw] sm:max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-x-2">
 					<PencilSimpleLineIcon />

@@ -81,7 +81,7 @@ export function BasicsSectionForm() {
 		<Form {...form}>
 			<form onChange={form.handleSubmit(onSubmit)}>
 				{/* 2-column grid */}
-				<div className="grid grid-cols-2 gap-x-6 gap-y-5">
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
 
 					{/* FULL NAME */}
 					<FormField

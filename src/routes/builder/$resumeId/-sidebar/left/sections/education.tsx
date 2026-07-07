@@ -101,7 +101,7 @@ export function EducationSectionBuilder() {
 
 	return (
 		<SectionBase type="education">
-			<div className="flex flex-col gap-4 p-4">
+			<div className="flex flex-col gap-4 px-0 py-4 sm:p-4">
 
 				{section.items.map((item) => {
 					// Calculate date range display for the toggle
@@ -124,21 +124,21 @@ export function EducationSectionBuilder() {
 					return (
 						<div
 							key={item.id}
-							className="relative flex items-start gap-3 rounded-2xl border border-gray-100 dark:border-border bg-gray-50 dark:bg-card p-4"
+							className="relative flex items-start gap-2 sm:gap-3 rounded-none sm:rounded-2xl border-y sm:border border-gray-100 dark:border-border bg-gray-50 dark:bg-card p-4 sm:p-5"
 							style={{ borderLeft: "4px solid #10b981" }}
 						>
 							{/* Timeline dot */}
-							<div className="mt-2 flex-shrink-0 h-3.5 w-3.5 rounded-full border-[3px] border-emerald-100 bg-emerald-500" />
+							{/* <div className="mt-2 flex-shrink-0 h-3.5 w-3.5 rounded-full border-[3px] border-emerald-100 bg-emerald-500" /> */}
 
 							{/* All fields */}
 							<div className="flex flex-1 flex-col gap-3 min-w-0">
 								{/* Education Type Toggle */}
-								<div className="flex rounded-lg bg-gray-100 dark:bg-muted p-1 w-max">
+								<div className="flex w-full sm:w-max rounded-lg bg-gray-100 dark:bg-muted p-1">
 									<button
 										type="button"
 										onClick={() => handleChange(item.id, "college", "School")}
 										className={cn(
-											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
+											"flex-1 sm:flex-none px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
 											item.college === "School"
 												? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm"
 												: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
@@ -150,20 +150,20 @@ export function EducationSectionBuilder() {
 										type="button"
 										onClick={() => handleChange(item.id, "college", "College")}
 										className={cn(
-											"px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
+											"flex-1 sm:flex-none px-4 py-1.5 rounded-md text-xs font-semibold transition-all",
 											(!item.college || item.college === "College")
 												? "bg-white dark:bg-card text-emerald-600 dark:text-emerald-400 shadow-sm"
 												: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
 										)}
 									>
-										College/University
+										College
 									</button>
 								</div>
 
 								{/* School Fields */}
 								{item.college === "School" ? (
 									<>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>School Name</Trans>
@@ -187,7 +187,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 										</div>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Start Date</Trans>
@@ -212,7 +212,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 										</div>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Percentage / CGPA</Trans>
@@ -229,7 +229,7 @@ export function EducationSectionBuilder() {
 								) : (
 									/* College Fields */
 									<>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Institution Name</Trans>
@@ -253,7 +253,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 										</div>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Specialization</Trans>
@@ -277,7 +277,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 										</div>
-										<div className="grid grid-cols-3 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Start Date</Trans>
@@ -317,8 +317,12 @@ export function EducationSectionBuilder() {
 								)}
 
 								{/* Currently studying toggle */}
-								<div className="flex items-center gap-2 pl-0.5">
+								<div className="flex items-center justify-between sm:justify-start gap-2 pl-0.5 mt-1 sm:mt-0 w-full">
+									<span className="text-sm text-gray-600 dark:text-gray-400 font-medium order-1 sm:order-2">
+										<Trans>Currently studying here</Trans>
+									</span>
 									<Switch
+										className="order-2 sm:order-1"
 										checked={item.currentlyStudyingHere || false}
 										onCheckedChange={(val) => {
 											handleChange(item.id, "currentlyStudyingHere", val);
@@ -327,11 +331,8 @@ export function EducationSectionBuilder() {
 											}
 										}}
 									/>
-									<span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-										<Trans>Currently studying here</Trans>
-									</span>
 									{dateRange && (
-										<span className="ml-2 text-xs text-gray-400 dark:text-gray-500">{dateRange}</span>
+										<span className="hidden sm:inline-block ml-2 text-xs text-gray-400 dark:text-gray-500 order-3">{dateRange}</span>
 									)}
 								</div>
 
@@ -343,7 +344,7 @@ export function EducationSectionBuilder() {
 									<RichInput
 										value={item.description || ""}
 										onChange={(val) => handleChange(item.id, "description", val)}
-										className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-muted/50"
+										className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-muted/50 min-h-[120px]"
 									/>
 								</div>
 							</div>

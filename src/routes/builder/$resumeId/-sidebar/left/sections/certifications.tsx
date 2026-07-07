@@ -60,16 +60,19 @@ export function CertificationsSectionBuilder() {
 
 	return (
 		<SectionBase type="certifications">
-			<div className="flex flex-col gap-4 p-4">
+			<div className="flex flex-col gap-4 px-0 py-4 sm:p-4">
 				{section.items.map((item) => (
 					<div
 						key={item.id}
-						className="relative flex items-start gap-4 rounded-3xl border border-gray-100 dark:border-border bg-gray-50/50 dark:bg-card p-4"
+						className="relative flex items-start gap-2 sm:gap-4 rounded-none sm:rounded-3xl border-y sm:border border-gray-100 dark:border-border bg-gray-50/50 dark:bg-card p-4 sm:p-5"
 						style={{ borderLeft: "4px solid #10b981" }}
 					>
-						{/* Left Icon */}
-						<div className="flex-shrink-0 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/30">
-							<SealCheck weight="fill" className="h-6 w-6 text-emerald-500" />
+						{/* Left Icon - Desktop Only */}
+						<div className="hidden md:flex flex-shrink-0 mt-1 h-10 w-10 items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/30">
+							<SealCheck
+								weight="fill"
+								className="h-6 w-6 text-emerald-500"
+							/>
 						</div>
 
 						{/* Fields Container */}
@@ -88,7 +91,7 @@ export function CertificationsSectionBuilder() {
 							</div>
 
 							{/* Row 2: Issuer + Date */}
-							<div className="grid grid-cols-2 gap-3">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 								<div>
 									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 										<Trans>Issuer</Trans>
@@ -127,14 +130,15 @@ export function CertificationsSectionBuilder() {
 							</div>
 
 							{/* Show link in title toggle */}
-							<div className="flex items-center gap-2 pl-0.5">
+							<div className="flex items-center justify-between sm:justify-start gap-2 pl-0.5 mt-1 sm:mt-0 w-full">
+								<span className="text-sm text-gray-600 dark:text-gray-400 font-medium order-1 sm:order-2">
+									<Trans>Show link in title</Trans>
+								</span>
 								<Switch
+									className="order-2 sm:order-1"
 									checked={item.options?.showLinkInTitle || false}
 									onCheckedChange={(val) => handleChange(item.id, "options.showLinkInTitle", val)}
 								/>
-								<span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-									<Trans>Show link in title</Trans>
-								</span>
 							</div>
 
 							{/* Description */}
@@ -145,7 +149,7 @@ export function CertificationsSectionBuilder() {
 								<RichInput
 									value={item.description || ""}
 									onChange={(val) => handleChange(item.id, "description", val)}
-									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
+									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card min-h-[120px]"
 								/>
 							</div>
 						</div>
