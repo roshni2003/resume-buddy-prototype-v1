@@ -166,7 +166,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 	// Tooltip placement — pick best spot to avoid covering target
 	const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
 	const vh = typeof window !== "undefined" ? window.innerHeight : 800;
-	const TOOLTIP_W = 360;
+	const TOOLTIP_W = Math.min(360, vw - 32);
 	const TOOLTIP_H = 220;
 
 	let tipStyle: React.CSSProperties = {
@@ -313,7 +313,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 					))}
 				</div>
 
-				<div className="mt-4 flex items-center justify-between gap-2">
+				<div className="mt-4 flex flex-wrap items-center justify-between gap-2">
 					<button
 						onClick={finish}
 						className="rounded-full px-3 py-1.5 text-xs text-slate-500 transition hover:text-slate-900 dark:text-white/70 dark:hover:text-white"
