@@ -59,16 +59,16 @@ export function VolunteerSectionBuilder() {
 
 	return (
 		<SectionBase type="volunteer">
-			<div className="flex flex-col gap-4 p-4">
+			<div className="flex flex-col gap-4 px-0 py-4 sm:p-4">
 
 				{section.items.map((item) => (
 					<div
 						key={item.id}
-						className="relative flex items-start gap-3 rounded-2xl border border-gray-100 dark:border-border bg-gray-50 dark:bg-muted/50 p-4"
+						className="relative flex items-start gap-2 sm:gap-3 rounded-none sm:rounded-2xl border-y sm:border border-gray-100 dark:border-border bg-gray-50 dark:bg-muted/50 p-4 sm:p-5"
 						style={{ borderLeft: "4px solid #f87171" }}
 					>
 						{/* Heart icon — vertically centred to the first row of inputs */}
-						<div className="mt-2 flex-shrink-0">
+						<div className="mt-2 flex-shrink-0 hidden md:flex items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/30">
 							<Heart
 								weight="fill"
 								className="h-5 w-5 text-rose-400"
@@ -130,14 +130,15 @@ export function VolunteerSectionBuilder() {
 							</div>
 
 							{/* Show link in title toggle */}
-							<div className="flex items-center gap-2 pl-0.5">
+							<div className="flex items-center justify-between sm:justify-start gap-2 pl-0.5 mt-1 sm:mt-0 w-full">
+								<span className="text-sm text-gray-600 dark:text-gray-400 font-medium order-1 sm:order-2">
+									<Trans>Show link in title</Trans>
+								</span>
 								<Switch
+									className="order-2 sm:order-1"
 									checked={item.options?.showLinkInTitle || false}
 									onCheckedChange={(val) => handleChange(item.id, "options.showLinkInTitle", val)}
 								/>
-								<span className="text-sm text-gray-600 font-medium">
-									<Trans>Show link in title</Trans>
-								</span>
 							</div>
 
 							{/* Description rich input */}
