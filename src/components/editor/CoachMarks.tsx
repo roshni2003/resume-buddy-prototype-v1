@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState, useCallback } from "react";
 import { Sparkles, ChevronLeft, ChevronRight, Wand2 } from "lucide-react";
+import { useBuilderSidebarStore } from "@/routes/builder/$resumeId/-store/sidebar";
 import { cn } from "@/utils/style";
 
 export type CoachStep = {
@@ -113,9 +114,19 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 
 	const step = steps[idx];
 
+		// Auto-toggle sidebar on mobile based on the target
+	useEffect(() => {
+		if (!active || !step) return;
+		if (typeof window !== "undefined" && window.innerWidth < 640) {
+			const isSidebarTarget = step.target.startsWith("section-");
+			useBuilderSidebarStore.getState().setLeftSidebarCollapsed(!isSidebarTarget);
+		}
+	}, [active, step]);
+	
 	const measure = useCallback(() => {
 		if (!step) return;
-		const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+		let el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+
 		if (!el) {
 			setMissing(true);
 			setRect(null);
@@ -153,13 +164,28 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 
 	if (!active) return null;
 
-	const PAD = 10;
+	const PAD = typeof window !== 'undefined' && window.innerWidth < 640 ? 4 : 10;
+	let hlLeft = rect ? rect.left - PAD : 0;
+	let hlWidth = rect ? rect.width + PAD * 2 : 0;
+	let hlTop = rect ? rect.top - PAD : 0;
+	let hlHeight = rect ? rect.height + PAD * 2 : 0;
+
+	if (typeof window !== 'undefined' && rect) {
+		if (hlLeft < 4) {
+			hlWidth -= (4 - hlLeft);
+			hlLeft = 4;
+		}
+		if (hlLeft + hlWidth > window.innerWidth - 4) {
+			hlWidth = window.innerWidth - 4 - hlLeft;
+		}
+	}
+
 	const highlightStyle = rect
 		? {
-			top: rect.top - PAD,
-			left: rect.left - PAD,
-			width: rect.width + PAD * 2,
-			height: rect.height + PAD * 2,
+			top: hlTop,
+			left: hlLeft,
+			width: hlWidth,
+			height: hlHeight,
 		}
 		: null;
 
@@ -254,7 +280,7 @@ export function CoachMarks({ steps = ZOE_STEPS }: { steps?: CoachStep[] }) {
 						className="pointer-events-none absolute zoe-float"
 						style={{
 							top: highlightStyle.top < 20 ? highlightStyle.top + highlightStyle.height - 18 : highlightStyle.top - 18,
-							left: highlightStyle.left + highlightStyle.width - 18,
+							left: typeof window !== "undefined" ? Math.min(highlightStyle.left + highlightStyle.width - 18, window.innerWidth - 44) : highlightStyle.left + highlightStyle.width - 18,
 							transition: "all 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
 						}}
 					>
