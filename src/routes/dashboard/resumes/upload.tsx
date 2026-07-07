@@ -577,7 +577,7 @@ function UploadRouteComponent() {
 								</div>
 
 								{/* Action Buttons */}
-								<div className="flex items-center justify-between border-border border-t pt-5">
+								<div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-border border-t pt-5">
 									<Button
 										variant="outline"
 										onClick={() => {
@@ -585,14 +585,14 @@ function UploadRouteComponent() {
 											setFile(null);
 											setUploadState("idle");
 										}}
-										className="cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+										className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 									>
 										Try another file
 									</Button>
 
 									<Button
 										onClick={() => setUploadState("choose_template")}
-										className="cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
+										className="w-full sm:w-auto cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										Choose a Template
 										<ArrowLeftIcon className="ml-1.5 size-4 rotate-180" />
@@ -625,18 +625,18 @@ function UploadRouteComponent() {
 									))}
 								</div>
 
-								<div className="flex items-center justify-between border-border border-t pt-5">
+								<div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-border border-t pt-5">
 									<Button
 										variant="outline"
 										onClick={() => setUploadState("parsed")}
-										className="cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+										className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 									>
 										<ArrowLeftIcon className="mr-2" /> Back to Review
 									</Button>
 									<Button
 										onClick={handleConfirm}
 										disabled={isCreating}
-										className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white min-w-32"
+										className="w-full sm:w-auto cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white min-w-32"
 									>
 										{isCreating ? (
 											<>
