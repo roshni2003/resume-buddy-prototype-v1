@@ -109,6 +109,11 @@ function formatBytes(bytes: number) {
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function stripHtml(html: string) {
+	if (!html) return "";
+	return html.replace(/<[^>]*>?/gm, '');
+}
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
@@ -209,12 +214,12 @@ function UploadRouteComponent() {
 				email: resumeData.basics?.email || "",
 				phone: resumeData.basics?.phone || "",
 				location: resumeData.basics?.location || "",
-				summary: resumeData.summary?.content || "",
+				summary: stripHtml(resumeData.summary?.content || ""),
 				experience: (resumeData.sections?.experience?.items || []).map((item: any) => ({
 					company: item.company || "",
 					role: item.position || "",
 					duration: item.period || "",
-					description: item.description || "",
+					description: stripHtml(item.description || ""),
 				})),
 				education: (resumeData.sections?.education?.items || []).map((item: any) => ({
 					institution: item.institution || "",
