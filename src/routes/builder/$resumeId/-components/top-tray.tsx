@@ -10,6 +10,7 @@ import {
 	ShieldWarningIcon,
 	SwapIcon,
 	TextTIcon,
+	ListIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -40,6 +41,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ReviewDrawer } from "@/components/ui/review-drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDialogStore } from "@/dialogs/store";
@@ -284,21 +286,20 @@ export function BuilderTopTray() {
 		}
 	};
 
-	return (
+	const buttons = (
 		<>
-			<div className="flex items-center justify-end gap-1 overflow-visible sm:gap-2">
 				{/* Colors Button */}
 				<Popover>
 					<PopoverTrigger asChild>
 						<Button
 							size="sm"
 							variant="outline"
-							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+							className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
 							aria-label="Colors"
 							data-tour="btn-colors"
 						>
 							<PaletteIcon className="h-4 w-4" />
-							<span className="hidden lg:inline">
+							<span className="inline sm:hidden lg:inline">
 								<Trans>Colors</Trans>
 							</span>
 						</Button>
@@ -325,12 +326,12 @@ export function BuilderTopTray() {
 						<Button
 							size="sm"
 							variant="outline"
-							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+							className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
 							aria-label="Fonts"
 							data-tour="btn-fonts"
 						>
 							<TextTIcon className="h-4 w-4" />
-							<span className="hidden lg:inline">
+							<span className="inline sm:hidden lg:inline">
 								<Trans>Fonts</Trans>
 							</span>
 						</Button>
@@ -355,12 +356,12 @@ export function BuilderTopTray() {
 					size="sm"
 					variant="outline"
 					onClick={() => openDialog("resume.template.gallery", undefined)}
-					className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+					className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
 					aria-label="Templates"
 					data-tour="btn-templates"
 				>
 					<SwapIcon className="h-4 w-4" />
-					<span className="hidden lg:inline">
+					<span className="inline sm:hidden lg:inline">
 						<Trans>Templates</Trans>
 					</span>
 				</Button>
@@ -368,12 +369,12 @@ export function BuilderTopTray() {
 				{/* Final Review Button with Warning */}
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<div className="shrink-0">
+						<div className="shrink-0 w-full sm:w-auto">
 							<Button
 								size="sm"
 								variant="outline"
 								className={cn(
-									"flex shrink-0 items-center justify-center gap-1.5 px-2 sm:h-9 sm:w-auto sm:gap-2 sm:px-3",
+									"flex w-full justify-start h-9 gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2",
 									"border-0 shadow-sm transition-all duration-300",
 									"!bg-gradient-to-r !from-indigo-600 !to-purple-600 !text-white",
 									"hover:!from-indigo-700 hover:!to-purple-700",
@@ -394,7 +395,7 @@ export function BuilderTopTray() {
 										<AnimatedEyes />
 									</motion.div>
 								)}
-								<span className="hidden lg:inline">
+								<span className="inline sm:hidden lg:inline">
 									<Trans>Final Review</Trans>
 								</span>
 							</Button>
@@ -420,12 +421,12 @@ export function BuilderTopTray() {
 						size="sm"
 						variant="outline"
 						onClick={() => setShowReviewDrawer(true)}
-						className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+						className="h-9 w-full justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2"
 						aria-label="View Last Review"
 						title="View your last review results"
 					>
 						<ShieldWarningIcon className="h-4 w-4" />
-						<span className="hidden lg:inline">
+						<span className="inline sm:hidden lg:inline">
 							<Trans>View Review</Trans>
 						</span>
 					</Button>
@@ -438,7 +439,7 @@ export function BuilderTopTray() {
 							size="sm"
 							variant="default"
 							disabled={isPrinting}
-							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-3 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 sm:h-9 sm:w-auto sm:gap-2 sm:px-4 transition-all"
+							className="flex w-full h-9 justify-start gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2 bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition-all"
 							aria-label="Download"
 							data-tour="btn-download"
 						>
@@ -474,10 +475,37 @@ export function BuilderTopTray() {
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
+		</>
+	);
 
-				{/* Review Drawer */}
-				{reviewResult && <ReviewDrawer result={reviewResult} />}
+	return (
+		<>
+			{/* Desktop View */}
+			<div className="hidden sm:flex items-center justify-end gap-2">
+				{buttons}
 			</div>
+
+			{/* Mobile View */}
+			<div className="flex items-center justify-end sm:hidden">
+				<Sheet>
+					<SheetTrigger asChild>
+						<Button size="icon" variant="ghost" aria-label="Menu" className="mr-1">
+							<ListIcon className="h-6 w-6" />
+						</Button>
+					</SheetTrigger>
+					<SheetContent side="right" className="w-[280px] p-4 flex flex-col gap-4 border-border">
+						<SheetHeader className="text-left mb-2">
+							<SheetTitle>Menu</SheetTitle>
+						</SheetHeader>
+						<div className="flex flex-col gap-3">
+							{buttons}
+						</div>
+					</SheetContent>
+				</Sheet>
+			</div>
+
+			{/* Review Drawer */}
+			{reviewResult && <ReviewDrawer result={reviewResult} />}
 			<AlertDialog open={showLastAttemptConfirm} onOpenChange={setShowLastAttemptConfirm}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
