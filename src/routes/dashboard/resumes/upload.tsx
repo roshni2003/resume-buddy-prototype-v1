@@ -369,11 +369,11 @@ function UploadRouteComponent() {
 								)}
 
 								{/* Footer Actions */}
-								<div className="flex justify-end gap-3 border-border border-t pt-5">
-									<Link to="/dashboard/resumes">
+								<div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-border border-t pt-5">
+									<Link to="/dashboard/resumes" className="w-full sm:w-auto">
 										<Button
 											variant="outline"
-											className="cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+											className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 										>
 											Cancel
 										</Button>
@@ -381,7 +381,7 @@ function UploadRouteComponent() {
 									<Button
 										onClick={handleUpload}
 										disabled={!file || !!fileError}
-										className="cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
+										className="w-full sm:w-auto cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										<CloudArrowUpIcon className="mr-1.5 size-4" />
 										Upload & Parse with Zoe
