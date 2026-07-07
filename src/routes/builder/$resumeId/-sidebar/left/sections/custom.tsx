@@ -206,7 +206,7 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 										<XIcon className="h-4 w-4" weight="bold" />
 									</button>
 
-									<div className="grid grid-cols-2 gap-3 w-full pr-6">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pr-6">
 										{Object.entries(item).map(([k, v]) => {
 											if (k === "id" || k === "hidden" || typeof v === "boolean" || k === "visible") return null;
 

@@ -382,7 +382,7 @@ export function ProfilesSectionBuilder() {
 								<span>&bull;</span> ADD A NETWORK
 							</div>
 
-							<div className="flex flex-wrap gap-3">
+							<div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
 								{socialNetworks.map((network) => (
 									<button
 										key={network.name}

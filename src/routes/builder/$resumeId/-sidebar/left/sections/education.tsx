@@ -133,7 +133,7 @@ export function EducationSectionBuilder() {
 							{/* All fields */}
 							<div className="flex flex-1 flex-col gap-3 min-w-0">
 								{/* Education Type Toggle */}
-								<div className="flex rounded-lg bg-gray-100 dark:bg-muted p-1 w-max">
+								<div className="flex w-full sm:w-max rounded-lg bg-gray-100 dark:bg-muted p-1">
 									<button
 										type="button"
 										onClick={() => handleChange(item.id, "college", "School")}
@@ -163,7 +163,7 @@ export function EducationSectionBuilder() {
 								{/* School Fields */}
 								{item.college === "School" ? (
 									<>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>School Name</Trans>
@@ -187,7 +187,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 										</div>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Start Date</Trans>
@@ -212,7 +212,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 										</div>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Percentage / CGPA</Trans>
@@ -229,7 +229,7 @@ export function EducationSectionBuilder() {
 								) : (
 									/* College Fields */
 									<>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Institution Name</Trans>
@@ -253,7 +253,7 @@ export function EducationSectionBuilder() {
 												/>
 											</div>
 										</div>
-										<div className="grid grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
 												<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 													<Trans>Specialization</Trans>
@@ -343,7 +343,7 @@ export function EducationSectionBuilder() {
 									<RichInput
 										value={item.description || ""}
 										onChange={(val) => handleChange(item.id, "description", val)}
-										className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-muted/50"
+										className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-muted/50 min-h-[120px]"
 									/>
 								</div>
 							</div>

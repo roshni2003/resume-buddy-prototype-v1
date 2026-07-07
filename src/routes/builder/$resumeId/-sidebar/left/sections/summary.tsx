@@ -84,54 +84,59 @@ export function SummarySectionBuilder() {
 			<div className="flex flex-col gap-6 p-5">
 				<FormProvider {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
-						<div className="mb-3 flex items-end justify-between">
-							<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest">
-								Professional Summary
-							</label>
+						<div className="mb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+							<div className="flex flex-col gap-2">
+								<label className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest block">
+									Professional Summary
+								</label>
 
-							<div
-								className="relative mb-2 rounded-xl bg-gray-50 p-1"
-								onMouseEnter={() => setIsHovering(true)}
-								onMouseLeave={() => setIsHovering(false)}
-							>
-								{/* Glow effects - active on initial load OR hover */}
-								{shouldGlow && (
-									<>
-										<div className="absolute -inset-1 rounded-full bg-amber-400/40 blur-md animate-ai-glow" />
-										<div className="absolute -inset-2 rounded-full border border-amber-300/50 animate-ai-glow-ring" />
-									</>
-								)}
+								<div className="flex flex-col sm:flex-row sm:items-center gap-2">
+									<div className="w-fit">
+										<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+											<SparkleIcon weight="fill" className="h-3 w-3" />
+											AI Assisted
+										</span>
+									</div>
 
-								<AIGenerateButton
-									resumeId={resumeId}
-									type="summary"
-									data={{
-										name: resumeData.basics.name,
-										headline: resumeData.basics.headline,
-										experience: resumeData.sections.experience.items.slice(0, 2),
-										skills: resumeData.sections.skills.items.slice(0, 5).map((skill) => skill.name),
-										currentSummary: content || "",
-									}}
-									onGenerated={handleAIGenerated}
-									roundsUsed={roundsUsed}
-									maxRounds={maxRounds}
-									isWordCountValid={isWordCountValid}
-									disabled={roundsUsed >= maxRounds || !isWordCountValid}
-									className="relative z-10 font-bold text-black shadow-lg shadow-amber-500/30 hover:text-black"
-								/>
+									<span className="text-xs text-slate-700 dark:text-gray-400">
+										Create a recruiter-ready summary in seconds.
+									</span>
+								</div>
 							</div>
-						</div>
 
-						{/* AI Chip */}
-						<div className="mb-3 flex items-center gap-2">
-							<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-								<SparkleIcon weight="fill" className="h-3 w-3" />
-								AI Assisted
-							</span>
+							<div className="w-fit origin-left sm:origin-right scale-90 sm:scale-100 mt-1 sm:mt-0">
+								<div
+									className="relative rounded-xl bg-gray-50 p-1"
+									onMouseEnter={() => setIsHovering(true)}
+									onMouseLeave={() => setIsHovering(false)}
+								>
+									{/* Glow effects - active on initial load OR hover */}
+									{shouldGlow && (
+										<>
+											<div className="absolute -inset-1 rounded-full bg-amber-400/40 blur-md animate-ai-glow" />
+											<div className="absolute -inset-2 rounded-full border border-amber-300/50 animate-ai-glow-ring" />
+										</>
+									)}
 
-							<span className="text-xs text-slate-700 dark:text-gray-400">
-								Create a recruiter-ready summary in seconds.
-							</span>
+									<AIGenerateButton
+										resumeId={resumeId}
+										type="summary"
+										data={{
+											name: resumeData.basics.name,
+											headline: resumeData.basics.headline,
+											experience: resumeData.sections.experience.items.slice(0, 2),
+											skills: resumeData.sections.skills.items.slice(0, 5).map((skill) => skill.name),
+											currentSummary: content || "",
+										}}
+										onGenerated={handleAIGenerated}
+										roundsUsed={roundsUsed}
+										maxRounds={maxRounds}
+										isWordCountValid={isWordCountValid}
+										disabled={roundsUsed >= maxRounds || !isWordCountValid}
+										className="relative z-10 font-bold text-black shadow-lg shadow-amber-500/30 hover:text-black"
+									/>
+								</div>
+							</div>
 						</div>
 
 						{/* Input Area */}

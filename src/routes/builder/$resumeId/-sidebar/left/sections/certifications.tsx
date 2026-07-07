@@ -88,7 +88,7 @@ export function CertificationsSectionBuilder() {
 							</div>
 
 							{/* Row 2: Issuer + Date */}
-							<div className="grid grid-cols-2 gap-3">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 								<div>
 									<label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
 										<Trans>Issuer</Trans>
@@ -145,7 +145,7 @@ export function CertificationsSectionBuilder() {
 								<RichInput
 									value={item.description || ""}
 									onChange={(val) => handleChange(item.id, "description", val)}
-									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
+									className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card min-h-[120px]"
 								/>
 							</div>
 						</div>
