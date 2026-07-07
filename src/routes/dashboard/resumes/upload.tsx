@@ -204,6 +204,29 @@ function UploadRouteComponent() {
 
 		try {
 			const parsedRaw = await api.resumeUpload({ resume_upload: file });
+
+			// Robustly parse and cap skills to prevent AI exaggeration and handle different formats
+			if (parsedRaw.data?.sections?.skills?.items) {
+				let allSkills: string[] = [];
+				parsedRaw.data.sections.skills.items.forEach((item: any) => {
+					if (Array.isArray(item.keywords) && item.keywords.length > 0) {
+						allSkills.push(...item.keywords);
+					} else if (typeof item.keywords === "string" && item.keywords.trim() !== "") {
+						allSkills.push(...item.keywords.split(",").map(s => s.trim()));
+					} else if (item.name) {
+						allSkills.push(...item.name.split(",").map((s: string) => s.trim()));
+					}
+				});
+				
+				// Deduplicate and cap
+				allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 15);
+				
+				// Overwrite the payload so the builder also gets the capped/cleaned skills
+				parsedRaw.data.sections.skills.items = allSkills.length > 0 
+					? [{ name: "Skills", keywords: allSkills }]
+					: [];
+			}
+
 			setFullResumeData(parsedRaw);
 
 			// Map to ParsedResumeData for preview UI
@@ -226,7 +249,9 @@ function UploadRouteComponent() {
 					degree: `${item.degree || ""} ${item.area || ""}`.trim(),
 					year: item.period || "",
 				})),
-				skills: (resumeData.sections?.skills?.items || []).flatMap((item: any) => item.keywords || [item.name]).filter(Boolean),
+				skills: (resumeData.sections?.skills?.items || [])
+					.flatMap((item: any) => item.keywords || [item.name])
+					.filter(Boolean),
 			};
 
 			setParsedData(mappedData);
