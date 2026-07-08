@@ -758,7 +758,7 @@ function MatchToJobRouteComponent() {
 							<Button
 								onClick={handleConfirmTemplate}
 								disabled={isCreating}
-								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:min-w-32"
+								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:w-auto sm:min-w-32"
 							>
 								{isCreating ? (
 									<>
