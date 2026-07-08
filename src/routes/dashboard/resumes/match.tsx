@@ -283,7 +283,7 @@ function MatchToJobRouteComponent() {
 	};
 
 	return (
-		<div className="space-y-6 max-w-4xl mx-auto py-4 font-sans text-foreground selection:bg-emerald-500/30" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+		<div className="space-y-6 max-w-4xl mx-auto py-4 px-4 md:px-8 font-sans text-foreground selection:bg-emerald-500/30" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 			{/* Header */}
 			{step !== "report" && step !== "loading" && (
 				<div className="max-w-2xl mx-auto flex items-center">
@@ -310,7 +310,7 @@ function MatchToJobRouteComponent() {
 						<p className="text-muted-foreground">Zoe will pull keywords and tailor your resume to match.</p>
 					</div>
 
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div className="space-y-1.5">
 							<label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Role</label>
 							<Input
@@ -370,7 +370,7 @@ function MatchToJobRouteComponent() {
 						<p className="text-muted-foreground">We'll tailor it to the job, or build one with you.</p>
 					</div>
 
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<button
 							onClick={() => setStep("pick_resume")}
 							className="cursor-pointer text-left group flex flex-col p-6 rounded-2xl border border-border/50 bg-muted/40 hover:bg-muted/60 hover:border-emerald-500/50 transition-all duration-300 gap-4"
@@ -552,11 +552,11 @@ function MatchToJobRouteComponent() {
 						</button>
 					</div>
 
-					<div className="grid grid-cols-12 gap-6">
+					<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 						{/* Left Column */}
-						<div className="col-span-5 space-y-6">
+						<div className="col-span-1 lg:col-span-5 space-y-6">
 							{/* Match Score */}
-							<div className="rounded-3xl border border-border bg-card/40 p-8 flex items-center gap-8">
+							<div className="rounded-3xl border border-border bg-card/40 p-6 sm:p-8 flex flex-col sm:flex-row items-center text-center sm:text-left gap-6 sm:gap-8">
 								<div className="relative size-28 shrink-0 flex items-center justify-center">
 									<svg className="absolute inset-0 size-full -rotate-90 text-slate-800" viewBox="0 0 120 120">
 										<circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8" />
@@ -575,7 +575,7 @@ function MatchToJobRouteComponent() {
 										<span className="block text-[10px] font-bold text-emerald-700/70 dark:text-emerald-500/70 uppercase tracking-wider mt-0.5">Match</span>
 									</div>
 								</div>
-								<div>
+								<div className="flex flex-col items-center sm:items-start">
 									<div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium mb-3">
 										<CheckCircleIcon weight="fill" /> {matchResult?.verdict ?? "Analyzing..."}
 									</div>
@@ -620,7 +620,7 @@ function MatchToJobRouteComponent() {
 						</div>
 
 						{/* Right Column */}
-						<div className="col-span-7 space-y-6">
+						<div className="col-span-1 lg:col-span-7 space-y-6">
 							{/* Action Plan */}
 							<div className="rounded-3xl border border-border bg-card/40 p-6">
 								<div className="flex items-center gap-2 mb-6">
@@ -652,18 +652,18 @@ function MatchToJobRouteComponent() {
 					</div>
 
 					{/* Footer Actions */}
-					<div className="flex items-center justify-between pt-6 border-t border-border/50">
+					<div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/50 mt-8">
 						<Button
 							variant="outline"
 							onClick={() => navigate({ to: "/dashboard/resumes" })}
-							className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
+							className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground w-full sm:w-auto"
 						>
 							<ArrowLeftIcon className="mr-2" /> Back to Builder
 						</Button>
-						<div className="flex gap-3">
+						<div className="flex flex-col sm:flex-row gap-3">
 							<Button
 								onClick={handleGenerateTailored}
-								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white"
+								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:w-auto"
 							>
 								Generate Tailored Resume
 							</Button>
@@ -748,18 +748,18 @@ function MatchToJobRouteComponent() {
 							))}
 						</div>
 
-						<div className="flex items-center justify-between pt-8 border-t border-border/50 mt-8">
+						<div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-8 border-t border-border/50 mt-8">
 							<Button
 								variant="outline"
 								onClick={() => setStep("report")}
-								className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground"
+								className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground w-full sm:w-auto"
 							>
 								<ArrowLeftIcon className="mr-2" /> Back to Report
 							</Button>
 							<Button
 								onClick={handleConfirmTemplate}
 								disabled={isCreating}
-								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white min-w-32"
+								className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:min-w-32"
 							>
 								{isCreating ? (
 									<>
