@@ -457,7 +457,7 @@ function MatchToJobRouteComponent() {
 										<div>
 											<h3 className="font-semibold text-foreground">{uploadingFile.name}</h3>
 											<p className={`text-xs ${fileError ? "text-rose-400" : "text-foreground0"}`}>
-												{fileError ?? `${(uploadingFile.size / 1024 / 1024).toFixed(1)} MB`}
+												{fileError ?? (uploadingFile.size < 1024 * 1024 ? `${(uploadingFile.size / 1024).toFixed(1)} KB` : `${(uploadingFile.size / 1024 / 1024).toFixed(1)} MB`)}
 											</p>
 										</div>
 									</div>
