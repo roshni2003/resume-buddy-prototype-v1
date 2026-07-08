@@ -131,7 +131,7 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                         contentEditable
                         suppressContentEditableWarning
                         onBlur={handleSchoolChange}
-                        className="section-item-title education-item-title cursor-text text-gray-900 outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+                        className="section-item-title education-item-title cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
                     >
                         {schoolText || "School Name"}
                     </span>
@@ -139,7 +139,7 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                         contentEditable
                         suppressContentEditableWarning
                         onBlur={handleDegreeChange}
-                        className="section-item-metadata education-item-degree-grade shrink-0 cursor-text text-end text-gray-800 outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+                        className="section-item-metadata education-item-degree-grade shrink-0 cursor-text text-end outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
                     >
                         {degreeText || "Degree"}
                     </span>
@@ -151,13 +151,13 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                         contentEditable
                         suppressContentEditableWarning
                         onBlur={handleAreaChange}
-                        className="section-item-metadata education-item-area cursor-text text-gray-700 outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+                        className="section-item-metadata education-item-area cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
                     >
                         {item.area || "Specialization"}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
                         {item.location && (
-                            <span className="section-item-metadata education-item-location shrink-0 text-end text-gray-600">
+                            <span className="section-item-metadata education-item-location shrink-0 text-end">
                                 {item.location}
                                 <span className="mx-1">•</span>
                             </span>
@@ -166,7 +166,7 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                             contentEditable={item.college === "School"}
                             suppressContentEditableWarning={item.college === "School"}
                             onBlur={handlePeriodChange}
-                            className="section-item-metadata education-item-location-period shrink-0 cursor-text text-end text-gray-600 outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+                            className="section-item-metadata education-item-location-period shrink-0 cursor-text text-end outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
                         >
                             {dateDisplay}
                         </span>
@@ -174,7 +174,7 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                             contentEditable
                             suppressContentEditableWarning
                             onBlur={handleGradeChange}
-                            className="section-item-metadata education-item-grade shrink-0 cursor-text text-end text-black outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500 font-medium"
+                            className="section-item-metadata education-item-grade shrink-0 cursor-text text-end outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500 font-medium"
                         >
                             {gradeText || "Grade"}
                         </span>
@@ -190,7 +190,7 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                 onBlur={handleDescriptionChange}
                 onClick={handleContentEditableLinkClick}
                 className={cn(
-                    "section-item-description education-item-description tiptap-content cursor-text text-gray-700 outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
+                    "section-item-description education-item-description tiptap-content cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
                     !stripHtml(item.description) && "hidden",
                 )}
             />
