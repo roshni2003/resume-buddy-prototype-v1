@@ -178,11 +178,17 @@ function UploadRouteComponent() {
 
 		const interval = setInterval(() => {
 			setProgressPercent((prev) => {
-				const next = prev + Math.floor(Math.random() * 15) + 5;
-				if (next >= 100) {
-					clearInterval(interval);
-					return 100;
-				}
+				let next = prev;
+
+				// Stop the automated increment if we've hit 95% or manually set to 100%
+				if (prev >= 95) return prev;
+
+				// Asymptotic progression to better reflect parsing time
+				if (prev < 30) next = prev + Math.floor(Math.random() * 5) + 3;
+				else if (prev < 60) next = prev + Math.floor(Math.random() * 3) + 2;
+				else if (prev < 85) next = prev + Math.floor(Math.random() * 2) + 1;
+				else next = prev + 1;
+
 				if (next < 35) setProgressText("Extracting raw text from document...");
 				else if (next < 60) setProgressText("Analyzing career history and education details...");
 				else if (next < 85) setProgressText("Identifying skills and contact details...");
@@ -190,7 +196,7 @@ function UploadRouteComponent() {
 
 				return next;
 			});
-		}, 350);
+		}, 800);
 
 		return () => clearInterval(interval);
 	}, [uploadState]);
@@ -212,17 +218,17 @@ function UploadRouteComponent() {
 					if (Array.isArray(item.keywords) && item.keywords.length > 0) {
 						allSkills.push(...item.keywords);
 					} else if (typeof item.keywords === "string" && item.keywords.trim() !== "") {
-						allSkills.push(...item.keywords.split(",").map(s => s.trim()));
+						allSkills.push(...item.keywords.split(",").map((s: string) => s.trim()));
 					} else if (item.name) {
 						allSkills.push(...item.name.split(",").map((s: string) => s.trim()));
 					}
 				});
-				
+
 				// Deduplicate and cap
 				allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 15);
-				
+
 				// Overwrite the payload so the builder also gets the capped/cleaned skills
-				parsedRaw.data.sections.skills.items = allSkills.length > 0 
+				parsedRaw.data.sections.skills.items = allSkills.length > 0
 					? [{ name: "Skills", keywords: allSkills }]
 					: [];
 			}
@@ -255,7 +261,14 @@ function UploadRouteComponent() {
 			};
 
 			setParsedData(mappedData);
-			setUploadState("parsed");
+
+			// Show 100% completion before transitioning
+			setProgressPercent(100);
+			setProgressText("Resume parsing complete!");
+
+			setTimeout(() => {
+				setUploadState("parsed");
+			}, 800);
 		} catch (e: any) {
 			setUploadError(e.message || "Something went wrong while parsing your resume. Please try again.");
 			setUploadState("idle");
@@ -334,11 +347,10 @@ function UploadRouteComponent() {
 										onDrop={handleDrop}
 										onClick={() => fileInputRef.current?.click()}
 										onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
-										className={`flex cursor-pointer flex-col items-center justify-center gap-5 rounded-xl border-2 border-dashed p-14 text-center transition-all duration-200 ${
-											dragging
+										className={`flex cursor-pointer flex-col items-center justify-center gap-5 rounded-xl border-2 border-dashed p-14 text-center transition-all duration-200 ${dragging
 												? "border-emerald-500 bg-emerald-500/5"
 												: "border-border hover:border-emerald-500/50 hover:bg-muted/40"
-										}`}
+											}`}
 									>
 										<div
 											className={`rounded-full p-4 transition-all ${dragging ? "bg-emerald-500/15 text-emerald-400" : "bg-muted text-muted-foreground"}`}
@@ -366,9 +378,8 @@ function UploadRouteComponent() {
 									</div>
 								) : (
 									<div
-										className={`flex items-center gap-3 rounded-xl border p-4 ${
-											fileError ? "border-red-500/30 bg-red-500/5" : "border-emerald-500/30 bg-emerald-500/5"
-										}`}
+										className={`flex items-center gap-3 rounded-xl border p-4 ${fileError ? "border-red-500/30 bg-red-500/5" : "border-emerald-500/30 bg-emerald-500/5"
+											}`}
 									>
 										<FileTextIcon
 											weight="fill"
@@ -609,11 +620,10 @@ function UploadRouteComponent() {
 										<div
 											key={key}
 											onClick={() => setSelectedTemplate(key as Template)}
-											className={`cursor-pointer rounded-xl border p-2 transition-all ${
-												selectedTemplate === key
+											className={`cursor-pointer rounded-xl border p-2 transition-all ${selectedTemplate === key
 													? "border-emerald-500 bg-emerald-500/5 ring-2 ring-emerald-500/20"
 													: "border-border hover:border-emerald-500/50 hover:bg-muted/40"
-											}`}
+												}`}
 										>
 											<img
 												src={template.imageUrl}
