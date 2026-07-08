@@ -244,7 +244,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 							</div>
 						</div>
 					))}
-					<Button variant="outline" onClick={() => setAnswers(prev => ({ ...prev, education: [...prev.education, { "3.1": "", "3.2": "", "3.3": { from: "", to: "" }, "3.4": false }] }))}>Add another education</Button>
+					<Button variant="outline" className="cursor-pointer" onClick={() => setAnswers(prev => ({ ...prev, education: [...prev.education, { "3.1": "", "3.2": "", "3.3": { from: "", to: "" }, "3.4": false }] }))}>Add another education</Button>
 				</div>
 			)}
 
@@ -274,7 +274,7 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 							<Input placeholder="What was the outcome of this project?" value={proj["4.7"]} onChange={e => handleProjChange(idx, "4.7", e.target.value)} />
 						</div>
 					))}
-					<Button variant="outline" onClick={() => setAnswers(prev => ({ ...prev, projects: [...prev.projects, { "4.1": "", "4.3": "", "4.4": "", "4.5": "", "4.6": "", "4.7": "" }] }))}>Add another project</Button>
+					<Button variant="outline" className="cursor-pointer" onClick={() => setAnswers(prev => ({ ...prev, projects: [...prev.projects, { "4.1": "", "4.3": "", "4.4": "", "4.5": "", "4.6": "", "4.7": "" }] }))}>Add another project</Button>
 				</div>
 			)}
 
@@ -285,8 +285,8 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 					<div className="p-4 border rounded-md space-y-3">
 						<label className="text-sm block mb-2">Have you worked anywhere before (internship, job, volunteer)?*</label>
 						<div className="flex gap-4">
-							<Button variant={hasExperience ? "default" : "outline"} onClick={() => { setHasExperience(true); handleExpChange(0, "5.1", "Yes"); }}>Yes</Button>
-							<Button variant={!hasExperience ? "default" : "outline"} onClick={() => { setHasExperience(false); handleExpChange(0, "5.1", "No"); }}>No</Button>
+							<Button variant={hasExperience ? "default" : "outline"} className="cursor-pointer" onClick={() => { setHasExperience(true); handleExpChange(0, "5.1", "Yes"); }}>Yes</Button>
+							<Button variant={!hasExperience ? "default" : "outline"} className="cursor-pointer" onClick={() => { setHasExperience(false); handleExpChange(0, "5.1", "No"); }}>No</Button>
 						</div>
 					</div>
 				</div>
@@ -318,13 +318,13 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 							<Input placeholder="What impact did your role make for the organisation?" value={exp["5.11"] || ""} onChange={e => handleExpChange(idx, "5.11", e.target.value)} />
 						</div>
 					))}
-					<Button variant="outline" onClick={() => setAnswers(prev => ({ ...prev, experience: [...prev.experience, { "5.1": "Yes", "5.2": "", "5.3": "", "5.5": { from: "", to: "" }, "5.6": "", "5.7": "", "5.8": "", "5.11": "" }] }))}>Add another experience</Button>
+					<Button variant="outline" className="cursor-pointer" onClick={() => setAnswers(prev => ({ ...prev, experience: [...prev.experience, { "5.1": "Yes", "5.2": "", "5.3": "", "5.5": { from: "", to: "" }, "5.6": "", "5.7": "", "5.8": "", "5.11": "" }] }))}>Add another experience</Button>
 				</div>
 			)}
 
 			<div className="flex justify-between pt-4">
-				<Button variant="outline" onClick={handleBack} disabled={step === 1}>Back</Button>
-				<Button onClick={handleNext} disabled={!isStepValid()}>{step === 5 || (step === 4 && !hasExperience) ? "Finish" : "Next"}</Button>
+				<Button variant="outline" className="cursor-pointer" onClick={handleBack} disabled={step === 1}>Back</Button>
+				<Button className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleNext} disabled={!isStepValid()}>{step === 5 || (step === 4 && !hasExperience) ? "Finish" : "Next"}</Button>
 			</div>
 		</div>
 	);
