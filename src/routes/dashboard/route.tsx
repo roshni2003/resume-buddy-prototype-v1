@@ -163,18 +163,19 @@ function DashboardHeader() {
 					</span>
 				</Link>
 
-				{/* <Link
-					to="/dashboard/admin/mixpanel"
-					activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
-					className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
-				>
-					<ChartBar size={18} weight="bold" />
-					<span>Insights</span>
-				</Link> */}
 
 				{/* Right: Settings & User menu */}
 				<div className="flex items-center gap-2 sm:gap-4">
 					<nav className="hidden items-center gap-1 sm:flex">
+						<Link
+							to="/dashboard/admin/mixpanel"
+							activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
+							className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+						>
+							{/* <ChartBar size={18} weight="bold" /> */}
+							<span>Insights</span>
+						</Link>
+
 						{/* TODO: Add logic to conditionally render Analytics link for admins only if needed */}
 						<Link
 							to="/dashboard/admin/analytics"
