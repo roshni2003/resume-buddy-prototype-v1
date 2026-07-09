@@ -239,9 +239,44 @@ function MatchToJobRouteComponent() {
 				
 				if (uploadingFile) {
 					const parsedRaw = await api.resumeUpload({ resume_upload: uploadingFile });
+
+					if (parsedRaw.data?.sections?.skills?.items) {
+						let allSkills: string[] = [];
+						const genericCategories = ["skills", "frontend", "backend", "languages", "tools", "frameworks", "technologies", "technical skills", "libraries", "databases", "other", "core skills", "programming languages"];
+						
+						parsedRaw.data.sections.skills.items.forEach((item: any) => {
+							const name = item.name ? item.name.trim() : "";
+							const hasKeywords = Array.isArray(item.keywords) && item.keywords.length > 0;
+							
+							if (name && genericCategories.includes(name.toLowerCase()) && hasKeywords) {
+								allSkills.push(...item.keywords);
+							} else if (name) {
+								allSkills.push(...name.split(",").map((s: string) => s.trim()));
+							} else if (hasKeywords) {
+								allSkills.push(...item.keywords);
+							} else if (typeof item.keywords === "string" && item.keywords.trim() !== "") {
+								allSkills.push(...item.keywords.split(",").map((s: string) => s.trim()));
+							}
+						});
+						allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 20);
+						parsedRaw.data.sections.skills.items = allSkills.map(skillName => ({
+								id: crypto.randomUUID(),
+								hidden: false,
+								name: skillName,
+								icon: "",
+								proficiency: "",
+								level: 0,
+								keywords: []
+						}));
+					}
+
 					resumeDataPayload = parsedRaw.data ? { 
 						...defaultResumeData, 
 						...parsedRaw.data, 
+						sections: {
+							...defaultResumeData.sections,
+							...(parsedRaw.data.sections || {})
+						},
 						metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
 						picture: defaultResumeData.picture 
 					} : undefined;

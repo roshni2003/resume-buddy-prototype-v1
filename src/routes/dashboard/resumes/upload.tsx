@@ -214,23 +214,36 @@ function UploadRouteComponent() {
 			// Robustly parse and cap skills to prevent AI exaggeration and handle different formats
 			if (parsedRaw.data?.sections?.skills?.items) {
 				let allSkills: string[] = [];
+				const genericCategories = ["skills", "frontend", "backend", "languages", "tools", "frameworks", "technologies", "technical skills", "libraries", "databases", "other", "core skills", "programming languages"];
+				
 				parsedRaw.data.sections.skills.items.forEach((item: any) => {
-					if (Array.isArray(item.keywords) && item.keywords.length > 0) {
+					const name = item.name ? item.name.trim() : "";
+					const hasKeywords = Array.isArray(item.keywords) && item.keywords.length > 0;
+					
+					if (name && genericCategories.includes(name.toLowerCase()) && hasKeywords) {
+						allSkills.push(...item.keywords);
+					} else if (name) {
+						allSkills.push(...name.split(",").map((s: string) => s.trim()));
+					} else if (hasKeywords) {
 						allSkills.push(...item.keywords);
 					} else if (typeof item.keywords === "string" && item.keywords.trim() !== "") {
 						allSkills.push(...item.keywords.split(",").map((s: string) => s.trim()));
-					} else if (item.name) {
-						allSkills.push(...item.name.split(",").map((s: string) => s.trim()));
 					}
 				});
 
 				// Deduplicate and cap
-				allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 15);
+				allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 20);
 
 				// Overwrite the payload so the builder also gets the capped/cleaned skills
-				parsedRaw.data.sections.skills.items = allSkills.length > 0
-					? [{ name: "Skills", keywords: allSkills }]
-					: [];
+				parsedRaw.data.sections.skills.items = allSkills.map(skillName => ({ 
+					id: crypto.randomUUID(),
+					hidden: false,
+					name: skillName, 
+					icon: "",
+					proficiency: "",
+					level: 0,
+					keywords: [] 
+				}));
 			}
 
 			setFullResumeData(parsedRaw);
@@ -256,7 +269,7 @@ function UploadRouteComponent() {
 					year: item.period || "",
 				})),
 				skills: (resumeData.sections?.skills?.items || [])
-					.flatMap((item: any) => item.keywords || [item.name])
+					.flatMap((item: any) => (Array.isArray(item.keywords) && item.keywords.length > 0) ? item.keywords : [item.name])
 					.filter(Boolean),
 			};
 
@@ -287,7 +300,16 @@ function UploadRouteComponent() {
 				name: resumeName,
 				slug: uniqueSlug,
 				tags: ["AI Uploaded"],
-				data: fullResumeData?.data ? { ...defaultResumeData, ...fullResumeData.data, metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, picture: defaultResumeData.picture } : undefined,
+				data: fullResumeData?.data ? { 
+					...defaultResumeData, 
+					...fullResumeData.data, 
+					sections: {
+						...defaultResumeData.sections,
+						...(fullResumeData.data.sections || {})
+					},
+					metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
+					picture: defaultResumeData.picture 
+				} : undefined,
 				withSampleData: false,
 			});
 
