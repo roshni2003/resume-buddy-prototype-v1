@@ -168,7 +168,15 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete, error }
 			const b = answers.basic_details;
 			const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b["1.3"].trim());
 			const isValidMobile = /^[6-9]\d{9}$/.test(b["1.2"].trim());
-			return !!(b["1.1"].trim() && isValidMobile && isValidEmail && b["1.4"].trim());
+			const isValidLocation = b["1.4"].trim().length >= 2;
+			
+			const linkedinVal = b["1.5"].trim();
+			const githubVal = b["1.6"].trim();
+			
+			const isValidLinkedin = linkedinVal.length === 0 || linkedinVal.length >= 5;
+			const isValidGithub = githubVal.length === 0 || githubVal.length >= 3;
+
+			return !!(b["1.1"].trim().length >= 2 && isValidMobile && isValidEmail && isValidLocation && isValidLinkedin && isValidGithub);
 		}
 		if (step === 2) {
 			return answers.education.every(edu => 
@@ -195,7 +203,9 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete, error }
 				<div className="space-y-4">
 					<h3 className="text-xl font-bold">1. Basic Details</h3>
 					<Input placeholder="Name*" value={answers.basic_details["1.1"]} onChange={e => handleBasicChange("1.1", e.target.value)} />
-					
+					{answers.basic_details["1.1"].trim().length === 1 && (
+							<p className="text-xs text-rose-500 mt-1">Please enter a valid name (at least 2 characters).</p>
+						)}
 					<div>
 						<Input placeholder="Mobile No.*" type="tel" maxLength={10} value={answers.basic_details["1.2"]} onChange={e => handleBasicChange("1.2", e.target.value.replace(/[^\d]/g, ''))} />
 						{answers.basic_details["1.2"].length > 0 && !/^[6-9]\d{9}$/.test(answers.basic_details["1.2"].trim()) && (
@@ -210,9 +220,24 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete, error }
 						)}
 					</div>
 
-					<Input placeholder="Location*" value={answers.basic_details["1.4"]} onChange={e => handleBasicChange("1.4", e.target.value)} />
-					<Input placeholder="Linkedin profile" value={answers.basic_details["1.5"]} onChange={e => handleBasicChange("1.5", e.target.value)} />
-					<Input placeholder="Github link" value={answers.basic_details["1.6"]} onChange={e => handleBasicChange("1.6", e.target.value)} />
+					<div>
+						<Input placeholder="Location*" value={answers.basic_details["1.4"]} onChange={e => handleBasicChange("1.4", e.target.value)} />
+						{answers.basic_details["1.4"].trim().length === 1 && (
+							<p className="text-xs text-rose-500 mt-1">Please enter a valid location (at least 2 characters).</p>
+						)}
+					</div>
+					<div>
+						<Input placeholder="Linkedin profile" value={answers.basic_details["1.5"]} onChange={e => handleBasicChange("1.5", e.target.value)} />
+						{answers.basic_details["1.5"].trim().length > 0 && answers.basic_details["1.5"].trim().length < 5 && (
+							<p className="text-xs text-rose-500 mt-1">Please enter a valid LinkedIn URL or username.</p>
+						)}
+					</div>
+					<div>
+						<Input placeholder="Github link" value={answers.basic_details["1.6"]} onChange={e => handleBasicChange("1.6", e.target.value)} />
+						{answers.basic_details["1.6"].trim().length > 0 && answers.basic_details["1.6"].trim().length < 3 && (
+							<p className="text-xs text-rose-500 mt-1">Please enter a valid GitHub URL or username.</p>
+						)}
+					</div>
 				</div>
 			)}
 
