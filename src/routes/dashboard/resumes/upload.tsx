@@ -280,7 +280,7 @@ function UploadRouteComponent() {
 			setProgressText("Resume parsing complete!");
 
 			setTimeout(() => {
-				setUploadState("parsed");
+				setUploadState("choose_template");
 			}, 800);
 		} catch (e: any) {
 			setUploadError(e.message || "Something went wrong while parsing your resume. Please try again.");
@@ -447,7 +447,7 @@ function UploadRouteComponent() {
 										className="w-full sm:w-auto cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										<CloudArrowUpIcon className="mr-1.5 size-4" />
-										Upload & Parse with Zoe
+										Upload & Continue
 									</Button>
 								</div>
 							</div>
@@ -506,137 +506,15 @@ function UploadRouteComponent() {
 							</div>
 						)}
 
-						{/* ── STATE 3: Parsed Data Preview ── */}
-						{uploadState === "parsed" && parsedData && (
-							<div className="space-y-6">
-								{/* Success Banner */}
-								<div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-									<CheckCircleIcon weight="fill" className="size-6 shrink-0 text-emerald-400" />
-									<div>
-										<h3 className="font-bold text-emerald-300 text-sm">Resume successfully read by Zoe!</h3>
-										<p className="mt-0.5 text-emerald-500/80 text-xs">
-											Take a quick look at your imported details. You can make full edits in the next step.
-										</p>
-									</div>
-								</div>
 
-								{/* Extracted Data Grid */}
-								<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-									{/* Left Column */}
-									<div className="space-y-5">
-										{/* Contact Details */}
-										<SectionCard icon={<UserIcon className="size-4" />} title="Contact Details">
-											<div className="grid grid-cols-2 gap-4 text-sm">
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Full Name</p>
-													<p className="font-medium text-foreground">{parsedData.fullName}</p>
-												</div>
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Title</p>
-													<p className="font-medium text-foreground">{parsedData.professionalTitle}</p>
-												</div>
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Email</p>
-													<p className="truncate font-medium text-foreground">{parsedData.email}</p>
-												</div>
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Phone</p>
-													<p className="font-medium text-foreground">{parsedData.phone}</p>
-												</div>
-											</div>
-										</SectionCard>
-
-										{/* Profile Summary */}
-										<SectionCard icon={<FileTextIcon className="size-4" />} title="Profile Summary">
-											<p className="text-muted-foreground text-sm italic leading-relaxed">"{parsedData.summary}"</p>
-										</SectionCard>
-
-										{/* Skills */}
-										<SectionCard
-											icon={<WrenchIcon className="size-4" />}
-											title={`Skills Detected (${parsedData.skills.length})`}
-										>
-											<div className="flex flex-wrap gap-1.5">
-												{parsedData.skills.map((skill) => (
-													<span
-														key={skill}
-														className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 font-medium text-emerald-400 text-xs"
-													>
-														{skill}
-													</span>
-												))}
-											</div>
-										</SectionCard>
-									</div>
-
-									{/* Right Column */}
-									<div className="space-y-5">
-										{/* Work Experience */}
-										<SectionCard icon={<SuitcaseIcon className="size-4" />} title="Work Experience">
-											<div className="space-y-4">
-												{parsedData.experience.map((exp, idx) => (
-													<div
-														key={`${exp.company}-${idx}`}
-														className="space-y-1 border-emerald-500/40 border-l-2 py-0.5 pl-3"
-													>
-														<div className="flex items-baseline justify-between gap-2">
-															<p className="font-bold text-foreground text-sm">{exp.role}</p>
-															<span className="shrink-0 font-semibold text-[10px] text-muted-foreground uppercase">
-																{exp.duration}
-															</span>
-														</div>
-														<p className="font-medium text-emerald-500 text-xs">{exp.company}</p>
-														<p className="text-muted-foreground text-xs leading-snug">{exp.description}</p>
-													</div>
-												))}
-											</div>
-										</SectionCard>
-
-										{/* Education */}
-										<SectionCard icon={<BookOpenIcon className="size-4" />} title="Education">
-											<div className="space-y-3">
-												{parsedData.education.map((edu, idx) => (
-													<div key={`${edu.institution}-${idx}`} className="space-y-0.5">
-														<div className="flex items-baseline justify-between gap-2">
-															<p className="font-bold text-foreground text-sm">{edu.degree}</p>
-															<span className="shrink-0 font-semibold text-[10px] text-muted-foreground">{edu.year}</span>
-														</div>
-														<p className="text-muted-foreground text-xs">{edu.institution}</p>
-													</div>
-												))}
-											</div>
-										</SectionCard>
-									</div>
-								</div>
-
-								{/* Action Buttons */}
-								<div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-border border-t pt-5">
-									<Button
-										variant="outline"
-										onClick={() => {
-											setParsedData(null);
-											setFile(null);
-											setUploadState("idle");
-										}}
-										className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-									>
-										Try another file
-									</Button>
-
-									<Button
-										onClick={() => setUploadState("choose_template")}
-										className="w-full sm:w-auto cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
-									>
-										Choose a Template
-										<ArrowLeftIcon className="ml-1.5 size-4 rotate-180" />
-									</Button>
-								</div>
-							</div>
-						)}
 
 						{/* ── STATE 4: Choose Template ── */}
 						{uploadState === "choose_template" && (
 							<div className="space-y-6">
+								<div>
+									<h2 className="font-bold text-lg">Choose a Template</h2>
+									<p className="text-sm text-muted-foreground">Select a design for your new resume. You can change this later.</p>
+								</div>
 								<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
 									{Object.entries(templates).map(([key, template]) => (
 										<div
@@ -660,10 +538,14 @@ function UploadRouteComponent() {
 								<div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-border border-t pt-5">
 									<Button
 										variant="outline"
-										onClick={() => setUploadState("parsed")}
+										onClick={() => {
+											setParsedData(null);
+											setFile(null);
+											setUploadState("idle");
+										}}
 										className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 									>
-										<ArrowLeftIcon className="mr-2" /> Back to Review
+										<ArrowLeftIcon className="mr-2" /> Try another file
 									</Button>
 									<Button
 										onClick={handleConfirm}
