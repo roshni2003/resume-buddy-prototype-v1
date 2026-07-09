@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { XIcon } from "@phosphor-icons/react";
+import { XIcon, WarningCircleIcon } from "@phosphor-icons/react";
 
 interface DateRange {
 	from: string;
@@ -47,6 +47,7 @@ export interface OnboardingAnswers {
 interface Props {
 	jobRole: string;
 	onComplete: (answers: OnboardingAnswers) => void;
+	error?: string | null;
 }
 
 export const onboardingQuestions = {
@@ -84,7 +85,7 @@ export const onboardingQuestions = {
 	],
 };
 
-export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
+export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete, error }) => {
 	const [step, setStep] = useState<number>(1);
 	
 	const [answers, setAnswers] = useState<OnboardingAnswers>({
@@ -322,6 +323,12 @@ export const OnboardingWizard: React.FC<Props> = ({ jobRole, onComplete }) => {
 				</div>
 			)}
 
+			{error && (
+				<div className="p-4 rounded-xl border border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center gap-3">
+					<WarningCircleIcon className="size-5 shrink-0" weight="fill" />
+					<p className="text-sm font-medium">{error}</p>
+				</div>
+			)}
 			<div className="flex justify-between pt-4">
 				<Button variant="outline" className="cursor-pointer" onClick={handleBack} disabled={step === 1}>Back</Button>
 				<Button className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleNext} disabled={!isStepValid()}>{step === 5 || (step === 4 && !hasExperience) ? "Finish" : "Next"}</Button>

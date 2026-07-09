@@ -496,6 +496,12 @@ function MatchToJobRouteComponent() {
 						)}
 					</div>
 
+					{matchError && (
+						<div className="p-4 rounded-xl border border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center gap-3">
+							<WarningCircleIcon className="size-5 shrink-0" weight="fill" />
+							<p className="text-sm font-medium">{matchError}</p>
+						</div>
+					)}
 					<div className="flex justify-end gap-3 pt-4">
 						<Button
 							variant="outline"
@@ -504,9 +510,6 @@ function MatchToJobRouteComponent() {
 						>
 							Back
 						</Button>
-						{matchError && (
-							<p className="text-sm text-rose-400 self-center">{matchError}</p>
-						)}
 						<Button
 							disabled={!selectedResumeId || (selectedResumeId === "file_upload" && (!uploadingFile || !!fileError))}
 							onClick={handleRunMatch}
@@ -520,7 +523,7 @@ function MatchToJobRouteComponent() {
 
 			{/* Step 3B: Start Fresh */}
 			{step === "start_fresh" && (
-				<OnboardingWizard jobRole={role} onComplete={handleRunOnboardingMatch} />
+				<OnboardingWizard jobRole={role} onComplete={handleRunOnboardingMatch} error={matchError} />
 			)}
 
 			{/* Step 4: Loading */}
