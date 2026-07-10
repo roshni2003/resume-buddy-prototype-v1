@@ -115,19 +115,23 @@ function AuthGate({ showAuthHelp }: { showAuthHelp?: boolean }) {
 				className="flex min-h-screen flex-col items-center justify-center px-6"
 				style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
 			>
-				<div className="flex max-w-lg flex-col items-center gap-6 text-center bg-card/10 p-8 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
+				<div className="flex max-w-lg w-full flex-col items-center gap-6 text-center bg-card/10 p-8 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
 					<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
-					<div>
+					<div className="w-full">
 						<h1 className="mb-2 font-bold text-white text-xl">Authentication Required</h1>
 						<p className="text-white/80 text-sm mb-6">
 							You are running the app without an authentication token.
 						</p>
-						<div className="bg-black/40 text-left p-5 rounded-xl text-sm text-white/90 border border-white/5 space-y-4">
+						<div className="bg-black/40 text-left p-5 rounded-xl text-sm text-white/90 border border-white/5 space-y-4 w-full">
 							<p><strong className="text-emerald-400">Step 1:</strong> Click the button below to log in to Zuvy.</p>
 							<p><strong className="text-emerald-400">Step 2:</strong> In the Zuvy dashboard, click on <strong>"Learn with Zoe"</strong>.</p>
-							<p><strong className="text-emerald-400">Step 3:</strong> You will be redirected to the production Zoe site. <strong>Copy the <code className="bg-black px-1.5 py-0.5 rounded text-emerald-300 text-xs">?token=...</code></strong> part from the URL.</p>
-							<p><strong className="text-emerald-400">Step 4:</strong> Come back to your environment and paste the token at the end of the URL like so:<br />
-							<code className="block mt-2 bg-black p-2 rounded text-xs overflow-x-auto text-emerald-300 whitespace-nowrap">{currentOrigin}/dashboard/resumes?token=eyJhb...</code></p>
+							<p><strong className="text-emerald-400">Step 3:</strong> You will be redirected to the production Zoe site. <strong>Copy the <code className="bg-black px-1.5 py-0.5 rounded text-emerald-300 text-xs break-all">?token=...</code></strong> part from the URL.</p>
+							<div className="w-full">
+								<strong className="text-emerald-400">Step 4:</strong> Come back to your environment and paste the token at the end of the URL like so:<br />
+								<code className="block mt-2 bg-black p-2 rounded text-xs text-emerald-300 break-all">
+									{currentOrigin}/dashboard/resumes?token=eyJhb...
+								</code>
+							</div>
 						</div>
 					</div>
 					<button
