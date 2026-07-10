@@ -288,8 +288,11 @@ function UploadRouteComponent() {
 		}
 	};
 
+	const isCreatingRef = useRef(false);
+
 	const handleConfirm = async () => {
-		if (!parsedData) return;
+		if (!parsedData || isCreatingRef.current) return;
+		isCreatingRef.current = true;
 		setUploadState("creating");
 		const toastId = toast.loading("Creating your resume in builder...");
 
@@ -318,8 +321,9 @@ function UploadRouteComponent() {
 			toast.success("Resume created! Redirecting to editor...", { id: toastId });
 			navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id } });
 		} catch {
-			toast.error("Failed to create resume. Please try again.", { id: toastId });
-			setUploadState("parsed");
+			isCreatingRef.current = false;
+			toast.error("Failed to create resume. Please try again.");
+			setUploadState("choose_template");
 		}
 	};
 
@@ -508,14 +512,23 @@ function UploadRouteComponent() {
 
 
 
-						{/* ── STATE 4: Choose Template ── */}
-						{uploadState === "choose_template" && (
-							<div className="space-y-6">
-								<div>
-									<h2 className="font-bold text-lg">Choose a Template</h2>
-									<p className="text-sm text-muted-foreground">Select a design for your new resume. You can change this later.</p>
+						{/* ── STATE 4: Choose Template & Creating ── */}
+						{(uploadState === "choose_template" || uploadState === "creating") && (
+							<div className="flex flex-col max-h-[calc(100vh-8rem)] rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md relative">
+								<div className="shrink-0 flex flex-col items-center gap-4 border-border border-b bg-card/80 px-6 py-8 text-center rounded-t-2xl">
+									<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
+										<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+									</div>
+									<div>
+										<h1 className="font-bold text-foreground text-2xl">Choose a Template</h1>
+										<p className="mt-1 text-muted-foreground text-sm">
+											Select a template to generate your new resume.
+										</p>
+									</div>
 								</div>
-								<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+
+								<div className="flex-1 overflow-y-auto p-6">
+									<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
 									{Object.entries(templates).map(([key, template]) => (
 										<div
 											key={key}
@@ -534,8 +547,9 @@ function UploadRouteComponent() {
 										</div>
 									))}
 								</div>
+								</div>
 
-								<div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-border border-t pt-5">
+								<div className="shrink-0 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 p-6 border-t border-border/50 bg-card/95 backdrop-blur-md rounded-b-2xl">
 									<Button
 										variant="outline"
 										onClick={() => {
@@ -543,25 +557,22 @@ function UploadRouteComponent() {
 											setFile(null);
 											setUploadState("idle");
 										}}
-										className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+										className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground w-full sm:w-auto"
 									>
 										<ArrowLeftIcon className="mr-2" /> Try another file
 									</Button>
 									<Button
 										onClick={handleConfirm}
 										disabled={isCreating}
-										className="w-full sm:w-auto cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white min-w-32"
+										className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:w-auto sm:min-w-32"
 									>
 										{isCreating ? (
 											<>
 												<SpinnerGapIcon className="mr-2 size-4 animate-spin" />
-												Creating...
+												Generating...
 											</>
 										) : (
-											<>
-												<CheckCircleIcon className="mr-2 size-4" />
-												Confirm & Open in Editor
-											</>
+											"Create Resume"
 										)}
 									</Button>
 								</div>

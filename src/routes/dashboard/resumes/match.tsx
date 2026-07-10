@@ -46,6 +46,8 @@ export const Route = createFileRoute("/dashboard/resumes/match")({
 type MatchStep = "paste_job" | "resume_choice" | "pick_resume" | "start_fresh" | "loading" | "report" | "low_score_warning" | "choose_template";
 
 function MatchToJobRouteComponent() {
+	const isCreatingRef = useRef(false);
+
 	const navigate = useNavigate();
 	const { openDialog } = useDialogStore();
 	
@@ -176,8 +178,11 @@ function MatchToJobRouteComponent() {
 	};
 
 	const handleConfirmTemplate = async () => {
+		if (isCreatingRef.current) return;
+		
 		if (jdMatchId) {
 			try {
+				isCreatingRef.current = true;
 				setIsCreating(true);
 				const tailoredData = await api.tailorResume({ jd_match_id: jdMatchId, template: selectedTemplate });
 				
@@ -201,12 +206,14 @@ function MatchToJobRouteComponent() {
 			} catch (e) {
 				console.error("Failed to tailor resume with onboarding", e);
 				setIsCreating(false);
+				isCreatingRef.current = false;
 			}
 			return;
 		}
 
 		if (selectedResumeId && selectedResumeId !== "file_upload") {
 			try {
+				isCreatingRef.current = true;
 				setIsCreating(true);
 				const originalResume = await api.fetchResume(selectedResumeId);
 				const updatedData = {
@@ -231,9 +238,11 @@ function MatchToJobRouteComponent() {
 			} catch(e) {
 				console.error("Failed to create tailored resume", e);
 				setIsCreating(false);
+				isCreatingRef.current = false;
 			}
 		} else {
 			try {
+				isCreatingRef.current = true;
 				setIsCreating(true);
 				let resumeDataPayload: any = undefined;
 				
@@ -302,6 +311,7 @@ function MatchToJobRouteComponent() {
 			} catch (e) {
 				console.error("Failed to create resume", e);
 				setIsCreating(false);
+				isCreatingRef.current = false;
 			}
 		}
 	};
@@ -750,8 +760,8 @@ function MatchToJobRouteComponent() {
 
 			{/* Step 4: Choose Template */}
 			{step === "choose_template" && (
-				<div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md">
-					<div className="flex flex-col items-center gap-4 border-border border-b bg-card/80 px-6 py-8 text-center">
+				<div className="flex flex-col max-h-[calc(100vh-8rem)] rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md relative">
+					<div className="shrink-0 flex flex-col items-center gap-4 border-border border-b bg-card/80 px-6 py-8 text-center rounded-t-2xl">
 						<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
 							<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
 						</div>
@@ -763,7 +773,7 @@ function MatchToJobRouteComponent() {
 						</div>
 					</div>
 
-					<div className="p-6">
+					<div className="flex-1 overflow-y-auto p-6">
 						<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
 							{Object.entries(templates).map(([key, template]) => (
 								<div
@@ -784,8 +794,9 @@ function MatchToJobRouteComponent() {
 								</div>
 							))}
 						</div>
+					</div>
 
-						<div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-8 border-t border-border/50 mt-8">
+						<div className="shrink-0 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 p-6 border-t border-border/50 bg-card/95 backdrop-blur-md rounded-b-2xl">
 							<Button
 								variant="outline"
 								onClick={() => setStep("report")}
@@ -809,7 +820,6 @@ function MatchToJobRouteComponent() {
 							</Button>
 						</div>
 					</div>
-				</div>
 			)}
 		</div>
 	);
