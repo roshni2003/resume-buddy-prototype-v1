@@ -44,6 +44,9 @@ export const Route = createFileRoute("/dashboard")({
 		// If there's NO token in storage and NO token in the URL, user is not logged in.
 		// Redirect immediately to Zuvy so no dashboard content mounts (and no API calls fire).
 		if (!hasTokenAfterClear && !hasUrlToken && !devBypass) {
+			if (import.meta.env.DEV) {
+				return { session: context.session, needsAuth: true, isAuthenticated: false, isLocalDevAuth: true };
+			}
 			throw redirect({
 				href: buildZuvyLoginUrl(url.pathname + url.search + url.hash),
 			});
@@ -59,10 +62,12 @@ export const Route = createFileRoute("/dashboard")({
 	},
 });
 
-function AuthGate() {
+function AuthGate({ isLocalDevAuth }: { isLocalDevAuth?: boolean }) {
 	const [secondsLeft, setSecondsLeft] = useState(Math.ceil(AUTH_GATE_TIMEOUT_MS / 1000));
 
 	useEffect(() => {
+		if (isLocalDevAuth) return;
+
 		const start = Date.now();
 		let cancelled = false;
 		let timer: ReturnType<typeof setTimeout> | null = null;
@@ -107,6 +112,38 @@ function AuthGate() {
 			if (timer) clearTimeout(timer);
 		};
 	}, []);
+
+	if (isLocalDevAuth) {
+		return (
+			<div
+				className="flex min-h-screen flex-col items-center justify-center px-6"
+				style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+			>
+				<div className="flex max-w-lg flex-col items-center gap-6 text-center bg-card/10 p-8 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
+					<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+					<div>
+						<h1 className="mb-2 font-bold text-white text-xl">Local Development Authentication</h1>
+						<p className="text-white/80 text-sm mb-6">
+							You are running the app locally without an authentication token.
+						</p>
+						<div className="bg-black/40 text-left p-5 rounded-xl text-sm text-white/90 border border-white/5 space-y-4">
+							<p><strong className="text-emerald-400">Step 1:</strong> Click the button below to log in to Zuvy.</p>
+							<p><strong className="text-emerald-400">Step 2:</strong> In the Zuvy dashboard, click on <strong>"Learn with Zoe"</strong>.</p>
+							<p><strong className="text-emerald-400">Step 3:</strong> You will be redirected to the production Zoe site. <strong>Copy the <code className="bg-black px-1.5 py-0.5 rounded text-emerald-300 text-xs">?token=...</code></strong> part from the URL.</p>
+							<p><strong className="text-emerald-400">Step 4:</strong> Come back to your local environment and paste the token at the end of the URL like so:<br />
+							<code className="block mt-2 bg-black p-2 rounded text-xs overflow-x-auto text-emerald-300 whitespace-nowrap">http://localhost:3000/dashboard/resumes?token=eyJhb...</code></p>
+						</div>
+					</div>
+					<button
+						onClick={() => redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash)}
+						className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-md py-2.5 font-medium transition-colors"
+					>
+						Go to Zuvy Login
+					</button>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div
@@ -220,9 +257,14 @@ function DashboardHeader() {
 
 function RouteComponent() {
 	useLingui();
-	const { needsAuth } = Route.useRouteContext();
+	const routeContext = Route.useRouteContext() as any;
+	const needsAuth = routeContext?.needsAuth;
+	const isLocalDevAuthFromContext = routeContext?.isLocalDevAuth;
+
 	const { theme } = useTheme();
 	const { backgroundTheme } = useSettingsStore();
+	
+	const [isClientUnauth, setIsClientUnauth] = useState(false);
 
 	useEffect(() => {
 		// Safety net: if beforeLoad didn't redirect for some reason (stale cached context,
@@ -232,7 +274,12 @@ function RouteComponent() {
 		const devBypass = import.meta.env.DEV && new URL(window.location.href).searchParams.get("test") === "true";
 
 		if (!devBypass && !isValidToken(token) && !isValidToken(urlToken)) {
-			redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash);
+			// Don't auto-redirect in DEV, because we want to show the AuthGate instructions
+			if (!import.meta.env.DEV) {
+				redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash);
+			} else {
+				setIsClientUnauth(true);
+			}
 		}
 	}, []);
 
@@ -244,8 +291,8 @@ function RouteComponent() {
 		});
 	}, []);
 
-	if (needsAuth) {
-		return <AuthGate />;
+	if (needsAuth || isClientUnauth) {
+		return <AuthGate isLocalDevAuth={isLocalDevAuthFromContext || isClientUnauth} />;
 	}
 
 	const getBackgroundStyle = () => {
