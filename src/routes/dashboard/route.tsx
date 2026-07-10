@@ -42,14 +42,9 @@ export const Route = createFileRoute("/dashboard")({
 		const hasTokenAfterClear = isValidToken(tokenAfterClear);
 
 		// If there's NO token in storage and NO token in the URL, user is not logged in.
-		// Redirect immediately to Zuvy so no dashboard content mounts (and no API calls fire).
+		// Instead of automatically redirecting, we show the Auth Help gate so users know what to do.
 		if (!hasTokenAfterClear && !hasUrlToken && !devBypass) {
-			if (import.meta.env.DEV) {
-				return { session: context.session, needsAuth: true, isAuthenticated: false, isLocalDevAuth: true };
-			}
-			throw redirect({
-				href: buildZuvyLoginUrl(url.pathname + url.search + url.hash),
-			});
+			return { session: context.session, needsAuth: true, isAuthenticated: false, showAuthHelp: true };
 		}
 
 		// At this point: either token is valid OR we have a URL token in-flight.
@@ -62,11 +57,12 @@ export const Route = createFileRoute("/dashboard")({
 	},
 });
 
-function AuthGate({ isLocalDevAuth }: { isLocalDevAuth?: boolean }) {
+function AuthGate({ showAuthHelp }: { showAuthHelp?: boolean }) {
 	const [secondsLeft, setSecondsLeft] = useState(Math.ceil(AUTH_GATE_TIMEOUT_MS / 1000));
+	const currentOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
 
 	useEffect(() => {
-		if (isLocalDevAuth) return;
+		if (showAuthHelp) return;
 
 		const start = Date.now();
 		let cancelled = false;
@@ -113,7 +109,7 @@ function AuthGate({ isLocalDevAuth }: { isLocalDevAuth?: boolean }) {
 		};
 	}, []);
 
-	if (isLocalDevAuth) {
+	if (showAuthHelp) {
 		return (
 			<div
 				className="flex min-h-screen flex-col items-center justify-center px-6"
@@ -122,21 +118,21 @@ function AuthGate({ isLocalDevAuth }: { isLocalDevAuth?: boolean }) {
 				<div className="flex max-w-lg flex-col items-center gap-6 text-center bg-card/10 p-8 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
 					<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
 					<div>
-						<h1 className="mb-2 font-bold text-white text-xl">Local Development Authentication</h1>
+						<h1 className="mb-2 font-bold text-white text-xl">Authentication Required</h1>
 						<p className="text-white/80 text-sm mb-6">
-							You are running the app locally without an authentication token.
+							You are running the app without an authentication token.
 						</p>
 						<div className="bg-black/40 text-left p-5 rounded-xl text-sm text-white/90 border border-white/5 space-y-4">
 							<p><strong className="text-emerald-400">Step 1:</strong> Click the button below to log in to Zuvy.</p>
 							<p><strong className="text-emerald-400">Step 2:</strong> In the Zuvy dashboard, click on <strong>"Learn with Zoe"</strong>.</p>
 							<p><strong className="text-emerald-400">Step 3:</strong> You will be redirected to the production Zoe site. <strong>Copy the <code className="bg-black px-1.5 py-0.5 rounded text-emerald-300 text-xs">?token=...</code></strong> part from the URL.</p>
-							<p><strong className="text-emerald-400">Step 4:</strong> Come back to your local environment and paste the token at the end of the URL like so:<br />
-							<code className="block mt-2 bg-black p-2 rounded text-xs overflow-x-auto text-emerald-300 whitespace-nowrap">http://localhost:3000/dashboard/resumes?token=eyJhb...</code></p>
+							<p><strong className="text-emerald-400">Step 4:</strong> Come back to your environment and paste the token at the end of the URL like so:<br />
+							<code className="block mt-2 bg-black p-2 rounded text-xs overflow-x-auto text-emerald-300 whitespace-nowrap">{currentOrigin}/dashboard/resumes?token=eyJhb...</code></p>
 						</div>
 					</div>
 					<button
 						onClick={() => redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash)}
-						className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-md py-2.5 font-medium transition-colors"
+						className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-md py-2.5 font-medium transition-colors cursor-pointer"
 					>
 						Go to Zuvy Login
 					</button>
@@ -236,7 +232,7 @@ function DashboardHeader() {
 
 					<UserDropdownMenu>
 						{({ session: userSession }) => (
-							<button className="flex items-center justify-center rounded-full transition-all hover:ring-2 hover:ring-white/20">
+							<button className="flex items-center justify-center rounded-full transition-all hover:ring-2 hover:ring-white/20 cursor-pointer">
 								<Avatar className="size-8">
 									<AvatarImage src={userSession.user.image ?? undefined} />
 									<AvatarFallback
@@ -259,7 +255,7 @@ function RouteComponent() {
 	useLingui();
 	const routeContext = Route.useRouteContext() as any;
 	const needsAuth = routeContext?.needsAuth;
-	const isLocalDevAuthFromContext = routeContext?.isLocalDevAuth;
+	const showAuthHelpFromContext = routeContext?.showAuthHelp;
 
 	const { theme } = useTheme();
 	const { backgroundTheme } = useSettingsStore();
@@ -274,12 +270,9 @@ function RouteComponent() {
 		const devBypass = import.meta.env.DEV && new URL(window.location.href).searchParams.get("test") === "true";
 
 		if (!devBypass && !isValidToken(token) && !isValidToken(urlToken)) {
-			// Don't auto-redirect in DEV, because we want to show the AuthGate instructions
-			if (!import.meta.env.DEV) {
-				redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash);
-			} else {
-				setIsClientUnauth(true);
-			}
+			// Instead of auto-redirecting anywhere, we set isClientUnauth to true
+			// so the AuthGate with manual copy-paste instructions shows up.
+			setIsClientUnauth(true);
 		}
 	}, []);
 
@@ -292,7 +285,7 @@ function RouteComponent() {
 	}, []);
 
 	if (needsAuth || isClientUnauth) {
-		return <AuthGate isLocalDevAuth={isLocalDevAuthFromContext || isClientUnauth} />;
+		return <AuthGate showAuthHelp={showAuthHelpFromContext || isClientUnauth} />;
 	}
 
 	const getBackgroundStyle = () => {
