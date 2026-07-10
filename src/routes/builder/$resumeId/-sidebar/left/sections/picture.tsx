@@ -278,10 +278,26 @@ export function PictureSectionForm() {
 							render={({ field }) => (
 								<FormItem className="space-y-3 pt-2">
 									<div className="flex items-center justify-between">
-										<FormLabel className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
+										<FormLabel className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider !m-0">
 											<Trans>Size</Trans>
 										</FormLabel>
 										<span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{field.value}px</span>
+									</div>
+									<div className="flex items-center justify-between pb-1 -mt-1">
+										<button
+											type="button"
+											onClick={() => field.onChange(Math.max(32, field.value - 4))}
+											className="text-xs font-medium text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-100 transition-colors"
+										>
+											dec. size
+										</button>
+										<button
+											type="button"
+											onClick={() => field.onChange(Math.min(256, field.value + 4))}
+											className="text-xs font-medium text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-100 transition-colors"
+										>
+											inc. size
+										</button>
 									</div>
 									<FormControl>
 										<div className="relative flex w-full items-center">
