@@ -554,8 +554,7 @@ export class ReactiveResumeV4JSONImporter {
 								id: item.id ?? generateId(),
 								hidden: !(item.visible ?? true),
 								language: item.name!,
-								fluency: item.description ?? "",
-								level: clampLevel(item.level ?? 0),
+								icon: "translate",
 							})),
 					},
 					interests: {

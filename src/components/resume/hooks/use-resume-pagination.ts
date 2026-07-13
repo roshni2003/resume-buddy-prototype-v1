@@ -125,7 +125,7 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 				const sectionHeight = measurements[sectionId];
 				if (sectionHeight && currentHeight + sectionHeight <= contentHeight) {
 					// The entire section (including wrapped flex items) fits perfectly!
-					itemDistribution[sectionId][currentPageIndex] = items.map((i) => i.id);
+					itemDistribution[sectionId][currentPageIndex] = items.map((i: any) => i.id);
 					currentHeight += sectionHeight + gapY;
 					continue;
 				}

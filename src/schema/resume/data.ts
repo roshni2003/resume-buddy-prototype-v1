@@ -180,14 +180,13 @@ export const interestItemSchema = baseItemSchema.extend({
 export const languageItemSchema = z.object({
 	id: z.string(),
 	hidden: z.boolean(),
+	icon: iconSchema,
 
 	language: z
 		.string()
 		.trim()
 		.min(2, "Language must be at least 2 characters")
 		.regex(/^[A-Za-z\s]+$/, "Please enter a valid language name"),
-	fluency: z.string(),
-	level: z.number(),
 });
 
 export const profileItemSchema = baseItemSchema.extend({
