@@ -63,6 +63,35 @@ export function AzurillTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-azurill page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+			<style>{`
+				.template-azurill .page-section-skills .section-content,
+				.template-azurill .page-section-interests .section-content,
+				.template-azurill .page-section-languages .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
+					column-gap: 0.75rem !important;
+					row-gap: 1rem !important;
+				}
+				.template-azurill .skills-item,
+				.template-azurill .interests-item,
+				.template-azurill .languages-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+				.template-azurill .skills-item .section-item-header,
+				.template-azurill .interests-item .section-item-header,
+				.template-azurill .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-azurill .skills-item .section-item-keywords,
+				.template-azurill .interests-item .section-item-keywords,
+				.template-azurill .languages-item .section-item-keywords {
+					display: none !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<div className="flex gap-x-(--page-gap-x)">

@@ -26,6 +26,13 @@ export function PikachuTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-pikachu page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+			<style>{`
+				.template-pikachu .page-section-skills .section-content,
+				.template-pikachu .page-section-interests .section-content,
+				.template-pikachu .page-section-languages .section-content {
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			<div className="flex gap-x-(--page-margin-x)">
 				{!fullWidth && (
 					<aside

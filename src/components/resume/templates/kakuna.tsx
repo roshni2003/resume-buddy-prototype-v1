@@ -22,6 +22,13 @@ export function KakunaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-kakuna page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+			<style>{`
+				.template-kakuna .page-section-skills .section-content,
+				.template-kakuna .page-section-interests .section-content,
+				.template-kakuna .page-section-languages .section-content {
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<main data-layout="main" className="group page-main space-y-(--page-gap-y)">

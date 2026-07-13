@@ -25,6 +25,13 @@ export function LeafishTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-leafish page-content">
+			<style>{`
+				.template-leafish .page-section-skills .section-content,
+				.template-leafish .page-section-interests .section-content,
+				.template-leafish .page-section-languages .section-content {
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<div className="flex gap-x-(--page-margin-x) px-(--page-margin-x) pt-(--page-margin-y)">
