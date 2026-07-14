@@ -187,7 +187,7 @@ export interface JDMatchResponse {
 /** Safely parse any date-like value into a valid Date. Handles the backend bug where hour=24 is returned. */
 export const safeParseDate = (value: unknown): Date => {
 	let parsedDate = new Date("invalid");
-	
+
 	if (value instanceof Date) {
 		parsedDate = value;
 	} else if (typeof value === "string" && value.length > 0) {
@@ -239,13 +239,13 @@ const scrubMockStrings = (obj: any): any => {
 			}
 			result[key] = scrubMockStrings(obj[key]);
 		}
-		
+
 		// If this object had dummy strings, it's likely a mocked object.
 		// Reset its 'hidden' property to false so it doesn't appear dim.
 		if (hasDummyString && "hidden" in result) {
 			result.hidden = false;
 		}
-		
+
 		return result;
 	}
 	if (typeof obj === "string" && obj === "string") {
@@ -276,7 +276,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 					items: (education.items || []).map((item: Record<string, any>) => {
 						let description = typeof item.description === "string" ? item.description : "";
 						let modeData: any = {};
-						
+
 						const commentMatch = description.match(/<!-- modeData: (.*?) -->/);
 						if (commentMatch) {
 							try {
@@ -314,7 +314,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 					items: ((sections.projects?.items as Record<string, any>[]) || []).map((item) => {
 						let description = typeof item.description === "string" ? item.description : "";
 						let role = typeof item.role === "string" ? item.role : "";
-						
+
 						if (!role && description) {
 							const commentMatch = description.match(/<!-- role: (.*?) -->/);
 							if (commentMatch) {
@@ -326,7 +326,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 								description = description.replace(commentMatch[0], "").trim();
 							}
 						}
-						
+
 						return {
 							...item,
 							description,
@@ -337,11 +337,22 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 				experience: {
 					...experience,
 					items: (experience.items || []).map((item: Record<string, any>) => {
+						let expData: any = {};
+						let description = typeof item.description === "string" ? item.description : "";
+						const commentMatch = description.match(/<!-- expData: (.*?) -->/);
+						if (commentMatch) {
+							try {
+								expData = JSON.parse(decodeURIComponent(commentMatch[1]));
+								description = description.replace(commentMatch[0], "").trim();
+							} catch (e) {}
+						}
+						
 						return {
 							...item,
-							startDate: typeof item.startDate === "string" ? item.startDate : "",
-							endDate: typeof item.endDate === "string" ? item.endDate : "",
-							currentlyWorkingHere: typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false,
+							description,
+							startDate: typeof expData.startDate === "string" ? expData.startDate : (typeof item.startDate === "string" ? item.startDate : ""),
+							endDate: typeof expData.endDate === "string" ? expData.endDate : (typeof item.endDate === "string" ? item.endDate : ""),
+							currentlyWorkingHere: typeof expData.currentlyWorkingHere === "boolean" ? expData.currentlyWorkingHere : (typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false),
 						};
 					}) as any[],
 				},
@@ -518,7 +529,7 @@ export const api = {
 	jdMatchUpload: (payload: { resume_upload: File; jd_text: string }) => {
 		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
 		const token = getAuthToken();
-		
+
 		const formData = new FormData();
 		formData.append("resume_upload", payload.resume_upload);
 		formData.append("jd_text", payload.jd_text);
@@ -542,7 +553,7 @@ export const api = {
 	resumeUpload: (payload: { resume_upload: File }) => {
 		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
 		const token = getAuthToken();
-		
+
 		const formData = new FormData();
 		formData.append("resume_upload", payload.resume_upload);
 
@@ -560,7 +571,7 @@ export const api = {
 			return res.json() as Promise<any>;
 		});
 	},
-	
+
 	// 19. POST: /ai/onboarding-jd-match
 	onboardingJdMatch: (payload: { jd_text: string; onboarding_questions: any; onboarding_answers: any }) => {
 		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");

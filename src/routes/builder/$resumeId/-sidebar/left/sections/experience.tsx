@@ -561,6 +561,7 @@ function AddNewPanel({
 		currentlyWorkingHere: false,
 		description: "",
 		period: "",
+		website: { url: "", label: "" },
 	};
 
 	return (

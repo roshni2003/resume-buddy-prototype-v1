@@ -78,13 +78,24 @@ const _syncResume = (resume: Resume) => {
 
 	// Ensure all date fields are properly serialized
 	if (dataToSync.sections?.experience?.items) {
-		dataToSync.sections.experience.items = dataToSync.sections.experience.items.map(
-			(item: Record<string, unknown>) => ({
+		dataToSync.sections.experience.items = dataToSync.sections.experience.items.map((item: Record<string, unknown>) => {
+			const expData = {
+				startDate: item.startDate || "",
+				endDate: item.endDate || "",
+				currentlyWorkingHere: item.currentlyWorkingHere || false,
+			};
+			const comment = `<!-- expData: ${encodeURIComponent(JSON.stringify(expData))} -->`;
+			let description = typeof item.description === "string" ? item.description : "";
+			description = description.replace(/<!-- expData: (.*?) -->/g, "").trim();
+
+			return {
 				...item,
 				startDate: item.startDate || "",
 				endDate: item.endDate || "",
-			}),
-		);
+				website: item.website || { url: "", label: "" },
+				description: description ? `${description}\n${comment}` : comment,
+			};
+		});
 	}
 
 	if (dataToSync.sections?.education?.items) {
