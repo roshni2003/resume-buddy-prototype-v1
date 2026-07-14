@@ -92,6 +92,7 @@ const _syncResume = (resume: Resume) => {
 				...item,
 				startDate: item.startDate || "",
 				endDate: item.endDate || "",
+				period: typeof item.period === "string" ? item.period : "",
 				website: item.website || { url: "", label: "" },
 				description: description ? `${description}\n${comment}` : comment,
 			};
@@ -129,6 +130,8 @@ const _syncResume = (resume: Resume) => {
 				...rest,
 				startDate: rest.startDate || "",
 				endDate: rest.endDate || "",
+				period: typeof rest.period === "string" ? rest.period : "",
+				website: rest.website || { url: "", label: "" },
 				school: typeof rest.school === "string" && rest.school.trim() === "" ? " " : rest.school,
 				description: description ? `${description}\n${comment}` : comment,
 			};
@@ -147,6 +150,16 @@ const _syncResume = (resume: Resume) => {
 				};
 			}
 			return rest;
+		});
+	}
+
+	if (dataToSync.sections?.languages?.items) {
+		dataToSync.sections.languages.items = dataToSync.sections.languages.items.map((item: Record<string, unknown>) => {
+			return {
+				...item,
+				fluency: JSON.stringify({ icon: item.icon || "translate" }),
+				level: typeof item.level === "number" ? item.level : 1,
+			};
 		});
 	}
 

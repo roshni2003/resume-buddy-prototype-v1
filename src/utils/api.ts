@@ -59,7 +59,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	}
 
 	if (!response.ok) {
-		const errorBody = await response.json().catch(() => ({}));
+		const errorBodyText = await response.clone().text().catch(() => "");
+		let errorBody = {};
+		try {
+			errorBody = JSON.parse(errorBodyText);
+		} catch (e) {
+			// ignore
+		}
+
 		throw new Error(errorBody.message || `Request failed with status ${response.status}`);
 	}
 
@@ -381,9 +388,27 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 						return {
 							...item,
 							description,
-							startDate: typeof expData.startDate === "string" ? expData.startDate : (typeof item.startDate === "string" ? item.startDate : ""),
-							endDate: typeof expData.endDate === "string" ? expData.endDate : (typeof item.endDate === "string" ? item.endDate : ""),
-							currentlyWorkingHere: typeof expData.currentlyWorkingHere === "boolean" ? expData.currentlyWorkingHere : (typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false),
+							startDate: expData.startDate || item.startDate || "",
+							endDate: expData.endDate || item.endDate || "",
+							currentlyWorkingHere: expData.currentlyWorkingHere ?? item.currentlyWorkingHere ?? false,
+						};
+					}) as any[],
+				},
+				languages: {
+					...(sections.languages || { items: [] }),
+					items: ((sections.languages || {}).items || []).map((item: Record<string, any>) => {
+						let icon = item.icon || "translate";
+						try {
+							if (item.fluency) {
+								const parsed = JSON.parse(item.fluency);
+								if (parsed.icon) {
+									icon = parsed.icon;
+								}
+							}
+						} catch (e) {}
+						return {
+							...item,
+							icon,
 						};
 					}) as any[],
 				},
