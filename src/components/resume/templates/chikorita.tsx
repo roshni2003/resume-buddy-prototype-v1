@@ -40,10 +40,84 @@ export function ChikoritaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-chikorita page-content">
 			<style>{`
-				.template-chikorita .page-section-skills .section-content,
+				/* Skills as grid */
+				.template-chikorita .page-section-skills .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					column-gap: 0.75rem !important;
+					row-gap: 1rem !important;
+				}
+
+				/* Interests & Languages as chips container */
 				.template-chikorita .page-section-interests .section-content,
 				.template-chikorita .page-section-languages .section-content {
-					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					display: flex !important;
+					flex-wrap: wrap !important;
+					gap: 0.5rem !important;
+				}
+
+				/* Skills item */
+				.template-chikorita .skills-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+
+				/* Interests & Languages chips styling */
+				.template-chikorita .interests-item,
+				.template-chikorita .languages-item {
+					display: flex !important;
+					flex-direction: row !important;
+					align-items: center !important;
+					width: auto !important;
+					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
+					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
+					border-radius: 9999px !important;
+					padding: 0.35rem 0.75rem !important;
+				}
+
+				.template-chikorita .skills-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-chikorita .interests-item .section-item-header,
+				.template-chikorita .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+					display: flex !important;
+					align-items: center !important;
+					column-gap: 0.35rem !important;
+				}
+
+				.template-chikorita .interests-item .section-item-title,
+				.template-chikorita .languages-item .section-item-title {
+					font-size: 1em !important;
+					font-weight: 500 !important;
+					color: var(--page-primary-color) !important;
+				}
+				
+				.template-chikorita .interests-item .section-item-icon,
+				.template-chikorita .languages-item .section-item-icon {
+					color: var(--page-primary-color) !important;
+				}
+
+				.template-chikorita .skills-item .section-item-keywords,
+				.template-chikorita .interests-item .section-item-keywords,
+				.template-chikorita .languages-item .section-item-keywords {
+					display: none !important;
+				}
+			
+				/* Chikorita Sidebar Contrast for Chips */
+				.template-chikorita [data-layout="sidebar"] .interests-item,
+				.template-chikorita [data-layout="sidebar"] .languages-item {
+					background-color: color-mix(in srgb, var(--page-background-color) 10%, transparent) !important;
+					border: 1px solid color-mix(in srgb, var(--page-background-color) 20%, transparent) !important;
+				}
+				.template-chikorita [data-layout="sidebar"] .interests-item .section-item-title,
+				.template-chikorita [data-layout="sidebar"] .languages-item .section-item-title,
+				.template-chikorita [data-layout="sidebar"] .interests-item .section-item-icon,
+				.template-chikorita [data-layout="sidebar"] .languages-item .section-item-icon {
+					color: var(--page-background-color) !important;
 				}
 			`}</style>
 			{/* Sidebar Background */}

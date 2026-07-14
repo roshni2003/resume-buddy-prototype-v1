@@ -33,10 +33,71 @@ export function DitgarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-ditgar page-content">
 			<style>{`
-				.template-ditgar .page-section-skills .section-content,
+				/* Skills as grid */
+				.template-ditgar .page-section-skills .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					column-gap: 0.75rem !important;
+					row-gap: 1rem !important;
+				}
+
+				/* Interests & Languages as chips container */
 				.template-ditgar .page-section-interests .section-content,
 				.template-ditgar .page-section-languages .section-content {
-					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					display: flex !important;
+					flex-wrap: wrap !important;
+					gap: 0.5rem !important;
+				}
+
+				/* Skills item */
+				.template-ditgar .skills-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+
+				/* Interests & Languages chips styling */
+				.template-ditgar .interests-item,
+				.template-ditgar .languages-item {
+					display: flex !important;
+					flex-direction: row !important;
+					align-items: center !important;
+					width: auto !important;
+					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
+					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
+					border-radius: 9999px !important;
+					padding: 0.35rem 0.75rem !important;
+				}
+
+				.template-ditgar .skills-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-ditgar .interests-item .section-item-header,
+				.template-ditgar .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+					display: flex !important;
+					align-items: center !important;
+					column-gap: 0.35rem !important;
+				}
+
+				.template-ditgar .interests-item .section-item-title,
+				.template-ditgar .languages-item .section-item-title {
+					font-size: 1em !important;
+					font-weight: 500 !important;
+					color: var(--page-primary-color) !important;
+				}
+				
+				.template-ditgar .interests-item .section-item-icon,
+				.template-ditgar .languages-item .section-item-icon {
+					color: var(--page-primary-color) !important;
+				}
+
+				.template-ditgar .skills-item .section-item-keywords,
+				.template-ditgar .interests-item .section-item-keywords,
+				.template-ditgar .languages-item .section-item-keywords {
+					display: none !important;
 				}
 			`}</style>
 			{/* Sidebar Background */}
