@@ -3,8 +3,8 @@ import { t } from "@lingui/macro";
 import { Trans } from "@lingui/react/macro";
 import { PencilSimpleLineIcon, PlusIcon } from "@phosphor-icons/react";
 import { X } from "lucide-react";
-import { useState } from "react";
-import { useForm, useFormContext } from "react-hook-form";
+import { useState, useMemo } from "react";
+import { useForm, useFormContext, useFormState } from "react-hook-form";
 import type z from "zod";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { Button } from "@/components/ui/button";
@@ -18,19 +18,11 @@ import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { languageItemSchema } from "@/schema/resume/data";
 import { generateId } from "@/utils/string";
 import { cn } from "@/utils/style";
+import { IconPicker } from "@/components/input/icon-picker";
 
 const formSchema = languageItemSchema;
 
 type FormValues = z.infer<typeof formSchema>;
-
-const fluencyLabels: Record<number, string> = {
-	0: "Hidden",
-	1: "Beginner",
-	2: "Conversational",
-	3: "Proficient",
-	4: "Fluent",
-	5: "Native",
-};
 
 export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.languages.create">) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);
@@ -38,7 +30,6 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 
 	const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
 	const [customLanguages, setCustomLanguages] = useState("");
-	const [level, setLevel] = useState(3);
 	const [error, setError] = useState("");
 
 	const predefinedLanguages = [
@@ -84,9 +75,8 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 				const newLang = {
 					id: generateId(),
 					hidden: false,
+					icon: "translate",
 					language: langName,
-					fluency: fluencyLabels[level] || "",
-					level: level,
 				};
 				if (data?.customSectionId) {
 					const section = draft.customSections.find((s) => s.id === data.customSectionId);
@@ -101,10 +91,10 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 
 	return (
 		<DialogContent className="w-full max-w-[95vw] sm:!max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
-			<div className="flex items-start justify-between mb-4">
+			<div className="flex items-start justify-between mb-2">
 				<div>
 					<h2 className="font-ibm-plex-sans text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Add languages</h2>
-					<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Pick several at once and set their fluency together.</p>
+					<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Pick as many as you like — all at once.</p>
 				</div>
 				<button onClick={closeDialog} className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
 					<X className="h-5 w-5" />
@@ -151,31 +141,9 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 					{error && <p className="mt-1.5 text-xs font-medium text-red-500">{error}</p>}
 				</div>
 
-				<div className="rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted/50 p-4 pt-5 pb-6">
-					<div className="mb-4 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-						<span>Level</span>
-						<span className="text-cyan-600">{level} · {fluencyLabels[level] || "Unknown"}</span>
-					</div>
-					<Slider
-						min={0}
-						max={5}
-						step={1}
-						value={[level]}
-						onValueChange={(val) => setLevel(val[0])}
-						className="[&>span:first-child]:bg-cyan-100 [&_[data-slot=slider-range]]:bg-cyan-500 [&_[data-slot=slider-thumb]]:border-cyan-500 [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-thumb]]:h-5 [&_[data-slot=slider-thumb]]:w-5"
-					/>
-					<div className="mt-3 flex justify-between px-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
-						<span>0</span>
-						<span>1</span>
-						<span>2</span>
-						<span>3</span>
-						<span>4</span>
-						<span>5</span>
-					</div>
-				</div>
 			</div>
 
-			<div className="mt-8 flex justify-end gap-3">
+			<div className="mt-4 flex justify-end gap-3">
 				<button onClick={closeDialog} className="rounded-full px-5 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-muted transition-colors">
 					Cancel
 				</button>
@@ -199,9 +167,8 @@ export function UpdateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 		defaultValues: {
 			id: data.item.id,
 			hidden: data.item.hidden,
+			icon: data.item.icon,
 			language: data.item.language,
-			fluency: data.item.fluency,
-			level: data.item.level,
 		},
 	});
 
@@ -253,6 +220,10 @@ export function UpdateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 
 function LanguageForm() {
 	const form = useFormContext<FormValues>();
+	const nameState = useFormState({ control: form.control, name: "language" });
+	const isNameInvalid = useMemo(() => {
+		return nameState.errors && Object.keys(nameState.errors).length > 0;
+	}, [nameState]);
 
 	// Pre-defined languages
 	const predefinedLanguages = [
@@ -281,13 +252,6 @@ function LanguageForm() {
 		"Italian",
 		"Korean",
 	];
-	// Fluency options
-	const fluencyOptions = [
-		{ value: "Basic", label: "Basic" },
-		{ value: "Conversational", label: "Conversational" },
-		{ value: "Fluent", label: "Fluent" },
-		{ value: "Native", label: "Native" },
-	];
 
 	// Add language chip instantly
 	const handleAddLanguageChip = (lang: string) => {
@@ -314,72 +278,34 @@ function LanguageForm() {
 				))}
 			</div>
 
-			<FormField
-				control={form.control}
-				name="language"
-				render={({ field }) => (
-					<FormItem>
-						<FormLabel>
-							<Trans>Language</Trans>
-						</FormLabel>
-						<FormControl>
-							<Input {...field} />
-						</FormControl>
-						<FormMessage />
-					</FormItem>
-				)}
-			/>
-
-			{/* Fluency dropdown */}
-			<FormField
-				control={form.control}
-				name="fluency"
-				render={({ field }) => (
-					<FormItem>
-						<FormLabel>
-							<Trans>Fluency</Trans>
-						</FormLabel>
-						<FormControl>
-							<select
-								className="w-full rounded border px-2 py-1"
-								value={field.value || ""}
-								onChange={(e) => field.onChange(e.target.value)}
-							>
-								<option value="">Select fluency</option>
-								{fluencyOptions.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
-						</FormControl>
-						<FormMessage />
-					</FormItem>
-				)}
-			/>
-
-			<FormField
-				control={form.control}
-				name="level"
-				render={({ field }) => (
-					<FormItem className="gap-4 sm:col-span-full">
-						<FormLabel>
-							<Trans>Level</Trans>
-						</FormLabel>
-						<FormControl>
-							<Slider
-								min={0}
-								max={5}
-								step={1}
-								value={[field.value]}
-								onValueChange={(value) => field.onChange(value[0])}
-							/>
-						</FormControl>
-						<FormMessage />
-						<FormDescription>{Number(field.value) === 0 ? t`Hidden` : `${field.value} / 5`}</FormDescription>
-					</FormItem>
-				)}
-			/>
+			<div className={cn("col-span-full flex items-end", isNameInvalid && "items-center")}>
+				<FormField
+					control={form.control}
+					name={"icon"}
+					render={({ field }) => (
+						<FormItem className="shrink-0">
+							<FormControl>
+								<IconPicker {...field} popoverProps={{ modal: true }} className="rounded-r-none! border-e-0!" />
+							</FormControl>
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
+					name="language"
+					render={({ field }) => (
+						<FormItem className="flex-1">
+							<FormLabel>
+								<Trans>Language</Trans>
+							</FormLabel>
+							<FormControl>
+								<Input className="rounded-l-none!" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+			</div>
 		</>
 	);
 }

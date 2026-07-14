@@ -23,6 +23,13 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-ditto page-content">
+			<style>{`
+				.template-ditto .page-section-skills .section-content,
+				.template-ditto .page-section-interests .section-content,
+				.template-ditto .page-section-languages .section-content {
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<div className="flex pt-(--page-margin-y)">

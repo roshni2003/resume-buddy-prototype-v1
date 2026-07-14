@@ -32,6 +32,13 @@ export function DitgarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-ditgar page-content">
+			<style>{`
+				.template-ditgar .page-section-skills .section-content,
+				.template-ditgar .page-section-interests .section-content,
+				.template-ditgar .page-section-languages .section-content {
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{/* Sidebar Background */}
 			{(!fullWidth || isFirstPage) && (
 				<div className="page-sidebar-background pointer-events-none absolute inset-y-0 z-0 w-(--page-sidebar-width) shrink-0 bg-(--page-primary-color)/20 ltr:start-0 rtl:end-0" />

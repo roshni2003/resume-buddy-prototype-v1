@@ -483,8 +483,7 @@ export class JSONResumeImporter {
 						id: generateId(),
 						hidden: false,
 						language: lang.language || "",
-						fluency: lang.fluency || "",
-						level: parseLevel(lang.fluency),
+						icon: "translate",
 					})),
 			};
 		}

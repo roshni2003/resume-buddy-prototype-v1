@@ -25,6 +25,35 @@ export function BronzorTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-bronzor page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+			<style>{`
+				.template-bronzor .page-section-skills .section-content,
+				.template-bronzor .page-section-interests .section-content,
+				.template-bronzor .page-section-languages .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					column-gap: 1.5rem !important;
+					row-gap: 1rem !important;
+				}
+				.template-bronzor .skills-item,
+				.template-bronzor .interests-item,
+				.template-bronzor .languages-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+				.template-bronzor .skills-item .section-item-header,
+				.template-bronzor .interests-item .section-item-header,
+				.template-bronzor .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-bronzor .skills-item .section-item-keywords,
+				.template-bronzor .interests-item .section-item-keywords,
+				.template-bronzor .languages-item .section-item-keywords {
+					display: none !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<div className="space-y-(--page-gap-y)">

@@ -39,6 +39,13 @@ export function LaprasTemplate({ pageIndex, pageLayout }: TemplateProps) {
 			style={style}
 			className="template-lapras page-content space-y-6 px-(--page-margin-x) pt-(--page-margin-y) print:p-0"
 		>
+			<style>{`
+				.template-lapras .page-section-skills .section-content,
+				.template-lapras .page-section-interests .section-content,
+				.template-lapras .page-section-languages .section-content {
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<main data-layout="main" className="group page-main space-y-6">

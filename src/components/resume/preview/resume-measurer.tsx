@@ -74,7 +74,7 @@ export const ResumeMeasurer = ({ onMeasure }: Props) => {
 	return (
 		<div
 			ref={setMeasurementRef}
-			className="resume-measurer pointer-events-none absolute top-0 left-0 -z-50 opacity-0"
+			className={`resume-measurer template-${metadata.template} pointer-events-none absolute top-0 left-0 -z-50 opacity-0`}
 			style={{
 				width: pageDimensionsAsPixels[metadata.page.format].width, // Use full page width
 				height: 0,

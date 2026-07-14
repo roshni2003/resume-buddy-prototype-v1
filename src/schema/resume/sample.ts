@@ -234,16 +234,14 @@ export const sampleResumeData: ResumeData = {
 				{
 					id: "019bef5a-93e4-7746-ad39-73807ccc48b5",
 					hidden: false,
+					icon: "translate",
 					language: "English",
-					fluency: "Native",
-					level: 5,
 				},
 				{
 					id: "019bef5a-93e4-7746-ad39-768670459358",
 					hidden: false,
+					icon: "translate",
 					language: "Polish",
-					fluency: "Conversational",
-					level: 3,
 				},
 			],
 		},

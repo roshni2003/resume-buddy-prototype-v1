@@ -91,7 +91,7 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 
 	return (
 		<DialogContent className="w-full max-w-[95vw] sm:!max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
-			<div className="flex items-start justify-between mb-4">
+			<div className="flex items-start justify-between mb-2">
 				<div>
 					<h2 className="font-ibm-plex-sans text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">What lights you up?</h2>
 					<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Pick as many as you like — all at once.</p>
@@ -142,7 +142,7 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 				</div>
 			</div>
 
-			<div className="mt-8 flex justify-end gap-3">
+			<div className="mt-4 flex justify-end gap-3">
 				<button onClick={closeDialog} className="rounded-full px-5 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-muted transition-colors">
 					Cancel
 				</button>

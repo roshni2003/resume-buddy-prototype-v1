@@ -39,6 +39,13 @@ export function ChikoritaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-chikorita page-content">
+			<style>{`
+				.template-chikorita .page-section-skills .section-content,
+				.template-chikorita .page-section-interests .section-content,
+				.template-chikorita .page-section-languages .section-content {
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{/* Sidebar Background */}
 			{!fullWidth && (
 				<div className="page-sidebar-background pointer-events-none absolute inset-y-0 z-0 w-(--page-sidebar-width) shrink-0 bg-(--page-primary-color) ltr:end-0 rtl:start-0" />

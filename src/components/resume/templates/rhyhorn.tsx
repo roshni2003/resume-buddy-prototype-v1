@@ -22,6 +22,13 @@ export function RhyhornTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-rhyhorn page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+			<style>{`
+				.template-rhyhorn .page-section-skills .section-content,
+				.template-rhyhorn .page-section-interests .section-content,
+				.template-rhyhorn .page-section-languages .section-content {
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<main data-layout="main" className="group page-main space-y-(--page-gap-y)">

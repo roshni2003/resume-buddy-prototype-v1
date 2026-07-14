@@ -26,6 +26,13 @@ export function GlalieTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-glalie page-content">
+			<style>{`
+				.template-glalie .page-section-skills .section-content,
+				.template-glalie .page-section-interests .section-content,
+				.template-glalie .page-section-languages .section-content {
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+				}
+			`}</style>
 			{/* Sidebar Background */}
 			{(!fullWidth || isFirstPage) && (
 				<div className="page-sidebar-background pointer-events-none absolute inset-y-0 z-0 w-(--page-sidebar-width) shrink-0 bg-(--page-primary-color)/20 ltr:start-0 rtl:end-0" />
