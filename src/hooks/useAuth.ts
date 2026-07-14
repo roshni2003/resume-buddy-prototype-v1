@@ -48,7 +48,9 @@ export const useAuth = () => {
 		clearAuthToken();
 		setUser(null);
 		setToken(null);
-		window.location.href = `https://app.zuvy.org/?zoeRedirectUrl=zoe.zuvy.org%3FreturnUrl%3D${encodeURIComponent(window.location.origin)}`;
+		const isDev = typeof window !== "undefined" && window.location.hostname.includes("amplifyapp.com");
+		const zuvyBase = isDev ? "https://dev.app.zuvy.org" : "https://app.zuvy.org";
+		window.location.href = `${zuvyBase}/?zoeRedirectUrl=zoe.zuvy.org%3FreturnUrl%3D${encodeURIComponent(window.location.origin)}`;
 	};
 
 	return { user, token, isLoading, logout };

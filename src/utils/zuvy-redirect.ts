@@ -24,8 +24,11 @@ export const buildZuvyLoginUrl = (returnUrl: string) => {
 	}
 	const fullReturnUrl = `${appBaseUrl}${relativeReturnUrl}`;
 
+	const isDev = typeof window !== "undefined" && window.location.hostname.includes("amplifyapp.com");
+	const zuvyBase = isDev ? "https://dev.app.zuvy.org" : "https://app.zuvy.org";
+
 	// Zuvy expects the callback URL in `zoeRedirectUrl`. Avoid double-encoding.
-	return `https://app.zuvy.org/?zoeRedirectUrl=${encodeURIComponent(fullReturnUrl)}`;
+	return `${zuvyBase}/?zoeRedirectUrl=${encodeURIComponent(fullReturnUrl)}`;
 };
 
 export const redirectToZuvyLogin = (returnUrl?: string) => {
