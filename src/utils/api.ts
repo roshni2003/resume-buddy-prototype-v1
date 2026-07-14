@@ -1,5 +1,6 @@
 import type { ResumeData } from "@/schema/resume/data";
 import { getAuthToken } from "@/utils/auth-token";
+import { defaultResumeData } from "@/schema/resume/data";
 
 const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
 
@@ -268,8 +269,38 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 		createdAt: safeParseDate(resume.createdAt),
 		updatedAt: safeParseDate(resume.updatedAt),
 		data: {
+			...defaultResumeData,
 			...data,
+			picture: {
+				...defaultResumeData.picture,
+				...(data.picture || {}),
+			},
+			basics: {
+				...defaultResumeData.basics,
+				...(data.basics || {}),
+			},
+			summary: {
+				...defaultResumeData.summary,
+				...(data.summary || {}),
+			},
+			metadata: {
+				...defaultResumeData.metadata,
+				...(data.metadata || {}),
+				typography: {
+					...defaultResumeData.metadata.typography,
+					...(data.metadata?.typography || {}),
+				},
+				page: {
+					...defaultResumeData.metadata.page,
+					...(data.metadata?.page || {}),
+				},
+				design: {
+					...defaultResumeData.metadata.design,
+					...(data.metadata?.design || {}),
+				},
+			},
 			sections: {
+				...defaultResumeData.sections,
 				...sections,
 				education: {
 					...education,
