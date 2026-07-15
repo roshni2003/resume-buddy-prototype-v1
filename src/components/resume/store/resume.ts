@@ -167,12 +167,12 @@ const _syncResume = (resume: Resume) => {
 		dataToSync.sections.interests.items = dataToSync.sections.interests.items.map((item: Record<string, unknown>) => {
 			const { name, icon, ...rest } = item;
 			if (typeof name === "string") {
-				const comment = `<!-- icon: ${icon || "football"} -->`;
+				const comment = `<!-- icon: ${icon || "star"} -->`;
 				const cleanName = name.replace(/<!-- icon: (.*?) -->/g, "").trim();
 				return {
 					...rest,
 					name: `${cleanName} ${comment}`,
-					icon: icon || "football"
+					icon: icon || "star"
 				};
 			}
 			return item;

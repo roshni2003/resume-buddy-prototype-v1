@@ -25,7 +25,7 @@ export function InterestsSectionBuilder() {
 						key={item.id}
 						className="group flex items-center gap-2 rounded-full border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-1.5 shadow-sm transition-all hover:border-rose-200 hover:shadow-md"
 					>
-						<PageIcon icon={item.icon || "football"} className="h-3.5 w-3.5 text-rose-400 !text-rose-400 shrink-0" />
+						<PageIcon icon={item.icon || "star"} className="h-3.5 w-3.5 text-rose-400 !text-rose-400 shrink-0" />
 						<span className="text-sm font-medium text-gray-800 dark:text-gray-200">
 							{item.name}
 						</span>

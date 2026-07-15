@@ -173,7 +173,7 @@ export const sampleResumeData: ResumeData = {
 				{
 					id: "019bef5a-93e4-7746-ad39-5a52dcf50ed4",
 					hidden: false,
-					icon: "code",
+					icon: "diamond",
 					name: "Unity Engine",
 					proficiency: "Expert",
 					level: 5,
