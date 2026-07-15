@@ -330,7 +330,7 @@ function InlineExperienceForm({
 											data={{
 												position: form.getValues("position"),
 												company: form.getValues("company"),
-												summary: description,
+												description: description,
 											}}
 											onGenerated={handleAIGenerated}
 											roundsUsed={roundsUsed}

@@ -1168,7 +1168,7 @@ function ExperienceInlineForm({
 			const response = await api.generateAIContent({
 				resume_id: useResumeStore.getState().resume.id,
 				type: "ExperienceDescription",
-				value: stripHtml(`${position} at ${company}`),
+				value: stripHtml(form.getValues("description") || `${position} at ${company}`),
 			});
 
 			const aiDescription = Object.values(response)[0];
@@ -1401,7 +1401,7 @@ function ProjectsInlineForm({
 			const response = await api.generateAIContent({
 				resume_id: useResumeStore.getState().resume.id,
 				type: "ProjectsDescription",
-				value: stripHtml(`${name}`),
+				value: stripHtml(form.getValues("description") || `${name}`),
 			});
 
 			const aiDescription = Object.values(response)[0];
