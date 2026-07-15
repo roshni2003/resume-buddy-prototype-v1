@@ -35,9 +35,9 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 				/* Interests & Languages as chips container */
 				.template-ditto .page-section-interests .section-content,
 				.template-ditto .page-section-languages .section-content {
-					display: grid !important;
-					grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-					gap: 0.75rem 0.5rem !important;
+					display: flex !important;
+					flex-wrap: wrap !important;
+					gap: 0.5rem !important;
 				}
 
 				/* Skills item */
@@ -80,6 +80,7 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					font-size: 1em !important;
 					font-weight: 500 !important;
 					color: var(--page-primary-color) !important;
+					white-space: nowrap !important;
 				}
 				
 				.template-ditto .interests-item .section-item-icon,
