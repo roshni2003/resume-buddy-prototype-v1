@@ -425,7 +425,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 						return {
 							...item,
 							name,
-							icon: icon === "heart" ? "football" : (icon || "football"),
+							icon: icon === "heart" || icon === "football" ? "star" : (icon || "star"),
 						};
 					}) as any[],
 				},
