@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { Plus, X } from "lucide-react";
-import { Heart } from "@phosphor-icons/react";
 import { useResumeStore } from "@/components/resume/store/resume";
+import { PageIcon } from "@/components/resume/shared/page-icon";
 import { cn } from "@/utils/style";
 import { SectionBase } from "../shared/section-base";
 import { SectionAddItemButton } from "../shared/section-item";
@@ -25,7 +25,7 @@ export function InterestsSectionBuilder() {
 						key={item.id}
 						className="group flex items-center gap-2 rounded-full border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-1.5 shadow-sm transition-all hover:border-rose-200 hover:shadow-md"
 					>
-						<Heart className="h-3.5 w-3.5 text-rose-400" weight="regular" />
+						<PageIcon icon={item.icon || "football"} className="h-3.5 w-3.5 text-rose-400 !text-rose-400 shrink-0" />
 						<span className="text-sm font-medium text-gray-800 dark:text-gray-200">
 							{item.name}
 						</span>

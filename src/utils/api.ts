@@ -412,6 +412,23 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 						};
 					}) as any[],
 				},
+				interests: {
+					...(sections.interests || { items: [] }),
+					items: ((sections.interests || {}).items || []).map((item: Record<string, any>) => {
+						let name = item.name || "";
+						let icon = item.icon;
+						const match = name.match(/<!-- icon: (.*?) -->/);
+						if (match) {
+							icon = match[1];
+							name = name.replace(match[0], "").trim();
+						}
+						return {
+							...item,
+							name,
+							icon: icon === "heart" ? "football" : (icon || "football"),
+						};
+					}) as any[],
+				},
 			},
 		},
 	};

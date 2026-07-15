@@ -74,7 +74,7 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 				const newInterest = {
 					id: generateId(),
 					hidden: false,
-					icon: "heart",
+					icon: "football",
 					name: interestName,
 					keywords: [],
 				};
