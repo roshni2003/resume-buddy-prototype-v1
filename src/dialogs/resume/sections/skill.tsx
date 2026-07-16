@@ -43,6 +43,12 @@ export function CreateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 	const [level, setLevel] = useState(3);
 	const [error, setError] = useState("");
 
+	const existingItems = useResumeStore((state) => data?.customSectionId 
+		? state.resume.data.customSections.find((s) => s.id === data.customSectionId)?.items || []
+		: state.resume.data.sections.skills.items
+	);
+	const existingNames = existingItems.map((item: any) => item.name?.toLowerCase() || "");
+
 	const predefinedSkills = [
 		"JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Python", "Go",
 		"Rust", "CSS", "HTML", "Tailwind", "SQL", "PostgreSQL", "GraphQL", "Git",
@@ -65,6 +71,10 @@ export function CreateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 
 				if (trimmed.length === 1 || (trimmed.length > 0 && !/^[A-Za-z\s]+$/.test(trimmed))) {
 					hasError = true;
+					setError("Skill must be at least 2 characters and contain only letters");
+				} else if (existingNames.includes(trimmed.toLowerCase())) {
+					hasError = true;
+					setError(`Skill "${trimmed}" is already added.`);
 				} else if (trimmed.length >= 2 && !newSkills.includes(trimmed)) {
 					newSkills.push(trimmed);
 				}
@@ -72,7 +82,6 @@ export function CreateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 		}
 
 		if (hasError) {
-			setError("Skill must be at least 2 characters and contain only letters");
 			return;
 		}
 
@@ -118,15 +127,19 @@ export function CreateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 					<p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Suggestions · Multi-select</p>
 					<div className="flex flex-wrap gap-2">
 						{predefinedSkills.map((skill) => {
+							const isAlreadySelected = existingNames.includes(skill.toLowerCase());
 							const isSelected = selectedSkills.includes(skill);
 							return (
 								<button
 									key={skill}
 									type="button"
+									disabled={isAlreadySelected}
 									onClick={() => toggleSkill(skill)}
 									className={cn(
 										"rounded-full border px-4 py-1.5 text-sm transition-all",
-										isSelected
+										isAlreadySelected 
+											? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed dark:border-gray-800 dark:bg-gray-900 dark:text-gray-600"
+											: isSelected
 											? "border-teal-200 bg-teal-50 text-teal-700 font-medium shadow-sm"
 											: "border-gray-200 dark:border-border bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50 hover:text-gray-900 dark:hover:text-gray-100"
 									)}
@@ -238,7 +251,7 @@ export function UpdateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 
 			<Form {...form}>
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
-					<SkillForm />
+					<SkillForm existingNames={useResumeStore(state => (data?.customSectionId ? state.resume.data.customSections.find((s) => s.id === data.customSectionId)?.items || [] : state.resume.data.sections.skills.items).filter(i => i.id !== form.getValues("id")).map((i: any) => i.name?.toLowerCase() || ""))} />
 
 					<DialogFooter className="sm:col-span-full">
 						<Button variant="ghost" onClick={requestClose}>
@@ -255,7 +268,7 @@ export function UpdateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 	);
 }
 
-function SkillForm() {
+function SkillForm({ existingNames = [] }: { existingNames?: string[] }) {
 	const form = useFormContext<FormValues>();
 	const nameState = useFormState({ control: form.control, name: "name" });
 	const isNameInvalid = useMemo(() => {
@@ -302,21 +315,25 @@ function SkillForm() {
 
 	return (
 		<>
-			{/* Pre-defined skill chips */}
 			<div className="col-span-full mb-2 flex flex-wrap gap-2">
-				{predefinedSkills.map((skill) => (
-					<button
-						type="button"
-						key={skill}
-						className={cn(
-							"cursor-pointer rounded-full border px-3 py-1 text-xs hover:bg-primary/10",
-							form.watch("name") === skill && "border-primary bg-primary text-white",
-						)}
-						onClick={() => handleAddSkillChip(skill)}
-					>
-						{skill}
-					</button>
-				))}
+				{predefinedSkills.map((skill) => {
+					const isAlreadySelected = existingNames.includes(skill.toLowerCase());
+					return (
+						<button
+							type="button"
+							key={skill}
+							disabled={isAlreadySelected}
+							className={cn(
+								"cursor-pointer rounded-full border px-3 py-1 text-xs hover:bg-primary/10",
+								form.watch("name") === skill && "border-primary bg-primary text-white",
+								isAlreadySelected && "cursor-not-allowed opacity-50 bg-gray-100 text-gray-500 hover:bg-gray-100"
+							)}
+							onClick={() => handleAddSkillChip(skill)}
+						>
+							{skill}
+						</button>
+					);
+				})}
 			</div>
 
 			<div className={cn("flex items-end", isNameInvalid && "items-center")}>
@@ -340,7 +357,18 @@ function SkillForm() {
 								<Trans>Name</Trans>
 							</FormLabel>
 							<FormControl>
-								<Input className="rounded-l-none!" {...field} />
+								<Input 
+									className="rounded-l-none!" 
+									{...field} 
+									onChange={(e) => {
+										field.onChange(e);
+										if (existingNames.includes(e.target.value.trim().toLowerCase())) {
+											form.setError("name", { message: `Skill "${e.target.value}" is already added.` });
+										} else {
+											form.clearErrors("name");
+										}
+									}}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

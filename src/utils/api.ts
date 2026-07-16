@@ -60,7 +60,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 	if (!response.ok) {
 		const errorBodyText = await response.clone().text().catch(() => "");
-		let errorBody = {};
+		let errorBody: any = {};
 		try {
 			errorBody = JSON.parse(errorBodyText);
 		} catch (e) {

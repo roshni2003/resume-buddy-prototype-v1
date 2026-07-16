@@ -32,6 +32,12 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 	const [customLanguages, setCustomLanguages] = useState("");
 	const [error, setError] = useState("");
 
+	const existingItems = useResumeStore((state) => data?.customSectionId 
+		? state.resume.data.customSections.find((s) => s.id === data.customSectionId)?.items || []
+		: state.resume.data.sections.languages.items
+	);
+	const existingNames = existingItems.map((item: any) => item.language?.toLowerCase() || "");
+
 	const predefinedLanguages = [
 		"English", "Spanish", "French", "German", "Mandarin", "Japanese", "Hindi",
 		"Arabic", "Portuguese", "Italian", "Korean", "Russian", "Dutch"
@@ -53,6 +59,10 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 
 				if (trimmed.length === 1 || (trimmed.length > 0 && !/^[A-Za-z\s]+$/.test(trimmed))) {
 					hasError = true;
+					setError("Language must be at least 2 characters and contain only letters");
+				} else if (existingNames.includes(trimmed.toLowerCase())) {
+					hasError = true;
+					setError(`Language "${trimmed}" is already added.`);
 				} else if (
 					trimmed.length >= 2 &&
 					!newLanguages.includes(trimmed)
@@ -63,7 +73,6 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 		}
 
 		if (hasError) {
-			setError("Language must be at least 2 characters and contain only letters");
 			return;
 		}
 
@@ -106,15 +115,19 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 					<p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Suggestions · Multi-select</p>
 					<div className="flex flex-wrap gap-2">
 						{predefinedLanguages.map((lang) => {
+							const isAlreadySelected = existingNames.includes(lang.toLowerCase());
 							const isSelected = selectedLanguages.includes(lang);
 							return (
 								<button
 									key={lang}
 									type="button"
+									disabled={isAlreadySelected}
 									onClick={() => toggleLanguage(lang)}
 									className={cn(
 										"rounded-full border px-4 py-1.5 text-sm transition-all",
-										isSelected
+										isAlreadySelected
+											? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed dark:border-gray-800 dark:bg-gray-900 dark:text-gray-600"
+											: isSelected
 											? "border-cyan-200 bg-cyan-50 text-cyan-700 font-medium shadow-sm"
 											: "border-gray-200 dark:border-border bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50 hover:text-gray-900 dark:hover:text-gray-100"
 									)}
@@ -201,7 +214,7 @@ export function UpdateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 
 			<Form {...form}>
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
-					<LanguageForm />
+					<LanguageForm existingNames={useResumeStore(state => (data?.customSectionId ? state.resume.data.customSections.find((s) => s.id === data.customSectionId)?.items || [] : state.resume.data.sections.languages.items).filter(i => i.id !== form.getValues("id")).map((i: any) => i.language?.toLowerCase() || ""))} />
 
 					<DialogFooter className="sm:col-span-full">
 						<Button variant="ghost" onClick={requestClose}>
@@ -218,7 +231,7 @@ export function UpdateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 	);
 }
 
-function LanguageForm() {
+function LanguageForm({ existingNames = [] }: { existingNames?: string[] }) {
 	const form = useFormContext<FormValues>();
 	const nameState = useFormState({ control: form.control, name: "language" });
 	const isNameInvalid = useMemo(() => {
@@ -261,21 +274,25 @@ function LanguageForm() {
 
 	return (
 		<>
-			{/* Pre-defined language chips */}
 			<div className="col-span-full mb-2 flex flex-wrap gap-2">
-				{predefinedLanguages.map((lang) => (
-					<button
-						type="button"
-						key={lang}
-						className={cn(
-							"cursor-pointer rounded-full border px-3 py-1 text-xs hover:bg-primary/10",
-							form.watch("language") === lang && "border-primary bg-primary text-white",
-						)}
-						onClick={() => handleAddLanguageChip(lang)}
-					>
-						{lang}
-					</button>
-				))}
+				{predefinedLanguages.map((lang) => {
+					const isAlreadySelected = existingNames.includes(lang.toLowerCase());
+					return (
+						<button
+							type="button"
+							key={lang}
+							disabled={isAlreadySelected}
+							className={cn(
+								"cursor-pointer rounded-full border px-3 py-1 text-xs hover:bg-primary/10",
+								form.watch("language") === lang && "border-primary bg-primary text-white",
+								isAlreadySelected && "cursor-not-allowed opacity-50 bg-gray-100 text-gray-500 hover:bg-gray-100"
+							)}
+							onClick={() => handleAddLanguageChip(lang)}
+						>
+							{lang}
+						</button>
+					);
+				})}
 			</div>
 
 			<div className={cn("col-span-full flex items-end", isNameInvalid && "items-center")}>
@@ -299,7 +316,18 @@ function LanguageForm() {
 								<Trans>Language</Trans>
 							</FormLabel>
 							<FormControl>
-								<Input className="rounded-l-none!" {...field} />
+								<Input 
+									className="rounded-l-none!" 
+									{...field} 
+									onChange={(e) => {
+										field.onChange(e);
+										if (existingNames.includes(e.target.value.trim().toLowerCase())) {
+											form.setError("language", { message: `Language "${e.target.value}" is already added.` });
+										} else {
+											form.clearErrors("language");
+										}
+									}}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
