@@ -193,7 +193,7 @@ export function EducationSectionBuilder() {
 													<Trans>Start Date</Trans>
 												</label>
 												<Input
-													type="month"
+													type="date"
 													value={item.startDate ?? ""}
 													onChange={(e) => handleChange(item.id, "startDate", e.target.value)}
 													className={inputCls}
@@ -204,7 +204,7 @@ export function EducationSectionBuilder() {
 													<Trans>End Date</Trans>
 												</label>
 												<Input
-													type="month"
+													type="date"
 													value={item.endDate ?? ""}
 													onChange={(e) => handleChange(item.id, "endDate", e.target.value)}
 													disabled={item.currentlyStudyingHere ?? false}
@@ -283,7 +283,7 @@ export function EducationSectionBuilder() {
 													<Trans>Start Date</Trans>
 												</label>
 												<Input
-													type="month"
+													type="date"
 													value={item.startDate || ""}
 													onChange={(e) => handleChange(item.id, "startDate", e.target.value)}
 													className={inputCls}
@@ -294,7 +294,7 @@ export function EducationSectionBuilder() {
 													<Trans>End Date</Trans>
 												</label>
 												<Input
-													type="month"
+													type="date"
 													value={item.endDate || ""}
 													onChange={(e) => handleChange(item.id, "endDate", e.target.value)}
 													disabled={item.currentlyStudyingHere}
