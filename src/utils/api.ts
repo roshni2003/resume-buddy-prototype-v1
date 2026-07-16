@@ -234,6 +234,28 @@ export const safeParseDate = (value: unknown): Date => {
 	return parsedDate;
 };
 
+/** Normalize various date formats (e.g., MM/YYYY) into YYYY-MM-DD for HTML date inputs */
+export const normalizeDateForInput = (dateStr: string | undefined | null): string => {
+	if (!dateStr) return "";
+	
+	// Already YYYY-MM-DD
+	if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+	
+	// Try MM/YYYY or MM-YYYY
+	const mmYyyyMatch = dateStr.match(/^(\d{1,2})[\/\-](\d{4})$/);
+	if (mmYyyyMatch) {
+		return `${mmYyyyMatch[2]}-${mmYyyyMatch[1].padStart(2, "0")}-02`; // Use 02 to avoid timezone underflow
+	}
+	
+	// Try parsing with Date
+	const d = new Date(dateStr);
+	if (!isNaN(d.getTime())) {
+		return d.toISOString().split("T")[0];
+	}
+	
+	return dateStr;
+};
+
 const scrubMockStrings = (obj: any): any => {
 	if (Array.isArray(obj)) {
 		return obj.map(scrubMockStrings);
@@ -343,6 +365,8 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 							...item,
 							...modeData,
 							description,
+							startDate: normalizeDateForInput(item.startDate),
+							endDate: normalizeDateForInput(item.endDate),
 							school: item.school === " " ? "" : (item.school || ""),
 						};
 					}) as any[],
@@ -388,8 +412,8 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 						return {
 							...item,
 							description,
-							startDate: expData.startDate || item.startDate || "",
-							endDate: expData.endDate || item.endDate || "",
+							startDate: normalizeDateForInput(expData.startDate || item.startDate || ""),
+							endDate: normalizeDateForInput(expData.endDate || item.endDate || ""),
 							currentlyWorkingHere: expData.currentlyWorkingHere ?? item.currentlyWorkingHere ?? false,
 						};
 					}) as any[],
