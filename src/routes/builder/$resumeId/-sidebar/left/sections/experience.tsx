@@ -330,7 +330,7 @@ function InlineExperienceForm({
 											data={{
 												position: form.getValues("position"),
 												company: form.getValues("company"),
-												summary: description,
+												description: description,
 											}}
 											onGenerated={handleAIGenerated}
 											roundsUsed={roundsUsed}
@@ -561,6 +561,7 @@ function AddNewPanel({
 		currentlyWorkingHere: false,
 		description: "",
 		period: "",
+		website: { url: "", label: "" },
 	};
 
 	return (

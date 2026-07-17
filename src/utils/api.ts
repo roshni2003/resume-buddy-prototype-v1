@@ -1,5 +1,6 @@
 import type { ResumeData } from "@/schema/resume/data";
 import { getAuthToken } from "@/utils/auth-token";
+import { defaultResumeData } from "@/schema/resume/data";
 
 const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
 
@@ -58,7 +59,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	}
 
 	if (!response.ok) {
-		const errorBody = await response.json().catch(() => ({}));
+		const errorBodyText = await response.clone().text().catch(() => "");
+		let errorBody: any = {};
+		try {
+			errorBody = JSON.parse(errorBodyText);
+		} catch (e) {
+			// ignore
+		}
+
 		throw new Error(errorBody.message || `Request failed with status ${response.status}`);
 	}
 
@@ -187,7 +195,7 @@ export interface JDMatchResponse {
 /** Safely parse any date-like value into a valid Date. Handles the backend bug where hour=24 is returned. */
 export const safeParseDate = (value: unknown): Date => {
 	let parsedDate = new Date("invalid");
-	
+
 	if (value instanceof Date) {
 		parsedDate = value;
 	} else if (typeof value === "string" && value.length > 0) {
@@ -226,6 +234,28 @@ export const safeParseDate = (value: unknown): Date => {
 	return parsedDate;
 };
 
+/** Normalize various date formats (e.g., MM/YYYY) into YYYY-MM-DD for HTML date inputs */
+export const normalizeDateForInput = (dateStr: string | undefined | null): string => {
+	if (!dateStr) return "";
+	
+	// Already YYYY-MM-DD
+	if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+	
+	// Try MM/YYYY or MM-YYYY
+	const mmYyyyMatch = dateStr.match(/^(\d{1,2})[\/\-](\d{4})$/);
+	if (mmYyyyMatch) {
+		return `${mmYyyyMatch[2]}-${mmYyyyMatch[1].padStart(2, "0")}-02`; // Use 02 to avoid timezone underflow
+	}
+	
+	// Try parsing with Date
+	const d = new Date(dateStr);
+	if (!isNaN(d.getTime())) {
+		return d.toISOString().split("T")[0];
+	}
+	
+	return dateStr;
+};
+
 const scrubMockStrings = (obj: any): any => {
 	if (Array.isArray(obj)) {
 		return obj.map(scrubMockStrings);
@@ -239,13 +269,13 @@ const scrubMockStrings = (obj: any): any => {
 			}
 			result[key] = scrubMockStrings(obj[key]);
 		}
-		
+
 		// If this object had dummy strings, it's likely a mocked object.
 		// Reset its 'hidden' property to false so it doesn't appear dim.
 		if (hasDummyString && "hidden" in result) {
 			result.hidden = false;
 		}
-		
+
 		return result;
 	}
 	if (typeof obj === "string" && obj === "string") {
@@ -268,15 +298,45 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 		createdAt: safeParseDate(resume.createdAt),
 		updatedAt: safeParseDate(resume.updatedAt),
 		data: {
+			...defaultResumeData,
 			...data,
+			picture: {
+				...defaultResumeData.picture,
+				...(data.picture || {}),
+			},
+			basics: {
+				...defaultResumeData.basics,
+				...(data.basics || {}),
+			},
+			summary: {
+				...defaultResumeData.summary,
+				...(data.summary || {}),
+			},
+			metadata: {
+				...defaultResumeData.metadata,
+				...(data.metadata || {}),
+				typography: {
+					...defaultResumeData.metadata.typography,
+					...(data.metadata?.typography || {}),
+				},
+				page: {
+					...defaultResumeData.metadata.page,
+					...(data.metadata?.page || {}),
+				},
+				design: {
+					...defaultResumeData.metadata.design,
+					...(data.metadata?.design || {}),
+				},
+			},
 			sections: {
+				...defaultResumeData.sections,
 				...sections,
 				education: {
 					...education,
 					items: (education.items || []).map((item: Record<string, any>) => {
 						let description = typeof item.description === "string" ? item.description : "";
 						let modeData: any = {};
-						
+
 						const commentMatch = description.match(/<!-- modeData: (.*?) -->/);
 						if (commentMatch) {
 							try {
@@ -305,6 +365,8 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 							...item,
 							...modeData,
 							description,
+							startDate: normalizeDateForInput(item.startDate),
+							endDate: normalizeDateForInput(item.endDate),
 							school: item.school === " " ? "" : (item.school || ""),
 						};
 					}) as any[],
@@ -314,7 +376,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 					items: ((sections.projects?.items as Record<string, any>[]) || []).map((item) => {
 						let description = typeof item.description === "string" ? item.description : "";
 						let role = typeof item.role === "string" ? item.role : "";
-						
+
 						if (!role && description) {
 							const commentMatch = description.match(/<!-- role: (.*?) -->/);
 							if (commentMatch) {
@@ -326,7 +388,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 								description = description.replace(commentMatch[0], "").trim();
 							}
 						}
-						
+
 						return {
 							...item,
 							description,
@@ -337,11 +399,57 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 				experience: {
 					...experience,
 					items: (experience.items || []).map((item: Record<string, any>) => {
+						let expData: any = {};
+						let description = typeof item.description === "string" ? item.description : "";
+						const commentMatch = description.match(/<!-- expData: (.*?) -->/);
+						if (commentMatch) {
+							try {
+								expData = JSON.parse(decodeURIComponent(commentMatch[1]));
+								description = description.replace(commentMatch[0], "").trim();
+							} catch (e) {}
+						}
+						
 						return {
 							...item,
-							startDate: typeof item.startDate === "string" ? item.startDate : "",
-							endDate: typeof item.endDate === "string" ? item.endDate : "",
-							currentlyWorkingHere: typeof item.currentlyWorkingHere === "boolean" ? item.currentlyWorkingHere : false,
+							description,
+							startDate: normalizeDateForInput(expData.startDate || item.startDate || ""),
+							endDate: normalizeDateForInput(expData.endDate || item.endDate || ""),
+							currentlyWorkingHere: expData.currentlyWorkingHere ?? item.currentlyWorkingHere ?? false,
+						};
+					}) as any[],
+				},
+				languages: {
+					...(sections.languages || { items: [] }),
+					items: ((sections.languages || {}).items || []).map((item: Record<string, any>) => {
+						let icon = item.icon || "translate";
+						try {
+							if (item.fluency) {
+								const parsed = JSON.parse(item.fluency);
+								if (parsed.icon) {
+									icon = parsed.icon;
+								}
+							}
+						} catch (e) {}
+						return {
+							...item,
+							icon,
+						};
+					}) as any[],
+				},
+				interests: {
+					...(sections.interests || { items: [] }),
+					items: ((sections.interests || {}).items || []).map((item: Record<string, any>) => {
+						let name = item.name || "";
+						let icon = item.icon;
+						const match = name.match(/<!-- icon: (.*?) -->/);
+						if (match) {
+							icon = match[1];
+							name = name.replace(match[0], "").trim();
+						}
+						return {
+							...item,
+							name,
+							icon: icon === "heart" || icon === "football" ? "star" : (icon || "star"),
 						};
 					}) as any[],
 				},
@@ -518,7 +626,7 @@ export const api = {
 	jdMatchUpload: (payload: { resume_upload: File; jd_text: string }) => {
 		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
 		const token = getAuthToken();
-		
+
 		const formData = new FormData();
 		formData.append("resume_upload", payload.resume_upload);
 		formData.append("jd_text", payload.jd_text);
@@ -542,7 +650,7 @@ export const api = {
 	resumeUpload: (payload: { resume_upload: File }) => {
 		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");
 		const token = getAuthToken();
-		
+
 		const formData = new FormData();
 		formData.append("resume_upload", payload.resume_upload);
 
@@ -560,7 +668,7 @@ export const api = {
 			return res.json() as Promise<any>;
 		});
 	},
-	
+
 	// 19. POST: /ai/onboarding-jd-match
 	onboardingJdMatch: (payload: { jd_text: string; onboarding_questions: any; onboarding_answers: any }) => {
 		const baseUrl = VITE_AI_BASE_URL_DEV.replace(/\/openapi$/, "");

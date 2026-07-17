@@ -39,6 +39,7 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 			currentlyWorkingHere: data?.item?.currentlyWorkingHere ?? false,
 			description: data?.item?.description ?? "",
 			period: data?.item?.period ?? "",
+			website: data?.item?.website ?? { url: "", label: "" },
 		},
 	});
 
@@ -104,6 +105,7 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 			currentlyWorkingHere: data.item.currentlyWorkingHere ?? false,
 			description: data.item.description,
 			period: data?.item?.period ?? "", // Ensure 'period' has a default value
+			website: data.item.website ?? { url: "", label: "" },
 		},
 	});
 

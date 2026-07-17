@@ -33,6 +33,12 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 	const [customInterests, setCustomInterests] = useState("");
 	const [error, setError] = useState("");
 
+	const existingItems = useResumeStore((state) => data?.customSectionId 
+		? state.resume.data.customSections.find((s) => s.id === data.customSectionId)?.items || []
+		: state.resume.data.sections.interests.items
+	);
+	const existingNames = existingItems.map((item: any) => item.name?.toLowerCase() || "");
+
 	const predefinedInterests = [
 		"Photography", "Hiking", "Cycling", "Chess", "Cooking", "Reading", "Gaming",
 		"Yoga", "Music", "Travel", "Painting", "Running", "Astronomy", "Coffee",
@@ -55,6 +61,10 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 
 				if (trimmed.length === 1 || (trimmed.length > 0 && !/^[A-Za-z\s]+$/.test(trimmed))) {
 					hasError = true;
+					setError("Interest must be at least 2 characters and contain only letters");
+				} else if (existingNames.includes(trimmed.toLowerCase())) {
+					hasError = true;
+					setError(`Interest "${trimmed}" is already added.`);
 				} else if (trimmed && !newInterests.includes(trimmed)) {
 					newInterests.push(trimmed);
 				}
@@ -62,7 +72,6 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 		}
 
 		if (hasError) {
-			setError("Interest must be at least 2 characters and contain only letters");
 			return;
 		}
 
@@ -74,7 +83,7 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 				const newInterest = {
 					id: generateId(),
 					hidden: false,
-					icon: "heart",
+					icon: "star",
 					name: interestName,
 					keywords: [],
 				};
@@ -90,8 +99,8 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 	};
 
 	return (
-		<DialogContent className="w-full max-w-[95vw] sm:max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
-			<div className="flex items-start justify-between mb-4">
+		<DialogContent className="w-full max-w-[95vw] sm:!max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto p-6 sm:rounded-3xl border-gray-200 dark:border-border bg-white dark:bg-card">
+			<div className="flex items-start justify-between mb-2">
 				<div>
 					<h2 className="font-ibm-plex-sans text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">What lights you up?</h2>
 					<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Pick as many as you like — all at once.</p>
@@ -106,15 +115,19 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 					<p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Suggestions · Multi-select</p>
 					<div className="flex flex-wrap gap-2">
 						{predefinedInterests.map((interest) => {
+							const isAlreadySelected = existingNames.includes(interest.toLowerCase());
 							const isSelected = selectedInterests.includes(interest);
 							return (
 								<button
 									key={interest}
 									type="button"
+									disabled={isAlreadySelected}
 									onClick={() => toggleInterest(interest)}
 									className={cn(
 										"rounded-full border px-4 py-1.5 text-sm transition-all",
-										isSelected
+										isAlreadySelected
+											? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed dark:border-gray-800 dark:bg-gray-900 dark:text-gray-600"
+											: isSelected
 											? "border-rose-200 bg-rose-50 text-rose-700 font-medium shadow-sm"
 											: "border-gray-200 dark:border-border bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50 hover:text-gray-900 dark:hover:text-gray-100"
 									)}
@@ -142,7 +155,7 @@ export function CreateInterestDialog({ data }: DialogProps<"resume.sections.inte
 				</div>
 			</div>
 
-			<div className="mt-8 flex justify-end gap-3">
+			<div className="mt-4 flex justify-end gap-3">
 				<button onClick={closeDialog} className="rounded-full px-5 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-muted transition-colors">
 					Cancel
 				</button>
@@ -190,7 +203,7 @@ export function UpdateInterestDialog({ data }: DialogProps<"resume.sections.inte
 	const { blockEvents, requestClose } = useFormBlocker(form);
 
 	return (
-		<DialogContent {...blockEvents} className="w-full max-w-[95vw] sm:max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
+		<DialogContent {...blockEvents} className="w-full max-w-[95vw] sm:!max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-x-2">
 					<PencilSimpleLineIcon />
@@ -201,7 +214,7 @@ export function UpdateInterestDialog({ data }: DialogProps<"resume.sections.inte
 
 			<Form {...form}>
 				<form className="grid gap-4 sm:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
-					<InterestForm />
+					<InterestForm existingNames={useResumeStore(state => (data?.customSectionId ? state.resume.data.customSections.find((s) => s.id === data.customSectionId)?.items || [] : state.resume.data.sections.interests.items).filter(i => i.id !== form.getValues("id")).map((i: any) => i.name?.toLowerCase() || ""))} />
 
 					<DialogFooter className="sm:col-span-full">
 						<Button variant="ghost" onClick={requestClose}>
@@ -218,7 +231,7 @@ export function UpdateInterestDialog({ data }: DialogProps<"resume.sections.inte
 	);
 }
 
-function InterestForm() {
+function InterestForm({ existingNames = [] }: { existingNames?: string[] }) {
 	const form = useFormContext<FormValues>();
 	const nameState = useFormState({ control: form.control, name: "name" });
 	const isNameInvalid = useMemo(() => {
@@ -257,21 +270,25 @@ function InterestForm() {
 
 	return (
 		<>
-			{/* Pre-defined interest chips */}
 			<div className="col-span-full mb-2 flex flex-wrap gap-2">
-				{predefinedInterests.map((interest) => (
-					<button
-						type="button"
-						key={interest}
-						className={cn(
-							"cursor-pointer rounded-full border px-3 py-1 text-xs hover:bg-primary/10",
-							form.watch("name") === interest && "border-primary bg-primary text-white",
-						)}
-						onClick={() => handleAddInterestChip(interest)}
-					>
-						{interest}
-					</button>
-				))}
+				{predefinedInterests.map((interest) => {
+					const isAlreadySelected = existingNames.includes(interest.toLowerCase());
+					return (
+						<button
+							type="button"
+							key={interest}
+							disabled={isAlreadySelected}
+							className={cn(
+								"cursor-pointer rounded-full border px-3 py-1 text-xs hover:bg-primary/10",
+								form.watch("name") === interest && "border-primary bg-primary text-white",
+								isAlreadySelected && "cursor-not-allowed opacity-50 bg-gray-100 text-gray-500 hover:bg-gray-100"
+							)}
+							onClick={() => handleAddInterestChip(interest)}
+						>
+							{interest}
+						</button>
+					);
+				})}
 			</div>
 
 			<div className={cn("col-span-full flex items-end", isNameInvalid && "items-center")}>
@@ -295,7 +312,18 @@ function InterestForm() {
 								<Trans>Name</Trans>
 							</FormLabel>
 							<FormControl>
-								<Input className="rounded-l-none!" {...field} />
+								<Input 
+									className="rounded-l-none!" 
+									{...field} 
+									onChange={(e) => {
+										field.onChange(e);
+										if (existingNames.includes(e.target.value.trim().toLowerCase())) {
+											form.setError("name", { message: `Interest "${e.target.value}" is already added.` });
+										} else {
+											form.clearErrors("name");
+										}
+									}}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

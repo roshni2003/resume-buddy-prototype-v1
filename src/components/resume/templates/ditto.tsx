@@ -23,6 +23,77 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-ditto page-content">
+			<style>{`
+				/* Skills as grid */
+				.template-ditto .page-section-skills .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					column-gap: 0.75rem !important;
+					row-gap: 1rem !important;
+				}
+
+				/* Interests & Languages as chips container */
+				.template-ditto .page-section-interests .section-content,
+				.template-ditto .page-section-languages .section-content {
+					display: flex !important;
+					flex-wrap: wrap !important;
+					gap: 0.5rem !important;
+				}
+
+				/* Skills item */
+				.template-ditto .skills-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+
+				/* Interests & Languages chips styling */
+				.template-ditto .interests-item,
+				.template-ditto .languages-item {
+					display: flex !important;
+					flex-direction: row !important;
+					align-items: center !important;
+					width: max-content !important;
+					max-width: 100% !important;
+					overflow: hidden !important;
+					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
+					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
+					border-radius: 9999px !important;
+					padding: 0.35rem 0.75rem !important;
+				}
+
+				.template-ditto .skills-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-ditto .interests-item .section-item-header,
+				.template-ditto .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+					display: flex !important;
+					align-items: center !important;
+					column-gap: 0.35rem !important;
+				}
+
+				.template-ditto .interests-item .section-item-title,
+				.template-ditto .languages-item .section-item-title {
+					font-size: 1em !important;
+					font-weight: 500 !important;
+					color: var(--page-primary-color) !important;
+					white-space: nowrap !important;
+				}
+				
+				.template-ditto .interests-item .section-item-icon,
+				.template-ditto .languages-item .section-item-icon {
+					color: var(--page-primary-color) !important;
+				}
+
+				.template-ditto .skills-item .section-item-keywords,
+				.template-ditto .interests-item .section-item-keywords,
+				.template-ditto .languages-item .section-item-keywords {
+					display: none !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<div className="flex pt-(--page-margin-y)">

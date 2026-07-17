@@ -178,11 +178,17 @@ function UploadRouteComponent() {
 
 		const interval = setInterval(() => {
 			setProgressPercent((prev) => {
-				const next = prev + Math.floor(Math.random() * 15) + 5;
-				if (next >= 100) {
-					clearInterval(interval);
-					return 100;
-				}
+				let next = prev;
+
+				// Stop the automated increment if we've hit 95% or manually set to 100%
+				if (prev >= 95) return prev;
+
+				// Asymptotic progression to better reflect parsing time
+				if (prev < 30) next = prev + Math.floor(Math.random() * 5) + 3;
+				else if (prev < 60) next = prev + Math.floor(Math.random() * 3) + 2;
+				else if (prev < 85) next = prev + Math.floor(Math.random() * 2) + 1;
+				else next = prev + 1;
+
 				if (next < 35) setProgressText("Extracting raw text from document...");
 				else if (next < 60) setProgressText("Analyzing career history and education details...");
 				else if (next < 85) setProgressText("Identifying skills and contact details...");
@@ -190,7 +196,7 @@ function UploadRouteComponent() {
 
 				return next;
 			});
-		}, 350);
+		}, 800);
 
 		return () => clearInterval(interval);
 	}, [uploadState]);
@@ -208,23 +214,36 @@ function UploadRouteComponent() {
 			// Robustly parse and cap skills to prevent AI exaggeration and handle different formats
 			if (parsedRaw.data?.sections?.skills?.items) {
 				let allSkills: string[] = [];
+				const genericCategories = ["skills", "frontend", "backend", "languages", "tools", "frameworks", "technologies", "technical skills", "libraries", "databases", "other", "core skills", "programming languages"];
+				
 				parsedRaw.data.sections.skills.items.forEach((item: any) => {
-					if (Array.isArray(item.keywords) && item.keywords.length > 0) {
+					const name = item.name ? item.name.trim() : "";
+					const hasKeywords = Array.isArray(item.keywords) && item.keywords.length > 0;
+					
+					if (name && genericCategories.includes(name.toLowerCase()) && hasKeywords) {
+						allSkills.push(...item.keywords);
+					} else if (name) {
+						allSkills.push(...name.split(",").map((s: string) => s.trim()));
+					} else if (hasKeywords) {
 						allSkills.push(...item.keywords);
 					} else if (typeof item.keywords === "string" && item.keywords.trim() !== "") {
-						allSkills.push(...item.keywords.split(",").map(s => s.trim()));
-					} else if (item.name) {
-						allSkills.push(...item.name.split(",").map((s: string) => s.trim()));
+						allSkills.push(...item.keywords.split(",").map((s: string) => s.trim()));
 					}
 				});
-				
+
 				// Deduplicate and cap
-				allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 15);
-				
+				allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 20);
+
 				// Overwrite the payload so the builder also gets the capped/cleaned skills
-				parsedRaw.data.sections.skills.items = allSkills.length > 0 
-					? [{ name: "Skills", keywords: allSkills }]
-					: [];
+				parsedRaw.data.sections.skills.items = allSkills.map(skillName => ({ 
+					id: crypto.randomUUID(),
+					hidden: false,
+					name: skillName, 
+					icon: "",
+					proficiency: "",
+					level: 0,
+					keywords: [] 
+				}));
 			}
 
 			setFullResumeData(parsedRaw);
@@ -250,20 +269,30 @@ function UploadRouteComponent() {
 					year: item.period || "",
 				})),
 				skills: (resumeData.sections?.skills?.items || [])
-					.flatMap((item: any) => item.keywords || [item.name])
+					.flatMap((item: any) => (Array.isArray(item.keywords) && item.keywords.length > 0) ? item.keywords : [item.name])
 					.filter(Boolean),
 			};
 
 			setParsedData(mappedData);
-			setUploadState("parsed");
+
+			// Show 100% completion before transitioning
+			setProgressPercent(100);
+			setProgressText("Resume parsing complete!");
+
+			setTimeout(() => {
+				setUploadState("choose_template");
+			}, 800);
 		} catch (e: any) {
 			setUploadError(e.message || "Something went wrong while parsing your resume. Please try again.");
 			setUploadState("idle");
 		}
 	};
 
+	const isCreatingRef = useRef(false);
+
 	const handleConfirm = async () => {
-		if (!parsedData) return;
+		if (!parsedData || isCreatingRef.current) return;
+		isCreatingRef.current = true;
 		setUploadState("creating");
 		const toastId = toast.loading("Creating your resume in builder...");
 
@@ -274,7 +303,16 @@ function UploadRouteComponent() {
 				name: resumeName,
 				slug: uniqueSlug,
 				tags: ["AI Uploaded"],
-				data: fullResumeData?.data ? { ...defaultResumeData, ...fullResumeData.data, metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, picture: defaultResumeData.picture } : undefined,
+				data: fullResumeData?.data ? { 
+					...defaultResumeData, 
+					...fullResumeData.data, 
+					sections: {
+						...defaultResumeData.sections,
+						...(fullResumeData.data.sections || {})
+					},
+					metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
+					picture: defaultResumeData.picture 
+				} : undefined,
 				withSampleData: false,
 			});
 
@@ -283,8 +321,9 @@ function UploadRouteComponent() {
 			toast.success("Resume created! Redirecting to editor...", { id: toastId });
 			navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id } });
 		} catch {
-			toast.error("Failed to create resume. Please try again.", { id: toastId });
-			setUploadState("parsed");
+			isCreatingRef.current = false;
+			toast.error("Failed to create resume. Please try again.");
+			setUploadState("choose_template");
 		}
 	};
 
@@ -334,11 +373,10 @@ function UploadRouteComponent() {
 										onDrop={handleDrop}
 										onClick={() => fileInputRef.current?.click()}
 										onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
-										className={`flex cursor-pointer flex-col items-center justify-center gap-5 rounded-xl border-2 border-dashed p-14 text-center transition-all duration-200 ${
-											dragging
+										className={`flex cursor-pointer flex-col items-center justify-center gap-5 rounded-xl border-2 border-dashed p-14 text-center transition-all duration-200 ${dragging
 												? "border-emerald-500 bg-emerald-500/5"
 												: "border-border hover:border-emerald-500/50 hover:bg-muted/40"
-										}`}
+											}`}
 									>
 										<div
 											className={`rounded-full p-4 transition-all ${dragging ? "bg-emerald-500/15 text-emerald-400" : "bg-muted text-muted-foreground"}`}
@@ -366,9 +404,8 @@ function UploadRouteComponent() {
 									</div>
 								) : (
 									<div
-										className={`flex items-center gap-3 rounded-xl border p-4 ${
-											fileError ? "border-red-500/30 bg-red-500/5" : "border-emerald-500/30 bg-emerald-500/5"
-										}`}
+										className={`flex items-center gap-3 rounded-xl border p-4 ${fileError ? "border-red-500/30 bg-red-500/5" : "border-emerald-500/30 bg-emerald-500/5"
+											}`}
 									>
 										<FileTextIcon
 											weight="fill"
@@ -414,7 +451,7 @@ function UploadRouteComponent() {
 										className="w-full sm:w-auto cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
 									>
 										<CloudArrowUpIcon className="mr-1.5 size-4" />
-										Upload & Parse with Zoe
+										Upload & Continue
 									</Button>
 								</div>
 							</div>
@@ -473,147 +510,33 @@ function UploadRouteComponent() {
 							</div>
 						)}
 
-						{/* ── STATE 3: Parsed Data Preview ── */}
-						{uploadState === "parsed" && parsedData && (
-							<div className="space-y-6">
-								{/* Success Banner */}
-								<div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-									<CheckCircleIcon weight="fill" className="size-6 shrink-0 text-emerald-400" />
+
+
+						{/* ── STATE 4: Choose Template & Creating ── */}
+						{(uploadState === "choose_template" || uploadState === "creating") && (
+							<div className="flex flex-col max-h-[calc(100vh-8rem)] rounded-2xl border border-border bg-card/60 shadow-2xl backdrop-blur-md relative">
+								<div className="shrink-0 flex flex-col items-center gap-4 border-border border-b bg-card/80 px-6 py-8 text-center rounded-t-2xl">
+									<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
+										<img src="/zoe-icon.png" alt="Zoe AI" className="size-10 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+									</div>
 									<div>
-										<h3 className="font-bold text-emerald-300 text-sm">Resume successfully read by Zoe!</h3>
-										<p className="mt-0.5 text-emerald-500/80 text-xs">
-											Take a quick look at your imported details. You can make full edits in the next step.
+										<h1 className="font-bold text-foreground text-2xl">Choose a Template</h1>
+										<p className="mt-1 text-muted-foreground text-sm">
+											Select a template to generate your new resume.
 										</p>
 									</div>
 								</div>
 
-								{/* Extracted Data Grid */}
-								<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-									{/* Left Column */}
-									<div className="space-y-5">
-										{/* Contact Details */}
-										<SectionCard icon={<UserIcon className="size-4" />} title="Contact Details">
-											<div className="grid grid-cols-2 gap-4 text-sm">
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Full Name</p>
-													<p className="font-medium text-foreground">{parsedData.fullName}</p>
-												</div>
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Title</p>
-													<p className="font-medium text-foreground">{parsedData.professionalTitle}</p>
-												</div>
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Email</p>
-													<p className="truncate font-medium text-foreground">{parsedData.email}</p>
-												</div>
-												<div>
-													<p className="mb-1 font-semibold text-[10px] text-muted-foreground uppercase">Phone</p>
-													<p className="font-medium text-foreground">{parsedData.phone}</p>
-												</div>
-											</div>
-										</SectionCard>
-
-										{/* Profile Summary */}
-										<SectionCard icon={<FileTextIcon className="size-4" />} title="Profile Summary">
-											<p className="text-muted-foreground text-sm italic leading-relaxed">"{parsedData.summary}"</p>
-										</SectionCard>
-
-										{/* Skills */}
-										<SectionCard
-											icon={<WrenchIcon className="size-4" />}
-											title={`Skills Detected (${parsedData.skills.length})`}
-										>
-											<div className="flex flex-wrap gap-1.5">
-												{parsedData.skills.map((skill) => (
-													<span
-														key={skill}
-														className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 font-medium text-emerald-400 text-xs"
-													>
-														{skill}
-													</span>
-												))}
-											</div>
-										</SectionCard>
-									</div>
-
-									{/* Right Column */}
-									<div className="space-y-5">
-										{/* Work Experience */}
-										<SectionCard icon={<SuitcaseIcon className="size-4" />} title="Work Experience">
-											<div className="space-y-4">
-												{parsedData.experience.map((exp, idx) => (
-													<div
-														key={`${exp.company}-${idx}`}
-														className="space-y-1 border-emerald-500/40 border-l-2 py-0.5 pl-3"
-													>
-														<div className="flex items-baseline justify-between gap-2">
-															<p className="font-bold text-foreground text-sm">{exp.role}</p>
-															<span className="shrink-0 font-semibold text-[10px] text-muted-foreground uppercase">
-																{exp.duration}
-															</span>
-														</div>
-														<p className="font-medium text-emerald-500 text-xs">{exp.company}</p>
-														<p className="text-muted-foreground text-xs leading-snug">{exp.description}</p>
-													</div>
-												))}
-											</div>
-										</SectionCard>
-
-										{/* Education */}
-										<SectionCard icon={<BookOpenIcon className="size-4" />} title="Education">
-											<div className="space-y-3">
-												{parsedData.education.map((edu, idx) => (
-													<div key={`${edu.institution}-${idx}`} className="space-y-0.5">
-														<div className="flex items-baseline justify-between gap-2">
-															<p className="font-bold text-foreground text-sm">{edu.degree}</p>
-															<span className="shrink-0 font-semibold text-[10px] text-muted-foreground">{edu.year}</span>
-														</div>
-														<p className="text-muted-foreground text-xs">{edu.institution}</p>
-													</div>
-												))}
-											</div>
-										</SectionCard>
-									</div>
-								</div>
-
-								{/* Action Buttons */}
-								<div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-border border-t pt-5">
-									<Button
-										variant="outline"
-										onClick={() => {
-											setParsedData(null);
-											setFile(null);
-											setUploadState("idle");
-										}}
-										className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-									>
-										Try another file
-									</Button>
-
-									<Button
-										onClick={() => setUploadState("choose_template")}
-										className="w-full sm:w-auto cursor-pointer bg-emerald-600 font-medium text-white transition-colors hover:bg-emerald-500"
-									>
-										Choose a Template
-										<ArrowLeftIcon className="ml-1.5 size-4 rotate-180" />
-									</Button>
-								</div>
-							</div>
-						)}
-
-						{/* ── STATE 4: Choose Template ── */}
-						{uploadState === "choose_template" && (
-							<div className="space-y-6">
-								<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+								<div className="flex-1 overflow-y-auto p-6">
+									<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
 									{Object.entries(templates).map(([key, template]) => (
 										<div
 											key={key}
 											onClick={() => setSelectedTemplate(key as Template)}
-											className={`cursor-pointer rounded-xl border p-2 transition-all ${
-												selectedTemplate === key
+											className={`cursor-pointer rounded-xl border p-2 transition-all ${selectedTemplate === key
 													? "border-emerald-500 bg-emerald-500/5 ring-2 ring-emerald-500/20"
 													: "border-border hover:border-emerald-500/50 hover:bg-muted/40"
-											}`}
+												}`}
 										>
 											<img
 												src={template.imageUrl}
@@ -624,30 +547,32 @@ function UploadRouteComponent() {
 										</div>
 									))}
 								</div>
+								</div>
 
-								<div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-border border-t pt-5">
+								<div className="shrink-0 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 p-6 border-t border-border/50 bg-card/95 backdrop-blur-md rounded-b-2xl">
 									<Button
 										variant="outline"
-										onClick={() => setUploadState("parsed")}
-										className="w-full sm:w-auto cursor-pointer border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+										onClick={() => {
+											setParsedData(null);
+											setFile(null);
+											setUploadState("idle");
+										}}
+										className="cursor-pointer border-border bg-card/60 text-foreground/80 hover:bg-muted hover:text-foreground w-full sm:w-auto"
 									>
-										<ArrowLeftIcon className="mr-2" /> Back to Review
+										<ArrowLeftIcon className="mr-2" /> Try another file
 									</Button>
 									<Button
 										onClick={handleConfirm}
 										disabled={isCreating}
-										className="w-full sm:w-auto cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white min-w-32"
+										className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:w-auto sm:min-w-32"
 									>
 										{isCreating ? (
 											<>
 												<SpinnerGapIcon className="mr-2 size-4 animate-spin" />
-												Creating...
+												Generating...
 											</>
 										) : (
-											<>
-												<CheckCircleIcon className="mr-2 size-4" />
-												Confirm & Open in Editor
-											</>
+											"Create Resume"
 										)}
 									</Button>
 								</div>

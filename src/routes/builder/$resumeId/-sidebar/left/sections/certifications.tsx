@@ -108,7 +108,7 @@ export function CertificationsSectionBuilder() {
 										<Trans>Date</Trans>
 									</label>
 									<Input
-										type="month"
+										type="date"
 										value={item.date || ""}
 										onChange={(e) => handleChange(item.id, "date", e.target.value)}
 										className={inputCls}

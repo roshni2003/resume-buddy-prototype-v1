@@ -161,6 +161,7 @@ export const experienceItemSchema = baseItemSchema.extend({
 	currentlyWorkingHere: z.boolean().optional().describe("Whether the user is currently working here."),
 	description: z.string().describe("The description of the experience. This should be a HTML-formatted string."),
 	period: z.string().describe("The period of time the experience was obtained over."),
+	website: urlSchema,
 });
 
 export const interestItemSchema = baseItemSchema.extend({
@@ -180,14 +181,13 @@ export const interestItemSchema = baseItemSchema.extend({
 export const languageItemSchema = z.object({
 	id: z.string(),
 	hidden: z.boolean(),
+	icon: iconSchema,
 
 	language: z
 		.string()
 		.trim()
 		.min(2, "Language must be at least 2 characters")
 		.regex(/^[A-Za-z\s]+$/, "Please enter a valid language name"),
-	fluency: z.string(),
-	level: z.number(),
 });
 
 export const profileItemSchema = baseItemSchema.extend({

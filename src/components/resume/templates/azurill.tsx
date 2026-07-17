@@ -63,6 +63,74 @@ export function AzurillTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-azurill page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+			<style>{`
+				/* Skills as grid */
+				.template-azurill .page-section-skills .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					column-gap: 0.75rem !important;
+					row-gap: 1rem !important;
+				}
+
+				/* Interests & Languages as chips container */
+				.template-azurill .page-section-interests .section-content,
+				.template-azurill .page-section-languages .section-content {
+					display: flex !important;
+					flex-wrap: wrap !important;
+					gap: 0.5rem !important;
+				}
+
+				/* Skills item */
+				.template-azurill .skills-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+
+				/* Interests & Languages chips styling */
+				.template-azurill .interests-item,
+				.template-azurill .languages-item {
+					display: flex !important;
+					flex-direction: row !important;
+					align-items: center !important;
+					width: auto !important;
+					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
+					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
+					border-radius: 9999px !important;
+					padding: 0.35rem 0.75rem !important;
+				}
+
+				.template-azurill .skills-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-azurill .interests-item .section-item-header,
+				.template-azurill .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+					display: flex !important;
+					align-items: center !important;
+					column-gap: 0.35rem !important;
+				}
+
+				.template-azurill .interests-item .section-item-title,
+				.template-azurill .languages-item .section-item-title {
+					font-size: 1em !important;
+					font-weight: 500 !important;
+					color: var(--page-primary-color) !important;
+				}
+				
+				.template-azurill .interests-item .section-item-icon,
+				.template-azurill .languages-item .section-item-icon {
+					color: var(--page-primary-color) !important;
+				}
+
+				.template-azurill .skills-item .section-item-keywords,
+				.template-azurill .interests-item .section-item-keywords,
+				.template-azurill .languages-item .section-item-keywords {
+					display: none !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<div className="flex gap-x-(--page-gap-x)">

@@ -69,7 +69,7 @@ function RouteComponent() {
 	const initialize = useResumeStore((state) => state.initialize);
 
 	useEffect(() => {
-		initialize(resume);
+		initialize(resume ?? null);
 		return () => initialize(null);
 	}, [resume, initialize]);
 

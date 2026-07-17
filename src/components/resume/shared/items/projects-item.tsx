@@ -126,7 +126,7 @@ export function ProjectsItem({ className, ...item }: ProjectsItemProps) {
 				{/* Row 2 */}
 				{item.role && (
 					<div className="flex items-start justify-between gap-x-2 mt-0.5">
-						<span className="section-item-metadata projects-item-role text-sm text-gray-700">
+						<span className="section-item-metadata projects-item-role text-sm">
 							<InlineEditableText
 								value={item.role}
 								placeholder="Role"

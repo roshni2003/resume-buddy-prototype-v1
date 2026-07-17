@@ -12,7 +12,19 @@ function formatExperienceDate(dateString: string | undefined): string {
 	if (!dateString) return "";
 
 	try {
-		const date = new Date(dateString);
+		let date = new Date(dateString);
+		if (isNaN(date.getTime())) {
+			// Try to parse MM/YYYY or MM-YYYY
+			const match = dateString.match(/^(\d{1,2})[\/\-](\d{4})$/);
+			if (match) {
+				date = new Date(`${match[2]}-${match[1].padStart(2, '0')}-02`); // Use 02 to avoid timezone underflow to previous month
+			}
+		}
+
+		if (isNaN(date.getTime())) {
+			return dateString;
+		}
+
 		const month = date.toLocaleString("en-US", { month: "short" });
 		const year = date.getFullYear();
 		return `${month} ${year}`;
