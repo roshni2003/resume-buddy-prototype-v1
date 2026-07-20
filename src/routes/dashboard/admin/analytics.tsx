@@ -155,7 +155,7 @@ function DashboardPage() {
   // Fetch user analytics for deeper insights
   const { data: userAnalytics, isLoading: isUserLoading } = useQuery({
     queryKey: ["user-analytics-sample"],
-    queryFn: () => api.fetchUserAnalytics(1, 100),
+    queryFn: () => api.fetchUserAnalytics(1, 50),
   });
 
   const users = userAnalytics?.users || [];
@@ -163,7 +163,7 @@ function DashboardPage() {
   const userInvocationsQueries = useQueries({
     queries: users.map(user => ({
       queryKey: ["user-invocations", user.userId],
-      queryFn: () => api.fetchUserAIInvocations(user.userId as string, 1, 1000),
+      queryFn: () => api.fetchUserAIInvocations(user.userId as string, 1, 50),
       enabled: !!user.userId,
     }))
   });
