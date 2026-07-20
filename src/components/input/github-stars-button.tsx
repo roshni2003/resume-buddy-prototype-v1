@@ -6,12 +6,10 @@ import { orpc } from "@/integrations/orpc/client";
 import { CountUp } from "../animation/count-up";
 
 export function GithubStarsButton() {
-	const { data: starCount } = useQuery(orpc.statistics.github.getStarCount.queryOptions());
+	// const { data: starCount } = useQuery(orpc.statistics.github.getStarCount.queryOptions());
+	const starCount: number | null = null;
 
-	const ariaLabel =
-		starCount != null
-			? t`Star us on GitHub, currently ${starCount.toLocaleString()} stars (opens in new tab)`
-			: t`Star us on GitHub (opens in new tab)`;
+	const ariaLabel = t`Star us on GitHub (opens in new tab)`;
 
 	return (
 		<Button asChild variant="outline">

@@ -7,11 +7,18 @@ import {
 	EyeIcon,
 	PencilSimpleLineIcon,
 	TrashSimpleIcon,
+	X as XIcon,
+	Plus as PlusIcon,
+	Sparkle,
+	Article,
+	Briefcase,
+	GraduationCap,
+	Certificate,
 } from "@phosphor-icons/react";
 import { AnimatePresence, Reorder } from "motion/react";
-import { match } from "ts-pattern";
 import { useResumeStore } from "@/components/resume/store/resume";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { RichInput } from "@/components/input/rich-input";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -30,69 +37,10 @@ import { useConfirm } from "@/hooks/use-confirm";
 import type {
 	CustomSection,
 	CustomSectionItem as CustomSectionItemType,
-	CustomSectionType,
 } from "@/schema/resume/data";
-import { getSectionTitle } from "@/utils/resume/section";
-import { stripHtml } from "@/utils/string";
 import { cn } from "@/utils/style";
 import { SectionBase } from "../shared/section-base";
-import { SectionAddItemButton, SectionItem } from "../shared/section-item";
-
-function getItemTitle(type: CustomSectionType, item: CustomSectionItemType): string {
-	return match(type)
-		.with("summary", () => {
-			if ("content" in item) {
-				const stripped = stripHtml(item.content);
-				return stripped.length > 50 ? `${stripped.slice(0, 50)}...` : stripped || "Summary";
-			}
-			return "Summary";
-		})
-		.with("profiles", () => ("network" in item ? item.network : ""))
-		.with("experience", () => ("company" in item ? item.company : ""))
-		.with("education", () => ("school" in item ? item.school : ""))
-		.with("projects", () => ("name" in item ? item.name : ""))
-		.with("skills", () => ("name" in item ? item.name : ""))
-		.with("languages", () => ("language" in item ? item.language : ""))
-		.with("interests", () => ("name" in item ? item.name : ""))
-		.with("awards", () => ("title" in item ? item.title : ""))
-		.with("certifications", () => ("title" in item ? item.title : ""))
-		.with("publications", () => ("title" in item ? item.title : ""))
-		.with("volunteer", () => ("organization" in item ? item.organization : ""))
-		.with("references", () => ("name" in item ? item.name : ""))
-		.with("cover-letter", () => {
-			if ("recipient" in item) {
-				const stripped = stripHtml(item.recipient);
-				return stripped.length > 50 ? `${stripped.slice(0, 50)}...` : stripped || "Cover Letter";
-			}
-			return "Cover Letter";
-		})
-		.exhaustive();
-}
-
-function getItemSubtitle(type: CustomSectionType, item: CustomSectionItemType): string | undefined {
-	return match(type)
-		.with("summary", () => undefined)
-		.with("profiles", () => ("username" in item ? item.username : undefined))
-		.with("experience", () => ("position" in item ? item.position : undefined))
-		.with("education", () => ("degree" in item ? item.degree : undefined))
-		.with("projects", () => ("period" in item ? item.period : undefined))
-		.with("skills", () => ("proficiency" in item ? item.proficiency : undefined))
-		.with("languages", () => ("fluency" in item ? item.fluency : undefined))
-		.with("interests", () => undefined)
-		.with("awards", () => ("awarder" in item ? item.awarder : undefined))
-		.with("certifications", () => ("issuer" in item ? item.issuer : undefined))
-		.with("publications", () => ("publisher" in item ? item.publisher : undefined))
-		.with("volunteer", () => ("period" in item ? item.period : undefined))
-		.with("references", () => undefined)
-		.with("cover-letter", () => {
-			if ("content" in item) {
-				const stripped = stripHtml(item.content);
-				return stripped.length > 50 ? `${stripped.slice(0, 50)}...` : stripped || undefined;
-			}
-			return undefined;
-		})
-		.exhaustive();
-}
+import { SectionAddItemButton } from "../shared/section-item";
 
 export function CustomSectionBuilder() {
 	const customSections = useResumeStore((state) => state.resume.data.customSections);
@@ -105,8 +53,17 @@ export function CustomSectionBuilder() {
 				))}
 			</AnimatePresence>
 
+			{customSections.length === 0 && (
+				<div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-emerald-200 dark:border-emerald-800/50 py-12 text-center text-emerald-500 dark:text-emerald-400">
+					<Sparkle className="h-6 w-6" weight="fill" />
+					<p className="font-medium text-gray-700 dark:text-gray-300 text-sm">
+						<Trans>No custom blocks yet — design one your way.</Trans>
+					</p>
+				</div>
+			)}
+
 			{/* Add Custom Section Button */}
-			<SectionAddItemButton type="custom" variant="outline" className="rounded-md">
+			<SectionAddItemButton type="custom" variant="outline" className="rounded-full border-dashed border-emerald-200 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400">
 				<Trans>Add a new custom section</Trans>
 			</SectionAddItemButton>
 		</SectionBase>
@@ -129,55 +86,181 @@ function CustomSectionContainer({ section }: { section: CustomSection }) {
 		});
 	};
 
-	return (
-		<div className="rounded-md border">
-			{/* Section Header */}
-			<div className="group flex select-none">
-				<button
-					type="button"
-					onClick={onUpdateSection}
-					className={cn(
-						"flex flex-1 flex-col items-start justify-center space-y-0.5 p-4 text-start transition-opacity hover:bg-secondary/40 focus:outline-none focus-visible:ring-1",
-						section.hidden && "opacity-50",
-					)}
-				>
-					<Badge variant="secondary" className="mb-1.5 rounded-sm">
-						{getSectionTitle(section.type)}
-					</Badge>
-					<span className="line-clamp-1 text-wrap font-medium text-base">{section.title}</span>
-					<span className="text-muted-foreground text-xs">
-						<Plural value={section.items.length} one="# item" other="# items" />
-					</span>
-				</button>
+	const handleChange = (itemId: string, field: string, value: any) => {
+		updateResumeData((draft) => {
+			const sectionIndex = draft.customSections.findIndex((s) => s.id === section.id);
+			if (sectionIndex === -1) return;
+			const item = draft.customSections[sectionIndex].items.find((i) => i.id === itemId);
+			if (item) {
+				if (field.includes(".")) {
+					const [parent, child] = field.split(".");
+					(item as any)[parent][child] = value;
+				} else {
+					(item as any)[field] = value;
+				}
+			}
+		});
+	};
 
-				<CustomSectionDropdownMenu section={section} />
+	const handleDelete = (itemId: string) => {
+		updateResumeData((draft) => {
+			const sectionIndex = draft.customSections.findIndex((s) => s.id === section.id);
+			if (sectionIndex === -1) return;
+			const itemIndex = draft.customSections[sectionIndex].items.findIndex((i) => i.id === itemId);
+			if (itemIndex !== -1) draft.customSections[sectionIndex].items.splice(itemIndex, 1);
+		});
+	};
+
+	const handleAdd = () => {
+		updateResumeData((draft) => {
+			const sectionIndex = draft.customSections.findIndex((s) => s.id === section.id);
+			if (sectionIndex === -1) return;
+
+			const id = crypto.randomUUID();
+			let newItem: any = { id, hidden: false, visible: true };
+
+			if (section.type === "summary") {
+				newItem = { ...newItem, name: "", content: "" };
+			} else if (section.type === "experience") {
+				newItem = { ...newItem, company: "", position: "", location: "", date: "", summary: "", url: "" };
+			} else if (section.type === "education") {
+				newItem = { ...newItem, institution: "", studyType: "", area: "", score: "", date: "", summary: "", url: "" };
+			} else if (section.type === "certifications") {
+				newItem = { ...newItem, title: "", issuer: "", date: "", website: { url: "", label: "" }, description: "" };
+			} else {
+				// Default generic fallback
+				newItem = { ...newItem, name: "", description: "" };
+			}
+
+			draft.customSections[sectionIndex].items.push(newItem);
+		});
+	};
+
+	const inputCls = "rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 h-11 text-sm shadow-sm focus:border-teal-300 focus:ring-1 focus:ring-teal-200 w-full";
+
+	const getIcon = () => {
+		switch (section.type) {
+			case "summary": return Article;
+			case "experience": return Briefcase;
+			case "education": return GraduationCap;
+			case "certifications": return Certificate;
+			default: return PencilSimpleLineIcon;
+		}
+	};
+	const Icon = getIcon();
+
+	const getPlaceholder = (key: string) => {
+		if (key === "date") return "Jan 2023 - Present";
+		if (key === "name") return "Section title — e.g. Languages, Publications, Hobbies";
+		return key.charAt(0).toUpperCase() + key.slice(1);
+	};
+
+	return (
+		<div className="rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/30 dark:bg-emerald-900/20 shadow-sm overflow-hidden mb-4">
+			{/* Section Header */}
+			<div className="group flex select-none items-center p-4">
+				<div className="flex flex-1 items-center gap-4">
+					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-500 dark:text-emerald-400">
+						<Icon className="h-5 w-5" weight="fill" />
+					</div>
+					<div className="flex flex-col items-start justify-center">
+						<button
+							type="button"
+							onClick={onUpdateSection}
+							className={cn(
+								"line-clamp-1 text-wrap font-medium text-base text-gray-900 dark:text-gray-100 transition-opacity hover:text-emerald-600 dark:hover:text-emerald-400 focus:outline-none",
+								section.hidden && "opacity-50"
+							)}
+						>
+							{section.title || <Trans>Untitled Section</Trans>}
+						</button>
+						<div className="flex items-center text-[10px] font-bold tracking-wider text-gray-500 dark:text-gray-400 uppercase mt-0.5 gap-1.5">
+							<span>{section.type === "custom" ? "Generic" : section.type}</span>
+							<span>&middot;</span>
+							<Plural value={section.items.length} one="# item" other="# items" />
+						</div>
+					</div>
+				</div>
+
+				<div className="flex items-center gap-1">
+					<CustomSectionDropdownMenu section={section} />
+				</div>
 			</div>
 
-			{/* Section Items */}
-			{section.items.length > 0 && (
-				<div className={cn("border-t", section.hidden && "opacity-50")}>
-					<Reorder.Group axis="y" values={section.items} onReorder={handleReorder}>
+			{/* Section Items Inline Editing */}
+			<div className="p-4 pt-0 flex flex-col gap-4">
+				{section.items.length > 0 && (
+					<Reorder.Group axis="y" values={section.items} onReorder={handleReorder} className="flex flex-col gap-4">
 						<AnimatePresence>
 							{section.items.map((item) => (
-								<SectionItem
+								<Reorder.Item
 									key={item.id}
-									type={section.type}
-									item={item}
-									customSectionId={section.id}
-									title={getItemTitle(section.type, item)}
-									subtitle={getItemSubtitle(section.type, item)}
-								/>
+									value={item}
+									className="relative flex flex-col gap-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-card p-4"
+								>
+									<button
+										type="button"
+										onClick={() => handleDelete(item.id)}
+										className="absolute right-3 top-3 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors z-10"
+									>
+										<XIcon className="h-4 w-4" weight="bold" />
+									</button>
+
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pr-6">
+										{Object.entries(item).map(([k, v]) => {
+											if (k === "id" || k === "hidden" || typeof v === "boolean" || k === "visible") return null;
+
+											const isFullWidth = k === "summary" || k === "content" || k === "description" || k === "url" || (typeof v === "object" && v !== null && "url" in v) || k === "name";
+
+											if (k === "summary" || k === "content" || k === "description") {
+												return (
+													<div key={k} className="col-span-2">
+														<RichInput
+															value={v as string}
+															onChange={(val) => handleChange(item.id, k, val)}
+															className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card"
+														/>
+													</div>
+												);
+											}
+											if (typeof v === "object" && v !== null && "url" in v) {
+												return (
+													<div key={k} className="col-span-2">
+														<Input
+															placeholder="Website URL"
+															value={v as string}
+															onChange={(e) => handleChange(item.id, `${k}.url`, e.target.value)}
+															className={inputCls}
+														/>
+													</div>
+												);
+											}
+											return (
+												<div key={k} className={isFullWidth ? "col-span-2" : "col-span-1"}>
+													<Input
+														placeholder={getPlaceholder(k)}
+														value={v as string}
+														onChange={(e) => handleChange(item.id, k, e.target.value)}
+														className={inputCls}
+													/>
+												</div>
+											);
+										})}
+									</div>
+								</Reorder.Item>
 							))}
 						</AnimatePresence>
 					</Reorder.Group>
-				</div>
-			)}
+				)}
 
-			{/* Add Item Button */}
-			<div className="border-t">
-				<SectionAddItemButton type={section.type} customSectionId={section.id}>
-					<Trans>Add a new item</Trans>
-				</SectionAddItemButton>
+				<button
+					type="button"
+					onClick={handleAdd}
+					className="mt-2 flex h-10 w-full items-center justify-center rounded-full border border-dashed border-emerald-200 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium text-sm"
+				>
+					<PlusIcon className="mr-2 h-4 w-4" weight="bold" />
+					<Trans>Add {section.type === "custom" ? "item" : section.type + " item"}</Trans>
+				</button>
 			</div>
 		</div>
 	);
@@ -235,9 +318,9 @@ function CustomSectionDropdownMenu({ section }: { section: CustomSection }) {
 			<DropdownMenuTrigger asChild>
 				<button
 					type="button"
-					className="flex cursor-context-menu items-center px-1.5 opacity-40 transition-[background-color,opacity] hover:bg-secondary/40 focus:outline-none focus-visible:ring-1 group-hover:opacity-100"
+					className="flex cursor-context-menu items-center px-4 py-2 opacity-40 transition-[background-color,opacity] hover:bg-gray-200 dark:hover:bg-muted/80 focus:outline-none focus-visible:ring-1 group-hover:opacity-100"
 				>
-					<DotsThreeVerticalIcon />
+					<DotsThreeVerticalIcon className="h-5 w-5" />
 				</button>
 			</DropdownMenuTrigger>
 

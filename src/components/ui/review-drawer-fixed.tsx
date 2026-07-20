@@ -26,22 +26,23 @@ type ReviewDrawerProps = {
 export function ReviewDrawer({ result }: ReviewDrawerProps) {
 	const showDrawer = useResumeStore((state) => state.showReviewDrawer);
 	const setShowDrawer = useResumeStore((state) => state.setShowReviewDrawer);
-	const autoFixResumeIssues = useResumeStore((state) => state.autoFixResumeIssues);
-	const [showDetails, setShowDetails] = useState(false);
-	const [isFixing, setIsFixing] = useState(false);
+	// const autoFixResumeIssues = useResumeStore((state) => (state as any).autoFixResumeIssues);
+	// const [showDetails, setShowDetails] = useState(false);
+	// const [isFixing, setIsFixing] = useState(false);
 
 	const getStatusColor = () => {
-		if (result.final_verdict === "READY") return "text-green-600 bg-green-50 border-green-200";
-		if (result.final_verdict === "NEEDS_MINOR_FIXES") return "text-orange-600 bg-orange-50 border-orange-200";
+		if (result.overall_score >= 60) return "text-green-600 bg-green-50 border-green-200";
+		if (result.overall_score >= 30) return "text-yellow-600 bg-yellow-50 border-yellow-200";
 		return "text-red-600 bg-red-50 border-red-200";
 	};
 
 	const getStatusText = () => {
-		if (result.final_verdict === "READY") return "Ready to Export";
-		if (result.final_verdict === "NEEDS_MINOR_FIXES") return "Needs Minor Fixes";
+		if (result.overall_score >= 60) return "Ready to Export";
+		if (result.overall_score >= 30) return "Needs Minor Fixes";
 		return "Needs Major Work";
 	};
 
+	/*
 	const handleAutoFix = async () => {
 		setIsFixing(true);
 		const toastId = toast.loading(t`Fixing issues automatically...`);
@@ -63,6 +64,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 			setIsFixing(false);
 		}
 	};
+	*/
 
 	return (
 		<AnimatePresence>
@@ -213,7 +215,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 									)}
 
 									{/* Detailed Checks - Collapsible */}
-									<div className="space-y-2">
+									{/* <div className="space-y-2">
 										<Button
 											variant="outline"
 											size="sm"
@@ -266,14 +268,14 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 												</motion.div>
 											)}
 										</AnimatePresence>
-									</div>
+									</div> */}
 								</div>
 							</div>
 
 							{/* Footer */}
 							<div className="space-y-2 border-t p-4">
 								{/* Auto-Fix Button - Only show if there are issues to fix */}
-								{(result.critical.length > 0 || result.important.length > 0 || result.suggestions.length > 0) && (
+								{/* {(result.critical.length > 0 || result.important.length > 0 || result.suggestions.length > 0) && (
 									<Button
 										onClick={handleAutoFix}
 										disabled={isFixing}
@@ -292,7 +294,7 @@ export function ReviewDrawer({ result }: ReviewDrawerProps) {
 											</>
 										)}
 									</Button>
-								)}
+								)} */}
 
 								<Button onClick={() => setShowDrawer(false)} variant="outline" className="w-full">
 									<Trans>Close Review</Trans>

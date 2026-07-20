@@ -127,15 +127,29 @@ export const certificationItemSchema = baseItemSchema.extend({
 });
 
 export const educationItemSchema = baseItemSchema.extend({
-	school: z.string().min(1).describe("The name of the school or institution."),
-	degree: z.string().describe("The degree or qualification obtained."),
-	area: z.string().describe("The area of study or specialization."),
-	grade: z.string().describe("The grade or score achieved."),
-	location: z.string().describe("The location of the school or institution."),
-	period: z.string().describe("The period of time the education was obtained over."),
-	website: urlSchema.describe("The website of the school or institution, if any."),
-	description: z.string().describe("The description of the education. This should be a HTML-formatted string."),
-	currentlyStudyingHere: z.boolean().describe("Indicates if the user is currently studying at this institution."),
+	college: z.string().optional(),
+	school: z.string().min(1),
+	degree: z.string(),
+	area: z.string(),
+	grade: z.string(),
+	location: z.string(),
+
+	startDate: z.string().optional(),
+	endDate: z.string().optional(),
+
+	period: z.string(),
+	website: urlSchema,
+	description: z.string(),
+	currentlyStudyingHere: z.boolean(),
+
+	// UI State Fields
+	schoolName_school: z.string().optional(),
+	board_school: z.string().optional(),
+	percentage_school: z.string().optional(),
+	collegeName_college: z.string().optional(),
+	degree_college: z.string().optional(),
+	specialization_college: z.string().optional(),
+	cgpa_college: z.string().optional(),
 });
 
 export const experienceItemSchema = baseItemSchema.extend({
@@ -147,33 +161,33 @@ export const experienceItemSchema = baseItemSchema.extend({
 	currentlyWorkingHere: z.boolean().optional().describe("Whether the user is currently working here."),
 	description: z.string().describe("The description of the experience. This should be a HTML-formatted string."),
 	period: z.string().describe("The period of time the experience was obtained over."),
-	website: urlSchema.describe("The website of the company or organization, if any."),
+	website: urlSchema,
 });
 
 export const interestItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
-	name: z.string().min(1).describe("The name of the interest/hobby."),
+	name: z
+		.string()
+		.trim()
+		.min(2, "Interest must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid interest name")
+		.describe("The name of the interest/hobby."),
 	keywords: z
 		.array(z.string())
 		.catch([])
 		.describe("The keywords associated with the interest/hobby, if any. These are displayed as tags below the name."),
 });
 
-export const languageItemSchema = baseItemSchema.extend({
-	language: z.string().min(1).describe("The name of the language the author knows."),
-	fluency: z
+export const languageItemSchema = z.object({
+	id: z.string(),
+	hidden: z.boolean(),
+	icon: iconSchema,
+
+	language: z
 		.string()
-		.describe(
-			"The fluency level of the language. Can be any text, such as 'Native', 'Fluent', 'Conversational', etc. or can also be a CEFR level (A1, A2, B1, B2, C1, C2).",
-		),
-	level: z
-		.number()
-		.min(0)
-		.max(5)
-		.catch(0)
-		.describe(
-			"The proficiency level of the language, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden.",
-		),
+		.trim()
+		.min(2, "Language must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid language name"),
 });
 
 export const profileItemSchema = baseItemSchema.extend({
@@ -185,6 +199,7 @@ export const profileItemSchema = baseItemSchema.extend({
 
 export const projectItemSchema = baseItemSchema.extend({
 	name: z.string().min(1).describe("The name of the project."),
+	role: z.string().describe("The role of the author in the project."),
 	period: z.string().describe("The period of time the project was worked on."),
 	website: urlSchema.describe("The link to the project, if any."),
 	description: z.string().describe("The description of the project. This should be a HTML-formatted string."),
@@ -212,7 +227,12 @@ export const referenceItemSchema = baseItemSchema.extend({
 
 export const skillItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
-	name: z.string().min(1).describe("The name of the skill."),
+	name: z
+		.string()
+		.trim()
+		.min(2, "Skill must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid skill name")
+		.describe("The name of the skill."),
 	proficiency: z
 		.string()
 		.describe(
@@ -232,14 +252,14 @@ export const skillItemSchema = baseItemSchema.extend({
 		.describe("The keywords associated with the skill, if any. These are displayed as tags below the name."),
 });
 
+// In schema/resume/data.ts
+
 export const volunteerItemSchema = baseItemSchema.extend({
 	organization: z.string().min(1).describe("The name of the organization or company."),
 	location: z.string().describe("The location of the organization or company."),
 	period: z.string().describe("The period of time the author was volunteered at the organization or company."),
 	website: urlSchema.describe("The link to the organization or company, if any."),
-	description: z
-		.string()
-		.describe("The description of the volunteer experience. This should be a HTML-formatted string."),
+	description: z.string().describe("The description of the volunteer experience. This should be a HTML-formatted string."),
 });
 
 export const coverLetterItemSchema = baseItemSchema.extend({
@@ -323,6 +343,7 @@ export type SectionData<T extends SectionType = SectionType> = z.infer<typeof se
 export type SectionItem<T extends SectionType = SectionType> = SectionData<T>["items"][number];
 
 export const sectionTypeSchema = z.enum([
+	"custom",
 	"summary",
 	"profiles",
 	"experience",
@@ -340,6 +361,11 @@ export const sectionTypeSchema = z.enum([
 ]);
 
 export type CustomSectionType = z.infer<typeof sectionTypeSchema>;
+
+export const customItemSchema = baseItemSchema.extend({
+	name: z.string().optional().describe("The name or title of the custom item."),
+	description: z.string().optional().describe("The description or content of the custom item."),
+});
 
 export const customSectionItemSchema = z.union([
 	// coverLetterItemSchema must come before summaryItemSchema because both have 'content',
@@ -359,12 +385,19 @@ export const customSectionItemSchema = z.union([
 	publicationItemSchema,
 	volunteerItemSchema,
 	referenceItemSchema,
+	customItemSchema,
 ]);
 
 export type CustomSectionItem = z.infer<typeof customSectionItemSchema>;
 
 export const customSectionSchema = baseSectionSchema.extend({
 	id: z.string().describe("The unique identifier for the custom section. Usually generated as a UUID."),
+	title: z
+		.string()
+		.trim()
+		.min(2, "Section title must be at least 2 characters")
+		.regex(/^[A-Za-z\s]+$/, "Please enter a valid section title")
+		.describe("The title of the section."),
 	type: sectionTypeSchema.describe(
 		"The type of items this custom section contains. Determines which item schema and form fields to use.",
 	),

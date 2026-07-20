@@ -1,6 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
-import { PencilSimpleLineIcon, PlusIcon } from "@phosphor-icons/react";
+import {
+	PencilSimpleLineIcon,
+	Article,
+	Briefcase,
+	GraduationCap,
+	Certificate,
+} from "@phosphor-icons/react";
 import { useForm, useFormContext } from "react-hook-form";
 import type z from "zod";
 import { useResumeStore } from "@/components/resume/store/resume";
@@ -18,22 +24,13 @@ const formSchema = customSectionSchema;
 
 type FormValues = z.infer<typeof formSchema>;
 
-const SECTION_TYPE_OPTIONS: { value: CustomSectionType; label: string }[] = [
-	{ value: "summary", label: "Summary" },
-	{ value: "experience", label: "Experience" },
-	{ value: "education", label: "Education" },
-	{ value: "projects", label: "Projects" },
-	{ value: "profiles", label: "Profiles" },
-	{ value: "skills", label: "Skills" },
-	{ value: "languages", label: "Languages" },
-	{ value: "interests", label: "Interests" },
-	{ value: "awards", label: "Awards" },
-	{ value: "certifications", label: "Certifications" },
-	{ value: "publications", label: "Publications" },
-	{ value: "volunteer", label: "Volunteer" },
-	{ value: "references", label: "References" },
-	{ value: "cover-letter", label: "Cover Letter" },
-];
+const SECTION_TYPE_OPTIONS = [
+	{ value: "custom", label: "Generic", description: "Title + free-form content", icon: PencilSimpleLineIcon },
+	{ value: "summary", label: "Summary", description: "Headline + paragraph", icon: Article },
+	{ value: "experience", label: "Experience", description: "Company, role, dates", icon: Briefcase },
+	{ value: "education", label: "Education", description: "School, degree, year", icon: GraduationCap },
+	{ value: "certifications", label: "Certification", description: "Title, issuer, link", icon: Certificate },
+] as const;
 
 export function CreateCustomSectionDialog({ data }: DialogProps<"resume.sections.custom.create">) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);
@@ -52,12 +49,26 @@ export function CreateCustomSectionDialog({ data }: DialogProps<"resume.sections
 	});
 
 	const onSubmit = (formData: FormValues) => {
-		updateResumeData((draft) => {
-			draft.customSections.push(formData);
+		// Build the first empty item based on type
+		const baseItem = { id: generateId(), hidden: false, visible: true };
+		const firstItem: any =
+			formData.type === "summary"
+				? { ...baseItem, name: "", content: "" }
+				: formData.type === "experience"
+					? { ...baseItem, company: "", position: "", location: "", date: "", summary: "", url: "" }
+					: formData.type === "education"
+						? { ...baseItem, institution: "", studyType: "", area: "", score: "", date: "", summary: "", url: "" }
+						: formData.type === "certifications"
+							? { ...baseItem, title: "", issuer: "", date: "", website: { url: "", label: "" }, description: "" }
+							: { ...baseItem, name: "", description: "" };
 
+		const sectionWithItem = { ...formData, items: [firstItem] };
+
+		updateResumeData((draft) => {
+			draft.customSections.push(sectionWithItem);
 			const lastPageIndex = draft.metadata.layout.pages.length - 1;
 			if (lastPageIndex < 0) return;
-			draft.metadata.layout.pages[lastPageIndex].main.push(formData.id);
+			draft.metadata.layout.pages[lastPageIndex].main.push(sectionWithItem.id);
 		});
 		closeDialog();
 	};
@@ -65,13 +76,16 @@ export function CreateCustomSectionDialog({ data }: DialogProps<"resume.sections
 	const { blockEvents, requestClose } = useFormBlocker(form);
 
 	return (
-		<DialogContent {...blockEvents}>
+		<DialogContent {...blockEvents} className="w-full max-w-[95vw] sm:!max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
-					<PlusIcon />
-					<Trans>Create a new custom section</Trans>
+				<DialogTitle className="flex flex-col gap-y-1">
+					<span className="font-ibm Plex text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+						<Trans>New custom section</Trans>
+					</span>
 				</DialogTitle>
-				<DialogDescription />
+				<DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+					<Trans>Name your section and choose a layout type.</Trans>
+				</DialogDescription>
 			</DialogHeader>
 
 			<Form {...form}>
@@ -121,13 +135,16 @@ export function UpdateCustomSectionDialog({ data }: DialogProps<"resume.sections
 	const { blockEvents, requestClose } = useFormBlocker(form);
 
 	return (
-		<DialogContent {...blockEvents}>
+		<DialogContent {...blockEvents} className="w-full max-w-[95vw] sm:!max-w-[576px] !h-[444px] !max-h-[444px] overflow-y-auto">
 			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
-					<PencilSimpleLineIcon />
-					<Trans>Update an existing custom section</Trans>
+				<DialogTitle className="flex flex-col gap-y-1">
+					<span className="font-serif text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+						<Trans>Update custom section</Trans>
+					</span>
 				</DialogTitle>
-				<DialogDescription />
+				<DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+					<Trans>Update your section name or change layout type.</Trans>
+				</DialogDescription>
 			</DialogHeader>
 
 			<Form {...form}>
@@ -159,11 +176,11 @@ function CustomSectionForm({ isUpdate = false }: { isUpdate?: boolean }) {
 				name="title"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<FormLabel>
-							<Trans>Title</Trans>
+						<FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+							<Trans>Section Title</Trans>
 						</FormLabel>
 						<FormControl>
-							<Input {...field} />
+							<Input {...field} placeholder="e.g. Volunteering, Awards, Publications" className="h-11 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted/50 px-4 text-sm transition-all focus:bg-white focus:ring-1 focus:ring-emerald-500" />
 						</FormControl>
 						<FormMessage />
 					</FormItem>
@@ -175,21 +192,36 @@ function CustomSectionForm({ isUpdate = false }: { isUpdate?: boolean }) {
 				name="type"
 				render={({ field }) => (
 					<FormItem className="sm:col-span-full">
-						<FormLabel>
+						<FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 							<Trans>Section Type</Trans>
 						</FormLabel>
 						<FormControl>
-							<select
-								{...field}
-								disabled={isUpdate}
-								className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-							>
-								{SECTION_TYPE_OPTIONS.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
+							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mt-2">
+								{SECTION_TYPE_OPTIONS.map((option) => {
+									const isSelected = field.value === option.value;
+									const Icon = option.icon;
+									return (
+										<button
+											key={option.value}
+											type="button"
+											onClick={() => !isUpdate && field.onChange(option.value)}
+											disabled={isUpdate}
+											className={`flex items-start gap-4 rounded-2xl border p-4 text-left transition-all ${isSelected
+												? "border-emerald-500 dark:border-emerald-600 bg-emerald-50/50 dark:bg-emerald-900/30 shadow-sm"
+												: "border-gray-200 dark:border-border bg-white dark:bg-card hover:border-emerald-200 hover:bg-gray-50 dark:hover:bg-muted/50"
+												} ${isUpdate ? "opacity-75 cursor-not-allowed" : "cursor-pointer"}`}
+										>
+											<div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isSelected ? "bg-emerald-500 text-white" : "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"}`}>
+												<Icon className="h-5 w-5" weight={isSelected ? "bold" : "regular"} />
+											</div>
+											<div className="flex flex-col gap-0.5">
+												<span className={`font-semibold ${isSelected ? "text-emerald-900 dark:text-emerald-300" : "text-gray-900 dark:text-gray-100"}`}>{option.label}</span>
+												<span className="text-xs text-gray-500 dark:text-gray-400">{option.description}</span>
+											</div>
+										</button>
+									);
+								})}
+							</div>
 						</FormControl>
 						<FormMessage />
 					</FormItem>

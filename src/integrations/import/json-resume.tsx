@@ -423,6 +423,8 @@ export class JSONResumeImporter {
 					.map((edu) => ({
 						id: generateId(),
 						hidden: false,
+						college: "College",
+						currentlyStudyingHere: false,
 						school: edu.institution || "",
 						degree: [edu.studyType, edu.area].filter(Boolean).join(" in ") || "",
 						area: edu.area || "",
@@ -445,6 +447,7 @@ export class JSONResumeImporter {
 						id: generateId(),
 						hidden: false,
 						name: project.name || "",
+						role: "",
 						period: formatPeriod(project.startDate, project.endDate),
 						website: createUrl(project.url),
 						description: toHtmlDescription(project.description, project.highlights),
@@ -480,8 +483,7 @@ export class JSONResumeImporter {
 						id: generateId(),
 						hidden: false,
 						language: lang.language || "",
-						fluency: lang.fluency || "",
-						level: parseLevel(lang.fluency),
+						icon: "translate",
 					})),
 			};
 		}

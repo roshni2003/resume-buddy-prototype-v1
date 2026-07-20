@@ -20,10 +20,13 @@ import { Route as AuthLoginRouteImport } from "./routes/auth/login";
 import { Route as ApiHealthRouteImport } from "./routes/api/health";
 import { Route as UsernameSlugRouteImport } from "./routes/$username/$slug";
 import { Route as BuilderResumeIdRouteRouteImport } from "./routes/builder/$resumeId/route";
+import { Route as DashboardSettingsIndexRouteImport } from "./routes/dashboard/settings/index";
 import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
 import { Route as UploadsUserIdSplatRouteImport } from "./routes/uploads/$userId.$";
 import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
+import { Route as DashboardResumesUploadRouteImport } from "./routes/dashboard/resumes/upload";
+import { Route as DashboardResumesMatchRouteImport } from "./routes/dashboard/resumes/match";
 import { Route as DashboardAdminMixpanelRouteImport } from "./routes/dashboard/admin/mixpanel";
 import { Route as DashboardAdminAnalyticsRouteImport } from "./routes/dashboard/admin/analytics";
 import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
@@ -84,6 +87,11 @@ const BuilderResumeIdRouteRoute = BuilderResumeIdRouteRouteImport.update({
   path: "/builder/$resumeId",
   getParentRoute: () => rootRouteImport,
 } as any);
+const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
+  id: "/settings/",
+  path: "/settings/",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const DashboardResumesIndexRoute = DashboardResumesIndexRouteImport.update({
   id: "/resumes/",
   path: "/resumes/",
@@ -105,6 +113,16 @@ const DashboardSettingsProfileRoute =
     path: "/settings/profile",
     getParentRoute: () => DashboardRouteRoute,
   } as any);
+const DashboardResumesUploadRoute = DashboardResumesUploadRouteImport.update({
+  id: "/resumes/upload",
+  path: "/resumes/upload",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardResumesMatchRoute = DashboardResumesMatchRouteImport.update({
+  id: "/resumes/match",
+  path: "/resumes/match",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const DashboardAdminMixpanelRoute = DashboardAdminMixpanelRouteImport.update({
   id: "/admin/mixpanel",
   path: "/admin/mixpanel",
@@ -147,10 +165,13 @@ export interface FileRoutesByFullPath {
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
   "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
+  "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
+  "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
   "/dashboard/resumes/": typeof DashboardResumesIndexRoute;
+  "/dashboard/settings/": typeof DashboardSettingsIndexRoute;
 }
 export interface FileRoutesByTo {
   "/schema.json": typeof SchemaDotjsonRoute;
@@ -166,10 +187,13 @@ export interface FileRoutesByTo {
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
   "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
+  "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
+  "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId": typeof BuilderResumeIdIndexRoute;
   "/dashboard/resumes": typeof DashboardResumesIndexRoute;
+  "/dashboard/settings": typeof DashboardSettingsIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -189,10 +213,13 @@ export interface FileRoutesById {
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
   "/dashboard/admin/mixpanel": typeof DashboardAdminMixpanelRoute;
+  "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
+  "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/uploads/$userId/$": typeof UploadsUserIdSplatRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
   "/dashboard/resumes/": typeof DashboardResumesIndexRoute;
+  "/dashboard/settings/": typeof DashboardSettingsIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -212,10 +239,13 @@ export interface FileRouteTypes {
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
     | "/dashboard/admin/mixpanel"
+    | "/dashboard/resumes/match"
+    | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId/"
-    | "/dashboard/resumes/";
+    | "/dashboard/resumes/"
+    | "/dashboard/settings/";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/schema.json"
@@ -231,10 +261,13 @@ export interface FileRouteTypes {
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
     | "/dashboard/admin/mixpanel"
+    | "/dashboard/resumes/match"
+    | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId"
-    | "/dashboard/resumes";
+    | "/dashboard/resumes"
+    | "/dashboard/settings";
   id:
     | "__root__"
     | "/_home"
@@ -253,10 +286,13 @@ export interface FileRouteTypes {
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
     | "/dashboard/admin/mixpanel"
+    | "/dashboard/resumes/match"
+    | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
     | "/uploads/$userId/$"
     | "/builder/$resumeId/"
-    | "/dashboard/resumes/";
+    | "/dashboard/resumes/"
+    | "/dashboard/settings/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -354,6 +390,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof BuilderResumeIdRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/dashboard/settings/": {
+      id: "/dashboard/settings/";
+      path: "/settings";
+      fullPath: "/dashboard/settings/";
+      preLoaderRoute: typeof DashboardSettingsIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     "/dashboard/resumes/": {
       id: "/dashboard/resumes/";
       path: "/resumes";
@@ -380,6 +423,20 @@ declare module "@tanstack/react-router" {
       path: "/settings/profile";
       fullPath: "/dashboard/settings/profile";
       preLoaderRoute: typeof DashboardSettingsProfileRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/upload": {
+      id: "/dashboard/resumes/upload";
+      path: "/resumes/upload";
+      fullPath: "/dashboard/resumes/upload";
+      preLoaderRoute: typeof DashboardResumesUploadRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/match": {
+      id: "/dashboard/resumes/match";
+      path: "/resumes/match";
+      fullPath: "/dashboard/resumes/match";
+      preLoaderRoute: typeof DashboardResumesMatchRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
     "/dashboard/admin/mixpanel": {
@@ -436,16 +493,22 @@ interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute;
   DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute;
   DashboardAdminMixpanelRoute: typeof DashboardAdminMixpanelRoute;
+  DashboardResumesMatchRoute: typeof DashboardResumesMatchRoute;
+  DashboardResumesUploadRoute: typeof DashboardResumesUploadRoute;
   DashboardSettingsProfileRoute: typeof DashboardSettingsProfileRoute;
   DashboardResumesIndexRoute: typeof DashboardResumesIndexRoute;
+  DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
   DashboardAdminMixpanelRoute: DashboardAdminMixpanelRoute,
+  DashboardResumesMatchRoute: DashboardResumesMatchRoute,
+  DashboardResumesUploadRoute: DashboardResumesUploadRoute,
   DashboardSettingsProfileRoute: DashboardSettingsProfileRoute,
   DashboardResumesIndexRoute: DashboardResumesIndexRoute,
+  DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
 };
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

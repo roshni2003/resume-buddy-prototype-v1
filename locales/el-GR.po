@@ -71,6 +71,9 @@ msgstr "{column, plural, one {# Στήλη} other {# Στήλες}}"
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 msgid "✓ You've used both AI suggestions. Edit the text to get new suggestions."
 msgstr ""
 
@@ -94,6 +97,11 @@ msgstr "Ένα έργο πάθους από τον <0>Amruth Pillai</0>."
 msgid "A4"
 msgstr "Α4"
 
+#. placeholder {0}: section.type === "custom" ? "item" : section.type + " item"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Add {0}"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "Προσθέστε ένα προσαρμοσμένο πεδίο"
@@ -106,34 +114,17 @@ msgstr "Προσθέστε μια ετικέτα στο URL"
 msgid "Add a new award"
 msgstr "Προσθέστε ένα νέο βραβείο"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
-msgid "Add a new certification"
-msgstr "Προσθέστε μια νέα πιστοποίηση"
-
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Add a new custom section"
 msgstr "Προσθέστε μια νέα προσαρμοσμένη ενότητα"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
-msgid "Add a new education"
-msgstr "Προσθέστε μια νέα εκπαίδευση"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Add a new experience"
 msgstr "Προσθέστε μια νέα επαγγελματική εμπειρία"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/interests.tsx
-msgid "Add a new interest"
-msgstr "Προσθέστε ένα νέο ενδιαφέρον"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Add a new item"
 msgstr "Προσθήκη νέου αντικειμένου"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/languages.tsx
-msgid "Add a new language"
-msgstr "Προσθέστε μια νέα γλώσσα"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
 msgid "Add a new project"
@@ -147,30 +138,41 @@ msgstr "Προσθέστε μια νέα δημοσίευση"
 msgid "Add a new reference"
 msgstr "Προσθέστε μια νέα σύσταση"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/skills.tsx
-msgid "Add a new skill"
-msgstr "Προσθέστε μια νέα δεξιότητα"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+msgid "Add certification"
+msgstr ""
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
-msgid "Add a new volunteer experience"
-msgstr "Προσθέστε μια νέα εθελοντική εμπειρία"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Add education"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Add Experience"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
 msgstr "Προσθήκη σελίδας"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Add Project"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
+msgid "Add volunteer work"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Afrikaans"
 msgstr "Αφρικάανς"
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "AI"
-msgstr "ΤΝ"
-
 #. js-lingui-explicit-id
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "ai.review.loading"
+msgstr ""
+
+#: src/dialogs/resume/import.tsx
+msgid "AI-powered import for PDF and Word documents is currently being moved to the backend. Please try again later or use JSON import."
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
@@ -244,19 +246,6 @@ msgstr "Τομέας σπουδών"
 msgid "Ask Zoe"
 msgstr ""
 
-#. placeholder {0}: roundsRemaining === 1 ? "round" : "rounds"
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe ({roundsRemaining} {0} remaining)"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Ask Zoe (Used)"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Aspect Ratio"
-msgstr "Αναλογία διαστάσεων"
-
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
 msgid "Awarder"
@@ -283,6 +272,10 @@ msgstr "Βασικά στοιχεία"
 msgid "Bengali"
 msgstr "Μπενγκάλι"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Board"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -291,18 +284,6 @@ msgstr "Κυρίως κείμενο"
 #: src/components/input/rich-input.tsx
 msgid "Bold"
 msgstr "Έντονα"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Radius"
-msgstr "Ακτίνα περιγράμματος"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Border Width"
-msgstr "Πλάτος περιγράμματος"
 
 #: src/components/command-palette/index.tsx
 msgid "Builder Command Palette"
@@ -329,8 +310,6 @@ msgstr "Από την κοινότητα, για την κοινότητα."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/profile.tsx
@@ -340,7 +319,6 @@ msgstr "Από την κοινότητα, για την κοινότητα."
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
@@ -348,6 +326,9 @@ msgstr "Από την κοινότητα, για την κοινότητα."
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/hooks/use-prompt.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Cancel"
@@ -361,6 +342,10 @@ msgstr "Καταλανικά"
 msgid "Certifications"
 msgstr "Πιστοποιήσεις"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "CGPA / Percentage"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Κινέζικα (Απλοποιημένα)"
@@ -372,10 +357,6 @@ msgstr "Κινέζικα (Παραδοσιακά)"
 #: src/components/level/combobox.tsx
 msgid "Circle"
 msgstr "Κύκλος"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Circle (100pt)"
-msgstr ""
 
 #: src/components/ui/multiple-combobox.tsx
 msgid "Clear selection"
@@ -403,6 +384,7 @@ msgid "Coming Soon!"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Company"
 msgstr "Εταιρεία"
 
@@ -415,10 +397,6 @@ msgstr "Επιβεβαίωση"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary.tsx
 msgid "Content"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Content generated successfully!"
 msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
@@ -440,13 +418,10 @@ msgstr ""
 #: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/profile.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/summary.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
@@ -465,10 +440,6 @@ msgstr "Δημιουργία νέας πιστοποίησης"
 msgid "Create a new cover letter"
 msgstr ""
 
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Create a new custom section"
-msgstr "Δημιουργία νέας προσαρμοσμένης ενότητας"
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Create a new education"
 msgstr "Δημιουργία νέας εκπαίδευσης"
@@ -476,14 +447,6 @@ msgstr "Δημιουργία νέας εκπαίδευσης"
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Create a new experience"
 msgstr "Δημιουργία νέας εμπειρίας"
-
-#: src/dialogs/resume/sections/interest.tsx
-msgid "Create a new interest"
-msgstr "Δημιουργία νέου ενδιαφέροντος"
-
-#: src/dialogs/resume/sections/language.tsx
-msgid "Create a new language"
-msgstr "Δημιουργία νέας γλώσσας"
 
 #: src/dialogs/resume/sections/profile.tsx
 msgid "Create a new profile"
@@ -502,14 +465,9 @@ msgid "Create a new reference"
 msgstr "Δημιουργία νέας σύστασης"
 
 #: src/components/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
 msgstr "Δημιουργία νέου βιογραφικού σημειώματος"
-
-#: src/dialogs/resume/sections/skill.tsx
-msgid "Create a new skill"
-msgstr "Δημιουργία νέας δεξιότητας"
 
 #: src/dialogs/resume/sections/summary.tsx
 msgid "Create a new summary"
@@ -532,7 +490,12 @@ msgstr "Δημιουργία του βιογραφικού σας σημειώμ
 msgid "Critical Issues"
 msgstr ""
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "Currently here"
+msgstr ""
+
 #: src/dialogs/resume/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 msgid "Currently studying here"
 msgstr ""
 
@@ -564,10 +527,12 @@ msgstr "Σκούρο"
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/publication.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
 msgid "Date"
 msgstr "Ημερομηνία"
 
 #: src/dialogs/resume/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
 msgid "Degree"
 msgstr "Πτυχίο"
 
@@ -594,6 +559,11 @@ msgstr "Διαγραφή του βιογραφικού σας σημειώματ
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Description"
 msgstr "Περιγραφή"
 
@@ -601,9 +571,8 @@ msgstr "Περιγραφή"
 msgid "Design"
 msgstr "Σχεδιασμός"
 
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Detailed Checks"
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Display Options"
 msgstr ""
 
 #: src/routes/$username/$slug.tsx
@@ -614,14 +583,6 @@ msgstr "Λήψη"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download a copy of your resume in PDF format. Use this file for printing or to easily share your resume with recruiters."
 msgstr "Κατεβάστε ένα αντίγραφο του βιογραφικού σας σημειώματος σε μορφή PDF. Χρησιμοποιήστε αυτό το αρχείο για εκτύπωση ή για να μοιραστείτε εύκολα το βιογραφικό σας σημείωμα με εργοδότες."
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download PDF"
-msgstr "Λήψη PDF"
-
-#: src/routes/builder/$resumeId/-components/top-tray.tsx
-msgid "Download Word"
-msgstr ""
 
 #: src/routes/$username/$slug.tsx
 msgid "Downloading..."
@@ -686,6 +647,9 @@ msgid "Enabling password protection..."
 msgstr "Ενεργοποίηση προστασίας με κωδικό πρόσβασης..."
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "End Date"
 msgstr ""
 
@@ -706,18 +670,6 @@ msgid "Export"
 msgstr "Εξαγωγή"
 
 #: src/components/ui/review-drawer-fixed.tsx
-msgid "Failed to fix issues automatically"
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Failed to generate content"
-msgstr ""
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Filter by"
-msgstr "Φιλτράρισμα κατά"
-
-#: src/components/ui/review-drawer-fixed.tsx
 #: src/components/ui/review-drawer.tsx
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "Final Review"
@@ -726,18 +678,6 @@ msgstr ""
 #: src/utils/locale.ts
 msgid "Finnish"
 msgstr "Φινλανδικά"
-
-#: src/components/ui/review-drawer-fixed.tsx
-msgid "Fix Issues Automatically"
-msgstr ""
-
-#: src/components/ui/review-drawer-fixed.tsx
-msgid "Fixing issues automatically..."
-msgstr ""
-
-#: src/components/ui/review-drawer-fixed.tsx
-msgid "Fixing Issues..."
-msgstr ""
 
 #: src/dialogs/resume/sections/language.tsx
 msgid "Fluency"
@@ -776,6 +716,10 @@ msgctxt "Page Format (A4, Letter or Free-Form)"
 msgid "Format"
 msgstr "Μορφή"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Frame"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Free-Form"
 msgstr "Ελεύθερη μορφή"
@@ -784,26 +728,13 @@ msgstr "Ελεύθερη μορφή"
 msgid "French"
 msgstr "Γαλλικά"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+msgid "Full Name"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
 msgstr "Πλήρες πλάτος"
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generated content is too short. Please try again."
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generating first suggestion..."
-msgstr ""
-
-#. placeholder {0}: roundsUsed + 1
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generating refinement (Round {0}/{maxRounds})..."
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Generating..."
-msgstr ""
 
 #: src/utils/locale.ts
 msgid "German"
@@ -817,14 +748,13 @@ msgstr ""
 msgid "Go Back"
 msgstr "Επιστροφή"
 
+#: src/components/ui/review-drawer.tsx
+msgid "Go to Field"
+msgstr ""
+
 #: src/dialogs/resume/sections/education.tsx
 msgid "Grade"
 msgstr "Βαθμός"
-
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Grammar & Tense"
-msgstr ""
 
 #: src/utils/locale.ts
 msgid "Greek"
@@ -893,6 +823,10 @@ msgstr "Εικονίδιο"
 msgid "Image size should be less than 10MB"
 msgstr ""
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Image URL"
+msgstr ""
+
 #: src/dialogs/resume/import.tsx
 msgid "Import"
 msgstr "Εισαγωγή"
@@ -920,17 +854,18 @@ msgstr "Γίνεται εισαγωγή..."
 msgid "Indonesian"
 msgstr "Ινδονησιακά"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Institution Name"
+msgstr ""
+
 #: src/utils/resume/section.tsx
 msgid "Interests"
 msgstr "Ενδιαφέροντα"
 
 #: src/dialogs/resume/sections/certification.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
 msgid "Issuer"
 msgstr "Φορέας πιστοποίησης"
-
-#: src/components/ui/review-drawer-fixed.tsx
-msgid "Issues fixed successfully!"
-msgstr ""
 
 #: src/utils/locale.ts
 msgid "Italian"
@@ -969,10 +904,6 @@ msgstr "Κορεατικά"
 msgid "Label"
 msgstr "Ετικέτα"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Landscape"
-msgstr "Οριζόντιος προσανατολισμός"
-
 #: src/components/user/dropdown-menu.tsx
 #: src/dialogs/resume/sections/language.tsx
 msgid "Language"
@@ -991,7 +922,6 @@ msgstr "Τελευταία λήψη στις {0}"
 msgid "Last Update"
 msgstr ""
 
-#: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Last updated on {updatedAt}"
 msgstr "Τελευταία ενημέρωση στις {updatedAt}"
@@ -1050,11 +980,6 @@ msgstr "Φωτεινό"
 msgid "Line Height"
 msgstr "Ύψος γραμμής"
 
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Link Status"
-msgstr ""
-
 #: src/utils/locale.ts
 msgid "Lithuanian"
 msgstr "Λιθουανικά"
@@ -1071,6 +996,9 @@ msgstr "Φόρτωση..."
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Location"
 msgstr "Τοποθεσία"
 
@@ -1124,13 +1052,16 @@ msgstr "Μετακίνηση σε"
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Name"
 msgstr "Όνομα"
 
 #: src/dialogs/resume/index.tsx
 msgid "Name already exists, please use a different name."
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Name your section and choose a layout type."
 msgstr ""
 
 #: src/utils/locale.ts
@@ -1141,13 +1072,29 @@ msgstr "Νεπάλι"
 msgid "Network"
 msgstr "Δίκτυο"
 
+#: src/dialogs/resume/sections/custom.tsx
+msgid "New custom section"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+msgid "New Experience"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Page"
 msgstr "Νέα σελίδα"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "New Project"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "New Section"
 msgstr "Νέα ενότητα"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "No custom blocks yet — design one your way."
+msgstr ""
 
 #: src/components/ui/combobox.tsx
 #: src/components/ui/multiple-combobox.tsx
@@ -1179,6 +1126,7 @@ msgid "Optionally, set a password so that only people with the password can view
 msgstr "Προαιρετικά, ορίστε έναν κωδικό πρόσβασης ώστε μόνο τα άτομα που γνωρίζουν τον κωδικό να μπορούν να βλέπουν το βιογραφικό σας σημείωμα μέσω του συνδέσμου."
 
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Organization"
 msgstr "Οργανισμός"
 
@@ -1208,11 +1156,20 @@ msgstr "Η προστασία με κωδικό πρόσβασης έχει απ
 msgid "Password protection has been enabled."
 msgstr "Η προστασία με κωδικό πρόσβασης έχει ενεργοποιηθεί."
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Percentage / CGPA"
+msgstr ""
+
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Period"
 msgstr "Περίοδος"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Period / Year"
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Persian"
@@ -1223,18 +1180,9 @@ msgstr "Περσικά"
 msgid "Phone"
 msgstr "Τηλέφωνο"
 
-#: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
-msgid "Photo Verdict"
-msgstr ""
-
 #: src/utils/resume/section.tsx
 msgid "Picture"
 msgstr "Φωτογραφία"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture Customization"
-msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture removed"
@@ -1242,10 +1190,6 @@ msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Picture uploaded successfully!"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Picture URL"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1259,14 +1203,6 @@ msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Please select a valid image file (PNG, JPG, WEBP, etc.)"
-msgstr ""
-
-#: src/components/ui/review-drawer-fixed.tsx
-msgid "Please try fixing issues manually or contact support."
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "Please wait for the current generation to complete."
 msgstr ""
 
 #. placeholder {0}: format.toUpperCase()
@@ -1283,17 +1219,9 @@ msgstr ""
 msgid "Please wait while your PDF is being generated..."
 msgstr "Περιμένετε όσο δημιουργείται το PDF σας..."
 
-#: src/components/ui/ai-generate-button.tsx
-msgid "Please write at least 5 words before asking Zoe."
-msgstr ""
-
 #: src/utils/locale.ts
 msgid "Polish"
 msgstr "Πολωνικά"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Portrait"
-msgstr "Κάθετος προσανατολισμός"
 
 #: src/utils/locale.ts
 msgid "Portuguese (Brazil)"
@@ -1305,6 +1233,7 @@ msgstr "Πορτογαλικά (Πορτογαλίας)"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/reference.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Position"
 msgstr "Θέση"
 
@@ -1327,10 +1256,6 @@ msgstr "Επάρκεια"
 msgid "Profile"
 msgstr "Προφίλ"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Profile Picture"
-msgstr ""
-
 #: src/utils/resume/section.tsx
 msgid "Profiles"
 msgstr "Προφίλ"
@@ -1338,6 +1263,10 @@ msgstr "Προφίλ"
 #: src/components/level/combobox.tsx
 msgid "Progress Bar"
 msgstr "Γραμμή προόδου"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Project Name"
+msgstr ""
 
 #: src/utils/resume/section.tsx
 msgid "Projects"
@@ -1383,6 +1312,11 @@ msgstr "Συστάσεις"
 msgid "Refresh"
 msgstr "Ανανέωση"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Remove"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
 msgstr "Κατάργηση κωδικού πρόσβασης"
@@ -1418,7 +1352,6 @@ msgid "Resume Colours"
 msgstr ""
 
 #: src/components/ui/review-drawer-fixed.tsx
-#: src/components/ui/review-drawer.tsx
 msgid "Resume Score"
 msgstr ""
 
@@ -1443,17 +1376,13 @@ msgstr ""
 msgid "Review limit reached. Resets at 12 AM."
 msgstr ""
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+msgid "Role"
+msgstr ""
+
 #: src/utils/locale.ts
 msgid "Romanian"
 msgstr "Ρουμανικά"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rotation"
-msgstr "Περιστροφή"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Rounded (10pt)"
-msgstr ""
 
 #: src/utils/locale.ts
 msgid "Russian"
@@ -1475,6 +1404,9 @@ msgstr "Ρωσικά"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Save Changes"
 msgstr "Αποθήκευση αλλαγών"
@@ -1482,6 +1414,10 @@ msgstr "Αποθήκευση αλλαγών"
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "Σχολείο"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "School Name"
+msgstr ""
 
 #. placeholder {0}: result.overall_score
 #. placeholder {1}: result.final_verdict === "READY" ? "Ready to export!" : "Check suggestions for improvements"
@@ -1502,6 +1438,10 @@ msgstr "Αναζήτηση για..."
 #: src/components/ui/multiple-combobox.tsx
 msgid "Search..."
 msgstr "Αναζήτηση..."
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Section Title"
+msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
@@ -1526,14 +1466,6 @@ msgstr "Ορισμός κωδικού πρόσβασης"
 msgid "Settings"
 msgstr "Ρυθμίσεις"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Color"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Shadow Width"
-msgstr "Πλάτος σκιάς"
-
 #: src/utils/resume/section.tsx
 msgid "Sharing"
 msgstr "Κοινοποίηση"
@@ -1552,6 +1484,9 @@ msgstr "Εμφάνιση"
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Show link in title"
 msgstr ""
 
@@ -1618,30 +1553,26 @@ msgstr "Κενό (κάθετο)"
 msgid "Spanish"
 msgstr "Ισπανικά"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+msgid "Specialization"
+msgstr ""
+
 #: src/components/level/combobox.tsx
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Square"
 msgstr "Τετράγωνο"
-
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Square (0pt)"
-msgstr ""
 
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
 msgstr "Κάντε μας star στο GitHub (ανοίγει σε νέα καρτέλα)"
 
-#. placeholder {0}: starCount.toLocaleString()
-#: src/components/input/github-stars-button.tsx
-msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
-msgstr "Κάντε μας star στο GitHub, αυτή τη στιγμή {0} stars (ανοίγει σε νέα καρτέλα)"
-
-#: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
 msgstr "Ξεκινήστε να φτιάχνετε το βιογραφικό σας σημείωμα από την αρχή"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/education.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
 msgid "Start Date"
 msgstr ""
 
@@ -1752,11 +1683,6 @@ msgstr ""
 msgid "This action cannot be undone."
 msgstr "Αυτή η ενέργεια δεν μπορεί να αναιρεθεί."
 
-#: src/dialogs/resume/import.tsx
-#: src/dialogs/resume/import.tsx
-msgid "This feature requires AI Integration to be enabled. Please enable it in the settings."
-msgstr "Αυτή η λειτουργία απαιτεί να είναι ενεργοποιημένη η ενσωμάτωση ΤΝ. Ενεργοποιήστε την στις ρυθμίσεις."
-
 #: src/routes/builder/$resumeId/-components/top-tray.tsx
 msgid "This is taking a bit longer than expected, please wait..."
 msgstr ""
@@ -1772,14 +1698,6 @@ msgstr "Αυτό μπορεί να πάρει μερικά λεπτά, ανάλ�
 msgid "This may take a while depending on the server capacity. Please do not close the window or refresh the page."
 msgstr "Αυτό μπορεί να πάρει λίγο χρόνο, ανάλογα με τη χωρητικότητα του διακομιστή. Μην κλείσετε το παράθυρο ή ανανεώσετε τη σελίδα."
 
-#: src/routes/dashboard/resumes/index.tsx
-msgid "This month"
-msgstr ""
-
-#: src/components/resume/store/resume.ts
-msgid "This resume is locked and cannot be updated."
-msgstr "Αυτό το βιογραφικό σημείωμα είναι κλειδωμένο και δεν μπορεί να ενημερωθεί."
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
 msgstr "Αυτή η ενότητα προορίζεται για τις προσωπικές σας σημειώσεις ειδικά για το συγκεκριμένο βιογραφικό σημείωμα. Το περιεχόμενο εδώ παραμένει ιδιωτικό και δεν κοινοποιείται σε κανέναν άλλον."
@@ -1790,8 +1708,8 @@ msgstr "Συμβουλή: Μπορείτε να ονομάσετε το βιογ
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/custom.tsx
 #: src/dialogs/resume/sections/publication.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
 msgid "Title"
 msgstr "Τίτλος"
 
@@ -1888,6 +1806,10 @@ msgstr ""
 msgid "Unlock"
 msgstr "Ξεκλείδωμα"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+msgid "Untitled Section"
+msgstr ""
+
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Unverified"
 msgstr "Μη επαληθευμένο"
@@ -1909,10 +1831,6 @@ msgstr "Ενημέρωση υπάρχουσας πιστοποίησης"
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Update an existing cover letter"
 msgstr ""
-
-#: src/dialogs/resume/sections/custom.tsx
-msgid "Update an existing custom section"
-msgstr "Ενημέρωση υπάρχουσας προσαρμοσμένης ενότητας"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Update an existing education"
@@ -1957,6 +1875,14 @@ msgstr ""
 #: src/dialogs/resume/sections/volunteer.tsx
 msgid "Update an existing volunteer experience"
 msgstr "Ενημέρωση υπάρχουσας εθελοντικής εμπειρίας"
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update custom section"
+msgstr ""
+
+#: src/dialogs/resume/sections/custom.tsx
+msgid "Update your section name or change layout type."
+msgstr ""
 
 #: src/dialogs/resume/index.tsx
 msgid "Updating your resume..."
@@ -2003,6 +1929,9 @@ msgstr "Εθελοντική εργασία"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/volunteer.tsx
 msgid "Website"
 msgstr "Ιστότοπος"
 
@@ -2017,21 +1946,23 @@ msgstr "Όταν είναι κλειδωμένο, το βιογραφικό ση
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 msgid "Write at least 5 words to enable Ask Zoe"
 msgstr ""
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/experience.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/projects.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx
 msgid "You have 1 more AI suggestion left for this text."
 msgstr ""
 
 #: src/hooks/use-form-blocker.tsx
 msgid "You have unsaved changes that will be lost."
-msgstr ""
-
-#: src/components/ui/ai-generate-button.tsx
-msgid "You've used all {maxRounds} rounds for this text. Edit the content to get more AI suggestions."
 msgstr ""
 
 #. placeholder {0}: format.toUpperCase()
@@ -2046,10 +1977,6 @@ msgstr "Οι αλλαγές σας αποθηκεύονται αυτόματα."
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Your profile has been updated successfully."
 msgstr "Το προφίλ σας ενημερώθηκε με επιτυχία."
-
-#: src/components/ui/review-drawer-fixed.tsx
-msgid "Your resume has been automatically improved. Review the changes."
-msgstr ""
 
 #: src/dialogs/resume/index.tsx
 msgid "Your resume has been created successfully."
@@ -2079,6 +2006,14 @@ msgstr "Το βιογραφικό σας σημείωμα ενημερώθηκε
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Your resume's public link is currently protected by a password. Share the password only with people you trust."
 msgstr "Ο δημόσιος σύνδεσμος του βιογραφικού σας σημειώματος προστατεύεται αυτή τη στιγμή με κωδικό πρόσβασης. Μοιραστείτε τον κωδικό μόνο με άτομα που εμπιστεύεστε."
+
+#: src/components/ui/review-drawer.tsx
+msgid "Zoe AI Active"
+msgstr ""
+
+#: src/components/ui/review-drawer.tsx
+msgid "Zoe found several critical gaps that might stop your resume from passing ATS."
+msgstr ""
 
 #: src/utils/locale.ts
 msgid "Zulu"

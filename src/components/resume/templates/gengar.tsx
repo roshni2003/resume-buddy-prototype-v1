@@ -26,6 +26,74 @@ export function GengarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-gengar page-content">
+			<style>{`
+				/* Skills as grid */
+				.template-gengar .page-section-skills .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					column-gap: 0.75rem !important;
+					row-gap: 1rem !important;
+				}
+
+				/* Interests & Languages as chips container */
+				.template-gengar .page-section-interests .section-content,
+				.template-gengar .page-section-languages .section-content {
+					display: flex !important;
+					flex-wrap: wrap !important;
+					gap: 0.5rem !important;
+				}
+
+				/* Skills item */
+				.template-gengar .skills-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+
+				/* Interests & Languages chips styling */
+				.template-gengar .interests-item,
+				.template-gengar .languages-item {
+					display: flex !important;
+					flex-direction: row !important;
+					align-items: center !important;
+					width: auto !important;
+					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
+					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
+					border-radius: 9999px !important;
+					padding: 0.35rem 0.75rem !important;
+				}
+
+				.template-gengar .skills-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-gengar .interests-item .section-item-header,
+				.template-gengar .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+					display: flex !important;
+					align-items: center !important;
+					column-gap: 0.35rem !important;
+				}
+
+				.template-gengar .interests-item .section-item-title,
+				.template-gengar .languages-item .section-item-title {
+					font-size: 1em !important;
+					font-weight: 500 !important;
+					color: var(--page-primary-color) !important;
+				}
+				
+				.template-gengar .interests-item .section-item-icon,
+				.template-gengar .languages-item .section-item-icon {
+					color: var(--page-primary-color) !important;
+				}
+
+				.template-gengar .skills-item .section-item-keywords,
+				.template-gengar .interests-item .section-item-keywords,
+				.template-gengar .languages-item .section-item-keywords {
+					display: none !important;
+				}
+			`}</style>
 			{/* Sidebar Background */}
 			{(!fullWidth || isFirstPage) && (
 				<div className="page-sidebar-background pointer-events-none absolute inset-y-0 z-0 w-(--page-sidebar-width) shrink-0 bg-(--page-primary-color)/20 ltr:start-0 rtl:end-0" />

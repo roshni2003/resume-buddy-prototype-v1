@@ -39,6 +39,25 @@ type Props<T extends CustomSectionItem | SectionItemType> = {
 	onAskZoe?: () => void;
 };
 
+const colorMap: Record<string, { border: string }> = {
+	picture: { border: "border-pink-500" },
+	basics: { border: "border-sky-500" },
+	profiles: { border: "border-purple-500" },
+	summary: { border: "border-yellow-500" },
+	experience: { border: "border-blue-500" },
+	education: { border: "border-green-500" },
+	projects: { border: "border-red-500" },
+	skills: { border: "border-teal-500" },
+	languages: { border: "border-indigo-500" },
+	interests: { border: "border-orange-500" },
+	awards: { border: "border-amber-500" },
+	certifications: { border: "border-emerald-500" },
+	publications: { border: "border-cyan-500" },
+	volunteer: { border: "border-rose-500" },
+	references: { border: "border-violet-500" },
+	custom: { border: "border-gray-500" },
+};
+
 export function SortableSectionItem<T extends CustomSectionItem | SectionItemType>({
 	type,
 	item,
@@ -102,28 +121,30 @@ export function SortableSectionItem<T extends CustomSectionItem | SectionItemTyp
 		});
 	};
 
+	const colors = colorMap[type as string] || colorMap.custom;
+
 	return (
-		<SortableItem id={item.id} asHandle className="group relative border-b last:border-b-0">
-			<div className="flex h-18 items-center bg-white">
-				<div className="flex shrink-0 items-center px-3 text-gray-500 opacity-70 transition-opacity group-hover:opacity-100">
+		<SortableItem id={item.id} asHandle className="group relative border-b border-border last:border-b-0">
+			<div className="flex h-18 items-center bg-card transition-colors">
+				<div className="flex shrink-0 items-center px-3 text-muted-foreground opacity-70 transition-opacity group-hover:opacity-100">
 					<DotsSixVerticalIcon size={20} />
 				</div>
 
 				<button
 					onClick={onUpdate}
 					className={cn(
-						"flex flex-1 flex-col items-start justify-center space-y-0.5 ps-1 text-start opacity-100 transition-opacity hover:bg-secondary/40 focus:outline-none focus-visible:ring-1",
+						"flex flex-1 flex-col items-start justify-center space-y-0.5 ps-1 text-start opacity-100 transition-opacity hover:bg-gray-50 dark:hover:bg-muted/50 focus:outline-none focus-visible:ring-1",
 						item.hidden && "opacity-50",
 					)}
 					type="button"
 				>
-					<div className="line-clamp-1 font-medium">{title}</div>
+					<div className="line-clamp-1 font-medium text-gray-800 dark:text-gray-200">{title}</div>
 					{subtitle && <div className="line-clamp-1 text-muted-foreground text-xs">{subtitle}</div>}
 				</button>
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<button className="flex h-full cursor-context-menu items-center px-3 text-gray-500 opacity-70 transition-[background-color,opacity] hover:bg-secondary/40 focus:outline-none focus-visible:ring-1 group-hover:opacity-100">
+						<button className="flex h-full cursor-context-menu items-center px-3 text-muted-foreground opacity-70 transition-[background-color,opacity] hover:bg-secondary/40 focus:outline-none focus-visible:ring-1 group-hover:opacity-100">
 							<DotsThreeVerticalIcon size={20} />
 						</button>
 					</DropdownMenuTrigger>

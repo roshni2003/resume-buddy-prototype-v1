@@ -22,6 +22,76 @@ export function RhyhornTemplate({ pageIndex, pageLayout }: TemplateProps) {
 
 	return (
 		<div className="template-rhyhorn page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+			<style>{`
+				/* Skills as grid */
+				.template-rhyhorn .page-section-skills .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					column-gap: 0.75rem !important;
+					row-gap: 1rem !important;
+				}
+
+				/* Interests & Languages as chips container */
+				.template-rhyhorn .page-section-interests .section-content,
+				.template-rhyhorn .page-section-languages .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+					gap: 0.75rem 0.5rem !important;
+				}
+
+				/* Skills item */
+				.template-rhyhorn .skills-item {
+					display: flex !important;
+					flex-direction: column !important;
+					align-items: flex-start !important;
+					row-gap: 0.25rem !important;
+					width: 100% !important;
+				}
+
+				/* Interests & Languages chips styling */
+				.template-rhyhorn .interests-item,
+				.template-rhyhorn .languages-item {
+					display: flex !important;
+					flex-direction: row !important;
+					align-items: center !important;
+					width: max-content !important;
+					max-width: 100% !important;
+					overflow: hidden !important;
+					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
+					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
+					border-radius: 9999px !important;
+					padding: 0.35rem 0.75rem !important;
+				}
+
+				.template-rhyhorn .skills-item .section-item-header {
+					margin-bottom: 0 !important;
+				}
+				.template-rhyhorn .interests-item .section-item-header,
+				.template-rhyhorn .languages-item .section-item-header {
+					margin-bottom: 0 !important;
+					display: flex !important;
+					align-items: center !important;
+					column-gap: 0.35rem !important;
+				}
+
+				.template-rhyhorn .interests-item .section-item-title,
+				.template-rhyhorn .languages-item .section-item-title {
+					font-size: 1em !important;
+					font-weight: 500 !important;
+					color: var(--page-primary-color) !important;
+				}
+				
+				.template-rhyhorn .interests-item .section-item-icon,
+				.template-rhyhorn .languages-item .section-item-icon {
+					color: var(--page-primary-color) !important;
+				}
+
+				.template-rhyhorn .skills-item .section-item-keywords,
+				.template-rhyhorn .interests-item .section-item-keywords,
+				.template-rhyhorn .languages-item .section-item-keywords {
+					display: none !important;
+				}
+			`}</style>
 			{isFirstPage && <Header />}
 
 			<main data-layout="main" className="group page-main space-y-(--page-gap-y)">

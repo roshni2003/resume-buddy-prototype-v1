@@ -52,6 +52,32 @@ export function VolunteerItem({ className, ...item }: VolunteerItemProps) {
 		}
 	};
 
+	// Helper function to get a clean display label from URL
+	const getDisplayLabel = (url: string): string => {
+		if (!url) return "";
+		try {
+			// Remove protocol (http://, https://)
+			let cleanUrl = url.replace(/^https?:\/\//, '');
+			// Remove www.
+			cleanUrl = cleanUrl.replace(/^www\./, '');
+			// Remove trailing slash
+			cleanUrl = cleanUrl.replace(/\/$/, '');
+			// Truncate if too long
+			if (cleanUrl.length > 30) {
+				return cleanUrl.substring(0, 30) + '...';
+			}
+			return cleanUrl;
+		} catch {
+			return url;
+		}
+	};
+
+	// Check if we should show the website link
+	const showWebsiteLink = item.website?.url && !item.options?.showLinkInTitle;
+
+	// Get display label for the link
+	const websiteLabel = item.website?.label || getDisplayLabel(item.website?.url || "");
+
 	return (
 		<div className={cn("volunteer-item", className)}>
 			{/* Header */}
@@ -63,6 +89,9 @@ export function VolunteerItem({ className, ...item }: VolunteerItemProps) {
 							value={item.organization}
 							placeholder="Organization"
 							onChange={handleOrganizationChange}
+							as={item.website?.url && item.options?.showLinkInTitle ? "a" : "span"}
+							href={item.website?.url}
+							className={item.website?.url && item.options?.showLinkInTitle ? "hover:underline" : ""}
 						/>
 					</strong>
 					<span className="section-item-metadata volunteer-item-period shrink-0 text-end">
@@ -91,10 +120,13 @@ export function VolunteerItem({ className, ...item }: VolunteerItemProps) {
 				)}
 			/>
 
-			{/* Website */}
-			{!item.options?.showLinkInTitle && (
-				<div className="section-item-website volunteer-item-website">
-					<PageLink {...item.website} label={item.website.label} />
+			{/* Website - only show if URL exists and showLinkInTitle is false */}
+			{showWebsiteLink && (
+				<div className="section-item-website volunteer-item-website mt-1">
+					<PageLink
+						url={item.website.url}
+						label={websiteLabel}
+					/>
 				</div>
 			)}
 		</div>

@@ -33,11 +33,11 @@ type RouterContext = {
 	flags: FeatureFlags;
 };
 
-const appName = "Zoe Resume Builder";
+const appName = "Resume Buddy";
 const tagline = "Build your professional resume with AI assistance";
 const title = `${appName} — ${tagline}`;
 const description =
-	"Zoe Resume Builder is a free resume builder with AI assistance that simplifies the process of creating, updating, and sharing your resume.";
+	"Resume Buddy is a free resume builder with AI assistance that simplifies the process of creating, updating, and sharing your resume.";
 
 await loadLocale(await getLocale());
 

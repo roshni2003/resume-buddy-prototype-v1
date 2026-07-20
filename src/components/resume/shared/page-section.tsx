@@ -23,7 +23,7 @@ export function PageSection<T extends SectionType>({ type, className, children, 
 	if (items.length === 0) return null;
 
 	return (
-		<section className={cn(`page-section page-section-${type}`, className)}>
+		<section data-section-id={type} className={cn(`page-section page-section-${type}`, className)}>
 			<h6 className="mb-1.5 text-(--page-primary-color)">{section.title || getSectionTitle(type)}</h6>
 
 			<div

@@ -10,6 +10,8 @@ import {
 	ShieldWarningIcon,
 	SwapIcon,
 	TextTIcon,
+	ListIcon,
+	DotsThreeVertical as DotsThreeVerticalIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -40,6 +42,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ReviewDrawer } from "@/components/ui/review-drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDialogStore } from "@/dialogs/store";
@@ -50,6 +53,7 @@ import { downloadFromUrl, generateFilename } from "@/utils/file";
 import { mixpanelService } from "@/utils/mixpanel";
 import { cn } from "@/utils/style";
 import { AnimatedEyes, DeadEyes } from "./animated-eyes";
+import { openZoeTour } from "@/components/editor/CoachMarks";
 
 function getWeekNumber(date: Date) {
 	const d = new Date(date);
@@ -331,20 +335,20 @@ export function BuilderTopTray() {
 		}
 	};
 
-	return (
+		const secondaryButtons = (
 		<>
-			<div className="flex items-center justify-end gap-1 overflow-visible sm:gap-2">
 				{/* Colors Button */}
 				<Popover>
 					<PopoverTrigger asChild>
 						<Button
 							size="sm"
 							variant="outline"
-							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+							className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 							aria-label="Colors"
+							data-tour="btn-colors"
 						>
 							<PaletteIcon className="h-4 w-4" />
-							<span className="hidden lg:inline">
+							<span className="hidden sm:inline">
 								<Trans>Colors</Trans>
 							</span>
 						</Button>
@@ -371,11 +375,12 @@ export function BuilderTopTray() {
 						<Button
 							size="sm"
 							variant="outline"
-							className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+							className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 							aria-label="Fonts"
+							data-tour="btn-fonts"
 						>
 							<TextTIcon className="h-4 w-4" />
-							<span className="hidden lg:inline">
+							<span className="hidden sm:inline">
 								<Trans>Fonts</Trans>
 							</span>
 						</Button>
@@ -400,11 +405,12 @@ export function BuilderTopTray() {
 					size="sm"
 					variant="outline"
 					onClick={() => openDialog("resume.template.gallery", undefined)}
-					className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+					className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 					aria-label="Templates"
+					data-tour="btn-templates"
 				>
 					<SwapIcon className="h-4 w-4" />
-					<span className="hidden lg:inline">
+					<span className="hidden sm:inline">
 						<Trans>Templates</Trans>
 					</span>
 				</Button>
@@ -417,7 +423,7 @@ export function BuilderTopTray() {
 								size="sm"
 								variant="outline"
 								className={cn(
-									"flex shrink-0 items-center justify-center gap-1.5 px-2 sm:h-9 sm:w-auto sm:gap-2 sm:px-3",
+									"flex w-auto justify-center h-9 gap-1.5 px-3 sm:w-auto sm:justify-center sm:gap-2",
 									"border-0 shadow-sm transition-all duration-300",
 									"!bg-gradient-to-r !from-indigo-600 !to-purple-600 !text-white",
 									"hover:!from-indigo-700 hover:!to-purple-700",
@@ -427,6 +433,7 @@ export function BuilderTopTray() {
 									reviewAttempts >= 2 && "!bg-gray-400 !text-white hover:!bg-gray-400 cursor-not-allowed",
 								)}
 								onClick={onFinalReview}
+								data-tour="btn-final-review"
 							>
 								{isReviewing ? (
 									<CircleNotchIcon className="animate-spin" />
@@ -437,7 +444,7 @@ export function BuilderTopTray() {
 										<AnimatedEyes />
 									</motion.div>
 								)}
-								<span className="hidden lg:inline">
+								<span className="hidden sm:inline">
 									<Trans>Final Review</Trans>
 								</span>
 							</Button>
@@ -463,49 +470,84 @@ export function BuilderTopTray() {
 						size="sm"
 						variant="outline"
 						onClick={() => setShowReviewDrawer(true)}
-						className="h-8 shrink-0 gap-1.5 px-2 sm:h-9 sm:gap-2 sm:px-3"
+						className="h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2"
 						aria-label="View Last Review"
 						title="View your last review results"
 					>
 						<ShieldWarningIcon className="h-4 w-4" />
-						<span className="hidden lg:inline">
+						<span className="hidden sm:inline">
 							<Trans>View Review</Trans>
 						</span>
 					</Button>
 				)}
 
-				{/* Consolidated Download button */}
+				</>
+	);
+
+	const downloadButton = (
+		<>{/* Download Dropdown */}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
 							size="sm"
 							variant="default"
 							disabled={isPrinting}
-							className="flex shrink-0 items-center justify-center gap-1.5 bg-emerald-600 px-2 text-white hover:bg-emerald-700 sm:h-9 sm:w-auto sm:gap-2 sm:px-3"
+							className="flex h-9 w-9 sm:w-auto justify-center gap-1.5 px-0 sm:px-3 sm:gap-2 bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition-all"
 							aria-label="Download"
+							data-tour="btn-download"
 						>
-							{isPrinting ? <CircleNotchIcon className={cn("animate-spin")} /> : <DownloadSimpleIcon />}
-							<span className="hidden lg:inline">
+							{isPrinting ? (
+								<CircleNotchIcon className="size-4 animate-spin" />
+							) : (
+								<DownloadSimpleIcon className="size-4" />
+							)}
+							<span className="font-medium hidden sm:inline">
 								<Trans>Download</Trans>
 							</span>
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="min-w-35">
-						<DropdownMenuItem onClick={onDownloadPDF} disabled={isPrinting}>
+					<DropdownMenuContent
+						align="end"
+						className="min-w-[160px] bg-popover text-foreground border-border"
+					>
+						<DropdownMenuItem
+							onClick={onDownloadPDF}
+							disabled={isPrinting}
+							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
+						>
 							<FilePdfIcon className="size-4 text-red-500" />
-							<Trans>Download PDF</Trans>
+							<span className="font-medium hidden sm:inline">Download PDF</span>
 						</DropdownMenuItem>
-
-						<DropdownMenuItem onClick={onDownloadDocx}>
-							<MicrosoftWordLogoIcon className="size-4 text-blue-600" />
-							<Trans>Download Word</Trans>
+						<DropdownMenuItem
+							onClick={onDownloadDocx}
+							disabled={isPrinting}
+							className="cursor-pointer gap-2 focus:bg-accent focus:text-accent-foreground"
+						>
+							<MicrosoftWordLogoIcon className="size-4 text-blue-500" />
+							<span className="font-medium hidden sm:inline">Download Word</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
-				</DropdownMenu>
+				</DropdownMenu></>
+	);
 
-				{/* Review Drawer */}
-				{reviewResult && <ReviewDrawer result={reviewResult} />}
+	return (
+		<>
+									{/* Unified Responsive View */}
+			<div className="flex items-center justify-start sm:justify-end gap-2 w-max sm:w-auto pb-1 sm:pb-0">
+				{secondaryButtons}
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={openZoeTour}
+					className="shrink-0 group flex sm:hidden items-center gap-2 rounded-full border border-fuchsia-400/40 bg-gradient-to-r from-fuchsia-500/15 to-violet-500/15 px-3 py-1.5 text-xs font-medium text-fuchsia-700 dark:text-fuchsia-200 transition"
+				>
+					✨ How to Use Zoe
+				</Button>
+				{downloadButton}
 			</div>
+
+			{/* Review Drawer */}
+			{reviewResult && <ReviewDrawer result={reviewResult} />}
 			<AlertDialog open={showLastAttemptConfirm} onOpenChange={setShowLastAttemptConfirm}>
 				<AlertDialogContent>
 					<AlertDialogHeader>

@@ -88,7 +88,7 @@ export function AwardsItem({ className, ...item }: AwardsItemProps) {
 			/>
 
 			{/* Website */}
-			{!item.options?.showLinkInTitle && (
+			{item.website && !item.options?.showLinkInTitle && (
 				<div className="section-item-website awards-item-website">
 					<PageLink {...item.website} label={item.website.label} />
 				</div>

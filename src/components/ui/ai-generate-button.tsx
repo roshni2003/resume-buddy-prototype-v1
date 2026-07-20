@@ -58,17 +58,17 @@ export function AIGenerateButton({
 		// Prevent multiple clicks while generating
 		if (isLoading) {
 			console.log("Already generating, ignoring click");
-			toast.info(t`Please wait for the current generation to complete.`);
+			toast.info("Please wait for the current generation to complete.");
 			return;
 		}
 
 		if (!isWordCountValid) {
-			toast.error(t`Please write at least 5 words before asking Zoe.`);
+			toast.error("Please write at least 5 words before asking Zoe.");
 			return;
 		}
 
 		if (hasReachedLimit) {
-			toast.error(t`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`);
+			toast.error(`You've used all ${maxRounds} rounds for this text. Edit the content to get more AI suggestions.`);
 			return;
 		}
 
@@ -76,8 +76,8 @@ export function AIGenerateButton({
 
 		const toastId = toast.loading(
 			roundsUsed === 0
-				? t`Generating first suggestion...`
-				: t`Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`,
+				? "Generating first suggestion..."
+				: `Generating refinement (Round ${roundsUsed + 1}/${maxRounds})...`,
 		);
 
 		// Map simpler internal types to what the API expects
@@ -108,7 +108,8 @@ export function AIGenerateButton({
 			},
 			{
 				onSuccess: async (response) => {
-					const content = Object.values(response)[0];
+					let content = Object.values(response)[0];
+					console.log("Generation successful, content length:", content?.length);
 
 					if (user?.id && effectiveResumeId) {
 						try {
@@ -172,6 +173,43 @@ export function AIGenerateButton({
 						}
 					}
 
+					// Check if content is valid
+					if (!content || content.length < 10) {
+						toast.error("Generated content is too short. Please try again.", { id: toastId });
+						return;
+					}
+
+					// Format AI response to proper HTML list if it contains bullets
+					const formatAIResponse = (text: string): string => {
+						if (!text) return "";
+						if (text.includes("<p>") || text.includes("<ul>") || text.includes("<li>")) {
+							return text;
+						}
+
+						let lines = text.split("\n");
+						if (lines.length === 1 && (text.includes("•") || text.includes("- "))) {
+							lines = text.split(/•|- /).filter(Boolean);
+						}
+
+						lines = lines.map((l) => l.trim()).filter((l) => l.length > 0);
+
+						// Assume it's a list if we found bullets or multiple lines
+						const isList = lines.length > 1 || text.includes("•") || text.includes("- ");
+
+						if (isList) {
+							const listItems = lines.map((line) => {
+								const cleanLine = line.replace(/^[•-]\s*/, "");
+								return `<li><p>${cleanLine}</p></li>`;
+							});
+							return `<ul>${listItems.join("")}</ul>`;
+						}
+
+						return `<p>${lines.join("<br>")}</p>`;
+					};
+
+					content = formatAIResponse(content);
+
+					toast.success("Content generated successfully!", { id: toastId });
 					onGenerated(content);
 					onRoundComplete?.();
 				},
@@ -189,7 +227,7 @@ export function AIGenerateButton({
 						date: new Date().toISOString().split("T")[0],
 					});
 
-					toast.error(error.message || t`Failed to generate content`, { id: toastId });
+					toast.error(error.message || "Failed to generate content", { id: toastId });
 				},
 			},
 		);
@@ -197,11 +235,9 @@ export function AIGenerateButton({
 
 	// Determine button text based on state
 	const getButtonText = () => {
-		if (isLoading) return t`Generating...`;
+		if (isLoading) return "Generating...";
 
-		if (hasReachedLimit) return t`Ask Zoe (Used)`;
-
-		return t`Ask Zoe (${roundsRemaining} ${roundsRemaining === 1 ? "round" : "rounds"} remaining)`;
+		return "Ask Zoe AI";
 	};
 
 	const isDisabled = disabled || isLoading || !isWordCountValid || hasReachedLimit;
@@ -213,9 +249,9 @@ export function AIGenerateButton({
 			variant="outline"
 			onClick={handleGenerate}
 			disabled={isDisabled}
-			className={`flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 text-sm shadow-sm transition-all hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 ${className || ""}`}
+			className={`flex items-center gap-1 rounded-lg bg-gray-100 px-1 py-1 font-medium text-gray-700 text-sm shadow-sm transition-all hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 ${className || ""}`}
 		>
-			<img src="/zoe-talking.png" alt="" className="size-4" />
+			<img src="/zoe-talking.png" alt="" className="h-7 w-6 dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
 			<span>{getButtonText()}</span>
 			{isLoading && (
 				<span className="ml-1 h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />

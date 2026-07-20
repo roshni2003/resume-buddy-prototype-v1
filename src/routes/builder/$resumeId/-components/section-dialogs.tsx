@@ -13,7 +13,7 @@ import { downloadFromUrl, generateFilename } from "@/utils/file";
 // Wrapper that applies light theme styling to section content
 export function SectionDialogWrapper({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="space-y-4 text-gray-900 [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_label]:text-gray-700 [&_p]:text-gray-700 [&_span]:text-gray-700">
+		<div className="space-y-4 text-foreground [&_h2]:text-foreground [&_h3]:text-foreground [&_label]:text-muted-foreground [&_p]:text-muted-foreground [&_span]:text-muted-foreground">
 			{children}
 		</div>
 	);
@@ -119,8 +119,8 @@ export function TypographyDialog() {
 
 				{/* Primary Font (Body Text) */}
 				<div className="space-y-3">
-					<h3 className="font-semibold text-gray-900 text-sm">Primary Font (Body Text)</h3>
-					<p className="text-gray-600 text-xs">Used for paragraphs, lists, and general content</p>
+					<h3 className="font-semibold text-foreground text-sm">Primary Font (Body Text)</h3>
+					<p className="text-muted-foreground text-xs">Used for paragraphs, lists, and general content</p>
 
 					{/* Popular Fonts Quick Select */}
 					<div className="grid grid-cols-2 gap-2">
@@ -132,33 +132,33 @@ export function TypographyDialog() {
 								className={`rounded-lg border-2 p-3 text-left transition-all ${
 									primaryFont === font
 										? "border-emerald-500 bg-emerald-50"
-										: "border-gray-200 bg-white hover:border-gray-300"
+										: "border-border bg-card hover:border-border"
 								}`}
 								style={{ fontFamily: font }}
 							>
 								<div className="font-medium text-sm">{font}</div>
-								<div className="text-gray-600 text-xs">Aa Bb Cc</div>
+								<div className="text-muted-foreground text-xs">Aa Bb Cc</div>
 							</button>
 						))}
 					</div>
 
 					{/* Custom Font Input */}
 					<div>
-						<label className="mb-1.5 block text-gray-700 text-xs">Or enter custom Google Font name</label>
+						<label className="mb-1.5 block text-muted-foreground text-xs">Or enter custom Google Font name</label>
 						<input
 							type="text"
 							value={primaryFont}
 							onChange={(e) => handlePrimaryFontChange(e.target.value)}
 							placeholder="Enter font name..."
-							className="w-full rounded-lg border-2 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+							className="w-full rounded-lg border-2 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
 						/>
 					</div>
 
 					{/* Font Preview */}
-					<div className="rounded-lg border-2 border-gray-200 bg-white p-4">
-						<div className="mb-2 font-medium text-gray-700 text-xs">Live Preview</div>
+					<div className="rounded-lg border-2 border-border bg-card p-4">
+						<div className="mb-2 font-medium text-muted-foreground text-xs">Live Preview</div>
 						<p
-							className="text-gray-900"
+							className="text-foreground"
 							style={{ fontFamily: primaryFont, fontSize: `${bodyFontSize}pt`, lineHeight: lineHeight }}
 						>
 							The quick brown fox jumps over the lazy dog. This is how your body text will appear in your resume with
@@ -169,8 +169,8 @@ export function TypographyDialog() {
 
 				{/* Secondary Font (Headings) */}
 				<div className="space-y-3">
-					<h3 className="font-semibold text-gray-900 text-sm">Secondary Font (Headings)</h3>
-					<p className="text-gray-600 text-xs">Used for section headings and your name</p>
+					<h3 className="font-semibold text-foreground text-sm">Secondary Font (Headings)</h3>
+					<p className="text-muted-foreground text-xs">Used for section headings and your name</p>
 
 					{/* Popular Fonts Quick Select */}
 					<div className="grid grid-cols-2 gap-2">
@@ -182,39 +182,39 @@ export function TypographyDialog() {
 								className={`rounded-lg border-2 p-3 text-left transition-all ${
 									headingFont === font
 										? "border-emerald-500 bg-emerald-50"
-										: "border-gray-200 bg-white hover:border-gray-300"
+										: "border-border bg-card hover:border-border"
 								}`}
 								style={{ fontFamily: font }}
 							>
 								<div className="font-medium text-sm">{font}</div>
-								<div className="text-gray-600 text-xs">Aa Bb Cc</div>
+								<div className="text-muted-foreground text-xs">Aa Bb Cc</div>
 							</button>
 						))}
 					</div>
 
 					{/* Custom Font Input */}
 					<div>
-						<label className="mb-1.5 block text-gray-700 text-xs">Or enter custom Google Font name</label>
+						<label className="mb-1.5 block text-muted-foreground text-xs">Or enter custom Google Font name</label>
 						<input
 							type="text"
 							value={headingFont}
 							onChange={(e) => handleHeadingFontChange(e.target.value)}
 							placeholder="Enter font name..."
-							className="w-full rounded-lg border-2 border-gray-300 px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+							className="w-full rounded-lg border-2 border-border px-3 py-2 text-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
 						/>
 					</div>
 
 					{/* Font Preview */}
-					<div className="rounded-lg border-2 border-gray-200 bg-white p-4">
-						<div className="mb-2 font-medium text-gray-700 text-xs">Live Preview</div>
+					<div className="rounded-lg border-2 border-border bg-card p-4">
+						<div className="mb-2 font-medium text-muted-foreground text-xs">Live Preview</div>
 						<h1
-							className="mb-2 text-2xl text-gray-900"
+							className="mb-2 text-2xl text-foreground"
 							style={{ fontFamily: headingFont, fontSize: `${headingFontSize}pt` }}
 						>
 							Professional Experience
 						</h1>
 						<h2
-							className="text-gray-900 text-lg"
+							className="text-foreground text-lg"
 							style={{ fontFamily: headingFont, fontSize: `${headingFontSize * 0.85}pt` }}
 						>
 							Senior Software Engineer
@@ -224,11 +224,11 @@ export function TypographyDialog() {
 
 				{/* Font Size Adjustments */}
 				<div className="space-y-4 rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-					<h3 className="font-semibold text-gray-900 text-sm">Font Size Adjustments</h3>
+					<h3 className="font-semibold text-foreground text-sm">Font Size Adjustments</h3>
 
 					{/* Body Font Size */}
 					<div>
-						<label className="mb-2 flex items-center justify-between text-gray-900 text-sm">
+						<label className="mb-2 flex items-center justify-between text-foreground text-sm">
 							<span>Body Text Size</span>
 							<span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-blue-900 text-xs">{bodyFontSize} pt</span>
 						</label>
@@ -241,7 +241,7 @@ export function TypographyDialog() {
 							onChange={(e) => handleBodyFontSizeChange(Number(e.target.value))}
 							className="w-full accent-emerald-600"
 						/>
-						<div className="mt-1 flex justify-between text-gray-600 text-xs">
+						<div className="mt-1 flex justify-between text-muted-foreground text-xs">
 							<span>Smaller (8pt)</span>
 							<span>Larger (14pt)</span>
 						</div>
@@ -249,7 +249,7 @@ export function TypographyDialog() {
 
 					{/* Heading Font Size */}
 					<div>
-						<label className="mb-2 flex items-center justify-between text-gray-900 text-sm">
+						<label className="mb-2 flex items-center justify-between text-foreground text-sm">
 							<span>Heading Text Size</span>
 							<span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-blue-900 text-xs">
 								{headingFontSize} pt
@@ -264,7 +264,7 @@ export function TypographyDialog() {
 							onChange={(e) => handleHeadingFontSizeChange(Number(e.target.value))}
 							className="w-full accent-emerald-600"
 						/>
-						<div className="mt-1 flex justify-between text-gray-600 text-xs">
+						<div className="mt-1 flex justify-between text-muted-foreground text-xs">
 							<span>Smaller (12pt)</span>
 							<span>Larger (24pt)</span>
 						</div>
@@ -272,7 +272,7 @@ export function TypographyDialog() {
 
 					{/* Line Height */}
 					<div>
-						<label className="mb-2 flex items-center justify-between text-gray-900 text-sm">
+						<label className="mb-2 flex items-center justify-between text-foreground text-sm">
 							<span>Line Height (Spacing)</span>
 							<span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-blue-900 text-xs">{lineHeight}</span>
 						</label>
@@ -285,7 +285,7 @@ export function TypographyDialog() {
 							onChange={(e) => handleLineHeightChange(Number(e.target.value))}
 							className="w-full accent-emerald-600"
 						/>
-						<div className="mt-1 flex justify-between text-gray-600 text-xs">
+						<div className="mt-1 flex justify-between text-muted-foreground text-xs">
 							<span>Compact (1.0)</span>
 							<span>Spacious (2.0)</span>
 						</div>
@@ -294,7 +294,7 @@ export function TypographyDialog() {
 
 				{/* Font Pairing Suggestions */}
 				<div className="space-y-3">
-					<h4 className="font-semibold text-gray-900 text-sm">Font Pairing Suggestions</h4>
+					<h4 className="font-semibold text-foreground text-sm">Font Pairing Suggestions</h4>
 					<div className="space-y-2">
 						<button
 							type="button"
@@ -302,10 +302,10 @@ export function TypographyDialog() {
 								handlePrimaryFontChange("Inter");
 								handleHeadingFontChange("Playfair Display");
 							}}
-							className="w-full rounded-lg border-2 border-gray-200 bg-white p-3 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50"
+							className="w-full rounded-lg border-2 border-border bg-card p-3 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50"
 						>
-							<div className="mb-1 font-semibold text-gray-900 text-sm">Modern Professional</div>
-							<div className="flex items-center justify-between text-gray-600 text-xs">
+							<div className="mb-1 font-semibold text-foreground text-sm">Modern Professional</div>
+							<div className="flex items-center justify-between text-muted-foreground text-xs">
 								<span style={{ fontFamily: "Inter" }}>Inter</span>
 								<span>+</span>
 								<span style={{ fontFamily: "Playfair Display" }}>Playfair Display</span>
@@ -318,10 +318,10 @@ export function TypographyDialog() {
 								handlePrimaryFontChange("Roboto");
 								handleHeadingFontChange("Montserrat");
 							}}
-							className="w-full rounded-lg border-2 border-gray-200 bg-white p-3 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50"
+							className="w-full rounded-lg border-2 border-border bg-card p-3 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50"
 						>
-							<div className="mb-1 font-semibold text-gray-900 text-sm">Clean & Minimal</div>
-							<div className="flex items-center justify-between text-gray-600 text-xs">
+							<div className="mb-1 font-semibold text-foreground text-sm">Clean & Minimal</div>
+							<div className="flex items-center justify-between text-muted-foreground text-xs">
 								<span style={{ fontFamily: "Roboto" }}>Roboto</span>
 								<span>+</span>
 								<span style={{ fontFamily: "Montserrat" }}>Montserrat</span>
@@ -334,10 +334,10 @@ export function TypographyDialog() {
 								handlePrimaryFontChange("Merriweather");
 								handleHeadingFontChange("Raleway");
 							}}
-							className="w-full rounded-lg border-2 border-gray-200 bg-white p-3 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50"
+							className="w-full rounded-lg border-2 border-border bg-card p-3 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50"
 						>
-							<div className="mb-1 font-semibold text-gray-900 text-sm">Classic Elegance</div>
-							<div className="flex items-center justify-between text-gray-600 text-xs">
+							<div className="mb-1 font-semibold text-foreground text-sm">Classic Elegance</div>
+							<div className="flex items-center justify-between text-muted-foreground text-xs">
 								<span style={{ fontFamily: "Merriweather" }}>Merriweather</span>
 								<span>+</span>
 								<span style={{ fontFamily: "Raleway" }}>Raleway</span>
@@ -347,9 +347,9 @@ export function TypographyDialog() {
 				</div>
 
 				{/* Typography Tips */}
-				<div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-					<h4 className="mb-2 font-semibold text-gray-900 text-sm">💡 Typography Tips</h4>
-					<ul className="space-y-1 text-gray-700 text-xs">
+				<div className="rounded-lg border border-border bg-muted/50 p-4">
+					<h4 className="mb-2 font-semibold text-foreground text-sm">💡 Typography Tips</h4>
+					<ul className="space-y-1 text-muted-foreground text-xs">
 						<li className="flex gap-2">
 							<span className="text-blue-600">•</span>
 							<span>Use 10-12pt for body text for optimal readability</span>
@@ -482,10 +482,10 @@ export function LayoutDialog() {
 		return (
 			<div
 				key={sectionId}
-				className="flex items-center gap-3 rounded-lg border-2 border-gray-200 bg-white p-3 transition-all"
+				className="flex items-center gap-3 rounded-lg border-2 border-border bg-card p-3 transition-all"
 			>
 				{/* Drag Handle */}
-				<div className="cursor-move text-gray-400">
+				<div className="cursor-move text-muted-foreground">
 					<svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
 						<path d="M7 2a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V4a2 2 0 00-2-2H7zM7 10a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H7zM15 2a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V4a2 2 0 00-2-2h-2zM15 10a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2z" />
 					</svg>
@@ -493,8 +493,8 @@ export function LayoutDialog() {
 
 				{/* Section Info */}
 				<div className="flex-1">
-					<h4 className="font-semibold text-gray-900 text-sm">{name}</h4>
-					<p className="text-gray-500 text-xs">{location === "main" ? "Main Column" : "Sidebar Column"}</p>
+					<h4 className="font-semibold text-foreground text-sm">{name}</h4>
+					<p className="text-muted-foreground text-xs">{location === "main" ? "Main Column" : "Sidebar Column"}</p>
 				</div>
 
 				{/* Controls */}
@@ -504,7 +504,7 @@ export function LayoutDialog() {
 						type="button"
 						onClick={() => moveSectionUp(sectionId, location)}
 						disabled={isFirst}
-						className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30"
+						className="rounded p-1 text-muted-foreground hover:bg-gray-100 hover:text-muted-foreground disabled:opacity-30"
 						title="Move up"
 					>
 						<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -517,7 +517,7 @@ export function LayoutDialog() {
 						type="button"
 						onClick={() => moveSectionDown(sectionId, location)}
 						disabled={isLast}
-						className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30"
+						className="rounded p-1 text-muted-foreground hover:bg-gray-100 hover:text-muted-foreground disabled:opacity-30"
 						title="Move down"
 					>
 						<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -570,9 +570,9 @@ export function LayoutDialog() {
 				{/* Sidebar Width Control */}
 				{!currentPage.fullWidth && (
 					<div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-						<h3 className="mb-3 font-semibold text-gray-900 text-sm">Sidebar Width Control</h3>
+						<h3 className="mb-3 font-semibold text-foreground text-sm">Sidebar Width Control</h3>
 						<div className="space-y-3">
-							<label className="mb-2 flex items-center justify-between text-gray-900 text-sm">
+							<label className="mb-2 flex items-center justify-between text-foreground text-sm">
 								<span>Sidebar Width</span>
 								<span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-blue-900 text-xs">
 									{layout.sidebarWidth}%
@@ -587,7 +587,7 @@ export function LayoutDialog() {
 								onChange={(e) => handleSidebarWidthChange(Number(e.target.value))}
 								className="w-full accent-emerald-600"
 							/>
-							<div className="mt-1 flex justify-between text-gray-600 text-xs">
+							<div className="mt-1 flex justify-between text-muted-foreground text-xs">
 								<span>Narrow (20%)</span>
 								<span>Wide (50%)</span>
 							</div>
@@ -596,17 +596,17 @@ export function LayoutDialog() {
 				)}
 
 				{/* Full Width Option */}
-				<div className="rounded-lg border-2 border-gray-200 p-4">
+				<div className="rounded-lg border-2 border-border p-4">
 					<label className="flex cursor-pointer items-start gap-3">
 						<input
 							type="checkbox"
 							checked={currentPage.fullWidth}
 							onChange={(e) => handleToggleFullWidth(e.target.checked)}
-							className="mt-0.5 h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+							className="mt-0.5 h-5 w-5 rounded border-border text-emerald-600 focus:ring-emerald-500"
 						/>
 						<div className="flex-1">
-							<h4 className="font-semibold text-gray-900 text-sm">Full Width Page</h4>
-							<p className="text-gray-600 text-xs">
+							<h4 className="font-semibold text-foreground text-sm">Full Width Page</h4>
+							<p className="text-muted-foreground text-xs">
 								Remove sidebar completely and use entire page width for maximum content space
 							</p>
 						</div>
@@ -621,21 +621,21 @@ export function LayoutDialog() {
 				{/* Section Management */}
 				{!currentPage.fullWidth && (
 					<div className="space-y-4">
-						<h3 className="font-semibold text-gray-900 text-sm">Manage Sections</h3>
+						<h3 className="font-semibold text-foreground text-sm">Manage Sections</h3>
 
 						{/* Main Column Sections */}
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
-								<h4 className="font-medium text-gray-700 text-sm">📄 Main Column</h4>
-								<span className="rounded-full bg-gray-200 px-2 py-0.5 text-gray-700 text-xs">
+								<h4 className="font-medium text-muted-foreground text-sm">📄 Main Column</h4>
+								<span className="rounded-full bg-gray-200 px-2 py-0.5 text-muted-foreground text-xs">
 									{currentPage.main.length} sections
 								</span>
 							</div>
 							<div className="space-y-2">
 								{currentPage.main.length === 0 ? (
-									<div className="rounded-lg border-2 border-gray-300 border-dashed bg-gray-50 p-4 text-center">
-										<p className="text-gray-500 text-sm">No sections in main column</p>
-										<p className="text-gray-400 text-xs">Move sections from sidebar to here</p>
+									<div className="rounded-lg border-2 border-border border-dashed bg-muted/50 p-4 text-center">
+										<p className="text-muted-foreground text-sm">No sections in main column</p>
+										<p className="text-muted-foreground text-xs">Move sections from sidebar to here</p>
 									</div>
 								) : (
 									currentPage.main.map((sectionId, index) =>
@@ -648,16 +648,16 @@ export function LayoutDialog() {
 						{/* Sidebar Column Sections */}
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
-								<h4 className="font-medium text-gray-700 text-sm">📌 Sidebar Column</h4>
-								<span className="rounded-full bg-gray-200 px-2 py-0.5 text-gray-700 text-xs">
+								<h4 className="font-medium text-muted-foreground text-sm">📌 Sidebar Column</h4>
+								<span className="rounded-full bg-gray-200 px-2 py-0.5 text-muted-foreground text-xs">
 									{currentPage.sidebar.length} sections
 								</span>
 							</div>
 							<div className="space-y-2">
 								{currentPage.sidebar.length === 0 ? (
-									<div className="rounded-lg border-2 border-gray-300 border-dashed bg-gray-50 p-4 text-center">
-										<p className="text-gray-500 text-sm">No sections in sidebar</p>
-										<p className="text-gray-400 text-xs">Move sections from main to here</p>
+									<div className="rounded-lg border-2 border-border border-dashed bg-muted/50 p-4 text-center">
+										<p className="text-muted-foreground text-sm">No sections in sidebar</p>
+										<p className="text-muted-foreground text-xs">Move sections from main to here</p>
 									</div>
 								) : (
 									currentPage.sidebar.map((sectionId, index) =>
@@ -672,7 +672,7 @@ export function LayoutDialog() {
 				{/* Full Width Mode Section List */}
 				{currentPage.fullWidth && (
 					<div className="space-y-2">
-						<h3 className="font-semibold text-gray-900 text-sm">Section Order</h3>
+						<h3 className="font-semibold text-foreground text-sm">Section Order</h3>
 						<div className="space-y-2">
 							{currentPage.main.map((sectionId, index) =>
 								renderSectionItem(sectionId, "main", index, currentPage.main.length),
@@ -682,9 +682,9 @@ export function LayoutDialog() {
 				)}
 
 				{/* Layout Tips */}
-				<div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-					<h4 className="mb-2 font-semibold text-gray-900 text-sm">💡 Layout Tips</h4>
-					<ul className="space-y-1 text-gray-700 text-xs">
+				<div className="rounded-lg border border-border bg-muted/50 p-4">
+					<h4 className="mb-2 font-semibold text-foreground text-sm">💡 Layout Tips</h4>
+					<ul className="space-y-1 text-muted-foreground text-xs">
 						<li className="flex gap-2">
 							<span className="text-blue-600">•</span>
 							<span>Put most important content (Experience, Education) in the main column</span>
@@ -803,15 +803,15 @@ export function DesignDialog() {
 
 				{/* Quick Color Selection */}
 				<div className="space-y-3">
-					<h3 className="font-semibold text-gray-900 text-sm">Quick Color Presets</h3>
-					<p className="text-gray-600 text-xs">Select a preset color or use the custom picker below</p>
+					<h3 className="font-semibold text-foreground text-sm">Quick Color Presets</h3>
+					<p className="text-muted-foreground text-xs">Select a preset color or use the custom picker below</p>
 					<div className="flex flex-wrap gap-2">
 						{quickColorOptions.map((color) => (
 							<button
 								key={color}
 								type="button"
 								onClick={() => handlePrimaryColorChange(color)}
-								className="group relative h-10 w-10 rounded-lg border-2 border-gray-200 transition-all hover:scale-110 hover:border-gray-400"
+								className="group relative h-10 w-10 rounded-lg border-2 border-border transition-all hover:scale-110 hover:border-gray-400"
 								style={{ backgroundColor: color }}
 								title={color}
 							>
@@ -833,33 +833,33 @@ export function DesignDialog() {
 
 				{/* Accent Color */}
 				<div className="space-y-3">
-					<h3 className="font-semibold text-gray-900 text-sm">Accent Color</h3>
-					<p className="text-gray-600 text-xs">Used for headings, icons, and highlights</p>
+					<h3 className="font-semibold text-foreground text-sm">Accent Color</h3>
+					<p className="text-muted-foreground text-xs">Used for headings, icons, and highlights</p>
 					<div className="flex items-center gap-3">
 						<input
 							type="color"
 							value={accentColor}
 							onChange={(e) => handleAccentColorChange(e.target.value)}
-							className="h-12 w-12 cursor-pointer rounded-lg border-2 border-gray-200"
+							className="h-12 w-12 cursor-pointer rounded-lg border-2 border-border"
 						/>
 						<input
 							type="text"
 							value={accentColor}
 							onChange={(e) => handleAccentColorChange(e.target.value)}
-							className="flex-1 rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+							className="flex-1 rounded-lg border border-border px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
 							placeholder="#000000"
 						/>
 					</div>
-					<div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-						<div className="mb-2 font-medium text-gray-700 text-xs">Preview</div>
+					<div className="rounded-lg border border-border bg-muted/50 p-3">
+						<div className="mb-2 font-medium text-muted-foreground text-xs">Preview</div>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
 								<div className="h-4 w-4 rounded" style={{ backgroundColor: accentColor }} />
-								<span className="text-gray-600 text-xs">Section headings</span>
+								<span className="text-muted-foreground text-xs">Section headings</span>
 							</div>
 							<div className="flex items-center gap-2">
 								<div className="h-4 w-4 rounded" style={{ backgroundColor: accentColor }} />
-								<span className="text-gray-600 text-xs">Icons and bullets</span>
+								<span className="text-muted-foreground text-xs">Icons and bullets</span>
 							</div>
 						</div>
 					</div>
@@ -867,20 +867,20 @@ export function DesignDialog() {
 
 				{/* Text Color */}
 				<div className="space-y-3">
-					<h3 className="font-semibold text-gray-900 text-sm">Text Color</h3>
-					<p className="text-gray-600 text-xs">Primary text color for body content</p>
+					<h3 className="font-semibold text-foreground text-sm">Text Color</h3>
+					<p className="text-muted-foreground text-xs">Primary text color for body content</p>
 					<div className="flex items-center gap-3">
 						<input
 							type="color"
 							value={textColor}
 							onChange={(e) => handleTextColorChange(e.target.value)}
-							className="h-12 w-12 cursor-pointer rounded-lg border-2 border-gray-200"
+							className="h-12 w-12 cursor-pointer rounded-lg border-2 border-border"
 						/>
 						<input
 							type="text"
 							value={textColor}
 							onChange={(e) => handleTextColorChange(e.target.value)}
-							className="flex-1 rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+							className="flex-1 rounded-lg border border-border px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
 							placeholder="#000000"
 						/>
 					</div>
@@ -888,29 +888,29 @@ export function DesignDialog() {
 
 				{/* Background Color */}
 				<div className="space-y-3">
-					<h3 className="font-semibold text-gray-900 text-sm">Background Color</h3>
-					<p className="text-gray-600 text-xs">Page background color</p>
+					<h3 className="font-semibold text-foreground text-sm">Background Color</h3>
+					<p className="text-muted-foreground text-xs">Page background color</p>
 					<div className="flex items-center gap-3">
 						<input
 							type="color"
 							value={backgroundColor}
 							onChange={(e) => handleBackgroundColorChange(e.target.value)}
-							className="h-12 w-12 cursor-pointer rounded-lg border-2 border-gray-200"
+							className="h-12 w-12 cursor-pointer rounded-lg border-2 border-border"
 						/>
 						<input
 							type="text"
 							value={backgroundColor}
 							onChange={(e) => handleBackgroundColorChange(e.target.value)}
-							className="flex-1 rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+							className="flex-1 rounded-lg border border-border px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
 							placeholder="#FFFFFF"
 						/>
 					</div>
 				</div>
 
 				{/* Color Tips */}
-				<div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-					<h4 className="mb-2 font-semibold text-gray-900 text-sm">💡 Color Tips</h4>
-					<ul className="space-y-1 text-gray-700 text-xs">
+				<div className="rounded-lg border border-border bg-muted/50 p-4">
+					<h4 className="mb-2 font-semibold text-foreground text-sm">💡 Color Tips</h4>
+					<ul className="space-y-1 text-muted-foreground text-xs">
 						<li className="flex gap-2">
 							<span className="text-blue-600">•</span>
 							<span>Use high contrast between text and background for readability</span>
@@ -997,18 +997,18 @@ export function PageDialog() {
 
 				{/* Page Format Selection */}
 				<div className="space-y-3">
-					<h3 className="font-semibold text-gray-900 text-sm">Page Format</h3>
+					<h3 className="font-semibold text-foreground text-sm">Page Format</h3>
 					<div className="grid grid-cols-3 gap-3">
 						<button
 							onClick={() => handleFormatChange("a4")}
 							type="button"
 							className={`rounded-lg border-2 p-4 text-center transition-all ${
-								format === "a4" ? "border-emerald-500 bg-emerald-50" : "border-gray-200 bg-white hover:border-gray-300"
+								format === "a4" ? "border-emerald-500 bg-emerald-50" : "border-border bg-card hover:border-border"
 							}`}
 						>
 							<div className="mb-2 text-2xl">📄</div>
-							<div className="font-semibold text-gray-900 text-sm">A4</div>
-							<div className="text-gray-600 text-xs">210 × 297 mm</div>
+							<div className="font-semibold text-foreground text-sm">A4</div>
+							<div className="text-muted-foreground text-xs">210 × 297 mm</div>
 						</button>
 						<button
 							onClick={() => handleFormatChange("letter")}
@@ -1016,12 +1016,12 @@ export function PageDialog() {
 							className={`rounded-lg border-2 p-4 text-center transition-all ${
 								format === "letter"
 									? "border-emerald-500 bg-emerald-50"
-									: "border-gray-200 bg-white hover:border-gray-300"
+									: "border-border bg-card hover:border-border"
 							}`}
 						>
 							<div className="mb-2 text-2xl">📃</div>
-							<div className="font-semibold text-gray-900 text-sm">Letter</div>
-							<div className="text-gray-600 text-xs">8.5 × 11 in</div>
+							<div className="font-semibold text-foreground text-sm">Letter</div>
+							<div className="text-muted-foreground text-xs">8.5 × 11 in</div>
 						</button>
 						<button
 							onClick={() => handleFormatChange("free-form")}
@@ -1029,12 +1029,12 @@ export function PageDialog() {
 							className={`rounded-lg border-2 p-4 text-center transition-all ${
 								format === "free-form"
 									? "border-emerald-500 bg-emerald-50"
-									: "border-gray-200 bg-white hover:border-gray-300"
+									: "border-border bg-card hover:border-border"
 							}`}
 						>
 							<div className="mb-2 text-2xl">📋</div>
-							<div className="font-semibold text-gray-900 text-sm">Free-Form</div>
-							<div className="text-gray-600 text-xs">Dynamic</div>
+							<div className="font-semibold text-foreground text-sm">Free-Form</div>
+							<div className="text-muted-foreground text-xs">Dynamic</div>
 						</button>
 					</div>
 				</div>
@@ -1064,7 +1064,7 @@ export function PageDialog() {
 					{/* Margin Adjustments */}
 					<div className="space-y-4">
 						<div>
-							<label className="mb-2 flex items-center justify-between text-gray-900 text-sm">
+							<label className="mb-2 flex items-center justify-between text-foreground text-sm">
 								<span className="font-semibold">Horizontal Margins</span>
 								<span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-blue-900 text-xs">{marginX} pt</span>
 							</label>
@@ -1077,14 +1077,14 @@ export function PageDialog() {
 								onChange={(e) => handleMarginXChange(Number(e.target.value))}
 								className="w-full accent-emerald-600"
 							/>
-							<div className="mt-1 flex justify-between text-gray-600 text-xs">
+							<div className="mt-1 flex justify-between text-muted-foreground text-xs">
 								<span>Narrower (more space)</span>
 								<span>Wider (less space)</span>
 							</div>
 						</div>
 
 						<div>
-							<label className="mb-2 flex items-center justify-between text-gray-900 text-sm">
+							<label className="mb-2 flex items-center justify-between text-foreground text-sm">
 								<span className="font-semibold">Vertical Margins</span>
 								<span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-blue-900 text-xs">{marginY} pt</span>
 							</label>
@@ -1097,7 +1097,7 @@ export function PageDialog() {
 								onChange={(e) => handleMarginYChange(Number(e.target.value))}
 								className="w-full accent-emerald-600"
 							/>
-							<div className="mt-1 flex justify-between text-gray-600 text-xs">
+							<div className="mt-1 flex justify-between text-muted-foreground text-xs">
 								<span>Narrower (more space)</span>
 								<span>Wider (less space)</span>
 							</div>
@@ -1107,63 +1107,63 @@ export function PageDialog() {
 
 				{/* Optimization Guide */}
 				<div className="space-y-3">
-					<h4 className="font-semibold text-gray-900 text-sm">Page Fitting Guide</h4>
+					<h4 className="font-semibold text-foreground text-sm">Page Fitting Guide</h4>
 					<div className="space-y-2">
-						<div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+						<div className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-3">
 							<div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 text-xs">
 								1
 							</div>
 							<div>
-								<p className="mb-1 font-medium text-gray-900 text-sm">Reduce Margins</p>
-								<p className="text-gray-600 text-xs">
+								<p className="mb-1 font-medium text-foreground text-sm">Reduce Margins</p>
+								<p className="text-muted-foreground text-xs">
 									Try reducing horizontal and vertical margins to create more space for content.
 								</p>
 							</div>
 						</div>
 
-						<div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+						<div className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-3">
 							<div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 text-xs">
 								2
 							</div>
 							<div>
-								<p className="mb-1 font-medium text-gray-900 text-sm">Adjust Font Sizes</p>
-								<p className="text-gray-600 text-xs">
+								<p className="mb-1 font-medium text-foreground text-sm">Adjust Font Sizes</p>
+								<p className="text-muted-foreground text-xs">
 									Use the Typography section to reduce font sizes slightly (try 9-10pt for body text).
 								</p>
 							</div>
 						</div>
 
-						<div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+						<div className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-3">
 							<div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 text-xs">
 								3
 							</div>
 							<div>
-								<p className="mb-1 font-medium text-gray-900 text-sm">Optimize Spacing</p>
-								<p className="text-gray-600 text-xs">
+								<p className="mb-1 font-medium text-foreground text-sm">Optimize Spacing</p>
+								<p className="text-muted-foreground text-xs">
 									Reduce line height and section spacing in the Design section to condense content.
 								</p>
 							</div>
 						</div>
 
-						<div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+						<div className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-3">
 							<div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 text-xs">
 								4
 							</div>
 							<div>
-								<p className="mb-1 font-medium text-gray-900 text-sm">Prioritize Content</p>
-								<p className="text-gray-600 text-xs">
+								<p className="mb-1 font-medium text-foreground text-sm">Prioritize Content</p>
+								<p className="text-muted-foreground text-xs">
 									Remove or shorten less relevant experiences to focus on your most impressive achievements.
 								</p>
 							</div>
 						</div>
 
-						<div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+						<div className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-3">
 							<div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 text-xs">
 								5
 							</div>
 							<div>
-								<p className="mb-1 font-medium text-gray-900 text-sm">Use Compact Layout</p>
-								<p className="text-gray-600 text-xs">
+								<p className="mb-1 font-medium text-foreground text-sm">Use Compact Layout</p>
+								<p className="text-muted-foreground text-xs">
 									Try different templates or layouts that use space more efficiently (e.g., two-column designs).
 								</p>
 							</div>
@@ -1250,13 +1250,13 @@ export function NotesDialog() {
 
 				{/* Cover Letter Textarea */}
 				<div>
-					<label className="mb-2 block font-semibold text-gray-900 text-sm">Your Cover Letter</label>
+					<label className="mb-2 block font-semibold text-foreground text-sm">Your Cover Letter</label>
 					<textarea
 						value={coverLetter}
 						onChange={handleCoverLetterChange}
 						rows={16}
 						placeholder="Dear Hiring Manager,&#10;&#10;I am writing to express my interest in the [Position] at [Company]...&#10;&#10;[First paragraph - introduce yourself and state why you're interested]&#10;&#10;[Second paragraph - highlight relevant skills and experiences]&#10;&#10;[Third paragraph - explain why you're a good fit]&#10;&#10;[Closing paragraph - thank them and express enthusiasm]&#10;&#10;Sincerely,&#10;[Your Name]"
-						className="w-full resize-none rounded-lg border-2 border-gray-300 px-4 py-3 font-serif text-gray-900 leading-relaxed transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+						className="w-full resize-none rounded-lg border-2 border-border px-4 py-3 font-serif text-foreground leading-relaxed transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 					/>
 				</div>
 
@@ -1277,8 +1277,8 @@ export function NotesDialog() {
 
 				{/* Formatting Tips */}
 				<div className="space-y-2">
-					<h4 className="font-semibold text-gray-900 text-sm">Formatting Tips:</h4>
-					<ul className="space-y-1 text-gray-600 text-xs">
+					<h4 className="font-semibold text-foreground text-sm">Formatting Tips:</h4>
+					<ul className="space-y-1 text-muted-foreground text-xs">
 						<li>• Keep it to one page (3-4 paragraphs)</li>
 						<li>• Address the hiring manager by name if possible</li>
 						<li>• Customize for each position and company</li>
@@ -1487,14 +1487,14 @@ export function SharingDialog() {
 	];
 
 	return (
-		<div className="space-y-6 text-gray-900 **:text-gray-900">
+		<div className="space-y-6 text-foreground **:text-foreground">
 			{/* Tab Navigation */}
 			<div className="flex gap-2 rounded-lg bg-gray-100 p-1">
 				<button
 					onClick={() => setShareOption("link")}
 					type="button"
 					className={`flex-1 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
-						shareOption === "link" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+						shareOption === "link" ? "bg-card text-emerald-600 shadow-sm" : "text-muted-foreground hover:text-foreground"
 					}`}
 				>
 					Share Link
@@ -1503,7 +1503,7 @@ export function SharingDialog() {
 					onClick={() => setShareOption("social")}
 					type="button"
 					className={`flex-1 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
-						shareOption === "social" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+						shareOption === "social" ? "bg-card text-emerald-600 shadow-sm" : "text-muted-foreground hover:text-foreground"
 					}`}
 				>
 					Social Media
@@ -1512,7 +1512,7 @@ export function SharingDialog() {
 					onClick={() => setShareOption("email")}
 					type="button"
 					className={`flex-1 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
-						shareOption === "email" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+						shareOption === "email" ? "bg-card text-emerald-600 shadow-sm" : "text-muted-foreground hover:text-foreground"
 					}`}
 				>
 					Send Email
@@ -1552,38 +1552,38 @@ export function SharingDialog() {
 
 					{/* URL Customization */}
 					<div className="space-y-3">
-						<h4 className="font-semibold text-gray-900 text-sm">Customize Your URL</h4>
+						<h4 className="font-semibold text-foreground text-sm">Customize Your URL</h4>
 
 						{/* Username Field */}
 						<div>
-							<label className="mb-1.5 block text-gray-700 text-xs">Username</label>
+							<label className="mb-1.5 block text-muted-foreground text-xs">Username</label>
 							<input
 								type="text"
 								value={username}
 								onChange={handleUsernameChange}
 								placeholder="johndoe"
-								className="w-full rounded-lg border-2 border-gray-300 px-3 py-2 text-gray-900 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+								className="w-full rounded-lg border-2 border-border px-3 py-2 text-foreground text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 							/>
-							<p className="mt-1 text-gray-500 text-xs">Only lowercase letters, numbers, and hyphens</p>
+							<p className="mt-1 text-muted-foreground text-xs">Only lowercase letters, numbers, and hyphens</p>
 						</div>
 
 						{/* Slug Field */}
 						<div>
-							<label className="mb-1.5 block text-gray-700 text-xs">Custom Slug</label>
+							<label className="mb-1.5 block text-muted-foreground text-xs">Custom Slug</label>
 							<input
 								type="text"
 								value={slug}
 								onChange={handleSlugChange}
 								placeholder="software-engineer-resume"
-								className="w-full rounded-lg border-2 border-gray-300 px-3 py-2 text-gray-900 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+								className="w-full rounded-lg border-2 border-border px-3 py-2 text-foreground text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 							/>
-							<p className="mt-1 text-gray-500 text-xs">Customize the resume identifier in your URL</p>
+							<p className="mt-1 text-muted-foreground text-xs">Customize the resume identifier in your URL</p>
 						</div>
 					</div>
 
 					{/* Generated Public URL */}
 					<div>
-						<label className="mb-2 block font-semibold text-gray-900 text-sm">Your Public URL</label>
+						<label className="mb-2 block font-semibold text-foreground text-sm">Your Public URL</label>
 						<div className="flex gap-2">
 							<input
 								type="text"
@@ -1620,7 +1620,7 @@ export function SharingDialog() {
 								)}
 							</button>
 						</div>
-						<p className="mt-2 text-gray-500 text-xs">
+						<p className="mt-2 text-muted-foreground text-xs">
 							✓ Anyone with this link can view and download your resume
 							<br />✓ Link automatically updates when you edit your resume
 							<br />✓ Compatible with link shorteners (bit.ly, etc.)
@@ -1628,19 +1628,19 @@ export function SharingDialog() {
 					</div>
 
 					{/* Privacy Settings */}
-					<div className="rounded-lg border-2 border-gray-200 p-4">
-						<h4 className="mb-3 font-semibold text-gray-900 text-sm">Privacy Settings</h4>
+					<div className="rounded-lg border-2 border-border p-4">
+						<h4 className="mb-3 font-semibold text-foreground text-sm">Privacy Settings</h4>
 						<div className="space-y-3">
 							<label className="flex cursor-pointer items-center gap-3">
 								<input
 									type="checkbox"
 									checked={allowDownload}
 									onChange={(e) => setAllowDownload(e.target.checked)}
-									className="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+									className="h-5 w-5 rounded border-border text-emerald-600 focus:ring-emerald-500"
 								/>
 								<div>
-									<p className="font-medium text-gray-900 text-sm">Allow download</p>
-									<p className="text-gray-600 text-xs">Viewers can download your resume as PDF</p>
+									<p className="font-medium text-foreground text-sm">Allow download</p>
+									<p className="text-muted-foreground text-xs">Viewers can download your resume as PDF</p>
 								</div>
 							</label>
 							{/* <label className="flex cursor-pointer items-center gap-3">
@@ -1648,11 +1648,11 @@ export function SharingDialog() {
 									type="checkbox"
 									checked={passwordProtect}
 									onChange={(e) => setPasswordProtect(e.target.checked)}
-									className="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+									className="h-5 w-5 rounded border-border text-emerald-600 focus:ring-emerald-500"
 								/>
 								<div>
-									<p className="font-medium text-gray-900 text-sm">Password protect</p>
-									<p className="text-gray-600 text-xs">Require password to view resume</p>
+									<p className="font-medium text-foreground text-sm">Password protect</p>
+									<p className="text-muted-foreground text-xs">Require password to view resume</p>
 								</div>
 							</label> */}
 							<label className="flex cursor-pointer items-center gap-3">
@@ -1660,11 +1660,11 @@ export function SharingDialog() {
 									type="checkbox"
 									checked={trackViews}
 									onChange={(e) => setTrackViews(e.target.checked)}
-									className="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+									className="h-5 w-5 rounded border-border text-emerald-600 focus:ring-emerald-500"
 								/>
 								<div>
-									<p className="font-medium text-gray-900 text-sm">Track views</p>
-									<p className="text-gray-600 text-xs">See analytics about who viewed your resume</p>
+									<p className="font-medium text-foreground text-sm">Track views</p>
+									<p className="text-muted-foreground text-xs">See analytics about who viewed your resume</p>
 								</div>
 							</label>
 						</div>
@@ -1684,7 +1684,7 @@ export function SharingDialog() {
 			{/* Social Media Tab */}
 			{shareOption === "social" && (
 				<div className="space-y-4">
-					<p className="mb-4 text-gray-600 text-sm">Share your resume directly on social platforms</p>
+					<p className="mb-4 text-muted-foreground text-sm">Share your resume directly on social platforms</p>
 					<div className="grid grid-cols-2 gap-3">
 						{socialPlatforms.map((platform) => (
 							<button
@@ -1705,24 +1705,24 @@ export function SharingDialog() {
 			{shareOption === "email" && (
 				<div className="space-y-4">
 					<div>
-						<label className="mb-2 block font-semibold text-gray-900 text-sm">Recipient Email</label>
+						<label className="mb-2 block font-semibold text-foreground text-sm">Recipient Email</label>
 						<input
 							type="email"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							placeholder="recruiter@company.com"
-							className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-gray-900 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+							className="w-full rounded-lg border-2 border-border px-4 py-3 text-foreground transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 						/>
 					</div>
 
 					<div>
-						<label className="mb-2 block font-semibold text-gray-900 text-sm">Message (Optional)</label>
+						<label className="mb-2 block font-semibold text-foreground text-sm">Message (Optional)</label>
 						<textarea
 							value={message}
 							onChange={(e) => setMessage(e.target.value)}
 							rows={4}
 							placeholder="Add a personal message..."
-							className="w-full resize-none rounded-lg border-2 border-gray-300 px-4 py-3 text-gray-900 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+							className="w-full resize-none rounded-lg border-2 border-border px-4 py-3 text-foreground transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 						></textarea>
 					</div>
 
@@ -1795,10 +1795,10 @@ export function ExportDialog() {
 	}, [selectedFormat, fileName, resume, exportResume]);
 
 	return (
-		<div className="space-y-6 text-gray-900 **:text-gray-900">
+		<div className="space-y-6 text-foreground **:text-foreground">
 			{/* Format Selection */}
 			<div className="space-y-3">
-				<h3 className="font-semibold text-gray-900 text-sm">Select Format</h3>
+				<h3 className="font-semibold text-foreground text-sm">Select Format</h3>
 				{formats.map((format) => (
 					<div
 						key={format.id}
@@ -1806,29 +1806,29 @@ export function ExportDialog() {
 						className={`relative flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all ${
 							selectedFormat === format.id
 								? "border-emerald-500 bg-emerald-50"
-								: "border-gray-200 bg-white hover:border-gray-300"
+								: "border-border bg-card hover:border-border"
 						}`}
 					>
 						{/* Radio Button */}
 						<div className="mt-1 shrink-0">
 							<div
 								className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-									selectedFormat === format.id ? "border-emerald-500 bg-emerald-500" : "border-gray-300 bg-white"
+									selectedFormat === format.id ? "border-emerald-500 bg-emerald-500" : "border-border bg-card"
 								}`}
 							>
-								{selectedFormat === format.id && <div className="h-2 w-2 rounded-full bg-white"></div>}
+								{selectedFormat === format.id && <div className="h-2 w-2 rounded-full bg-card"></div>}
 							</div>
 						</div>
 
 						{/* Icon */}
-						<div className={`shrink-0 ${selectedFormat === format.id ? "text-emerald-600" : "text-gray-400"}`}>
+						<div className={`shrink-0 ${selectedFormat === format.id ? "text-emerald-600" : "text-muted-foreground"}`}>
 							{format.icon}
 						</div>
 
 						{/* Text */}
 						<div className="flex-1">
-							<h4 className="mb-1 font-semibold text-gray-900">{format.name}</h4>
-							<p className="text-gray-600 text-sm">{format.description}</p>
+							<h4 className="mb-1 font-semibold text-foreground">{format.name}</h4>
+							<p className="text-muted-foreground text-sm">{format.description}</p>
 						</div>
 
 						{/* Selected Badge */}
@@ -1847,16 +1847,16 @@ export function ExportDialog() {
 
 			{/* File Name Input */}
 			<div>
-				<label className="mb-2 block font-semibold text-gray-900 text-sm">File Name</label>
+				<label className="mb-2 block font-semibold text-foreground text-sm">File Name</label>
 				<div className="relative">
 					<input
 						type="text"
 						value={fileName}
 						onChange={(e) => setFileName(e.target.value)}
-						className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 pr-20 text-gray-900 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+						className="w-full rounded-lg border-2 border-border px-4 py-3 pr-20 text-foreground transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
 						placeholder="Enter file name"
 					/>
-					<div className="absolute top-1/2 right-3 -translate-y-1/2 font-medium text-gray-500 text-sm">
+					<div className="absolute top-1/2 right-3 -translate-y-1/2 font-medium text-muted-foreground text-sm">
 						.{selectedFormat}
 					</div>
 				</div>

@@ -39,13 +39,16 @@ function RouteComponent() {
 	const router = useRouter();
 	const { session } = Route.useRouteContext();
 
+	if (!session?.user) return null;
+
 	const defaultValues = useMemo(() => {
+		const user = session.user as any;
 		return {
-			name: session?.user?.name ?? "",
-			username: session?.user?.username ?? "",
-			email: session?.user?.email ?? "",
+			name: user.name ?? "",
+			username: user.username ?? "",
+			email: user.email ?? "",
 		};
-	}, [session?.user]);
+	}, [session.user]);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),

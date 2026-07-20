@@ -26,12 +26,14 @@ export const Route = createFileRoute("/printer/$resumeId")({
 				],
 			};
 		}
+		return {};
 	},
-	beforeLoad: async ({ params, search }) => {
-		if (env.VITE_FLAG_DEBUG_PRINTER) return;
+	// @ts-expect-error - types mis-match
+	beforeLoad: ({ params, search }) => {
+		if (env.VITE_FLAG_DEBUG_PRINTER) return {};
 
 		// Allow preview token for dashboard cards
-		if (search?.token === "preview") return;
+		if (search?.token === "preview") return {};
 
 		try {
 			// Verify the token and ensure it matches the resume ID

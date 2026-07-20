@@ -1,22 +1,22 @@
-import { t } from "@lingui/macro";
 import { PlusIcon } from "@phosphor-icons/react";
 import { useDialogStore } from "@/dialogs/store";
-import { BaseCard } from "./base-card";
+import { cn } from "@/utils/style";
 
 export function CreateResumeCard() {
 	const { openDialog } = useDialogStore();
 
 	return (
-		<BaseCard
-			title={t`Create a new resume`}
-			description={t`Start building your resume from scratch`}
-			onClick={() => openDialog("resume.create", undefined)}
-			className="border-2 border-gray-400 border-dashed bg-transparent shadow-none hover:border-gray-600"
+		<div
+			onClick={() => openDialog("resume.onboarding", undefined)}
+			className={cn(
+				"group relative flex h-[280px] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-card/50 shadow-sm transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-500/5 active:scale-[0.98] sm:active:scale-100"
+			)}
 		>
-			<div className="absolute inset-0 flex flex-col items-center justify-center">
-				<PlusIcon weight="bold" className="mb-2 size-10 text-gray-500" />
-				<span className="font-medium text-base text-gray-500">Create Resume</span>
+			<div className="flex size-10 items-center justify-center rounded-full bg-muted transition-colors group-hover:bg-emerald-500/10 mb-3">
+				<PlusIcon weight="bold" className="size-5 text-muted-foreground transition-colors group-hover:text-emerald-500" />
 			</div>
-		</BaseCard>
+			<h3 className="font-semibold text-base text-foreground">New Resume</h3>
+			<p className="text-muted-foreground text-xs sm:text-sm mt-1">Start from scratch or upload</p>
+		</div>
 	);
 }

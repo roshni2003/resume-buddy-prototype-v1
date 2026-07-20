@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getCookie, setCookie } from "@tanstack/react-start/server";
@@ -13,6 +13,7 @@ import { useResumeStore } from "@/components/resume/store/resume";
 import { ResizableGroup, ResizablePanel, ResizableSeparator } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { api } from "@/utils/api";
+import { CoachMarks } from "@/components/editor/CoachMarks";
 import { BuilderHeader } from "./-components/header";
 import { BuilderSidebarLeft } from "./-sidebar/left";
 import { useBuilderSidebar, useBuilderSidebarStore } from "./-store/sidebar";
@@ -32,18 +33,26 @@ export const Route = createFileRoute("/builder/$resumeId")({
 		return { session: context.session };
 	},
 	loader: async ({ params, context }) => {
-		const [layout, resume] = await Promise.all([
-			getBuilderLayoutServerFn(),
-			context.queryClient.ensureQueryData({
+		const layout = await getBuilderLayoutServerFn();
+
+		// Use prefetchQuery instead of ensureQueryData so SSR doesn't hard-crash
+		// if the backend requires a token (since SSR has no access to localStorage).
+		// The client will retry and succeed once hydration happens.
+		try {
+			await context.queryClient.prefetchQuery({
 				queryKey: ["resumes", params.resumeId],
 				queryFn: () => api.fetchResume(params.resumeId),
-			}),
-		]);
-
-		return { layout, name: resume.name };
+			});
+			const resume = context.queryClient.getQueryData<any>(["resumes", params.resumeId]);
+			return { layout, name: resume?.name || "Resume" };
+		} catch (error) {
+			// If it fails on SSR (e.g. 401 due to missing token), just return the layout.
+			// The client will fetch it.
+			return { layout, name: "Resume" };
+		}
 	},
 	head: ({ loaderData }) => ({
-		meta: loaderData ? [{ title: `${loaderData.name} - Zoe Resume Builder` }] : undefined,
+		meta: loaderData ? [{ title: `${loaderData.name} - Resume Buddy` }] : undefined,
 	}),
 });
 
@@ -51,7 +60,7 @@ function RouteComponent() {
 	const { layout: initialLayout } = Route.useLoaderData();
 
 	const { resumeId } = Route.useParams();
-	const { data: resume } = useSuspenseQuery({
+	const { data: resume, isLoading, isError } = useQuery({
 		queryKey: ["resumes", resumeId],
 		queryFn: () => api.fetchResume(resumeId),
 	});
@@ -60,7 +69,7 @@ function RouteComponent() {
 	const initialize = useResumeStore((state) => state.initialize);
 
 	useEffect(() => {
-		initialize(resume);
+		initialize(resume ?? null);
 		return () => initialize(null);
 	}, [resume, initialize]);
 
@@ -131,6 +140,7 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 	if (isMobile) {
 		return (
 			<div className="flex h-svh flex-col" {...props}>
+				<CoachMarks />
 				<BuilderHeader />
 
 				{/* Mobile Layout - Main content always visible */}
@@ -152,7 +162,7 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 								aria-label="Close sidebar"
 							/>
 							{/* Drawer with slide animation */}
-							<div className="fixed inset-y-0 top-14 left-0 z-50 w-[85vw] max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out">
+							<div className="fixed inset-y-0 top-14 left-0 z-50 w-[85vw] max-w-sm transform bg-background shadow-xl transition-transform duration-300 ease-in-out">
 								<BuilderSidebarLeft />
 							</div>
 						</>
@@ -164,6 +174,7 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 
 	return (
 		<div className="flex h-svh flex-col" style={style} {...props}>
+			<CoachMarks />
 			<BuilderHeader />
 
 			<ResizableGroup orientation="horizontal" className="flex-1" onLayoutChange={onLayoutChange}>

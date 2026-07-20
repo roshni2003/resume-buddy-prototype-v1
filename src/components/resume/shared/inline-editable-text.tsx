@@ -28,7 +28,7 @@ export function InlineEditableText({
 		if (!ref.current) return;
 		if (isFocused) return;
 		ref.current.textContent = value;
-	}, [value, isFocused]);
+	}, [value, isFocused, as]);
 
 	const debouncedOnChange = useMemo(() => debounce(onChange, 100), [onChange]);
 

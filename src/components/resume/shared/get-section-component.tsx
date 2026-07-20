@@ -15,6 +15,7 @@ import { InlineEditableText } from "./inline-editable-text";
 import { AwardsItem } from "./items/awards-item";
 import { CertificationsItem } from "./items/certifications-item";
 import { CoverLetterItem } from "./items/cover-letter-item";
+import { CustomItem } from "./items/custom-item";
 import { EducationItem } from "./items/education-item";
 import { ExperienceItem } from "./items/experience-item";
 import { InterestsItem } from "./items/interests-item";
@@ -57,6 +58,7 @@ function renderItemByType(type: CustomSectionType, item: CustomSectionItem, item
 		.with("volunteer", () => <VolunteerItem {...(item as SectionItem<"volunteer">)} className={itemClassName} />)
 		.with("references", () => <ReferencesItem {...(item as SectionItem<"references">)} className={itemClassName} />)
 		.with("cover-letter", () => <CoverLetterItem {...(item as CoverLetterItemType)} className={itemClassName} />)
+		.with("custom", () => <CustomItem {...(item as any)} className={itemClassName} />)
 		.exhaustive();
 }
 
@@ -165,7 +167,7 @@ export const CustomSectionComponent = ({
 	if (visibleItems.length === 0) return null;
 
 	return (
-		<section className={cn(`page-section page-section-custom page-section-${id}`, sectionClassName)}>
+		<section data-section-id={id} className={cn(`page-section page-section-custom page-section-${id}`, sectionClassName)}>
 			{customSection.type !== "summary" && customSection.type !== "cover-letter" && (
 				<h6 className="mb-1.5 text-(--page-primary-color)">
 					<InlineEditableText

@@ -1,101 +1,633 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Trans } from "@lingui/react/macro";
-import { useState } from "react";
-import { toast } from "sonner";
+import {
+	CaretDownIcon,
+	CaretUpIcon,
+	FolderOpenIcon,
+	GlobeIcon,
+	PlusIcon,
+	SparkleIcon,
+	TagIcon,
+	TrashIcon,
+} from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import type z from "zod";
-import { useResumeStore } from "@/components/resume/store/resume";
-import { SortableList } from "@/components/ui/sortable-list";
-import type { projectItemSchema } from "@/schema/resume/data";
-import { api } from "@/utils/api";
-import { stripHtml } from "@/utils/string";
-import { cn } from "@/utils/style";
-import { SectionBase } from "../shared/section-base";
-import { SectionAddItemButton } from "../shared/section-item";
-import { SortableSectionItem } from "../shared/sortable-section-item";
 
+import { RichInput } from "@/components/input/rich-input";
+import { useResumeStore } from "@/components/resume/store/resume";
+import { AIGenerateButton } from "@/components/ui/ai-generate-button";
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { projectItemSchema } from "@/schema/resume/data";
+import { SectionBase } from "../shared/section-base";
+import { generateId } from "@/utils/string";
+
+type FormValues = z.infer<typeof projectItemSchema>;
+
+type PanelState =
+	| { mode: "idle" }
+	| { mode: "create" }
+	| { mode: "edit"; id: string };
+
+function ZoeTipsCard() {
+	return (
+		<div className="relative overflow-hidden rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-linear-to-br from-emerald-50 dark:from-emerald-900/20 to-teal-50/50 dark:to-teal-900/20 p-5 shadow-sm">
+			<div className="absolute top-0 right-0 p-4 opacity-10">
+				<SparkleIcon weight="fill" className="h-24 w-24 text-emerald-600 dark:text-emerald-400" />
+			</div>
+			<div className="mb-3 flex items-center gap-2">
+				<SparkleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" weight="fill" />
+				<h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm uppercase tracking-widest">Zoe Tips</h4>
+			</div>
+			<ul className="mb-4 space-y-2 font-medium text-emerald-900 dark:text-emerald-200 text-sm">
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Lead with what the project does, not how you built it
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Mention the tech stack concisely (3–5 keywords)
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Highlight impact — users, scale, or problem solved
+				</li>
+				<li className="flex items-center gap-2">
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+					Include a live link or GitHub repo if public
+				</li>
+			</ul>
+			<p className="font-serif text-emerald-700 dark:text-emerald-400 text-sm italic">
+				Zoe will sharpen your project pitch and highlight the impact. Look for the magic button above!
+			</p>
+		</div>
+	);
+}
+
+interface InlineFormProps {
+	defaultValues: FormValues;
+	onSave: (values: FormValues) => void;
+	onCancel: () => void;
+	isNew?: boolean;
+}
+
+function InlineProjectForm({
+	defaultValues,
+	onSave,
+	onCancel,
+	isNew = false,
+}: InlineFormProps) {
+	const [isPulsing, setIsPulsing] = useState(true);
+	const [isHovering, setIsHovering] = useState(false);
+
+	useEffect(() => {
+		const timer = setTimeout(() => setIsPulsing(false), 5000);
+		return () => clearTimeout(timer);
+	}, []);
+
+	const form = useForm<FormValues>({
+		resolver: zodResolver(projectItemSchema),
+		defaultValues,
+	});
+
+	const projectId = form.getValues("id");
+	const description = useWatch({ control: form.control, name: "description" });
+	const previousDescriptionRef = useRef(description);
+	const aiUpdateCountRef = useRef(0);
+
+	const roundsUsed = useResumeStore(
+		(state) => state.projectAIRoundsUsed?.[projectId] ?? 0
+	);
+	const incrementRoundsUsed = useResumeStore(
+		(state) => state.incrementProjectRounds
+	);
+	const resetRounds = useResumeStore((state) => state.resetProjectRounds);
+	const maxRounds = 2;
+
+	useEffect(() => {
+		if (aiUpdateCountRef.current > 0) {
+			aiUpdateCountRef.current -= 1;
+			previousDescriptionRef.current = description;
+			return;
+		}
+		if (description !== previousDescriptionRef.current) {
+			resetRounds(projectId);
+		}
+		previousDescriptionRef.current = description;
+	}, [description, resetRounds, projectId]);
+
+	const wordCount =
+		typeof description === "string"
+			? description.trim().split(/\s+/).filter(Boolean).length
+			: 0;
+	const charCount =
+		typeof description === "string"
+			? description.replace(/<[^>]*>/g, "").length
+			: 0;
+	const isWordCountValid = wordCount >= 5;
+
+	const handleAIGenerated = (aiText: string) => {
+		if (aiText && aiText.length > 10) {
+			aiUpdateCountRef.current = 2;
+			form.setValue("description", aiText, {
+				shouldDirty: true,
+				shouldValidate: true,
+			});
+			incrementRoundsUsed(projectId);
+		}
+	};
+
+	const shouldGlow = isPulsing || isHovering;
+
+	return (
+		<Form {...form}>
+			<form className="space-y-5" onSubmit={form.handleSubmit(onSave)}>
+				{/* ── Row 1: Project name ── */}
+				<div className="grid gap-4 sm:grid-cols-2">
+					<FormField
+						control={form.control}
+						name="name"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+									<FolderOpenIcon className="h-3.5 w-3.5" />
+									<Trans>Project Name</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="My Awesome Project"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="role"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+									<FolderOpenIcon className="h-3.5 w-3.5" />
+									<Trans>Role</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										value={field.value || ""}
+										placeholder="My Awesome Role"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+				{/* ── Row 2: Period + Tech stack ── */}
+				<div className="grid gap-4 sm:grid-cols-2">
+					<FormField
+						control={form.control}
+						name="period"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+									<TagIcon className="h-3.5 w-3.5" />
+									<Trans>Period / Year</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="Jan 2024 – Mar 2024"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="website.url"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+									<GlobeIcon className="h-3.5 w-3.5" />
+									<Trans>Website</Trans>
+								</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="https://myproject.com"
+										className="rounded-xl border-gray-200 dark:border-border bg-white/70 dark:bg-card/70 focus:border-violet-400 focus:ring-violet-200"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+
+				{/* ── Row 4: Show Link in Title Toggle ── */}
+				<FormField
+					control={form.control}
+					name="options.showLinkInTitle"
+					render={({ field }) => (
+						<FormItem className="flex flex-col">
+							<FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+								<Trans>Display Options</Trans>
+							</FormLabel>
+							<div className="flex items-center gap-2">
+								<FormControl>
+									<Switch
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
+								</FormControl>
+								<span className="text-sm text-gray-600">
+									<Trans>Show link in title</Trans>
+								</span>
+							</div>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				{/* ── Description + AI ── */}
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<div className="mb-3 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-end sm:justify-between gap-y-2 sm:gap-y-0">
+								<FormLabel className="font-bold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-widest block w-full sm:w-auto sm:mb-2">
+									<Trans>Description</Trans>
+								</FormLabel>
+
+								<div className="w-fit origin-left sm:origin-right scale-90 sm:scale-100 order-last sm:order-none sm:ml-auto mt-1 sm:mt-0">
+									<div
+										className="relative rounded-xl bg-gray-50 p-1 sm:mb-2"
+										onMouseEnter={() => setIsHovering(true)}
+										onMouseLeave={() => setIsHovering(false)}
+									>
+										{shouldGlow && (
+											<>
+												<div className="absolute -inset-1 rounded-full bg-violet-400/40 blur-md animate-ai-glow" />
+												<div className="absolute -inset-2 rounded-full border border-violet-300/50 animate-ai-glow-ring" />
+											</>
+										)}
+
+										<AIGenerateButton
+											resumeId={useResumeStore.getState().resume.id}
+											type="projects"
+											data={{
+												name: form.getValues("name"),
+												description,
+											}}
+											onGenerated={handleAIGenerated}
+											roundsUsed={roundsUsed}
+											maxRounds={maxRounds}
+											isWordCountValid={isWordCountValid}
+											disabled={roundsUsed >= maxRounds || !isWordCountValid}
+											className="relative z-10 font-bold text-black shadow-lg shadow-violet-500/30 hover:text-black"
+										/>
+									</div>
+								</div>
+
+								<div className="w-full flex flex-col sm:flex-row sm:items-center gap-2 order-2 sm:order-none sm:mb-3">
+									<div className="w-fit">
+										<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+											<SparkleIcon weight="fill" className="h-3 w-3" />
+											AI Assisted
+										</span>
+									</div>
+
+									<span className="text-xs text-slate-700 dark:text-gray-400">
+										Turn projects into standout resume bullets.
+									</span>
+								</div>
+							</div>
+							
+							<FormControl>
+								<RichInput
+									{...field}
+									value={field.value || ""}
+									onChange={field.onChange}
+								/>
+							</FormControl>
+
+							{/* Word / char count */}
+							<p className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
+								<span>
+									{wordCount} words · {charCount} chars
+								</span>
+								{!isWordCountValid && field.value && (
+									<span className="text-amber-500">
+										<Trans>Write at least 5 words to enable Ask Zoe</Trans>
+									</span>
+								)}
+							</p>
+
+							{roundsUsed === 1 && (
+								<p className="text-xs text-blue-500">
+									<Trans>You have 1 more AI suggestion left for this text.</Trans>
+								</p>
+							)}
+							{roundsUsed >= maxRounds && (
+								<p className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600">
+									<Trans>
+										✓ You've used both AI suggestions. Edit the text to get new
+										suggestions.
+									</Trans>
+								</p>
+							)}
+
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				{/* ── Actions ── */}
+				<div className="flex justify-end gap-2 pt-1">
+					<Button
+						type="button"
+						variant="ghost"
+						className="rounded-xl border border-gray-200 dark:border-border text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-muted/50"
+						onClick={onCancel}
+					>
+						<Trans>Cancel</Trans>
+					</Button>
+					<Button
+						type="submit"
+						disabled={form.formState.isSubmitting}
+						className="rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
+					>
+						{isNew ? <Trans>Add Project</Trans> : <Trans>Add Project</Trans>}
+					</Button>
+				</div>
+
+				{/* ── Tips Card ── */}
+				<ZoeTipsCard />
+			</form>
+		</Form>
+	);
+}
+
+interface ProjectCardProps {
+	item: FormValues;
+	isExpanded: boolean;
+	onToggle: () => void;
+	onSave: (values: FormValues) => void;
+	onDelete: () => void;
+}
+
+function ProjectCard({
+	item,
+	isExpanded,
+	onToggle,
+	onSave,
+	onDelete,
+}: ProjectCardProps) {
+	const subtitle = [item.period, item.website?.label]
+		.filter((p) => p && p.trim().length > 0)
+		.join(" · ");
+
+	return (
+		<div
+			className={`rounded-2xl border dark:bg-card shadow-sm transition-all duration-200 ${isExpanded
+				? "bg-white dark:border-emerald-700/50 shadow-md"
+				: "bg-white dark:bg-card dark:border-border hover:border-gray-200 dark:hover:border-border/80 hover:shadow"
+				}`}
+		>
+			{/* ── Header ── */}
+			<button
+				type="button"
+				onClick={onToggle}
+				className="flex w-full items-center gap-3 px-5 py-4 text-left"
+			>
+				<span
+					className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors ${isExpanded ? "bg-violet-500" : "bg-gray-100 dark:bg-muted"
+						}`}
+				>
+					<FolderOpenIcon
+						weight="fill"
+						className={`h-5 w-5 ${isExpanded ? "text-white" : "text-gray-400 dark:text-gray-500"}`}
+					/>
+				</span>
+
+				<div className="min-w-0 flex-1">
+					<p
+						className={`truncate font-semibold leading-tight ${isExpanded ? "text-violet-800" : "text-gray-800 dark:text-gray-200"
+							}`}
+					>
+						{item.name || "New Project"}
+					</p>
+					{subtitle && (
+						<p className="truncate text-sm text-gray-400 dark:text-gray-500">{subtitle}</p>
+					)}
+				</div>
+
+				<span className="shrink-0 text-gray-400 dark:text-gray-500">
+					{isExpanded ? (
+						<CaretUpIcon className="h-4 w-4" />
+					) : (
+						<CaretDownIcon className="h-4 w-4" />
+					)}
+				</span>
+			</button>
+
+			{/* ── Expanded form ── */}
+			<AnimatePresence initial={false}>
+				{isExpanded && (
+					<motion.div
+						key="form"
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: "auto" }}
+						exit={{ opacity: 0, height: 0 }}
+						transition={{ duration: 0.25, ease: "easeInOut" }}
+						className="overflow-hidden"
+					>
+						<div className="border-t border-gray-100 dark:border-border px-5 pb-6 pt-5">
+							<div className="mb-4 flex justify-end">
+								<button
+									type="button"
+									onClick={onDelete}
+									className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600"
+								>
+									<TrashIcon className="h-3.5 w-3.5" />
+									<Trans>Remove</Trans>
+								</button>
+							</div>
+
+							<InlineProjectForm
+								key={item.id}
+								defaultValues={item}
+								onSave={onSave}
+								onCancel={onToggle}
+								isNew={false}
+							/>
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
+		</div>
+	);
+}
+
+
+function AddNewPanel({
+	onSave,
+	onCancel,
+}: {
+	onSave: (v: FormValues) => void;
+	onCancel: () => void;
+}) {
+	const newDefaults: FormValues = {
+		id: generateId(),
+		hidden: false,
+		options: { showLinkInTitle: false },
+		name: "",
+		role: "",
+		period: "",
+		description: "",
+		website: { url: "", label: "" },
+	};
+
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: -8 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -8 }}
+			transition={{ duration: 0.2 }}
+			className="rounded-2xl border border-violet-300 dark:border-violet-700/50 bg-gradient-to-b from-white dark:from-card to-violet-50/30 dark:to-muted/30 p-5 shadow-md shadow-violet-100 dark:shadow-none"
+		>
+			<div className="mb-4 flex items-center gap-2">
+				<span className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-500 text-white shadow-sm">
+					<PlusIcon weight="bold" className="h-4 w-4" />
+				</span>
+				<p className="font-semibold text-violet-800">
+					<Trans>New Project</Trans>
+				</p>
+			</div>
+
+			<InlineProjectForm
+				defaultValues={newDefaults}
+				onSave={onSave}
+				onCancel={onCancel}
+				isNew
+			/>
+		</motion.div>
+	);
+}
+
+/* ─────────────────────────────────────────────
+   MAIN EXPORT
+───────────────────────────────────────────── */
 export function ProjectsSectionBuilder() {
-	const section = useResumeStore((state) => state.resume.data.sections.projects);
+	const section = useResumeStore(
+		(state) => state.resume.data.sections.projects
+	);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
-	const onReorder = (items: z.infer<typeof projectItemSchema>[]) => {
+	const [expandedId, setExpandedId] = useState<string | null>(null);
+	const [panelState, setPanelState] = useState<PanelState>({ mode: "idle" });
+	const [generatingIds] = useState<Set<string>>(new Set());
+
+	const handleAddProject = (values: FormValues) => {
 		updateResumeData((draft) => {
-			draft.sections.projects.items = items;
+			draft.sections.projects.items.push(values);
 		});
+		setPanelState({ mode: "idle" });
 	};
 
-	const buildSubtitle = (item: z.infer<typeof projectItemSchema>) => {
-		const parts = [item.period, item.website.label].filter((part) => part && part.trim().length > 0);
-		return parts.length > 0 ? parts.join(" • ") : undefined;
+	const handleUpdateProject = (values: FormValues) => {
+		updateResumeData((draft) => {
+			const index = draft.sections.projects.items.findIndex(
+				(item) => item.id === values.id
+			);
+			if (index !== -1) {
+				draft.sections.projects.items[index] = values;
+			}
+		});
+		setExpandedId(null);
 	};
 
-	const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
+	const handleDeleteProject = (id: string) => {
+		updateResumeData((draft) => {
+			draft.sections.projects.items = draft.sections.projects.items.filter(
+				(item) => item.id !== id
+			);
+		});
+		setExpandedId(null);
+	};
 
-	const handleAskZoe = async (id: string) => {
-		setGeneratingIds((prev) => new Set([...prev, id]));
-		try {
-			const item = section.items.find((p) => p.id === id);
-			if (!item) throw new Error("Project item not found");
-
-			const response = await api.generateAIContent({
-				resume_id: useResumeStore.getState().resume.id,
-				type: "ProjectsDescription",
-				value: stripHtml(item.name),
-			});
-
-			const aiDescription = Object.values(response)[0];
-
-			updateResumeData((draft) => {
-				const draftItem = draft.sections.projects.items.find((p) => p.id === id);
-				if (draftItem) draftItem.description = aiDescription;
-			});
-
-			toast.success("AI project description generated!");
-		} catch (error) {
-			console.error("AI generation error:", error);
-			toast.error(error instanceof Error ? error.message : "Failed to generate");
-		} finally {
-			setGeneratingIds((prev) => {
-				const newSet = new Set(prev);
-				newSet.delete(id);
-				return newSet;
-			});
+	const toggleExpand = (id: string) => {
+		setExpandedId(expandedId === id ? null : id);
+		if (panelState.mode !== "idle") {
+			setPanelState({ mode: "idle" });
 		}
 	};
 
 	return (
-		<SectionBase type="projects" className={cn("rounded-md border", section.items.length === 0 && "border-dashed")}>
-			<SortableList
-				items={section.items}
-				onReorder={onReorder}
-				keyExtractor={(item) => item.id}
-				renderItem={(item) => (
-					<SortableSectionItem
+		<SectionBase type="projects">
+			<div className="space-y-4">
+				{/* Projects List */}
+				{section.items.map((item) => (
+					<ProjectCard
 						key={item.id}
-						type="projects"
 						item={item}
-						title={item.name}
-						subtitle={buildSubtitle(item)}
-						onAskZoe={() => handleAskZoe(item.id)}
+						isExpanded={expandedId === item.id}
+						onToggle={() => toggleExpand(item.id)}
+						onSave={handleUpdateProject}
+						onDelete={() => handleDeleteProject(item.id)}
 					/>
+				))}
+
+				{/* Add New Panel */}
+				{panelState.mode === "create" ? (
+					<AddNewPanel
+						onSave={handleAddProject}
+						onCancel={() => setPanelState({ mode: "idle" })}
+					/>
+				) : (
+					<button
+						type="button"
+						onClick={() => setPanelState({ mode: "create" })}
+						className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 dark:border-border py-4 text-sm font-medium text-gray-400 dark:text-gray-500 transition-all hover:border-violet-300 hover:bg-violet-50/30 hover:text-violet-600"
+					>
+						<PlusIcon className="h-4 w-4" />
+						<Trans>Add a new project</Trans>
+					</button>
 				)}
-			/>
 
-			<SectionAddItemButton type="projects">
-				<Trans>Add a new project</Trans>
-			</SectionAddItemButton>
-
-			{generatingIds.size > 0 && (
-				<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-white p-5 shadow-2xl">
-					<div className="flex items-start gap-4">
-						<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100">
-							<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8" />
-						</div>
-						<div>
-							<h4 className="mb-1 font-bold text-gray-900">Zoe is working...</h4>
-							<p className="text-gray-600 text-sm">Generating professional descriptions for your projects</p>
+				{/* Zoe Working Indicator */}
+				{generatingIds.size > 0 && (
+					<div className="fixed right-8 bottom-8 max-w-sm animate-pulse rounded-2xl border-2 border-emerald-500 bg-card p-5 shadow-2xl">
+						<div className="flex items-start gap-4">
+							<div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+								<img src="/zoe-icon.png" alt="Zoe" className="h-8 w-8 dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+							</div>
+							<div>
+								<h4 className="mb-1 font-bold text-foreground">Zoe is working...</h4>
+								<p className="text-muted-foreground text-sm">Generating professional descriptions for your projects</p>
+							</div>
 						</div>
 					</div>
-				</div>
-			)}
+				)}
+			</div>
 		</SectionBase>
 	);
 }

@@ -10,12 +10,16 @@ interface BuilderSidebarState {
 	leftSidebar: PanelImperativeHandle | null;
 	rightSidebar: PanelImperativeHandle | null;
 	isLeftSidebarCollapsed: boolean;
+	activeSection: string;
+	expandedSections: Record<string, boolean>;
 }
 
 interface BuilderSidebarActions {
 	setLeftSidebar: (ref: PanelImperativeHandle | null) => void;
 	setRightSidebar: (ref: PanelImperativeHandle | null) => void;
 	setLeftSidebarCollapsed: (collapsed: boolean) => void;
+	setActiveSection: (section: string) => void;
+	toggleSectionExpanded: (section: string) => void;
 }
 
 type BuilderSidebar = BuilderSidebarState & BuilderSidebarActions;
@@ -25,9 +29,15 @@ export const useBuilderSidebarStore = create<BuilderSidebar>((set) => ({
 	leftSidebar: null,
 	rightSidebar: null,
 	isLeftSidebarCollapsed: false,
+	activeSection: "basics",
+	expandedSections: {},
 	setLeftSidebar: (ref) => set({ leftSidebar: ref }),
 	setRightSidebar: (ref) => set({ rightSidebar: ref }),
 	setLeftSidebarCollapsed: (collapsed) => set({ isLeftSidebarCollapsed: collapsed }),
+	setActiveSection: (section) => set({ activeSection: section }),
+	toggleSectionExpanded: (section) => set((state) => ({
+		expandedSections: { ...state.expandedSections, [section]: !state.expandedSections[section] }
+	})),
 }));
 
 type UseBuilderSidebarReturn = {

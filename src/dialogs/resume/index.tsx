@@ -24,6 +24,7 @@ import { api } from "@/utils/api";
 import { generateRandomName, slugify } from "@/utils/string";
 import { type DialogProps, useDialogStore } from "../store";
 import { type TemplateMetadata, templates } from "./template/data";
+import type { Template } from "@/schema/templates";
 
 const formSchema = z.object({
 	id: z.string(),
@@ -99,7 +100,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 	const navigate = useNavigate();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const [currentStep, setCurrentStep] = useState<1 | 2>(1);
-	const [selectedTemplate, setSelectedTemplate] = useState<string>("ditto");
+	const [selectedTemplate, setSelectedTemplate] = useState<Template>("ditto");
 	const [basicDetails, setBasicDetails] = useState<BasicDetailsFormValues | null>(null);
 	const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
 	const [showPhotoOptions, setShowPhotoOptions] = useState(false);
@@ -203,7 +204,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							network: "LinkedIn",
 							username: "",
 							icon: "linkedin",
-							url: basicDetails.linkedinUrl,
+							website: { url: basicDetails.linkedinUrl, label: "" },
 						});
 					}
 					if (basicDetails.githubUrl) {
@@ -213,7 +214,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							network: "GitHub",
 							username: "",
 							icon: "github",
-							url: basicDetails.githubUrl,
+							website: { url: basicDetails.githubUrl, label: "" },
 						});
 					}
 					if (basicDetails.websiteUrl) {
@@ -223,7 +224,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							network: "Website",
 							username: "",
 							icon: "link",
-							url: basicDetails.websiteUrl,
+							website: { url: basicDetails.websiteUrl, label: "" },
 						});
 					}
 
@@ -287,28 +288,28 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 
 	if (currentStep === 1) {
 		return (
-			<DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto bg-white text-gray-900">
+			<DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-xl border border-border bg-background/95 text-foreground shadow-2xl backdrop-blur-md">
 				{/* Progress Bar */}
 				<div className="mb-6">
 					<div className="mb-2 flex items-center justify-between">
-						<span className="font-medium text-gray-700 text-sm">Step 1 of 2</span>
-						<span className="font-medium text-gray-700 text-sm">Basic Details</span>
+						<span className="font-medium text-muted-foreground text-sm">Step 1 of 2</span>
+						<span className="font-medium text-muted-foreground text-sm">Basic Details</span>
 					</div>
-					<div className="h-1.5 w-full rounded-full bg-gray-200">
+					<div className="h-1.5 w-full rounded-full bg-muted">
 						<div
-							className="h-1.5 rounded-full bg-emerald-600 transition-all duration-300"
+							className="h-1.5 rounded-full bg-emerald-500 transition-all duration-300"
 							style={{ width: "50%" }}
 						></div>
 					</div>
 				</div>
 				{/* Header with Zoe */}
-				<div className="mb-6 flex items-start gap-4 border-gray-100 border-b pb-6">
+				<div className="mb-6 flex items-start gap-4 border-border border-b pb-6">
 					<div className="shrink-0">
-						<img src="/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full" />
+						<img src="/zoe-talking.png" alt="Zoe AI" className="h-15 w-12 rounded-full border border-border dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
 					</div>
 					<div>
-						<h2 className="mb-1 font-bold text-emerald-900 text-xl">Let's build your resume</h2>
-						<p className="text-gray-600">I'm Zoe, your AI assistant for Resume Builder. Start with your basics.</p>
+						<h2 className="mb-1 font-bold text-foreground text-xl">Let's build your resume</h2>
+						<p className="text-muted-foreground">I'm Zoe, your AI assistant for Resume Builder. Start with your basics.</p>
 					</div>
 				</div>{" "}
 				<Form {...basicDetailsForm}>
@@ -316,11 +317,11 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						{/* Profile Photo Upload */}
 						<div className="flex items-start gap-6">
 							<div className="relative">
-								<div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+								<div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
 									{profilePhoto ? (
 										<img src={profilePhoto} alt="Profile" className="h-full w-full object-cover" />
 									) : (
-										<CameraIcon className="h-10 w-10 text-gray-400" />
+										<CameraIcon className="h-10 w-10 text-muted-foreground" />
 									)}
 								</div>
 								<input
@@ -336,7 +337,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 									<button
 										type="button"
 										onClick={handleRemovePhoto}
-										className="absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 transition-colors hover:bg-red-700"
+										className="absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full bg-red-500/90 ring-2 ring-background transition-colors hover:bg-red-500"
 										title="Remove photo"
 									>
 										<TrashIcon className="h-4 w-4 text-white" />
@@ -344,7 +345,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 								) : (
 									<label
 										htmlFor="profile-photo-upload"
-										className="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-emerald-600 transition-colors hover:bg-emerald-700"
+										className="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-emerald-500/90 ring-2 ring-background transition-colors hover:bg-emerald-500"
 										title="Upload photo"
 									>
 										<PlusIcon className="h-4 w-4 text-white" />
@@ -359,13 +360,13 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 									name="fullName"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel className="text-gray-900">
-												Full Name <span className="text-red-500">*</span>
+											<FormLabel className="text-foreground">
+												Full Name <span className="text-red-400">*</span>
 											</FormLabel>
 											<FormControl>
 												<Input
 													{...field}
-													className="border-2 border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-0"
+													className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 													placeholder="John Doe"
 													onChange={(e) => {
 														const value = e.target.value.replace(/[0-9]/g, "");
@@ -373,7 +374,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 													}}
 												/>
 											</FormControl>
-											<FormMessage />
+											<FormMessage className="text-red-400" />
 										</FormItem>
 									)}
 								/>
@@ -384,13 +385,13 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 									name="professionalTitle"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel className="text-gray-900">
-												Professional Title <span className="text-red-500">*</span>
+											<FormLabel className="text-foreground">
+												Professional Title <span className="text-red-400">*</span>
 											</FormLabel>
 											<FormControl>
 												<Input
 													{...field}
-													className="border-2 border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-0"
+													className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 													placeholder="Senior Software Engineer"
 													onChange={(e) => {
 														const value = e.target.value.replace(/[0-9]/g, "");
@@ -398,7 +399,7 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 													}}
 												/>
 											</FormControl>
-											<FormMessage />
+											<FormMessage className="text-red-400" />
 										</FormItem>
 									)}
 								/>
@@ -412,18 +413,18 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 								name="email"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel className="text-gray-900">
-											Email <span className="text-red-500">*</span>
+										<FormLabel className="text-foreground">
+											Email <span className="text-red-400">*</span>
 										</FormLabel>
 										<FormControl>
 											<Input
 												{...field}
 												type="email"
-												className="border-2 border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-0"
+												className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 												placeholder="john@example.com"
 											/>
 										</FormControl>
-										<FormMessage />
+										<FormMessage className="text-red-400" />
 									</FormItem>
 								)}
 							/>
@@ -433,8 +434,8 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 								name="phone"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel className="text-gray-900">
-											Phone <span className="text-red-500">*</span>
+										<FormLabel className="text-foreground">
+											Phone <span className="text-red-400">*</span>
 										</FormLabel>
 										<FormControl>
 											<Input
@@ -446,10 +447,11 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 													const cleaned = e.target.value.replace(/\D/g, "");
 													field.onChange(cleaned);
 												}}
+												className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 												placeholder="9876543210"
 											/>
 										</FormControl>
-										<FormMessage />
+										<FormMessage className="text-red-400" />
 									</FormItem>
 								)}
 							/>
@@ -459,17 +461,17 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 								name="location"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel className="text-gray-900">
-											Location <span className="text-red-500">*</span>
+										<FormLabel className="text-foreground">
+											Location <span className="text-red-400">*</span>
 										</FormLabel>
 										<FormControl>
 											<Input
 												{...field}
-												className="border-2 border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-0"
+												className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 												placeholder="San Francisco, CA"
 											/>
 										</FormControl>
-										<FormMessage />
+										<FormMessage className="text-red-400" />
 									</FormItem>
 								)}
 							/>
@@ -477,23 +479,23 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 
 						{/* Optional Links */}
 						<div>
-							<h3 className="mb-4 font-semibold text-gray-700 text-xs uppercase tracking-wider">Optional Links</h3>
+							<h3 className="mb-4 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Optional Links</h3>
 							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 								<FormField
 									control={basicDetailsForm.control}
 									name="linkedinUrl"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel className="text-gray-900">LinkedIn URL</FormLabel>
+											<FormLabel className="text-foreground">LinkedIn URL</FormLabel>
 											<FormControl>
 												<Input
 													{...field}
 													type="url"
-													className="border-2 border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-0"
+													className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 													placeholder="https://linkedin.com/in/..."
 												/>
 											</FormControl>
-											<FormMessage />
+											<FormMessage className="text-red-400" />
 										</FormItem>
 									)}
 								/>
@@ -503,16 +505,16 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 									name="githubUrl"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel className="text-gray-900">GitHub URL</FormLabel>
+											<FormLabel className="text-foreground">GitHub URL</FormLabel>
 											<FormControl>
 												<Input
 													{...field}
 													type="url"
-													className="border-2 border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-0"
+													className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 													placeholder="https://github.com/..."
 												/>
 											</FormControl>
-											<FormMessage />
+											<FormMessage className="text-red-400" />
 										</FormItem>
 									)}
 								/>
@@ -522,16 +524,16 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 									name="websiteUrl"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel className="text-gray-900">Website URL</FormLabel>
+											<FormLabel className="text-foreground">Website URL</FormLabel>
 											<FormControl>
 												<Input
 													{...field}
 													type="url"
-													className="border-2 border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-0"
+													className="border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:border-emerald-500/50"
 													placeholder="https://yourwebsite.com"
 												/>
 											</FormControl>
-											<FormMessage />
+											<FormMessage className="text-red-400" />
 										</FormItem>
 									)}
 								/>
@@ -543,13 +545,17 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 							<Button
 								type="button"
 								variant="outline"
-								className="border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+								className="cursor-pointer border-border bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
 								onClick={closeDialog}
 							>
 								<ArrowLeftIcon className="mr-2" />
 								Cancel
 							</Button>
-							<Button type="submit" disabled={!isFormValid} className="bg-emerald-600 hover:bg-emerald-700">
+							<Button
+								type="submit"
+								disabled={!isFormValid}
+								className="cursor-pointer bg-emerald-600 text-white transition-colors hover:bg-emerald-500"
+							>
 								Continue
 								<ArrowRightIcon className="ml-2" />
 							</Button>
@@ -560,18 +566,17 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 		);
 	}
 
-	// Step 2: Template Selection
 	return (
-		<DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto bg-white text-gray-900">
+		<DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto rounded-xl border border-border bg-background/95 text-foreground shadow-2xl backdrop-blur-md">
 			{/* Progress Bar */}
 			<div className="mb-6">
 				<div className="mb-2 flex items-center justify-between">
-					<span className="font-medium text-gray-700 text-sm">Step 2 of 2</span>
-					<span className="font-medium text-gray-700 text-sm">Choose Template</span>
+					<span className="font-medium text-muted-foreground text-sm">Step 2 of 2</span>
+					<span className="font-medium text-muted-foreground text-sm">Choose Template</span>
 				</div>
-				<div className="h-1.5 w-full rounded-full bg-gray-200">
+				<div className="h-1.5 w-full rounded-full bg-muted">
 					<div
-						className="h-1.5 rounded-full bg-emerald-600 transition-all duration-300"
+						className="h-1.5 rounded-full bg-emerald-500 transition-all duration-300"
 						style={{ width: "100%" }}
 					></div>
 				</div>
@@ -579,11 +584,11 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 			{/* Header */}
 			<div className="mb-8 text-center">
 				<div className="mb-4 flex items-center justify-center gap-2">
-					<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full" />
-					<span className="font-medium text-gray-600 text-sm">Zoe AI - Resume Builder Assistant</span>
+					<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-8 rounded-full border border-border dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+					<span className="font-medium text-muted-foreground text-sm">Zoe AI - Resume Builder Assistant</span>
 				</div>
-				<h1 className="mb-2 font-bold text-3xl text-emerald-900">Choose Your Template</h1>
-				<p className="text-gray-600">Pick a design that matches your style. You can always change it later.</p>
+				<h1 className="mb-2 font-bold text-3xl text-foreground">Choose Your Template</h1>
+				<p className="text-muted-foreground">Pick a design that matches your style. You can always change it later.</p>
 			</div>{" "}
 			{/* Templates Grid */}
 			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -592,15 +597,20 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						key={key}
 						template={template}
 						isSelected={selectedTemplate === key}
-						onSelect={() => setSelectedTemplate(key)}
+						onSelect={() => setSelectedTemplate(key as Template)}
 						onContinue={onTemplateSelected}
 						isPending={isPending}
 					/>
 				))}
 			</div>
 			{/* Navigation Buttons */}
-			<DialogFooter className="flex items-center justify-between border-gray-200 border-t pt-6">
-				<Button style={{ backgroundColor: "grey" }} type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+			<DialogFooter className="flex items-center justify-between border-border border-t pt-6">
+				<Button
+					type="button"
+					variant="outline"
+					className="cursor-pointer border-border bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+					onClick={() => setCurrentStep(1)}
+				>
 					<ArrowLeftIcon className="mr-2" />
 					Back
 				</Button>
@@ -865,17 +875,17 @@ function TemplateCard({ template, isSelected, onSelect, onContinue, isPending }:
 	return (
 		<div
 			onClick={onSelect}
-			className={`group cursor-pointer transition-all ${isSelected ? "ring-2 ring-emerald-600 ring-offset-2" : ""}`}
+			className={`group cursor-pointer transition-all ${isSelected ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : ""}`}
 		>
-			<div className="overflow-hidden rounded-xl border-2 border-gray-200 bg-white transition-all hover:border-gray-300">
+			<div className="overflow-hidden rounded-xl border-2 border-border bg-card transition-all hover:border-emerald-500/50">
 				{/* Template Preview Image */}
-				<div className="relative aspect-[8.5/11] overflow-hidden bg-linear-to-br from-gray-100 to-gray-50">
-					<img src={template.imageUrl} alt={template.name} className="h-full w-full object-cover" />
+				<div className="relative aspect-[8.5/11] overflow-hidden bg-muted">
+					<img src={template.imageUrl} alt={template.name} className="h-full w-full object-cover opacity-90" />
 
 					{/* Selected Checkmark */}
 					{isSelected && (
-						<div className="absolute inset-0 flex items-center justify-center bg-emerald-50/80">
-							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600">
+						<div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 shadow-lg">
 								<svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
 								</svg>
@@ -885,10 +895,10 @@ function TemplateCard({ template, isSelected, onSelect, onContinue, isPending }:
 				</div>
 
 				{/* Template Info */}
-				<div className="bg-white p-4">
-					<div className="mb-1 flex items-start justify-between">
-						<h3 className="font-semibold text-emerald-900">{template.name}</h3>
-						<span className="rounded bg-emerald-100 px-2 py-0.5 font-medium text-emerald-700 text-xs">
+				<div className="p-4">
+					<div className="mb-1 flex items-start justify-between gap-2">
+						<h3 className="font-semibold text-foreground">{template.name}</h3>
+						<span className="whitespace-nowrap rounded bg-emerald-500/10 px-2 py-0.5 font-medium text-[10px] text-emerald-400 uppercase tracking-wider ring-1 ring-emerald-500/20">
 							{template.sidebarPosition === "left"
 								? "Left Sidebar"
 								: template.sidebarPosition === "right"
@@ -896,14 +906,14 @@ function TemplateCard({ template, isSelected, onSelect, onContinue, isPending }:
 									: "Single Column"}
 						</span>
 					</div>
-					<p className="text-gray-600 text-sm">
+					<p className="mt-1 text-muted-foreground text-sm">
 						{typeof template.description === "object" ? template.name : template.description}
 					</p>
 					{/* Continue to Editor Button (only for selected template) */}
 					{isSelected && (
 						<Button
 							type="button"
-							className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700"
+							className="mt-4 w-full bg-emerald-600 text-white transition-colors hover:bg-emerald-500"
 							onClick={(e) => {
 								e.stopPropagation();
 								onContinue();

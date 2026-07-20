@@ -1,8 +1,10 @@
+import { Link } from "@tanstack/react-router";
 import { SidebarSimpleIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useBuilderSidebar, useBuilderSidebarStore } from "../-store/sidebar";
 import { BuilderTopTray } from "./top-tray.tsx";
+import { openZoeTour } from "@/components/editor/CoachMarks";
 
 export function BuilderHeader() {
 	const isMobile = useIsMobile();
@@ -21,7 +23,7 @@ export function BuilderHeader() {
 	};
 
 	return (
-		<header className="z-10 flex shrink-0 items-center justify-between gap-2 border-gray-200 border-b bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-3 md:px-6">
+		<header className="z-10 flex shrink-0 items-center justify-between gap-2 border-border border-b bg-background px-3 py-2 sm:gap-3 sm:px-4 sm:py-3 md:px-6">
 			<div className="flex items-center">
 				<Button
 					size="icon"
@@ -29,9 +31,50 @@ export function BuilderHeader() {
 					onClick={handleToggle}
 					className="h-8 w-8 sm:h-10 sm:w-10"
 					aria-label="Toggle sidebar"
+					data-tour="btn-mobile-sidebar"
 				>
 					<SidebarSimpleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
 				</Button>
+
+				<div className="flex items-center gap-3">
+					<Link
+						to="/dashboard/resumes"
+						className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
+					>
+						<img src="/zoe-icon.png"
+							alt="Resume Buddy"
+							className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8 dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+						<span
+							className="hidden font-bold text-foreground text-sm sm:block sm:text-base"
+							style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+						>
+							Resume Buddy
+						</span>
+					</Link>
+
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={openZoeTour}
+						// 	className="
+						// 		zoe-tour-trigger
+						// 		hidden sm:flex
+						// 		items-center gap-2
+						// 		rounded-full
+						// 		border-yellow-400/40
+						// 		bg-yellow-400/10
+						// 		text-yellow-600
+						// 		hover:bg-yellow-400/20
+						// 		hover:border-yellow-400/60
+						// 		animate-pulse
+						// 	"
+						// >
+						className="group ml-2 hidden sm:flex items-center gap-2 rounded-full border border-fuchsia-400/40 bg-gradient-to-r from-fuchsia-500/15 to-violet-500/15 px-3 py-1.5 text-xs font-medium text-fuchsia-700 dark:text-fuchsia-200 backdrop-blur-md transition hover:scale-[1.03] hover:from-fuchsia-500/25 hover:to-violet-500/25">
+						✨ How to Use Zoe
+					</Button>
+
+				</div>
+
 			</div>
 			<div className="flex-1 overflow-x-auto">
 				<BuilderTopTray />

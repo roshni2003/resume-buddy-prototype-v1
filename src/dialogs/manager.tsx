@@ -2,6 +2,7 @@ import { match } from "ts-pattern";
 import { Dialog } from "@/components/ui/dialog";
 import { CreateResumeDialog, DuplicateResumeDialog, UpdateResumeDialog } from "./resume";
 import { ImportResumeDialog } from "./resume/import";
+import { OnboardingDialog } from "./resume/onboarding";
 import { CreateAwardDialog, UpdateAwardDialog } from "./resume/sections/award";
 import { CreateCertificationDialog, UpdateCertificationDialog } from "./resume/sections/certification";
 import { CreateCoverLetterDialog, UpdateCoverLetterDialog } from "./resume/sections/cover-letter";
@@ -29,6 +30,7 @@ export function DialogManager() {
 		.with({ type: "resume.update" }, ({ data }) => <UpdateResumeDialog data={data} />)
 		.with({ type: "resume.duplicate" }, ({ data }) => <DuplicateResumeDialog data={data} />)
 		.with({ type: "resume.import" }, () => <ImportResumeDialog />)
+		.with({ type: "resume.onboarding" }, () => <OnboardingDialog />)
 		.with({ type: "resume.template.gallery" }, () => <TemplateGalleryDialog />)
 		.with({ type: "resume.sections.profiles.create" }, ({ data }) => <CreateProfileDialog data={data} />)
 		.with({ type: "resume.sections.profiles.update" }, ({ data }) => <UpdateProfileDialog data={data} />)

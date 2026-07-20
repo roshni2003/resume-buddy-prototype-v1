@@ -78,21 +78,105 @@ const _syncResume = (resume: Resume) => {
 
 	// Ensure all date fields are properly serialized
 	if (dataToSync.sections?.experience?.items) {
-		dataToSync.sections.experience.items = dataToSync.sections.experience.items.map(
-			(item: Record<string, unknown>) => ({
+		dataToSync.sections.experience.items = dataToSync.sections.experience.items.map((item: Record<string, unknown>) => {
+			const expData = {
+				startDate: item.startDate || "",
+				endDate: item.endDate || "",
+				currentlyWorkingHere: item.currentlyWorkingHere || false,
+			};
+			const comment = `<!-- expData: ${encodeURIComponent(JSON.stringify(expData))} -->`;
+			let description = typeof item.description === "string" ? item.description : "";
+			description = description.replace(/<!-- expData: (.*?) -->/g, "").trim();
+
+			return {
 				...item,
 				startDate: item.startDate || "",
 				endDate: item.endDate || "",
-			}),
-		);
+				period: typeof item.period === "string" ? item.period : "",
+				website: item.website || { url: "", label: "" },
+				description: description ? `${description}\n${comment}` : comment,
+			};
+		});
 	}
 
 	if (dataToSync.sections?.education?.items) {
-		dataToSync.sections.education.items = dataToSync.sections.education.items.map((item: Record<string, unknown>) => ({
-			...item,
-			startDate: item.startDate || "",
-			endDate: item.endDate || "",
-		}));
+		dataToSync.sections.education.items = dataToSync.sections.education.items.map((item: Record<string, unknown>) => {
+			const {
+				schoolName_school,
+				board_school,
+				percentage_school,
+				collegeName_college,
+				degree_college,
+				specialization_college,
+				cgpa_college,
+				...rest
+			} = item;
+
+			const modeData = {
+				schoolName_school,
+				board_school,
+				percentage_school,
+				collegeName_college,
+				degree_college,
+				specialization_college,
+				cgpa_college,
+			};
+
+			const comment = `<!-- modeData: ${encodeURIComponent(JSON.stringify(modeData))} -->`;
+			let description = typeof rest.description === "string" ? rest.description : "";
+			description = description.replace(/<!-- modeData: (.*?) -->/g, "").trim();
+
+			return {
+				...rest,
+				startDate: rest.startDate || "",
+				endDate: rest.endDate || "",
+				period: typeof rest.period === "string" ? rest.period : "",
+				website: rest.website || { url: "", label: "" },
+				school: typeof rest.school === "string" && rest.school.trim() === "" ? " " : rest.school,
+				description: description ? `${description}\n${comment}` : comment,
+			};
+		});
+	}
+
+	if (dataToSync.sections?.projects?.items) {
+		dataToSync.sections.projects.items = dataToSync.sections.projects.items.map((item: Record<string, unknown>) => {
+			const { role, ...rest } = item;
+			if (typeof role === "string" && role.trim()) {
+				const comment = `<!-- role: ${encodeURIComponent(role)} -->`;
+				const description = typeof rest.description === "string" ? rest.description : "";
+				return {
+					...rest,
+					description: description ? `${description}\n${comment}` : comment,
+				};
+			}
+			return rest;
+		});
+	}
+
+	if (dataToSync.sections?.languages?.items) {
+		dataToSync.sections.languages.items = dataToSync.sections.languages.items.map((item: Record<string, unknown>) => {
+			return {
+				...item,
+				fluency: JSON.stringify({ icon: item.icon || "translate" }),
+				level: typeof item.level === "number" ? item.level : 1,
+			};
+		});
+	}
+
+	if (dataToSync.sections?.interests?.items) {
+		dataToSync.sections.interests.items = dataToSync.sections.interests.items.map((item: Record<string, unknown>) => {
+			const { name, icon, ...rest } = item;
+			if (typeof name === "string") {
+				const comment = `<!-- icon: ${icon || "star"} -->`;
+				const cleanName = name.replace(/<!-- icon: (.*?) -->/g, "").trim();
+				return {
+					...rest,
+					name: `${cleanName} ${comment}`,
+					icon: icon || "star"
+				};
+			}
+			return item;
+		});
 	}
 
 	api.updateResume(resume.id, { data: dataToSync });

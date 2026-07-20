@@ -1,21 +1,15 @@
 // import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import { ReadCvLogo, Users } from "@phosphor-icons/react";
-// import { ChartBar} from "@phosphor-icons/react";
+import { ChartBar } from "@phosphor-icons/react";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
-// import { ReadCvLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
+// authClient used in index.tsx for session
 import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
-// On some devices (iOS Safari private mode, Facebook/Instagram in-app browsers) the
-// localStorage write committed in beforeLoad doesn't reflect immediately on the next read.
-// Instead of redirecting back to Zuvy on the first miss, render <AuthGate /> and keep
-// retrying for up to 60s before giving up. This breaks the redirect loop in the common
-// case where the storage write succeeds a moment later.
 const AUTH_GATE_TIMEOUT_MS = 60_000;
 const AUTH_GATE_POLL_MS = 500;
 
@@ -48,11 +42,9 @@ export const Route = createFileRoute("/dashboard")({
 		const hasTokenAfterClear = isValidToken(tokenAfterClear);
 
 		// If there's NO token in storage and NO token in the URL, user is not logged in.
-		// Redirect immediately to Zuvy so no dashboard content mounts (and no API calls fire).
+		// Instead of automatically redirecting, we show the Auth Help gate so users know what to do.
 		if (!hasTokenAfterClear && !hasUrlToken && !devBypass) {
-			throw redirect({
-				href: buildZuvyLoginUrl(url.pathname + url.search + url.hash),
-			});
+			return { session: context.session, needsAuth: true, isAuthenticated: false, showAuthHelp: true };
 		}
 
 		// At this point: either token is valid OR we have a URL token in-flight.
@@ -65,10 +57,13 @@ export const Route = createFileRoute("/dashboard")({
 	},
 });
 
-function AuthGate() {
+function AuthGate({ showAuthHelp }: { showAuthHelp?: boolean }) {
 	const [secondsLeft, setSecondsLeft] = useState(Math.ceil(AUTH_GATE_TIMEOUT_MS / 1000));
+	const currentOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
 
 	useEffect(() => {
+		if (showAuthHelp) return;
+
 		const start = Date.now();
 		let cancelled = false;
 		let timer: ReturnType<typeof setTimeout> | null = null;
@@ -76,8 +71,6 @@ function AuthGate() {
 		const tick = async () => {
 			if (cancelled) return;
 
-			// Re-attempt persistence from the URL each tick: on some devices the storage
-			// quota opens up after a delay, so a retry may succeed where the first write failed.
 			const urlToken = getUrlToken();
 			if (urlToken) {
 				await persistAuthToken(urlToken);
@@ -93,8 +86,6 @@ function AuthGate() {
 				tokenValid: isValidToken(token),
 			});
 			if (isValidToken(token)) {
-				// Storage finally has a valid token — reload so the route re-runs
-				// beforeLoad and renders the dashboard with auth.
 				console.log("[auth-debug] AuthGate.tick: token landed, reloading");
 				window.location.reload();
 				return;
@@ -118,18 +109,57 @@ function AuthGate() {
 		};
 	}, []);
 
+	if (showAuthHelp) {
+		return (
+			<div
+				className="flex min-h-screen flex-col items-center justify-center px-6"
+				style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+			>
+				<div className="flex max-w-lg w-full flex-col items-center gap-6 text-center bg-card/10 p-8 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
+					<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+					<div className="w-full">
+						<h1 className="mb-2 font-bold text-white text-xl">Authentication Required</h1>
+						<p className="text-white/80 text-sm mb-6">
+							You are running the app without an authentication token.
+						</p>
+						<div className="bg-black/40 text-left p-5 rounded-xl text-sm text-white/90 border border-white/5 space-y-4 w-full">
+							<p><strong className="text-emerald-400">Step 1:</strong> Click the button below to log in to Zuvy.</p>
+							<p><strong className="text-emerald-400">Step 2:</strong> In the Zuvy dashboard, click on <strong>"Learn with Zoe"</strong>.</p>
+							<p><strong className="text-emerald-400">Step 3:</strong> You will be redirected to the production Zoe site. <strong>Copy the <code className="bg-black px-1.5 py-0.5 rounded text-emerald-300 text-xs break-all">?token=...</code></strong> part from the URL.</p>
+							<div className="w-full">
+								<strong className="text-emerald-400">Step 4:</strong> Come back to your environment and paste the token at the end of the URL like so:<br />
+								<code className="block mt-2 bg-black p-2 rounded text-xs text-emerald-300 break-all">
+									{currentOrigin}/dashboard/resumes?token=eyJhb...
+								</code>
+							</div>
+						</div>
+					</div>
+					<button
+						onClick={() => redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash)}
+						className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-md py-2.5 font-medium transition-colors cursor-pointer"
+					>
+						Go to Zuvy Login
+					</button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-6">
+		<div
+			className="flex min-h-screen flex-col items-center justify-center px-6"
+			style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+		>
 			<div className="flex max-w-md flex-col items-center gap-6 text-center">
-				<img src="/zoe-talking.png" alt="Zoe AI" className="h-16 w-12" />
-				<div className="size-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+				<img src="/zoe-icon.png" alt="Zoe AI" className="h-16 w-16 rounded-full object-cover dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+				<div className="size-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
 				<div>
-					<h1 className="mb-2 font-bold text-gray-900 text-xl">Logging you in...</h1>
-					<p className="text-gray-600 text-sm">
+					<h1 className="mb-2 font-bold text-white text-xl">Logging you in...</h1>
+					<p className="text-white/60 text-sm">
 						Please wait while we securely sign you in. This usually takes a few seconds.
 					</p>
 				</div>
-				<p className="text-gray-400 text-xs">
+				<p className="text-white/30 text-xs">
 					If this takes longer than expected, we'll redirect you to sign in again in {secondsLeft}s.
 				</p>
 			</div>
@@ -137,9 +167,104 @@ function AuthGate() {
 	);
 }
 
+import { useSettingsStore } from "@/stores/settings";
+import { useTheme } from "@/components/theme/provider";
+
+function DashboardHeader() {
+	const { theme } = useTheme();
+
+	return (
+		<header
+			className="sticky top-0 z-30 border-b"
+			style={{
+				background: theme === "light" ? "rgba(255, 255, 255, 0.85)" : "rgba(9, 13, 22, 0.85)",
+				borderColor: theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+				backdropFilter: "blur(20px)",
+				WebkitBackdropFilter: "blur(20px)",
+			}}
+		>
+			<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5">
+				{/* Left: Logo */}
+				<Link
+					to="/dashboard/resumes"
+					className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
+				>
+					<img src="/zoe-icon.png"
+						alt="Resume Buddy"
+						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9 dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
+					<span
+						className={`font-bold text-base sm:text-lg ${theme === "light" ? "text-slate-900" : "text-white"}`}
+						style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+					>
+						Resume Buddy
+					</span>
+				</Link>
+
+				{/* <Link
+					to="/dashboard/admin/mixpanel"
+					activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
+					className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
+				>
+					<ChartBar size={18} weight="bold" />
+					<span>Insights</span>
+				</Link> */}
+
+				{/* Right: Settings & User menu */}
+				<div className="flex items-center gap-2 sm:gap-4">
+					<nav className="hidden items-center gap-1 sm:flex">
+						{/* TODO: Add logic to conditionally render Analytics link for admins only if needed */}
+						<Link
+							to="/dashboard/admin/analytics"
+							activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
+							className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+						>
+							User Analytics
+						</Link>
+					</nav>
+
+					<Link
+						to="/dashboard/settings"
+						activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
+						className={`flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+					>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+							<circle cx="12" cy="12" r="3"></circle>
+						</svg>
+						<span className="hidden sm:inline text-sm font-medium">Settings</span>
+					</Link>
+
+					<UserDropdownMenu>
+						{({ session: userSession }) => (
+							<button className="flex items-center justify-center rounded-full transition-all hover:ring-2 hover:ring-white/20 cursor-pointer">
+								<Avatar className="size-8">
+									<AvatarImage src={userSession.user.image ?? undefined} />
+									<AvatarFallback
+										className="text-xs text-white"
+										style={{ background: "rgba(0,208,156,0.2)" }}
+									>
+										{getInitials(userSession.user.name)}
+									</AvatarFallback>
+								</Avatar>
+							</button>
+						)}
+					</UserDropdownMenu>
+				</div>
+			</div>
+		</header>
+	);
+}
+
 function RouteComponent() {
 	useLingui();
-	const { needsAuth } = Route.useRouteContext();
+	const routeContext = Route.useRouteContext() as any;
+	const needsAuth = routeContext?.needsAuth;
+	const showAuthHelpFromContext = routeContext?.showAuthHelp;
+
+	const { theme } = useTheme();
+	const { backgroundTheme } = useSettingsStore();
+	
+	const [isClientUnauth, setIsClientUnauth] = useState(false);
 
 	useEffect(() => {
 		// Safety net: if beforeLoad didn't redirect for some reason (stale cached context,
@@ -149,71 +274,41 @@ function RouteComponent() {
 		const devBypass = import.meta.env.DEV && new URL(window.location.href).searchParams.get("test") === "true";
 
 		if (!devBypass && !isValidToken(token) && !isValidToken(urlToken)) {
-			redirectToZuvyLogin(window.location.pathname + window.location.search + window.location.hash);
+			// Instead of auto-redirecting anywhere, we set isClientUnauth to true
+			// so the AuthGate with manual copy-paste instructions shows up.
+			setIsClientUnauth(true);
 		}
 	}, []);
 
-	if (needsAuth) {
-		return <AuthGate />;
+	useEffect(() => {
+		const token = getAuthToken();
+		console.log("[auth-debug] dashboard.RouteComponent mounted", {
+			path: window.location.pathname + window.location.search + window.location.hash,
+			hasStoredToken: Boolean(token),
+		});
+	}, []);
+
+	if (needsAuth || isClientUnauth) {
+		return <AuthGate showAuthHelp={showAuthHelpFromContext || isClientUnauth} />;
 	}
 
-	return (
-		<div className="flex min-h-screen flex-col bg-gray-50">
-			{/* Header */}
-			<header className="border-gray-200 border-b bg-white shadow-sm">
-				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-					{/* Left: Logo and Title */}
-					<div className="flex items-center gap-2 sm:gap-3">
-						<img src="/zoe-talking.png" alt="Zoe AI" className="h-8 w-6 rounded-full sm:h-10 sm:w-8" />
-						<h1 className="font-bold text-base text-gray-900 sm:text-lg md:text-xl">Resume Buddy</h1>
-					</div>{" "}
-					{/* Center: Navigation */}
-					<nav className="hidden items-center gap-1 md:flex lg:gap-2">
-						<Link
-							to="/dashboard/resumes"
-							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
-							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
-						>
-							<ReadCvLogo size={18} weight="bold" />
-							<span>Resumes</span>
-						</Link>
-						{/* <Link
-							to="/dashboard/admin/mixpanel"
-							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
-							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
-						>
-							<ChartBar size={18} weight="bold" />
-							<span>Insights</span>
-						</Link> */}
-						<Link
-							to="/dashboard/admin/analytics"
-							activeProps={{ className: "bg-emerald-50 text-emerald-700 shadow-sm" }}
-							className="flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-gray-600 text-sm transition-all hover:bg-gray-100 lg:px-4"
-						>
-							<Users size={18} weight="bold" />
-							<span>User Analytics</span>
-						</Link>
-					</nav>
-					{/* Right: User Menu */}
-					<UserDropdownMenu>
-						{({ session }) => (
-							<button className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100">
-								<Avatar className="size-8">
-									<AvatarImage src={session.user.image ?? undefined} />
-									<AvatarFallback className="text-xs">{getInitials(session.user.name)}</AvatarFallback>
-								</Avatar>
-								<div className="hidden text-left md:block">
-									<p className="font-medium text-sm">{session.user.name}</p>
-									<p className="text-gray-500 text-xs">{session.user.email}</p>
-								</div>
-							</button>
-						)}
-					</UserDropdownMenu>
-				</div>
-			</header>
+	const getBackgroundStyle = () => {
+		if (theme === "light") return { background: "var(--color-background)" };
+		if (backgroundTheme === "navy") return { background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" };
+		if (backgroundTheme === "purple") return { background: "linear-gradient(145deg, #0f0514 0%, #1c0f2a 100%)" };
+		if (backgroundTheme === "forest") return { background: "linear-gradient(145deg, #05140b 0%, #0f2a17 100%)" };
+		return { background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" };
+	};
 
-			{/* Main Content */}
-			<main className="@container mx-auto w-full max-w-7xl flex-1 p-6">
+	return (
+		<div
+			className="flex min-h-screen flex-col bg-background text-foreground"
+			style={getBackgroundStyle()}
+		>
+			<DashboardHeader />
+
+			{/* Main content — sits above the orbs */}
+			<main className="@container relative z-10 mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">
 				<Outlet />
 			</main>
 		</div>

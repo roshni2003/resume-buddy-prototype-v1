@@ -30,6 +30,7 @@ export function CreateEducationDialog({ data }: DialogProps<"resume.sections.edu
 			id: generateId(),
 			hidden: data?.item?.hidden ?? false,
 			options: data?.item?.options ?? { showLinkInTitle: false },
+			college: data?.item?.college ?? "College",
 			school: data?.item?.school ?? "",
 			degree: data?.item?.degree ?? "",
 			area: data?.item?.area ?? "",
@@ -105,8 +106,9 @@ export function UpdateEducationDialog({ data }: DialogProps<"resume.sections.edu
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			id: data.item.id,
-			hidden: data.item.hidden,
+			hidden: data.item.hidden ?? false,
 			options: data.item.options ?? { showLinkInTitle: false },
+			college: data.item.college ?? "College",
 			school: data.item.school,
 			degree: data.item.degree,
 			area: data.item.area,
