@@ -50,14 +50,57 @@ export function PictureSectionForm() {
 				return;
 			}
 
-			// Create preview URL
+			// Create preview URL and compress
 			const reader = new FileReader();
 			reader.onloadend = () => {
-				const url = reader.result as string;
-				form.setValue("url", url, { shouldDirty: true });
-				form.setValue("hidden", false, { shouldDirty: true });
-				form.handleSubmit(onSubmit)();
-				toast.success(t`Picture uploaded successfully!`);
+				const img = new Image();
+				img.onload = () => {
+					try {
+						const canvas = document.createElement("canvas");
+						let { width, height } = img;
+						const maxDim = 800; // Resize to max 800px to reduce base64 size and prevent 413 error
+
+						if (width > height) {
+							if (width > maxDim) {
+								height = Math.round(height * (maxDim / width));
+								width = maxDim;
+							}
+						} else {
+							if (height > maxDim) {
+								width = Math.round(width * (maxDim / height));
+								height = maxDim;
+							}
+						}
+
+						canvas.width = width;
+						canvas.height = height;
+						const ctx = canvas.getContext("2d");
+						
+						if (ctx) {
+							ctx.drawImage(img, 0, 0, width, height);
+							// Compress image as webp or jpeg
+							const compressedBase64 = canvas.toDataURL("image/webp", 0.8);
+							form.setValue("url", compressedBase64, { shouldDirty: true });
+							form.setValue("hidden", false, { shouldDirty: true });
+							form.handleSubmit(onSubmit)();
+							toast.success(t`Picture uploaded successfully!`);
+						} else {
+							// Fallback if canvas context fails
+							form.setValue("url", img.src, { shouldDirty: true });
+							form.setValue("hidden", false, { shouldDirty: true });
+							form.handleSubmit(onSubmit)();
+							toast.success(t`Picture uploaded successfully!`);
+						}
+					} catch (e) {
+						console.error("Failed to compress image", e);
+						// Fallback to original image
+						form.setValue("url", img.src, { shouldDirty: true });
+						form.setValue("hidden", false, { shouldDirty: true });
+						form.handleSubmit(onSubmit)();
+						toast.success(t`Picture uploaded successfully!`);
+					}
+				};
+				img.src = reader.result as string;
 			};
 			reader.readAsDataURL(file);
 		}
