@@ -194,7 +194,14 @@ function MatchToJobRouteComponent() {
 						...tailoredData.data,
 						metadata: {
 							...(tailoredData.data?.metadata || defaultResumeData.metadata),
-							template: selectedTemplate
+							template: selectedTemplate,
+							design: {
+								...(tailoredData.data?.metadata?.design || defaultResumeData.metadata.design),
+								colors: {
+									...(tailoredData.data?.metadata?.design?.colors || defaultResumeData.metadata.design.colors),
+									primary: templates[selectedTemplate].defaults.design.colors.primary,
+								},
+							},
 						}
 					},
 					withSampleData: false,
@@ -221,6 +228,13 @@ function MatchToJobRouteComponent() {
 					metadata: {
 						...originalResume.data.metadata,
 						template: selectedTemplate,
+						design: {
+							...originalResume.data.metadata.design,
+							colors: {
+								...originalResume.data.metadata.design.colors,
+								primary: templates[selectedTemplate].defaults.design.colors.primary,
+							},
+						},
 					},
 				};
 				
@@ -286,14 +300,34 @@ function MatchToJobRouteComponent() {
 							...defaultResumeData.sections,
 							...(parsedRaw.data.sections || {})
 						},
-						metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
+						metadata: {
+							...defaultResumeData.metadata,
+							template: selectedTemplate,
+							design: {
+								...defaultResumeData.metadata.design,
+								colors: {
+									...defaultResumeData.metadata.design.colors,
+									primary: templates[selectedTemplate].defaults.design.colors.primary,
+								},
+							},
+						}, 
 						picture: defaultResumeData.picture 
 					} : undefined;
 				} else {
 					// Start fresh or fallback
 					resumeDataPayload = {
 						...defaultResumeData,
-						metadata: { ...defaultResumeData.metadata, template: selectedTemplate }
+						metadata: {
+							...defaultResumeData.metadata,
+							template: selectedTemplate,
+							design: {
+								...defaultResumeData.metadata.design,
+								colors: {
+									...defaultResumeData.metadata.design.colors,
+									primary: templates[selectedTemplate].defaults.design.colors.primary,
+								},
+							},
+						}
 					};
 				}
 

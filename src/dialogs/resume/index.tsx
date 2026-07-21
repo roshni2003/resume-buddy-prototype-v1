@@ -234,6 +234,13 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 						metadata: {
 							...createdResume.data.metadata,
 							template: selectedTemplate,
+							design: {
+								...createdResume.data.metadata.design,
+								colors: {
+									...createdResume.data.metadata.design.colors,
+									primary: templates[selectedTemplate].defaults.design.colors.primary,
+								},
+							},
 						},
 						picture: {
 							...createdResume.data.picture,
