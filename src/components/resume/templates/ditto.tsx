@@ -96,7 +96,7 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 			`}</style>
 			{isFirstPage && <Header />}
 
-			<div className="flex pt-(--page-margin-y)">
+			<div className="flex py-(--page-margin-y)">
 				{!fullWidth && (
 					<aside
 						data-layout="sidebar"

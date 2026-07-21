@@ -21,7 +21,7 @@ export function KakunaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	const { main, sidebar, fullWidth } = pageLayout;
 
 	return (
-		<div className="template-kakuna page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+		<div className="template-kakuna page-content space-y-(--page-gap-y) px-(--page-margin-x) py-(--page-margin-y)">
 			<style>{`
 				/* Skills as grid */
 				.template-kakuna .page-section-skills .section-content {
