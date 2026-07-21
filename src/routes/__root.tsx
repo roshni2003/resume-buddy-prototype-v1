@@ -92,24 +92,20 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 						// Diagnostic logs are prefixed with "[auth-debug] inline:" — filter the
 						// console for "[auth-debug]" to trace the full token flow.
 						try {
-							console.log('[auth-debug] inline: script start, href=', window.location.href);
 							var url = new URL(window.location.href);
 							var extracted = url.searchParams.get('token');
 							if (!extracted && url.hash.includes('token=')) {
 								extracted = new URLSearchParams(url.hash.replace(/^#\\/?/, '')).get('token');
 							}
 							var tail = extracted ? ('…' + extracted.slice(-8) + ' (len=' + extracted.length + ')') : String(extracted);
-							console.log('[auth-debug] inline: url token =', tail);
 							if (extracted && extracted !== 'preview') {
 								try {
 									localStorage.setItem('authToken', extracted);
 									var lsBack = localStorage.getItem('authToken');
-									console.log('[auth-debug] inline: localStorage write', lsBack === extracted ? 'OK' : 'MISMATCH', '(read tail=' + (lsBack ? lsBack.slice(-8) : lsBack) + ')');
 								} catch(e) { console.log('[auth-debug] inline: localStorage threw', e); }
 								try {
 									sessionStorage.setItem('authToken', extracted);
 									var ssBack = sessionStorage.getItem('authToken');
-									console.log('[auth-debug] inline: sessionStorage write', ssBack === extracted ? 'OK' : 'MISMATCH');
 								} catch(e) { console.log('[auth-debug] inline: sessionStorage threw', e); }
 								try {
 									var isHttps = window.location.protocol === 'https:';

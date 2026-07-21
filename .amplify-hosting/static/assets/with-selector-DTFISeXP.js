@@ -1,6 +1,5 @@
 import { n as e } from "./jsx-runtime-D7jARjhZ.js";
 import { t } from "./react-BZSX5Bs9.js";
-
 function n() {
 	throw Error(`Invariant failed`);
 }

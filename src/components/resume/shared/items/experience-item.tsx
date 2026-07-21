@@ -24,7 +24,6 @@ function formatExperienceDate(dateString: string | undefined): string {
 		if (isNaN(date.getTime())) {
 			return dateString;
 		}
-
 		const month = date.toLocaleString("en-US", { month: "short" });
 		const year = date.getFullYear();
 		return `${month} ${year}`;

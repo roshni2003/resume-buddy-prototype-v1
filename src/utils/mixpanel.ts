@@ -1,6 +1,7 @@
-const MIXPANEL_TOKEN = "071926001d0ae550dfb32c46e1c9cfbd";
-
 let mixpanelInstance: any = null;
+
+// const MIXPANEL_TOKEN = "071926001d0ae550dfb32c46e1c9cfbd";
+const MIXPANEL_TOKEN = "a4250231f24e572c9a8e8f50217d59ac";
 
 // Initialize mixpanel only on the client side
 if (typeof window !== 'undefined') {
@@ -27,6 +28,11 @@ export const mixpanelService = {
 			$name: user?.user_metadata?.full_name,
 			$email: user?.email,
 		});
+	},
+	setProfileProperties: (properties: object) => {
+		if (typeof window === 'undefined' || !mixpanelInstance) return;
+		console.log(`[Mixpanel] Profile Set:`, properties);
+		mixpanelInstance.people.set(properties);
 	},
 	track: (name: string, props?: object) => {
 		if (typeof window === 'undefined' || !mixpanelInstance) return;

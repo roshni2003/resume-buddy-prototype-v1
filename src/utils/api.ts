@@ -153,6 +153,10 @@ export interface AIInvocationItem {
 	errorMessage: string | null;
 	inputTokens: number;
 	outputTokens: number;
+	totalTokens: number;
+	dollarUsed: number;
+	model: string;
+	latencyMs: number;
 	createdAt: string;
 }
 

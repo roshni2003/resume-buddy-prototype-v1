@@ -1,6 +1,5 @@
 import { o as e } from "./jsx-runtime-D7jARjhZ.js";
 import { t } from "./react-BZSX5Bs9.js";
-
 var n = e(t(), 1),
 	r = `(max-width: 767px)`;
 function i() {
