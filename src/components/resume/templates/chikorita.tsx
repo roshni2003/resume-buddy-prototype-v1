@@ -128,7 +128,7 @@ export function ChikoritaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 			<div className="flex">
 				<main
 					data-layout="main"
-					className="group page-main z-10 flex-1 space-y-4 px-(--page-margin-x) pt-(--page-margin-y)"
+					className="group page-main z-10 flex-1 space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)"
 				>
 					{isFirstPage && <Header />}
 					{main.map((section) => (
@@ -139,7 +139,7 @@ export function ChikoritaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 				{!fullWidth && (
 					<aside
 						data-layout="sidebar"
-						className="group page-sidebar z-10 w-(--page-sidebar-width) shrink-0 space-y-4 overflow-x-hidden px-(--page-margin-x) pt-(--page-margin-y) text-(--page-background-color)"
+						className="group page-sidebar z-10 w-(--page-sidebar-width) shrink-0 space-y-(--page-gap-y) overflow-x-hidden px-(--page-margin-x) pt-(--page-margin-y) text-(--page-background-color)"
 					>
 						{sidebar.map((section) => (
 							<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />

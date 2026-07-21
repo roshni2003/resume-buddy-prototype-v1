@@ -100,7 +100,7 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 				{!fullWidth && (
 					<aside
 						data-layout="sidebar"
-						className="group page-sidebar w-(--page-sidebar-width) shrink-0 space-y-4 overflow-x-hidden ps-(--page-margin-x)"
+						className="group page-sidebar w-(--page-sidebar-width) shrink-0 space-y-(--page-gap-y) overflow-x-hidden ps-(--page-margin-x)"
 					>
 						{sidebar.map((section) => (
 							<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
@@ -108,7 +108,7 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					</aside>
 				)}
 
-				<main data-layout="main" className="group page-main space-y-4 px-(--page-margin-x)">
+				<main data-layout="main" className="group page-main space-y-(--page-gap-y) px-(--page-margin-x)">
 					{main.map((section) => (
 						<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
 					))}

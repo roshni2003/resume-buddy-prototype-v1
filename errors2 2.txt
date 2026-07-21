@@ -1,0 +1,68 @@
+src/components/input/github-stars-button.tsx(3,1): error TS6133: 'useQuery' is declared but its value is never read.
+src/components/input/github-stars-button.tsx(5,1): error TS6133: 'orpc' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(71,35): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(77,37): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(83,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(89,35): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(95,33): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(101,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(107,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(113,33): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(120,2): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(130,39): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(136,36): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/get-section-component.tsx(142,37): error TS6133: 'id' is declared but its value is never read.
+src/components/resume/shared/items/custom-item.tsx(31,54): error TS2367: This comparison appears to be unintentional because the types '"profiles" | "experience" | "education" | "projects" | "skills" | "languages" | "interests" | "awards" | "certifications" | "publications" | "volunteer" | "references" | "summary" | "cover-letter"' and '"generic"' have no overlap.
+src/components/resume/shared/items/custom-item.tsx(45,55): error TS2367: This comparison appears to be unintentional because the types '"profiles" | "experience" | "education" | "projects" | "skills" | "languages" | "interests" | "awards" | "certifications" | "publications" | "volunteer" | "references" | "summary" | "cover-letter"' and '"generic"' have no overlap.
+src/components/resume/shared/items/education-item.tsx(125,11): error TS6133: 'educationTitle' is declared but its value is never read.
+src/components/resume/shared/items/experience-item.tsx(8,1): error TS6133: 'PageLink' is declared but its value is never read.
+src/components/resume/shared/items/projects-item.tsx(72,8): error TS6133: 'handleNameChange' is declared but its value is never read.
+src/components/resume/shared/items/projects-item.tsx(82,8): error TS6133: 'handlePeriodChange' is declared but its value is never read.
+src/components/theme/provider.tsx(16,50): error TS6133: 'defaultTheme' is declared but its value is never read.
+src/components/ui/ai-generate-button.tsx(52,8): error TS6133: 'roundsRemaining' is declared but its value is never read.
+src/components/ui/review-drawer-fixed.tsx(29,62): error TS2339: Property 'autoFixResumeIssues' does not exist on type 'ResumeStore'.
+src/components/ui/review-drawer-fixed.tsx(30,9): error TS6133: 'showDetails' is declared but its value is never read.
+src/components/ui/review-drawer-fixed.tsx(30,22): error TS6133: 'setShowDetails' is declared but its value is never read.
+src/dialogs/resume/index.tsx(600,43): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SetStateAction<"azurill" | "bronzor" | "chikorita" | "ditgar" | "ditto" | "gengar" | "glalie" | "kakuna" | "lapras" | "leafish" | "onyx" | "pikachu" | "rhyhorn">'.
+src/dialogs/resume/sections/custom.tsx(20,15): error TS6133: 'CustomSectionType' is declared but its value is never read.
+src/dialogs/resume/sections/interest.tsx(3,32): error TS6133: 'PlusIcon' is declared but its value is never read.
+src/dialogs/resume/sections/language.tsx(4,32): error TS6133: 'PlusIcon' is declared but its value is never read.
+src/dialogs/resume/sections/skill.tsx(4,32): error TS6133: 'PlusIcon' is declared but its value is never read.
+src/routes/_home/index.tsx(16,10): error TS6133: 'RouteComponent' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx(13,2): error TS6133: 'FormLabel' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx(16,1): error TS6133: 'Input' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/certifications.tsx(8,1): error TS6133: 'cn' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx(219,16): error TS2322: Type '{ label: string; value: string; onChange: (val: string) => void; className: string; }' is not assignable to type 'IntrinsicAttributes & Partial<EditorOptions> & { immediatelyRender?: boolean | undefined; shouldRerenderOnTransaction?: boolean | undefined; } & { ...; }'.
+  Property 'label' does not exist on type 'IntrinsicAttributes & Partial<EditorOptions> & { immediatelyRender?: boolean | undefined; shouldRerenderOnTransaction?: boolean | undefined; } & { ...; }'.
+src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx(263,18): error TS2367: This comparison appears to be unintentional because the types '"custom" | "profiles" | "experience" | "education" | "projects" | "skills" | "languages" | "interests" | "awards" | "certifications" | "publications" | "volunteer" | "references" | "summary" | "cover-letter"' and '"generic"' have no overlap.
+src/routes/builder/$resumeId/-sidebar/left/sections/interests.tsx(1,1): error TS6133: 'Trans' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/sections/summary.tsx(105,31): error TS2339: Property 'id' does not exist on type '{ picture: { hidden: boolean; url: string; size: number; rotation: number; aspectRatio: number; borderRadius: number; borderColor: string; borderWidth: number; shadowColor: string; shadowWidth: number; }; ... 4 more ...; metadata: { ...; }; }'.
+src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx(3,1): error TS6133: 'useMemo' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx(8,68): error TS6133: 'leftSidebarSections' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx(37,8): error TS6133: 'layout' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/left/shared/sortable-section-item.tsx(124,8): error TS6133: 'colors' is declared but its value is never read.
+src/routes/builder/$resumeId/-sidebar/right/sections/template.tsx(12,16): error TS2322: Type '"template"' is not assignable to type 'RightSidebarSection'.
+src/routes/dashboard/admin/mixpanel.tsx(92,8): error TS6133: 'totalTokens' is declared but its value is never read.
+src/routes/dashboard/resumes/-components/list-view.tsx(15,28): error TS2339: Property 'resume' does not exist on type '{ auth: { providers: { list: Partial<Record<"custom" | "credential" | "google" | "github", string>>; }; verifyResumePassword: boolean; }; flags: { get: FeatureFlags; }; storage: { ...; }; }'.
+src/routes/dashboard/resumes/-components/zoe-banner.tsx(15,49): error TS2339: Property 'openDialog' does not exist on type 'unknown'.
+src/routes/dashboard/resumes/index.tsx(5,29): error TS6133: 'TagIcon' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(11,1): error TS6133: 'Badge' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(13,1): error TS6133: 'MultipleCombobox' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(18,1): error TS6133: 'cn' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(144,8): error TS6133: 'tagOptions' is declared but its value is never read.
+src/routes/dashboard/resumes/index.tsx(193,8): error TS6133: 'handleFilterChange' is declared but its value is never read.
+src/routes/dashboard/resumes/match.tsx(50,8): error TS6133: 'openDialog' is declared but its value is never read.
+src/routes/dashboard/resumes/match.tsx(759,45): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SetStateAction<"azurill" | "bronzor" | "chikorita" | "ditgar" | "ditto" | "gengar" | "glalie" | "kakuna" | "lapras" | "leafish" | "onyx" | "pikachu" | "rhyhorn">'.
+src/routes/dashboard/resumes/upload.tsx(49,7): error TS6133: 'MOCK_PARSED_DATA' is declared but its value is never read.
+src/routes/dashboard/settings/profile.tsx(45,29): error TS2339: Property 'username' does not exist on type '({ id: string; createdAt: Date; updatedAt: Date; email: string; emailVerified: boolean; name: string; image?: string | null | undefined; } | { id: string; createdAt: Date; ... 7 more ...; twoFactorEnabled: boolean | ... 1 more ... | undefined; }) & { ...; }'.
+  Property 'username' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; email: string; emailVerified: boolean; name: string; image?: string | null | undefined; } & { name: string; }'.
+src/routes/dashboard/settings/profile.tsx(72,65): error TS18047: 'session' is possibly 'null'.
+src/routes/dashboard/settings/profile.tsx(75,22): error TS18047: 'session' is possibly 'null'.
+src/routes/dashboard/settings/profile.tsx(89,66): error TS18047: 'session' is possibly 'null'.
+src/routes/dashboard/settings/profile.tsx(98,11): error TS18047: 'session' is possibly 'null'.
+src/routes/dashboard/settings/profile.tsx(185,16): error TS18047: 'session' is possibly 'null'.
+src/routes/printer/$resumeId.tsx(18,2): error TS2322: Type '({ loaderData }: AssetFnContextOptions<"/printer/$resumeId", "/printer/$resumeId", RootRoute<Register, undefined, RouterContext, AnyContext, () => Promise<{ theme: "dark" | "light"; locale: "en-US" | ... 51 more ... | "zh-TW"; session: AuthSession | null; flags: FeatureFlags | { ...; }; }>, ... 6 more ..., undefined...' is not assignable to type '(ctx: AssetFnContextOptions<"/printer/$resumeId", "/printer/$resumeId", RootRoute<Register, undefined, RouterContext, AnyContext, () => Promise<{ theme: "dark" | "light"; locale: "en-US" | ... 51 more ... | "zh-TW"; session: AuthSession | null; flags: FeatureFlags | { ...; }; }>, ... 6 more ..., undefined>, ... 6 mo...'.
+  Type '{ styles: { children: string; }[]; } | undefined' is not assignable to type 'Awaitable<{ links?: (DetailedHTMLProps<LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> | undefined)[] | undefined; scripts?: (DetailedHTMLProps<...> | undefined)[] | undefined; meta?: (DetailedHTMLProps<...> | undefined)[] | undefined; styles?: (DetailedHTMLProps<...> | undefined)[] | undefined; }>'.
+    Type 'undefined' is not assignable to type 'Awaitable<{ links?: (DetailedHTMLProps<LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> | undefined)[] | undefined; scripts?: (DetailedHTMLProps<...> | undefined)[] | undefined; meta?: (DetailedHTMLProps<...> | undefined)[] | undefined; styles?: (DetailedHTMLProps<...> | undefined)[] | undefined; }>'.
+src/routes/printer/$resumeId.tsx(30,2): error TS2322: Type '({ params, search }: BeforeLoadContextOptions<Register, RootRoute<Register, undefined, RouterContext, AnyContext, () => Promise<{ theme: "dark" | "light"; locale: "en-US" | "zu-ZA" | ... 50 more ... | "zh-TW"; session: AuthSession | null; flags: FeatureFlags | { ...; }; }>, ... 6 more ..., undefined>, ... 6 more ......' is not assignable to type '(ctx: BeforeLoadContextOptions<Register, RootRoute<Register, undefined, RouterContext, AnyContext, () => Promise<{ theme: "dark" | "light"; locale: "en-US" | "zu-ZA" | ... 50 more ... | "zh-TW"; session: AuthSession | null; flags: FeatureFlags | { ...; }; }>, ... 6 more ..., undefined>, ... 6 more ..., undefined>) =...'.
+  Type 'Promise<void>' is not assignable to type 'never'.

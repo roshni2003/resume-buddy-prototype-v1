@@ -108,7 +108,7 @@ export function GengarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 						{isFirstPage && <Header />}
 
 						{!fullWidth && (
-							<div className="shrink-0 space-y-4 overflow-x-hidden px-(--page-margin-x) pt-(--page-margin-y)">
+							<div className="shrink-0 space-y-(--page-gap-y) overflow-x-hidden px-(--page-margin-x) pt-(--page-margin-y)">
 								{sidebar.map((section) => (
 									<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
 								))}
@@ -118,7 +118,7 @@ export function GengarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 				)}
 
 				<main data-layout="main" className="group page-main z-10">
-					<div className="space-y-4 px-(--page-margin-x) pt-(--page-margin-y)">
+					<div className="space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
 						{main.map((section) => (
 							<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
 						))}
