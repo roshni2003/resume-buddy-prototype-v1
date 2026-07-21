@@ -25,14 +25,12 @@ const __vite__mapDeps = (
 			"assets/api-BDc_pfcq.js",
 		]),
 ) => i.map((i) => d[i]);
-
 import { q as g, K as h, G as m } from "./badge-BlEOZEch.js";
 import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
 import { n as f, t as p } from "./lazyRouteComponent-DBGst3ji.js";
 import { M as a, R as c, H as i, i as l, O as o, D as r, P as s, t as u } from "./preload-helper-DwC0sqXt.js";
 import { t as n } from "./react-BZSX5Bs9.js";
 import { P as d } from "./useStore-KX9e-E04.js";
-
 function _(e) {
 	return ({ search: t, next: n }) => {
 		if (e === !0) return {};

@@ -1,7 +1,6 @@
 import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
 import { Z as n } from "./preload-helper-DwC0sqXt.js";
 import { t as r } from "./spinner-BNUJLa4B.js";
-
 var i = e(t(), 1);
 function a() {
 	return (0, i.jsxs)(`div`, {

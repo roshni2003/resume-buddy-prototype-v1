@@ -8,7 +8,6 @@ import { n as d, o as f, a as l, s as m, r as p, i as u } from "./rich-input-CFi
 import { n as _, o as ee, l as g, a as h, s as v } from "./section-BpLUrMt_.js";
 import { a as c } from "./string-_Z1c2EAS.js";
 import { t as te } from "./Warning.es-uAi4GnyT.js";
-
 var S = e(n(), 1),
 	re = new Map([
 		[

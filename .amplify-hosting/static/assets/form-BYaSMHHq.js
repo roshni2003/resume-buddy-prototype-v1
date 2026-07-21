@@ -1,7 +1,6 @@
 import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
 import { g as a, y as c, _ as i, h as o, D as r, x as s } from "./preload-helper-DwC0sqXt.js";
 import { t as n } from "./react-BZSX5Bs9.js";
-
 var l = e(n(), 1),
 	u = e(t(), 1),
 	d = `Label`,

@@ -1,6 +1,5 @@
 import { n as e, o as t } from "./jsx-runtime-D7jARjhZ.js";
 import { t as n } from "./react-BZSX5Bs9.js";
-
 var r = e((e, t) => {
 		var n = `Expected a function`,
 			r = NaN,

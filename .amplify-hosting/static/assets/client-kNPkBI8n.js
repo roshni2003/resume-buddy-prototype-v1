@@ -1,6 +1,5 @@
 import { o as e } from "./jsx-runtime-D7jARjhZ.js";
 import { t } from "./react-BZSX5Bs9.js";
-
 function n(e) {
 	return Object.fromEntries(Object.entries(e).map(([e, t]) => [e, { code: e, message: t, toString: () => e }]));
 }

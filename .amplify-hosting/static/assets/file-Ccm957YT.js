@@ -1,5 +1,4 @@
 import { i as e } from "./string-_Z1c2EAS.js";
-
 function t(e) {
 	return `${e.getFullYear()}${String(e.getMonth() + 1).padStart(2, `0`)}${String(e.getDate()).padStart(2, `0`)}_${String(e.getHours()).padStart(2, `0`)}${String(e.getMinutes()).padStart(2, `0`)}`;
 }

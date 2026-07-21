@@ -11,7 +11,6 @@ import { t as g, n as h } from "./input-DIek8tFf.js";
 import { r as f, t as p } from "./profile-BhzKRY5a.js";
 import { t as E } from "./separator-E8i2irOi.js";
 import { t as m } from "./Warning.es-uAi4GnyT.js";
-
 var O = e(n()),
 	k = e(t(), 1);
 function A({ title: e, icon: t, className: n }) {
