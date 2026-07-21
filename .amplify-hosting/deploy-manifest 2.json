@@ -1,0 +1,33 @@
+{
+	"version": 1,
+	"framework": {
+		"name": "tanstack-start",
+		"version": "1.0.0"
+	},
+	"routes": [
+		{
+			"path": "/*.*",
+			"target": {
+				"kind": "Static"
+			},
+			"fallback": {
+				"kind": "Compute",
+				"src": "default"
+			}
+		},
+		{
+			"path": "/*",
+			"target": {
+				"kind": "Compute",
+				"src": "default"
+			}
+		}
+	],
+	"computeResources": [
+		{
+			"name": "default",
+			"runtime": "nodejs20.x",
+			"entrypoint": "server.js"
+		}
+	]
+}
