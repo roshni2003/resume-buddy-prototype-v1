@@ -37,7 +37,7 @@ export function LaprasTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div
 			style={style}
-			className="template-lapras page-content space-y-6 px-(--page-margin-x) pt-(--page-margin-y) print:p-0"
+			className="template-lapras page-content space-y-6 px-(--page-margin-x) py-(--page-margin-y) print:p-0"
 		>
 			<style>{`
 				/* Skills as grid */

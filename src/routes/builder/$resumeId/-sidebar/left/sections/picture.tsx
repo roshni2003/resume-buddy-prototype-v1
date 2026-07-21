@@ -327,27 +327,19 @@ export function PictureSectionForm() {
 										<span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{field.value}px</span>
 									</div>
 									<div className="flex items-center justify-between pb-1 -mt-1">
-										<button
-											type="button"
-											onClick={() => field.onChange(Math.max(32, field.value - 4))}
-											className="text-xs font-medium text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-100 transition-colors"
-										>
+										<span className="text-xs font-medium text-gray-400 cursor-default">
 											dec. size
-										</button>
-										<button
-											type="button"
-											onClick={() => field.onChange(Math.min(256, field.value + 4))}
-											className="text-xs font-medium text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-100 transition-colors"
-										>
+										</span>
+										<span className="text-xs font-medium text-gray-400 cursor-default">
 											inc. size
-										</button>
+										</span>
 									</div>
 									<FormControl>
 										<div className="relative flex w-full items-center">
 											<input
 												type="range"
-												min={32}
-												max={256}
+												min={50}
+												max={150}
 												step={1}
 												value={field.value}
 												onChange={(e) => {
@@ -355,7 +347,7 @@ export function PictureSectionForm() {
 												}}
 												className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-emerald-100 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-emerald-500 [&::-moz-range-thumb]:bg-white [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-emerald-500 [&::-webkit-slider-thumb]:bg-white"
 												style={{
-													background: `linear-gradient(to right, #10b981 0%, #10b981 ${((field.value - 32) / (256 - 32)) * 100}%, #d1fae5 ${((field.value - 32) / (256 - 32)) * 100}%, #d1fae5 100%)`,
+													background: `linear-gradient(to right, #10b981 0%, #10b981 ${((field.value - 50) / (150 - 50)) * 100}%, #d1fae5 ${((field.value - 50) / (150 - 50)) * 100}%, #d1fae5 100%)`,
 												}}
 											/>
 										</div>
