@@ -134,12 +134,7 @@ export function AIGenerateButton({
 								// Also check the most recent one if no match found
 								const latestInvocation = matchingInvocation || invocationsResponse.invocations[0];
 
-								console.log("[Mixpanel] Found invocation:", {
-									keyName: latestInvocation.keyName,
-									totalTokens: latestInvocation.totalTokens,
-									dollarUsed: latestInvocation.dollarUsed,
-									createdAt: latestInvocation.createdAt,
-								});
+
 
 								mixpanelService.track("AI Token Usage", {
 									tokens_used: latestInvocation.totalTokens,

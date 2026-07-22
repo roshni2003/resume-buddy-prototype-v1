@@ -188,7 +188,8 @@ function RouteComponent() {
 
 	// Try every field that might contain a display name
 	const displayName = user?.name || user?.displayName || user?.username || user?.email?.split("@")[0] || tokenName;
-	const firstName = displayName?.split(" ")[0] || (isPending ? "" : "");
+	const rawFirstName = displayName?.split(" ")[0] || (isPending ? "" : "");
+	const firstName = rawFirstName ? rawFirstName.charAt(0).toUpperCase() + rawFirstName.slice(1).toLowerCase() : "";
 
 	const handleFilterChange = (value: string[]) => {
 		mixpanelService.track("Filter Applied", {
