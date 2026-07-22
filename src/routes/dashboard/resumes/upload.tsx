@@ -213,33 +213,40 @@ function UploadRouteComponent() {
 
 			// Robustly parse and cap skills to prevent AI exaggeration and handle different formats
 			if (parsedRaw.data?.sections?.skills?.items) {
-				let allSkills: string[] = [];
+				let allSkills: { name: string; icon: string }[] = [];
 				const genericCategories = ["skills", "frontend", "backend", "languages", "tools", "frameworks", "technologies", "technical skills", "libraries", "databases", "other", "core skills", "programming languages"];
 				
 				parsedRaw.data.sections.skills.items.forEach((item: any) => {
 					const name = item.name ? item.name.trim() : "";
+					const icon = item.icon || "";
 					const hasKeywords = Array.isArray(item.keywords) && item.keywords.length > 0;
 					
 					if (name && genericCategories.includes(name.toLowerCase()) && hasKeywords) {
-						allSkills.push(...item.keywords);
+						allSkills.push(...item.keywords.map((k: string) => ({ name: k, icon })));
 					} else if (name) {
-						allSkills.push(...name.split(",").map((s: string) => s.trim()));
+						allSkills.push(...name.split(",").map((s: string) => ({ name: s.trim(), icon })));
 					} else if (hasKeywords) {
-						allSkills.push(...item.keywords);
+						allSkills.push(...item.keywords.map((k: string) => ({ name: k, icon })));
 					} else if (typeof item.keywords === "string" && item.keywords.trim() !== "") {
-						allSkills.push(...item.keywords.split(",").map((s: string) => s.trim()));
+						allSkills.push(...item.keywords.split(",").map((s: string) => ({ name: s.trim(), icon })));
 					}
 				});
 
-				// Deduplicate and cap
-				allSkills = Array.from(new Set(allSkills)).filter(Boolean).slice(0, 20);
+				// Deduplicate by name and cap
+				const uniqueSkillsMap = new Map<string, string>();
+				for (const skill of allSkills) {
+					if (skill.name && !uniqueSkillsMap.has(skill.name)) {
+						uniqueSkillsMap.set(skill.name, skill.icon);
+					}
+				}
+				const uniqueSkills = Array.from(uniqueSkillsMap.entries()).slice(0, 20);
 
 				// Overwrite the payload so the builder also gets the capped/cleaned skills
-				parsedRaw.data.sections.skills.items = allSkills.map(skillName => ({ 
+				parsedRaw.data.sections.skills.items = uniqueSkills.map(([skillName, icon]) => ({ 
 					id: crypto.randomUUID(),
 					hidden: false,
 					name: skillName, 
-					icon: "",
+					icon: icon || "",
 					proficiency: "",
 					level: 0,
 					keywords: [] 
@@ -310,7 +317,17 @@ function UploadRouteComponent() {
 						...defaultResumeData.sections,
 						...(fullResumeData.data.sections || {})
 					},
-					metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
+					metadata: {
+						...defaultResumeData.metadata,
+						template: selectedTemplate,
+						design: {
+							...defaultResumeData.metadata.design,
+							colors: {
+								...defaultResumeData.metadata.design.colors,
+								primary: templates[selectedTemplate].defaults.design.colors.primary,
+							},
+						},
+					},
 					picture: defaultResumeData.picture 
 				} : undefined,
 				withSampleData: false,

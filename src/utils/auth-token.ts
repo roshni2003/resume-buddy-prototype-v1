@@ -11,7 +11,6 @@ const tokenTail = (token: string | null | undefined) =>
 const log = (...args: unknown[]) => {
 	if (DEBUG && typeof console !== "undefined") {
 		// eslint-disable-next-line no-console
-		console.log("[auth-debug]", ...args);
 	}
 };
 
@@ -91,12 +90,10 @@ export const getAuthToken = (): string | null => {
 		try {
 			return localStorage.getItem(AUTH_TOKEN_KEY);
 		} catch (e) {
-			log("getAuthToken: localStorage.getItem threw", e);
 			return null;
 		}
 	})();
 	if (fromLocal) {
-		log("getAuthToken: found in localStorage", tokenTail(fromLocal));
 		return fromLocal;
 	}
 
@@ -104,17 +101,14 @@ export const getAuthToken = (): string | null => {
 		try {
 			return sessionStorage.getItem(AUTH_TOKEN_KEY);
 		} catch (e) {
-			log("getAuthToken: sessionStorage.getItem threw", e);
 			return null;
 		}
 	})();
 	if (fromSession) {
-		log("getAuthToken: found in sessionStorage", tokenTail(fromSession));
 		return fromSession;
 	}
 
 	const fromCookie = getCookie(AUTH_TOKEN_KEY);
-	log("getAuthToken: cookie =", tokenTail(fromCookie));
 	return fromCookie;
 };
 
@@ -149,7 +143,6 @@ const yieldTick = (ms = 50): Promise<void> => new Promise((resolve) => setTimeou
 export const persistAuthToken = async (token: string, maxAttempts = 3): Promise<boolean> => {
 	if (typeof window === "undefined") return false;
 
-	log("persistAuthToken: start", tokenTail(token));
 	let storedSomewhere = false;
 
 	// 1. localStorage with retries + yield ticks (handles deferred-commit devices)
@@ -164,13 +157,10 @@ export const persistAuthToken = async (token: string, maxAttempts = 3): Promise<
 				storedSomewhere = true;
 				break;
 			}
-			log("persistAuthToken: localStorage attempt", i + 1, "readback mismatch", tokenTail(readback));
 		} catch (e) {
-			log("persistAuthToken: localStorage.setItem threw on attempt", i + 1, e);
 			await yieldTick(50);
 		}
 	}
-	log("persistAuthToken: localStorage result", localOk ? "OK" : "FAILED");
 
 	// 2. sessionStorage — always attempt as a parallel store, not just on localStorage failure.
 	let sessionOk = false;
@@ -182,17 +172,13 @@ export const persistAuthToken = async (token: string, maxAttempts = 3): Promise<
 			storedSomewhere = true;
 		}
 	} catch (e) {
-		log("persistAuthToken: sessionStorage.setItem threw", e);
 	}
-	log("persistAuthToken: sessionStorage result", sessionOk ? "OK" : "FAILED");
 
 	// 3. First-party cookie — survives some in-app browsers and Safari private mode
 	//    where Web Storage is silently broken. Always attempted as a third fallback.
 	const cookieOk = setCookie(AUTH_TOKEN_KEY, token, AUTH_COOKIE_MAX_AGE_SECONDS);
 	if (cookieOk) storedSomewhere = true;
-	log("persistAuthToken: cookie result", cookieOk ? "OK" : "FAILED");
 
-	log("persistAuthToken: done — storedSomewhere =", storedSomewhere);
 	return storedSomewhere;
 };
 
@@ -209,10 +195,8 @@ export const getUrlToken = (): string | null => {
 			extractedToken = new URLSearchParams(url.hash.replace(/^#/, "")).get("token");
 		}
 		if (extractedToken && extractedToken !== "preview") {
-			log("getUrlToken: extracted from URL", tokenTail(extractedToken));
 			return extractedToken;
 		}
-		log("getUrlToken: no token in URL (search or hash)");
 	} catch (e) {
 		log("getUrlToken: threw", e);
 	}

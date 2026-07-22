@@ -20,6 +20,7 @@ const sectionClassName = cn(
 export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	const isFirstPage = pageIndex === 0;
 	const { main, sidebar, fullWidth } = pageLayout;
+	const picture = useResumeStore((state) => state.resume.data.picture);
 
 	return (
 		<div className="template-ditto page-content">
@@ -96,19 +97,25 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 			`}</style>
 			{isFirstPage && <Header />}
 
-			<div className="flex pt-(--page-margin-y)">
+			<div className="flex py-(--page-margin-y)">
 				{!fullWidth && (
 					<aside
 						data-layout="sidebar"
-						className="group page-sidebar w-(--page-sidebar-width) shrink-0 space-y-4 overflow-x-hidden ps-(--page-margin-x)"
+						className="group page-sidebar w-(--page-sidebar-width) shrink-0 space-y-(--page-gap-y) overflow-x-hidden ps-(--page-margin-x)"
 					>
+						{isFirstPage && !picture.hidden && (
+							<div 
+								style={{ height: `max(0px, calc(${picture.size}pt - 80px))` }} 
+								className="w-full shrink-0" 
+							/>
+						)}
 						{sidebar.map((section) => (
 							<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
 						))}
 					</aside>
 				)}
 
-				<main data-layout="main" className="group page-main space-y-4 px-(--page-margin-x)">
+				<main data-layout="main" className="group page-main space-y-(--page-gap-y) px-(--page-margin-x)">
 					{main.map((section) => (
 						<Section key={section} type={section} id={section} sectionClassName={sectionClassName} />
 					))}

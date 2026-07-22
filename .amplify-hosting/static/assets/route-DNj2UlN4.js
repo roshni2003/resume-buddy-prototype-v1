@@ -39,7 +39,6 @@ const __vite__mapDeps = (
 			"assets/file-Ccm957YT.js",
 		]),
 ) => i.map((i) => d[i]);
-
 import { t as le } from "./api-BDc_pfcq.js";
 import {
 	B as b,
@@ -78,7 +77,6 @@ import {
 } from "./preload-helper-DwC0sqXt.js";
 import { t as n } from "./react-BZSX5Bs9.js";
 import { s as _, o as g } from "./string-_Z1c2EAS.js";
-
 var P = e(n(), 1),
 	ue = new Map([
 		[

@@ -1,6 +1,5 @@
 import { o as e, t } from "./jsx-runtime-D7jARjhZ.js";
 import { t as n } from "./react-BZSX5Bs9.js";
-
 var r = class {
 		constructor() {
 			(this.listeners = new Set()), (this.subscribe = this.subscribe.bind(this));

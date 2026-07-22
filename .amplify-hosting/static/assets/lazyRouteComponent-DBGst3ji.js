@@ -2,7 +2,6 @@ import { o as e } from "./jsx-runtime-D7jARjhZ.js";
 import { t } from "./react-BZSX5Bs9.js";
 import { n as i } from "./route-YyFGB8Ug.js";
 import { c as n, z as r } from "./useStore-KX9e-E04.js";
-
 function a(e) {
 	return new o(e, { silent: !0 }).createRoute;
 }

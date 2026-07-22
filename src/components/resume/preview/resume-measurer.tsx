@@ -55,6 +55,14 @@ export const ResumeMeasurer = ({ onMeasure }: Props) => {
 			if (id) {
 				const rect = node.getBoundingClientRect();
 				measurements[id] = rect.height;
+				
+				const contentNode = node.querySelector(".section-content");
+				if (contentNode) {
+					const contentRect = contentNode.getBoundingClientRect();
+					measurements[`${id}_header`] = contentRect.top - rect.top;
+				} else {
+					measurements[`${id}_header`] = 0;
+				}
 			}
 		});
 
@@ -65,6 +73,12 @@ export const ResumeMeasurer = ({ onMeasure }: Props) => {
 			if (id) {
 				const rect = node.getBoundingClientRect();
 				measurements[id] = rect.height;
+				
+				const sectionNode = node.closest("[data-section-id]");
+				if (sectionNode) {
+					const sectionRect = sectionNode.getBoundingClientRect();
+					measurements[`${id}_offset`] = rect.bottom - sectionRect.top;
+				}
 			}
 		});
 

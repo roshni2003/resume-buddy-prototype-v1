@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useResumeStore } from "@/components/resume/store/resume";
+import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/utils/api";
 import { mixpanelService } from "@/utils/mixpanel";
 import { stripHtml } from "@/utils/string";
@@ -36,6 +37,7 @@ export function AIGenerateButton({
 	const isMounted = useRef(true);
 	const storeResumeId = useResumeStore((state) => state.resume.id);
 	const effectiveResumeId = resumeId || storeResumeId;
+	const { user } = useAuth();
 
 	const { mutate: generateContent, isPending } = useMutation({
 		mutationFn: api.generateAIContent,
@@ -105,19 +107,66 @@ export function AIGenerateButton({
 				value: value,
 			},
 			{
-				onSuccess: (response) => {
+				onSuccess: async (response) => {
 					let content = Object.values(response)[0];
 					console.log("Generation successful, content length:", content?.length);
 
-					// ✅ ADD THIS MIXPANEL TRACKING
-					mixpanelService.track("AI Token Usage", {
-						tokens_used: 500, // Estimated tokens for content generation
-						feature: type, // "experience", "projects", "summary", etc.
-						success: true,
-						round: roundsUsed + 1,
-						timestamp: new Date().toISOString(),
-						date: new Date().toISOString().split("T")[0],
-					});
+					if (user?.id && effectiveResumeId) {
+						try {
+							// Fetch more records to find the correct one
+							const invocationsResponse = await api.fetchUserAIInvocations(user.id, 1, 10); // Get last 10 invocations
+
+							if (invocationsResponse?.invocations?.length > 0) {
+								// Find the invocation that matches current resume and type
+								const matchingInvocation = invocationsResponse.invocations.find(
+									(inv) =>
+										inv.resumeId === effectiveResumeId &&
+										inv.keyName ===
+											(type === "experience"
+												? "ExperienceDescription"
+												: type === "projects"
+													? "ProjectsDescription"
+													: type === "summary"
+														? "summary"
+														: "FinalReview"),
+								);
+
+								// Also check the most recent one if no match found
+								const latestInvocation = matchingInvocation || invocationsResponse.invocations[0];
+
+
+
+								mixpanelService.track("AI Token Usage", {
+									tokens_used: latestInvocation.totalTokens,
+									total_cost: latestInvocation.dollarUsed,
+									feature: type,
+									success: true,
+									round: roundsUsed + 1,
+									resume_id: effectiveResumeId,
+									invocation_id: latestInvocation.id,
+									timestamp: new Date().toISOString(),
+									date: new Date().toISOString().split("T")[0],
+								});
+							} else {
+								// Fallback: track without token data but mark as pending
+								mixpanelService.track("AI Token Usage", {
+									feature: type,
+									success: true,
+									round: roundsUsed + 1,
+									token_data_pending: true,
+								});
+							}
+						} catch (err) {
+							console.error("Failed to fetch invocation data", err);
+							// Don't block the user experience - still track success
+							mixpanelService.track("AI Token Usage", {
+								feature: type,
+								success: true,
+								round: roundsUsed + 1,
+								token_tracking_failed: true,
+							});
+						}
+					}
 
 					// Check if content is valid
 					if (!content || content.length < 10) {
@@ -157,14 +206,9 @@ export function AIGenerateButton({
 
 					toast.success("Content generated successfully!", { id: toastId });
 					onGenerated(content);
-
-					// Record the round
-					if (isMounted.current) {
-						console.log("Recording round completion");
-						onRoundComplete?.();
-					}
+					onRoundComplete?.();
 				},
-				onError: (error: any) => {
+				onError: (error: Error) => {
 					console.error("Generation error:", error);
 
 					// ✅ ADD THIS MIXPANEL TRACKING

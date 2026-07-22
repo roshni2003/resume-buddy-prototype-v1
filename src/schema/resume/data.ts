@@ -32,8 +32,8 @@ export const pictureSchema = z.object({
 		),
 	size: z
 		.number()
-		.min(32)
-		.max(512)
+		.min(50)
+		.max(150)
 		.describe("The size of the picture to display on the resume, defined in points (pt)."),
 	rotation: z
 		.number()

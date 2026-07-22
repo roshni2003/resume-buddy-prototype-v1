@@ -62,12 +62,12 @@ export function AzurillTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	const { main, sidebar, fullWidth } = pageLayout;
 
 	return (
-		<div className="template-azurill page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+		<div className="template-azurill page-content space-y-(--page-gap-y) px-(--page-margin-x) py-(--page-margin-y)">
 			<style>{`
 				/* Skills as grid */
 				.template-azurill .page-section-skills .section-content {
 					display: grid !important;
-					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 					column-gap: 0.75rem !important;
 					row-gap: 1rem !important;
 				}

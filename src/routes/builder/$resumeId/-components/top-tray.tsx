@@ -46,6 +46,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { ReviewDrawer } from "@/components/ui/review-drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDialogStore } from "@/dialogs/store";
+import { useAuth } from "@/hooks/useAuth";
 import type { ResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 import { downloadFromUrl, generateFilename } from "@/utils/file";
@@ -65,6 +66,7 @@ function getWeekNumber(date: Date) {
 export function BuilderTopTray() {
 	const { i18n } = useLingui();
 	const openDialog = useDialogStore((state) => state.openDialog);
+	const { user } = useAuth();
 	const params = useParams({ from: "/builder/$resumeId" });
 	const { data: resume } = useQuery({
 		queryKey: ["resumes", params.resumeId],
@@ -182,16 +184,61 @@ export function BuilderTopTray() {
 			setReviewResult(result);
 			setShowReviewDrawer(true);
 
-			mixpanelService.track("AI Token Usage", {
-				tokens_used: result.tokens_used || 1500, // Fallback if not in API response
-				feature: "FinalReview",
-				success: true,
-				timestamp: new Date().toISOString(),
-				date: new Date().toISOString().split("T")[0],
-				week: getWeekNumber(new Date()),
-				month: new Date().getMonth() + 1,
-				year: new Date().getFullYear(),
-			});
+			try {
+				const invocationsResponse = await api.fetchUserAIInvocations(user?.id || "me", 1, 10);
+				if (invocationsResponse?.invocations?.length > 0) {
+					// Find the most recent FinalReview invocation for THIS resume
+					const finalReviewInvocation = invocationsResponse.invocations.find(
+						(inv) => inv.resumeId === resume.id && inv.keyName === "FinalReview",
+					);
+
+					// If found, use it; otherwise fall back to the most recent
+					const latestInvocation = finalReviewInvocation || invocationsResponse.invocations[0];
+
+					mixpanelService.track("AI Token Usage", {
+						tokens_used:
+							latestInvocation.totalTokens ||
+							latestInvocation.inputTokens + latestInvocation.outputTokens ||
+							result.tokens_used,
+						total_cost: latestInvocation.dollarUsed,
+						feature: "FinalReview",
+						model: latestInvocation.model,
+						latency_ms: latestInvocation.latencyMs,
+						success: true,
+						timestamp: new Date().toISOString(),
+						date: new Date().toISOString().split("T")[0],
+						week: getWeekNumber(new Date()),
+						month: new Date().getMonth() + 1,
+						year: new Date().getFullYear(),
+					});
+				} else {
+					// Fallback tracking without token data
+					mixpanelService.track("AI Token Usage", {
+						tokens_used: result.tokens_used || 0,
+						total_cost: 0,
+						feature: "FinalReview",
+						success: true,
+						timestamp: new Date().toISOString(),
+						date: new Date().toISOString().split("T")[0],
+						week: getWeekNumber(new Date()),
+						month: new Date().getMonth() + 1,
+						year: new Date().getFullYear(),
+					});
+				}
+			} catch (error) {
+				console.error("Failed to fetch accurate AI invocation tracking for FinalReview", error);
+				mixpanelService.track("AI Token Usage", {
+					tokens_used: result.tokens_used || 0,
+					total_cost: 0,
+					feature: "FinalReview",
+					success: true,
+					timestamp: new Date().toISOString(),
+					date: new Date().toISOString().split("T")[0],
+					week: getWeekNumber(new Date()),
+					month: new Date().getMonth() + 1,
+					year: new Date().getFullYear(),
+				});
+			}
 
 			toast.success(t`Review complete!`, {
 				id: toastId,

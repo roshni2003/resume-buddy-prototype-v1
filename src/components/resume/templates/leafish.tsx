@@ -95,8 +95,8 @@ export function LeafishTemplate({ pageIndex, pageLayout }: TemplateProps) {
 			`}</style>
 			{isFirstPage && <Header />}
 
-			<div className="flex gap-x-(--page-margin-x) px-(--page-margin-x) pt-(--page-margin-y)">
-				<main data-layout="main" className="group page-main space-y-(--page-gap-y)">
+			<div className="flex gap-x-(--page-margin-x) px-(--page-margin-x) py-(--page-margin-y)">
+				<main data-layout="main" className="group page-main grow space-y-(--page-gap-y)">
 					{main
 						.filter((section) => section !== "summary")
 						.map((section) => (

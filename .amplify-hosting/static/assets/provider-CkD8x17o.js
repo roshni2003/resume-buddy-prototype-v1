@@ -4,7 +4,6 @@ import { i as r } from "./preload-helper-DwC0sqXt.js";
 import { t as n } from "./react-BZSX5Bs9.js";
 import { s as a, o as i } from "./string-_Z1c2EAS.js";
 import { i as o } from "./useStore-KX9e-E04.js";
-
 var c = r.union([r.literal(`light`), r.literal(`dark`)]),
 	l = `theme`,
 	u = `dark`;

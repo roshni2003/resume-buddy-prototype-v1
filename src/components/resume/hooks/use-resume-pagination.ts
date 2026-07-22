@@ -19,7 +19,8 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 	const pageHeight = pageDimensionsAsPixels[metadata.page.format].height;
 	const marginY = metadata.page.marginY;
 	const gapY = metadata.page.gapY;
-	const contentHeight = pageHeight - marginY * 2;
+	// We subtract a small safety buffer (16px) to ensure items don't sit exactly on the bottom edge
+	const contentHeight = pageHeight - marginY * 2 - 16;
 
 	return useMemo(() => {
 		// If no measurements yet, return original layout
@@ -92,11 +93,9 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 				if (items.length === 0) continue;
 
 				const itemIds = items.map((i: any) => i.id);
-				const itemHeights = itemIds.map((id: string) => measurements[id] || 50);
 				const totalMeasuredHeight = measurements[sectionId] || 0;
-				const totalItemHeight = itemHeights.reduce((a: number, b: number) => a + b, 0);
 				// Estimate header height (section header)
-				const sectionHeaderHeight = Math.max(0, totalMeasuredHeight - totalItemHeight);
+				const sectionHeaderHeight = measurements[`${sectionId}_header`] || 0;
 
 				// Does header fit?
 				if (currentHeight + sectionHeaderHeight > contentHeight) {
@@ -130,16 +129,62 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 					continue;
 				}
 
+				// If it's a grid/chip section, prefer shifting the whole section to the next page rather than splitting
+				const preventSplit = ["skills", "languages", "interests", "certifications", "awards"].includes(sectionId);
+				if (preventSplit && sectionHeight && sectionHeight <= contentHeight) {
+					// It can fit on one page, but not the current page. Move it entirely to next page.
+					currentPageIndex++;
+					currentHeight = 0;
+
+					if (currentPageIndex >= MAX_PAGES) {
+						isOverflowing = true;
+						break;
+					}
+
+					if (!pages[currentPageIndex]) {
+						pages[currentPageIndex] = {
+							fullWidth: metadata.layout.pages[0]?.fullWidth ?? false,
+							main: [],
+							sidebar: [],
+						};
+					}
+
+					pages[currentPageIndex][columnName].push(sectionId);
+					itemDistribution[sectionId][currentPageIndex] = items.map((i: any) => i.id);
+					currentHeight += sectionHeight + gapY;
+					continue;
+				}
+
 				// Otherwise, fallback to fitting individual items
+				let previousItemOffset = sectionHeaderHeight;
+
 				for (let i = 0; i < items.length; i++) {
 					const itemId = items[i].id;
 					const itemHeight = measurements[itemId] || 50;
+					const itemOffset = measurements[`${itemId}_offset`];
 
-					if (currentHeight + itemHeight <= contentHeight) {
+					let heightContribution = 0;
+					const isFirstOnPage = !itemDistribution[sectionId][currentPageIndex] || itemDistribution[sectionId][currentPageIndex].length === 0;
+					
+					if (isFirstOnPage) {
+						if (i === 0 && itemOffset !== undefined) {
+							// First item of the section on the first page: use exact offset from header
+							heightContribution = Math.max(0, itemOffset - previousItemOffset);
+						} else {
+							// First item on a NEW page: just its height (no header or previous gaps)
+							heightContribution = itemHeight;
+						}
+					} else if (itemOffset !== undefined) {
+						heightContribution = Math.max(0, itemOffset - previousItemOffset);
+					} else {
+						heightContribution = itemHeight + gapY;
+					}
+
+					if (currentHeight + heightContribution <= contentHeight) {
 						// Item fits
 						const currentDist = itemDistribution[sectionId][currentPageIndex] || [];
 						itemDistribution[sectionId][currentPageIndex] = [...currentDist, itemId];
-						currentHeight += itemHeight + gapY;
+						currentHeight += heightContribution;
 					} else {
 						// Item doesn't fit, move to next page
 						currentPageIndex++;
@@ -166,7 +211,13 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 
 						const currentDist = itemDistribution[sectionId][currentPageIndex] || [];
 						itemDistribution[sectionId][currentPageIndex] = [...currentDist, itemId];
-						currentHeight += itemHeight + gapY;
+						currentHeight += itemHeight; // First item on new page
+					}
+
+					if (itemOffset !== undefined) {
+						previousItemOffset = itemOffset;
+					} else {
+						previousItemOffset += itemHeight + gapY;
 					}
 				}
 
@@ -191,10 +242,16 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 			p.sidebar.forEach((s) => sidebarSections.add(s));
 		});
 
-		// Pass headerHeight to the first page (index 0)
-		fillColumn(Array.from(mainSections), 0, headerHeight, "main");
+		const headerInMain = ["chikorita", "pikachu"].includes(metadata.template);
+		const headerInSidebar = ["ditgar", "gengar", "glalie", "ditto"].includes(metadata.template);
+		
+		const mainInitialHeight = headerInSidebar ? 0 : headerHeight;
+		const sidebarInitialHeight = headerInMain ? 0 : headerHeight;
+
+		// Pass initial height to the first page (index 0)
+		fillColumn(Array.from(mainSections), 0, mainInitialHeight, "main");
 		if (!metadata.layout.pages[0]?.fullWidth) {
-			fillColumn(Array.from(sidebarSections), 0, headerHeight, "sidebar");
+			fillColumn(Array.from(sidebarSections), 0, sidebarInitialHeight, "sidebar");
 		}
 
 		return {

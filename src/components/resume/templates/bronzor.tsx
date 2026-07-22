@@ -24,7 +24,7 @@ export function BronzorTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	const { main, sidebar, fullWidth } = pageLayout;
 
 	return (
-		<div className="template-bronzor page-content space-y-(--page-gap-y) px-(--page-margin-x) pt-(--page-margin-y)">
+		<div className="template-bronzor page-content space-y-(--page-gap-y) px-(--page-margin-x) py-(--page-margin-y)">
 			<style>{`
 				/* Skills as grid */
 				.template-bronzor .page-section-skills .section-content {

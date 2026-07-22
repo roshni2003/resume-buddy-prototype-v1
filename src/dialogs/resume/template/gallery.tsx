@@ -28,6 +28,7 @@ export function TemplateGalleryDialog(_: DialogProps<"resume.template.gallery">)
 
 		updateResumeData((draft) => {
 			draft.metadata.template = template;
+			draft.metadata.design.colors.primary = templateMetadata.defaults.design.colors.primary;
 
 			// Reorganize sections based on template's sidebar position
 			const sidebarPosition = templateMetadata.sidebarPosition;

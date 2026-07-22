@@ -45,7 +45,7 @@ export const templates = {
 		defaults: {
 			design: {
 				colors: {
-					primary: "rgba(124, 58, 237, 1)", // Purple
+					primary: "rgba(59, 130, 246, 1)", // Blue
 					text: "rgba(0, 0, 0, 1)",
 					background: "rgba(255, 255, 255, 1)",
 				},
@@ -105,7 +105,7 @@ export const templates = {
 		defaults: {
 			design: {
 				colors: {
-					primary: "rgba(236, 72, 153, 1)", // Pink
+					primary: "rgba(15, 119, 84, 1)", // Green
 					text: "rgba(0, 0, 0, 1)",
 					background: "rgba(255, 255, 255, 1)",
 				},
@@ -135,7 +135,7 @@ export const templates = {
 		defaults: {
 			design: {
 				colors: {
-					primary: "rgba(20, 184, 166, 1)", // Teal
+					primary: "rgba(3, 132, 198, 1)", // Dark Blue
 					text: "rgba(0, 0, 0, 1)",
 					background: "rgba(255, 255, 255, 1)",
 				},
@@ -165,7 +165,7 @@ export const templates = {
 		defaults: {
 			design: {
 				colors: {
-					primary: "rgba(0, 0, 0, 1)", // Black
+					primary: "rgba(236, 72, 153, 1)", // Pink
 					text: "rgba(0, 0, 0, 1)",
 					background: "rgba(255, 255, 255, 1)",
 				},
@@ -195,7 +195,7 @@ export const templates = {
 		defaults: {
 			design: {
 				colors: {
-					primary: "rgba(139, 92, 246, 1)", // Violet
+					primary: "rgba(82, 19, 168, 1)", // Violet
 					text: "rgba(0, 0, 0, 1)",
 					background: "rgba(255, 255, 255, 1)",
 				},
@@ -255,7 +255,7 @@ export const templates = {
 		defaults: {
 			design: {
 				colors: {
-					primary: "rgba(219, 39, 119, 1)", // Magenta
+					primary: "rgba(234, 179, 8, 1)", // Yellow
 					text: "rgba(0, 0, 0, 1)",
 					background: "rgba(255, 255, 255, 1)",
 				},
@@ -375,7 +375,7 @@ export const templates = {
 		defaults: {
 			design: {
 				colors: {
-					primary: "rgba(234, 179, 8, 1)", // Yellow/gold
+					primary: "rgba(173, 140, 47, 1)", // Dark Yellow/Gold
 					text: "rgba(0, 0, 0, 1)",
 					background: "rgba(255, 255, 255, 1)",
 				},

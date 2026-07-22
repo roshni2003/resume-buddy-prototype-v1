@@ -11,12 +11,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const url = path.startsWith("http") ? path : `${VITE_AI_BASE_URL_DEV}${path}`;
 	const token = getAuthToken();
 
-	console.log("[auth-debug] api.request: sending", {
-		method: options.method ?? "GET",
-		url,
-		hasAuthHeader: Boolean(token),
-		tokenTail: token ? `…${token.slice(-8)}` : null,
-	});
+
 
 	const isGet = !options.method || options.method.toUpperCase() === "GET";
 	const response = await fetch(url, {
@@ -28,18 +23,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 		},
 	});
 
-	console.log("[auth-debug] api.request: response", {
-		url,
-		status: response.status,
-		ok: response.ok,
-	});
+
 
 	if (response.status === 401) {
 		const bodyText = await response
 			.clone()
 			.text()
 			.catch(() => "<unreadable>");
-		console.log("[auth-debug] api.request: 401 — backend rejected token. Body:", bodyText);
+
 
 		// ONLY show the user-friendly dialog if we actually sent a token that was rejected.
 		// If no token was sent (token is null/empty), it's a silent failure that should
@@ -153,6 +144,10 @@ export interface AIInvocationItem {
 	errorMessage: string | null;
 	inputTokens: number;
 	outputTokens: number;
+	totalTokens: number;
+	dollarUsed: number;
+	model: string;
+	latencyMs: number;
 	createdAt: string;
 }
 
@@ -237,22 +232,22 @@ export const safeParseDate = (value: unknown): Date => {
 /** Normalize various date formats (e.g., MM/YYYY) into YYYY-MM-DD for HTML date inputs */
 export const normalizeDateForInput = (dateStr: string | undefined | null): string => {
 	if (!dateStr) return "";
-	
+
 	// Already YYYY-MM-DD
 	if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-	
+
 	// Try MM/YYYY or MM-YYYY
 	const mmYyyyMatch = dateStr.match(/^(\d{1,2})[\/\-](\d{4})$/);
 	if (mmYyyyMatch) {
 		return `${mmYyyyMatch[2]}-${mmYyyyMatch[1].padStart(2, "0")}-02`; // Use 02 to avoid timezone underflow
 	}
-	
+
 	// Try parsing with Date
 	const d = new Date(dateStr);
 	if (!isNaN(d.getTime())) {
 		return d.toISOString().split("T")[0];
 	}
-	
+
 	return dateStr;
 };
 
@@ -406,9 +401,9 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 							try {
 								expData = JSON.parse(decodeURIComponent(commentMatch[1]));
 								description = description.replace(commentMatch[0], "").trim();
-							} catch (e) {}
+							} catch (e) { }
 						}
-						
+
 						return {
 							...item,
 							description,
@@ -429,7 +424,7 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 									icon = parsed.icon;
 								}
 							}
-						} catch (e) {}
+						} catch (e) { }
 						return {
 							...item,
 							icon,
@@ -474,9 +469,7 @@ export const api = {
 		}
 		const queryString = searchParams.toString();
 		const resumes = await request<ResumeSummary[]>(`/resumes/user${queryString ? `?${queryString}` : ""}`);
-		if (resumes?.[0]) {
-			console.log("[date-debug] raw resume dates:", { createdAt: resumes[0].createdAt, updatedAt: resumes[0].updatedAt, type_created: typeof resumes[0].createdAt, type_updated: typeof resumes[0].updatedAt });
-		}
+
 		return resumes.map(mapResume);
 	},
 
@@ -523,7 +516,6 @@ export const api = {
 	// 7. GET: /resumes/statistics (Dashboard summary)
 	fetchStatistics: async () => {
 		const stats = await request<ResumeStatistics>("/resumes/statistics");
-		console.log("[date-debug] raw statistics:", JSON.stringify(stats));
 		return stats;
 	},
 

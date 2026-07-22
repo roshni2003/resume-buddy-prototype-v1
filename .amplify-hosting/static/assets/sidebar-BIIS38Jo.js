@@ -7,7 +7,6 @@ import { T as a, D as i, y as o, C as r } from "./preload-helper-DwC0sqXt.js";
 import { t as n } from "./react-BZSX5Bs9.js";
 import { l as s } from "./resume-Cd2sSNAf.js";
 import { t as x } from "./use-mobile-D_kEz352.js";
-
 var C = e(n(), 1),
 	w = e(t(), 1),
 	[T, E] = l(`Tooltip`, [g]),

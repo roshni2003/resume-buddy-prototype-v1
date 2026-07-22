@@ -1,6 +1,5 @@
 import { E as e, t as n, i as t } from "./preload-helper-DwC0sqXt.js";
 import { s as i, o as r } from "./string-_Z1c2EAS.js";
-
 function a(e) {
 	for (var t = 1; t < arguments.length; t++) {
 		var n = arguments[t];

@@ -31,12 +31,10 @@ const __vite__mapDeps = (
 			"assets/file-Ccm957YT.js",
 		]),
 ) => i.map((i) => d[i]);
-
 import { t as i } from "./api-BDc_pfcq.js";
 import { n, t as r } from "./lazyRouteComponent-DBGst3ji.js";
 import { t as e } from "./preload-helper-DwC0sqXt.js";
 import { s as t } from "./with-selector-DTFISeXP.js";
-
 const a = n(`/$username/$slug`)({
 	component: r(
 		() =>

@@ -15162,17 +15162,23 @@ var defaultKeyHasher = async (token) => {
 };
 var verifyOTPBodySchema = z$2.object({
 	code: z$2.string().meta({ description: 'The otp code to verify. Eg: "012345"' }),
-	trustDevice: z$2.boolean().optional().meta({
-		description:
-			"If true, the device will be trusted for 30 days. It'll be refreshed on every sign in request within this time. Eg: true",
-	}),
-});
-var send2FaOTPBodySchema = z$2
-	.object({
-		trustDevice: z$2.boolean().optional().meta({
+	trustDevice: z$2
+		.boolean()
+		.optional()
+		.meta({
 			description:
 				"If true, the device will be trusted for 30 days. It'll be refreshed on every sign in request within this time. Eg: true",
 		}),
+});
+var send2FaOTPBodySchema = z$2
+	.object({
+		trustDevice: z$2
+			.boolean()
+			.optional()
+			.meta({
+				description:
+					"If true, the device will be trusted for 30 days. It'll be refreshed on every sign in request within this time. Eg: true",
+			}),
 	})
 	.optional();
 var otp2fa = (options) => {
