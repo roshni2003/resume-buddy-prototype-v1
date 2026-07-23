@@ -306,6 +306,38 @@ function UploadRouteComponent() {
 		try {
 			const resumeName = parsedData.fullName || "My Parsed Resume";
 			const uniqueSlug = `${slugify(resumeName)}-${Date.now().toString(36)}`;
+			
+			// Sanitize sections to prevent Zod validation errors on the backend
+			const rawSections = fullResumeData?.data?.sections || {};
+			const sanitizedSections = { ...defaultResumeData.sections };
+			
+			// Safely map over each section type to inject missing fields
+			Object.keys(rawSections).forEach((key) => {
+				const sectionKey = key as keyof typeof defaultResumeData.sections;
+				if (rawSections[sectionKey] && Array.isArray(rawSections[sectionKey].items)) {
+					sanitizedSections[sectionKey] = {
+						...defaultResumeData.sections[sectionKey],
+						...rawSections[sectionKey],
+						items: rawSections[sectionKey].items.map((item: any) => ({
+							...item,
+							id: item.id || crypto.randomUUID(),
+							hidden: !!item.hidden,
+							website: item.website || { url: "", label: "" },
+							// Ensure min(1) strings for specific schemas
+							...(sectionKey === "experience" && { company: item.company || "Unknown Company" }),
+							...(sectionKey === "education" && { school: item.school || item.institution || "Unknown Institution" }),
+							...(sectionKey === "projects" && { name: item.name || "Untitled Project" }),
+							...(sectionKey === "awards" && { title: item.title || "Unknown Award" }),
+							...(sectionKey === "certifications" && { title: item.title || "Unknown Certification" }),
+							...(sectionKey === "volunteer" && { organization: item.organization || "Unknown Organization" }),
+							...(sectionKey === "references" && { name: item.name || "Available upon request" }),
+							...(sectionKey === "publications" && { title: item.title || "Untitled Publication" }),
+							...(sectionKey === "profiles" && { network: item.network || "Unknown Network" })
+						}))
+					};
+				}
+			});
+
 			const resume = await api.createResume({
 				name: resumeName,
 				slug: uniqueSlug,
@@ -313,21 +345,8 @@ function UploadRouteComponent() {
 				data: fullResumeData?.data ? { 
 					...defaultResumeData, 
 					...fullResumeData.data, 
-					sections: {
-						...defaultResumeData.sections,
-						...(fullResumeData.data.sections || {})
-					},
-					metadata: {
-						...defaultResumeData.metadata,
-						template: selectedTemplate,
-						design: {
-							...defaultResumeData.metadata.design,
-							colors: {
-								...defaultResumeData.metadata.design.colors,
-								primary: templates[selectedTemplate].defaults.design.colors.primary,
-							},
-						},
-					},
+					sections: sanitizedSections,
+					metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
 					picture: defaultResumeData.picture 
 				} : undefined,
 				withSampleData: false,
