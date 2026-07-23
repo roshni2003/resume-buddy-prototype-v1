@@ -141,7 +141,7 @@ const MOCK = {
 };
 
 type DashboardData = typeof MOCK;
-type TabId = "overview" | "activity" | "ai" | "search" | "journey" | "detailed";
+type TabId = "overview" | "activity" | "ai" | "journey" | "detailed";
 
 function DashboardPage() {
   const [tab, setTab] = useState<TabId>("overview");
@@ -255,7 +255,6 @@ function DashboardPage() {
     { id: "overview", label: "Overview" },
     { id: "activity", label: "Resume Activity" },
     { id: "ai", label: "AI Analysis" },
-    { id: "search", label: "Search & Filter" },
     { id: "journey", label: "User Journey" },
     { id: "detailed", label: "Detailed Activity Report" },
   ];
@@ -328,7 +327,6 @@ function DashboardPage() {
           {tab === "overview" && <OverviewTab data={data} />}
           {tab === "activity" && <ActivityTab data={data} />}
           {tab === "ai" && <AIAnalysisTab data={data} />}
-          {tab === "search" && <SearchTab data={data} />}
           {tab === "journey" && <JourneyTab data={data} />}
           {tab === "detailed" && <DetailedActivityReportTab />}
         </>
@@ -790,69 +788,6 @@ function AIAnalysisTab({ data }: { data: DashboardData }) {
   );
 }
 
-function SearchTab({ data }: { data: DashboardData }) {
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Total searches</div>
-          <div className="mt-2 text-4xl font-bold text-foreground">148</div>
-          <div className="mt-3 text-xs font-bold text-[#34d399]">↗ +14%</div>
-        </Card>
-        <Card>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Zero-result rate</div>
-          <div className="mt-2 text-4xl font-bold text-foreground">8.1%</div>
-          <div className="mt-3 text-xs font-bold text-[#34d399]">↗ -1.2%</div>
-        </Card>
-        <Card>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Search → action</div>
-          <div className="mt-2 text-4xl font-bold text-foreground">42%</div>
-          <div className="mt-3 text-xs font-bold text-[#34d399]">↗ +3.4%</div>
-        </Card>
-        <Card>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Common filters</div>
-          <div className="mt-2 text-4xl font-bold text-foreground">4</div>
-          <div className="mt-3 text-xs font-bold text-[#34d399]">↗ stable</div>
-        </Card>
-      </div>
-
-      <Card>
-        <SectionHeader title="Most common filters used" />
-        <div className="mt-4 space-y-4">
-          {data.commonFilters.map(f => (
-            <div key={f.filter}>
-              <div className="mb-1.5 flex items-center justify-between text-[11px] font-bold">
-                <span className="text-foreground/80">{f.filter}</span>
-                <span className="text-muted-foreground/80">{f.uses} uses</span>
-              </div>
-              <div className="h-1.5 w-full rounded-r-full bg-muted">
-                <div className="h-full rounded-r-full bg-[#059669]" style={{ width: `${(f.uses / f.max) * 100}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card>
-        <SectionHeader title="Search & Filter Activity" hint="LAST 3 MONTHS" />
-        <Table
-          head={["Sort By", "Page Views", "Resume Data Loaded", "Sort Changed", "Downloaded"]}
-          rows={data.filters.map((r) => [
-            r.sortBy,
-            r.pageViews.toString(),
-            r.resumeDataLoaded.toString(),
-            r.sortChanged.toString(),
-            r.downloaded.toString(),
-          ])}
-          totals={["Overall", "36", "27", "2", "8"]}
-        />
-        <div className="mt-6 rounded-lg border border-[#ca8a04]/30 bg-[#ca8a04]/10 p-3 text-xs text-[#facc15]">
-          ⓘ Layout ready — real search events not fully wired yet.
-        </div>
-      </Card>
-    </div>
-  );
-}
 
 function JourneyTab({ data }: { data: DashboardData }) {
   return (
