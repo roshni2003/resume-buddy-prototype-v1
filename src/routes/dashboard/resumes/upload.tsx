@@ -346,7 +346,17 @@ function UploadRouteComponent() {
 					...defaultResumeData, 
 					...fullResumeData.data, 
 					sections: sanitizedSections,
-					metadata: { ...defaultResumeData.metadata, template: selectedTemplate }, 
+					metadata: {
+						...defaultResumeData.metadata,
+						template: selectedTemplate,
+						design: {
+							...defaultResumeData.metadata.design,
+							colors: {
+								...defaultResumeData.metadata.design.colors,
+								primary: templates[selectedTemplate].defaults.design.colors.primary,
+							},
+						},
+					},
 					picture: defaultResumeData.picture 
 				} : undefined,
 				withSampleData: false,
