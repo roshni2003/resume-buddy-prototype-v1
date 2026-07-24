@@ -149,6 +149,14 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 						}
 					} else if (itemOffset !== undefined) {
 						heightContribution = Math.max(0, itemOffset - previousItemOffset);
+						
+						// For flex-wrapped sections (chips), rows can be ~40-50px. We group them to prevent orphans.
+						const isChipSection = ["interests", "languages", "skills"].includes(sectionId);
+						const threshold = isChipSection ? 60 : 10;
+						
+						if (heightContribution < threshold) {
+							heightContribution = 0;
+						}
 					} else {
 						heightContribution = itemHeight + gapY;
 					}
