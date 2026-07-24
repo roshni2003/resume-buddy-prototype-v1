@@ -102,21 +102,20 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 								try {
 									localStorage.setItem('authToken', extracted);
 									var lsBack = localStorage.getItem('authToken');
-								} catch(e) { console.log('[auth-debug] inline: localStorage threw', e); }
+								} catch(e) {}
 								try {
 									sessionStorage.setItem('authToken', extracted);
 									var ssBack = sessionStorage.getItem('authToken');
-								} catch(e) { console.log('[auth-debug] inline: sessionStorage threw', e); }
+								} catch(e) {}
 								try {
 									var isHttps = window.location.protocol === 'https:';
 									document.cookie = 'authToken=' + encodeURIComponent(extracted)
 										+ '; Path=/; Max-Age=604800; SameSite=Lax'
 										+ (isHttps ? '; Secure' : '');
 									var cookieOk = document.cookie.indexOf('authToken=') !== -1;
-									console.log('[auth-debug] inline: cookie write', cookieOk ? 'OK' : 'NOT FOUND', '(document.cookie snippet=' + document.cookie.slice(0, 100) + ')');
-								} catch(e) { console.log('[auth-debug] inline: cookie threw', e); }
+								} catch(e) {}
 							}
-						} catch(e) { console.log('[auth-debug] inline: outer threw', e); }
+						} catch(e) {}
 					`,
 				},
 			],
