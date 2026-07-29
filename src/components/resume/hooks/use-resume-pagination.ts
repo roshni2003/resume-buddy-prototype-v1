@@ -128,33 +128,6 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 					currentHeight += sectionHeight + gapY;
 					continue;
 				}
-
-				// If it's a grid/chip section, prefer shifting the whole section to the next page rather than splitting
-				const preventSplit = ["skills", "languages", "interests", "certifications", "awards"].includes(sectionId);
-				if (preventSplit && sectionHeight && sectionHeight <= contentHeight) {
-					// It can fit on one page, but not the current page. Move it entirely to next page.
-					currentPageIndex++;
-					currentHeight = 0;
-
-					if (currentPageIndex >= MAX_PAGES) {
-						isOverflowing = true;
-						break;
-					}
-
-					if (!pages[currentPageIndex]) {
-						pages[currentPageIndex] = {
-							fullWidth: metadata.layout.pages[0]?.fullWidth ?? false,
-							main: [],
-							sidebar: [],
-						};
-					}
-
-					pages[currentPageIndex][columnName].push(sectionId);
-					itemDistribution[sectionId][currentPageIndex] = items.map((i: any) => i.id);
-					currentHeight += sectionHeight + gapY;
-					continue;
-				}
-
 				// Otherwise, fallback to fitting individual items
 				let previousItemOffset = sectionHeaderHeight;
 
@@ -176,6 +149,14 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 						}
 					} else if (itemOffset !== undefined) {
 						heightContribution = Math.max(0, itemOffset - previousItemOffset);
+						
+						// For flex-wrapped sections (chips), rows can be ~40-50px. We group them to prevent orphans.
+						const isChipSection = ["interests", "languages", "skills"].includes(sectionId);
+						const threshold = isChipSection ? 60 : 10;
+						
+						if (heightContribution < threshold) {
+							heightContribution = 0;
+						}
 					} else {
 						heightContribution = itemHeight + gapY;
 					}
