@@ -130,6 +130,22 @@ export interface UserAnalyticsItem {
 export interface UserAnalyticsResponse {
 	pagination: PaginationInfo;
 	users: UserAnalyticsItem[];
+	global?: {
+		tokens: {
+			totalTokens: number;
+			distinctUsers: number;
+			totalCostUsd?: number;
+		};
+		failureRate: {
+			totalCalls: number;
+			failedCalls: number;
+			failureRatePercent: number;
+			totalCostUsd?: number;
+		};
+		daily: any[];
+		weekly: any[];
+		monthly: any[];
+	};
 }
 
 // AI Invocation Specifics
