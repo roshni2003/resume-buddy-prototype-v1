@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/utils/style";
 import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -133,6 +134,27 @@ type TabId = "overview" | "activity" | "ai" | "detailed";
 
 function DashboardPage() {
   const [tab, setTab] = useState<TabId>("overview");
+  const [globalDateRange, setGlobalDateRange] = useState<{ start?: string; end?: string }>({});
+
+  const { data: keyUsageData } = useQuery({
+    queryKey: ["analytics-key-usage", globalDateRange],
+    queryFn: () => api.fetchKeyUsage(globalDateRange.start, globalDateRange.end),
+  });
+
+  const { data: jdMatchesData } = useQuery({
+    queryKey: ["analytics-jd-matches", globalDateRange],
+    queryFn: () => api.fetchJdMatches(globalDateRange.start, globalDateRange.end),
+  });
+
+  const { data: resumeClicksData } = useQuery({
+    queryKey: ["analytics-resume-clicks", globalDateRange],
+    queryFn: () => api.fetchResumeClicks(globalDateRange.start, globalDateRange.end),
+  });
+
+  const { data: errorCountsData } = useQuery({
+    queryKey: ["analytics-error-counts", globalDateRange],
+    queryFn: () => api.fetchErrorCounts(globalDateRange.start, globalDateRange.end),
+  });
 
   // Fetch aggregate statistics
   const { data: stats, isLoading: isStatsLoading } = useQuery({
@@ -222,9 +244,77 @@ function DashboardPage() {
       merged.totalDownloads = stats.totalDownloads || 0;
     }
 
-    merged.entryPointClicks = MOCK.entryPointClicks;
+    if (keyUsageData && keyUsageData.details) {
+      merged.askZoeUsage = keyUsageData.details.map((d: any) => ({
+        label: d.keyName,
+        calls: d.totalTokens,
+        max: Math.max(1, ...keyUsageData.details.map((x: any) => x.totalTokens))
+      })).sort((a: any, b: any) => b.calls - a.calls);
 
-    if (allInvocations.length > 0) {
+      merged.aiAnalysis = keyUsageData.details.map((d: any) => ({
+        feature: d.keyName,
+        success: true,
+        uniques: 0,
+        tokens: d.totalTokens,
+        cost: d.totalDollarUsed,
+        errorRate: 0,
+      }));
+
+      merged.globalTokens = keyUsageData.details.reduce((acc: any, curr: any) => acc + curr.totalTokens, 0);
+      merged.globalCost = keyUsageData.details.reduce((acc: any, curr: any) => acc + curr.totalDollarUsed, 0);
+    }
+
+    if (jdMatchesData) {
+      merged.jdMatching = {
+        strong: jdMatchesData.percentages.strong || 0,
+        good: jdMatchesData.percentages.good || 0,
+        moderate: jdMatchesData.percentages.moderate || 0,
+        needsWork: jdMatchesData.percentages.need_work || 0,
+      };
+    }
+
+    if (resumeClicksData && resumeClicksData.metrics) {
+      const colors: Record<string, string> = {
+        "resume-upload": "bg-[#2dd4bf]",
+        "jd-matching": "bg-[#0ea5e9]",
+        "blank-template": "bg-[#a855f7]",
+        "resume-review": "bg-[#f59e0b]"
+      };
+      const labels: Record<string, string> = {
+        "resume-upload": "Resume Upload",
+        "jd-matching": "JD Matching",
+        "blank-template": "Blank Template",
+        "resume-review": "Final Review"
+      };
+
+      let totalClicks = 0;
+      Object.values(resumeClicksData.metrics).forEach((m: any) => { totalClicks += m.totalClicks; });
+
+      merged.entryPointClicks = Object.entries(resumeClicksData.metrics).map(([key, value]: [string, any]) => ({
+        label: labels[key] || key,
+        count: value.totalClicks,
+        color: colors[key] || "bg-[#34d399]"
+      }));
+
+      merged.entryPoints = Object.entries(resumeClicksData.metrics).map(([key, value]: [string, any]) => ({
+        label: labels[key] || key,
+        pct: totalClicks > 0 ? Math.round((value.totalClicks / totalClicks) * 100) : 0,
+        color: colors[key] || "bg-[#34d399]"
+      }));
+    } else {
+      merged.entryPointClicks = MOCK.entryPointClicks;
+    }
+
+    if (errorCountsData && errorCountsData.counts) {
+      const maxCount = Math.max(...(Object.values(errorCountsData.counts) as number[]), 1);
+      merged.fileRejections = Object.entries(errorCountsData.counts).map(([label, count]) => ({
+        label,
+        count: count as number,
+        max: maxCount
+      }));
+    }
+
+    if (allInvocations.length > 0 && (!keyUsageData || !keyUsageData.details)) {
       const askZoeUsage: Record<string, number> = {};
       const aiAnalysisMap: Record<string, { feature: string, success: boolean, uniques: Set<string>, tokens: number, cost: number, totalCalls: number, failedCalls: number }> = {};
 
@@ -261,7 +351,7 @@ function DashboardPage() {
     }
 
     return merged;
-  }, [stats, userAnalytics, allInvocations]);
+  }, [stats, userAnalytics, allInvocations, keyUsageData, jdMatchesData, resumeClicksData, errorCountsData]);
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "overview", label: "Overview" },
@@ -289,9 +379,36 @@ function DashboardPage() {
           <button className="rounded-full border border-border bg-muted/50 px-5 py-2 font-medium text-sm hover:bg-border transition-colors">
             Export CSV
           </button>
-          <button className="rounded-full bg-[#059669] px-5 py-2 text-sm font-bold text-foreground hover:bg-[#047857] transition-colors shadow-sm">
-            Add Filter
-          </button>
+          <Popover modal={false}>
+            <PopoverTrigger asChild>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end" side="bottom" sideOffset={8}>
+              <Calendar
+                initialFocus
+                mode="range"
+                selected={{
+                  from: globalDateRange.start ? new Date(globalDateRange.start) : undefined,
+                  to: globalDateRange.end ? new Date(globalDateRange.end) : undefined
+                }}
+                onSelect={(range: any) => {
+                  if (range?.from) {
+                    const start = format(range.from, "yyyy-MM-dd");
+                    const end = range.to ? format(range.to, "yyyy-MM-dd") : undefined;
+                    setGlobalDateRange({ start, end });
+                  } else {
+                    setGlobalDateRange({});
+                  }
+                }}
+                numberOfMonths={1}
+                className="p-2"
+                startMonth={new Date(2023, 0)}
+                endMonth={new Date()}
+              />
+              <div className="p-2 pt-0 border-t flex justify-between">
+                <Button variant="ghost" size="sm" onClick={() => setGlobalDateRange({})}>Clear</Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -624,19 +741,19 @@ function AIAnalysisTab({ data }: { data: DashboardData }) {
           <SectionHeader title="JD Matching Verdicts" />
           <div className="mt-4">
             <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-[#34d399]" style={{ width: '23%' }} />
-              <div className="h-full bg-[#fcd34d]" style={{ width: '24%' }} />
-              <div className="h-full bg-[#f97316]" style={{ width: '37%' }} />
-              <div className="h-full bg-[#ef4444]" style={{ width: '15%' }} />
+              <div className="h-full bg-[#34d399]" style={{ width: `${data.jdMatching.strong}%` }} />
+              <div className="h-full bg-[#fcd34d]" style={{ width: `${data.jdMatching.good}%` }} />
+              <div className="h-full bg-[#f97316]" style={{ width: `${data.jdMatching.moderate}%` }} />
+              <div className="h-full bg-[#ef4444]" style={{ width: `${data.jdMatching.needsWork}%` }} />
             </div>
             <div className="mt-4 space-y-2">
-              <Row label="STRONG FIT" value="23%" dot="bg-[#34d399]" />
-              <Row label="GOOD FIT" value="24%" dot="bg-[#fcd34d]" />
-              <Row label="MODERATE FIT" value="37%" dot="bg-[#f97316]" />
-              <Row label="NEEDS WORK" value="15%" dot="bg-[#ef4444]" />
+              <Row label="STRONG FIT" value={`${data.jdMatching.strong}%`} dot="bg-[#34d399]" />
+              <Row label="GOOD FIT" value={`${data.jdMatching.good}%`} dot="bg-[#fcd34d]" />
+              <Row label="MODERATE FIT" value={`${data.jdMatching.moderate}%`} dot="bg-[#f97316]" />
+              <Row label="NEEDS WORK" value={`${data.jdMatching.needsWork}%`} dot="bg-[#ef4444]" />
             </div>
             <div className="mt-4 rounded-lg border border-[#059669]/30 bg-[#059669]/10 px-3 py-2 text-[10px] text-[#34d399] font-medium">
-              46% tailored-resume acceptance rate
+              Powered by real JD analysis data
             </div>
           </div>
         </Card>
