@@ -81,7 +81,7 @@ export function DittoTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					font-size: 1em !important;
 					font-weight: 500 !important;
 					color: var(--page-primary-color) !important;
-					white-space: nowrap !important;
+					word-break: break-word !important;
 				}
 				
 				.template-ditto .interests-item .section-item-icon,
