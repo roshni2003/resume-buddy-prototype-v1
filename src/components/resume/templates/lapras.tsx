@@ -170,7 +170,7 @@ function Header() {
 				"rounded-(--picture-border-radius) border border-(--page-text-color)/10 bg-(--page-background-color) p-4",
 			)}
 		>
-			<PagePicture />
+			<PagePicture className="mr-2" />
 
 			<div className="page-basics space-y-(--page-gap-y)">
 				<div>
