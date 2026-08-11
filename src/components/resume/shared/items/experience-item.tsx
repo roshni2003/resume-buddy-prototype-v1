@@ -135,7 +135,7 @@ export function ExperienceItem({ className, ...item }: ExperienceItemProps) {
 						contentEditable
 						suppressContentEditableWarning
 						onBlur={handleCompanyChange}
-						className="section-item-title experience-item-title cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+						className="section-item-title experience-item-title cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500 font-bold"
 					>
 						{item.company}
 					</span>

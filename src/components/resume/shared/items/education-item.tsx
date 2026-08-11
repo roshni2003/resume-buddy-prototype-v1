@@ -131,7 +131,7 @@ export function EducationItem({ className, ...item }: EducationItemProps) {
                         contentEditable
                         suppressContentEditableWarning
                         onBlur={handleSchoolChange}
-                        className="section-item-title education-item-title cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500"
+                        className="section-item-title education-item-title cursor-text outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500 font-bold"
                     >
                         {schoolText || "School Name"}
                     </span>
