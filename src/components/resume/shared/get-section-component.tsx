@@ -164,11 +164,18 @@ export const CustomSectionComponent = ({
 		return true;
 	});
 
+	const { pageIndex, itemDistribution } = useContext(ResumePageContext);
+	const isContinuation = (() => {
+		if (!itemDistribution || !itemDistribution[id]) return false;
+		const firstPageIndex = itemDistribution[id].findIndex((items) => items && items.length > 0);
+		return firstPageIndex !== -1 && firstPageIndex < pageIndex;
+	})();
+
 	if (visibleItems.length === 0) return null;
 
 	return (
 		<section data-section-id={id} className={cn(`page-section page-section-custom page-section-${id}`, sectionClassName)}>
-			{customSection.type !== "summary" && customSection.type !== "cover-letter" && (
+			{customSection.type !== "summary" && customSection.type !== "cover-letter" && !isContinuation && (
 				<h6 className="mb-1.5 text-(--page-primary-color)">
 					<InlineEditableText
 						value={customSection.title}
