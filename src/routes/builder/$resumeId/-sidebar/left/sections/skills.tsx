@@ -30,7 +30,7 @@ export function SkillsSectionBuilder() {
 			const item = draft.sections.skills.items.find((item) => item.id === id);
 			if (item) {
 				item.level = newLevel;
-				item.proficiency = levelLabels[newLevel] || "";
+				item.proficiency = newLevel === 0 ? "" : (levelLabels[newLevel] || "");
 			}
 		});
 	};

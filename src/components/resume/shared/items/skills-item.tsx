@@ -39,7 +39,7 @@ export function SkillsItem({ className, ...item }: SkillsItemProps) {
 					</div>
 
 					{/* Proficiency */}
-					{item.proficiency && (
+					{item.proficiency && item.proficiency !== "Hidden" && (
 						<span className="section-item-metadata skills-item-proficiency inline-block">
 							<InlineEditableText value={item.proficiency} placeholder="Proficiency" onChange={handleProficiencyChange} />
 						</span>
