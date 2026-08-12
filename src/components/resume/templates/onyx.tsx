@@ -20,6 +20,14 @@ export function OnyxTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-onyx page-content space-y-(--page-gap-y) px-(--page-margin-x) py-(--page-margin-y)">
 			<style>{`
+				
+				
+				/* Profiles as grid */
+				.template-onyx .page-section-profiles .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					gap: 0.75rem !important;
+				}
 				/* Skills as grid */
 				.template-onyx .page-section-skills .section-content {
 					display: grid !important;

@@ -40,6 +40,14 @@ export function LaprasTemplate({ pageIndex, pageLayout }: TemplateProps) {
 			className="template-lapras page-content space-y-6 px-(--page-margin-x) py-(--page-margin-y) print:p-0"
 		>
 			<style>{`
+				
+				
+				/* Profiles as grid */
+				.template-lapras .page-section-profiles .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					gap: 0.75rem !important;
+				}
 				/* Skills as grid */
 				.template-lapras .page-section-skills .section-content {
 					display: grid !important;

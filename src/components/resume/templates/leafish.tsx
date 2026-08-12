@@ -26,6 +26,14 @@ export function LeafishTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-leafish page-content">
 			<style>{`
+				
+				
+				/* Profiles as grid */
+				.template-leafish .page-section-profiles .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					gap: 0.75rem !important;
+				}
 				/* Skills as grid */
 				.template-leafish .page-section-skills .section-content {
 					display: grid !important;

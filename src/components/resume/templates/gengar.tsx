@@ -27,6 +27,14 @@ export function GengarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-gengar page-content">
 			<style>{`
+				
+				
+				/* Profiles as grid */
+				.template-gengar .page-section-profiles .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					gap: 0.75rem !important;
+				}
 				/* Skills as grid */
 				.template-gengar .page-section-skills .section-content {
 					display: grid !important;

@@ -64,6 +64,14 @@ export function AzurillTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-azurill page-content space-y-(--page-gap-y) px-(--page-margin-x) py-(--page-margin-y)">
 			<style>{`
+				
+				
+				/* Profiles as grid */
+				.template-azurill .page-section-profiles .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					gap: 0.75rem !important;
+				}
 				/* Skills as grid */
 				.template-azurill .page-section-skills .section-content {
 					display: grid !important;
