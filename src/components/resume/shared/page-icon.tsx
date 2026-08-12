@@ -52,8 +52,16 @@ export function PageIcon({
 	};
 
 	const mappedIcon = emojiMap[icon] || icon;
-	const lowerIcon = mappedIcon.toLowerCase();
-	const iconName = logoSuffixIcons.includes(lowerIcon) ? `${lowerIcon}-logo` : lowerIcon;
+	let lowerIcon = mappedIcon.toLowerCase();
+	
+	// Handle legacy PascalCase icon names like 'LinkedinLogo' that became 'linkedinlogo'
+	if (lowerIcon.endsWith("logo") && !lowerIcon.endsWith("-logo")) {
+		lowerIcon = lowerIcon.replace(/logo$/, "-logo");
+	}
+	
+	// Remove the -logo suffix temporarily to check if it's in the logoSuffixIcons list
+	const baseIconName = lowerIcon.replace(/-logo$/, "");
+	const iconName = logoSuffixIcons.includes(baseIconName) ? `${baseIconName}-logo` : lowerIcon;
 
 	return (
 		<i

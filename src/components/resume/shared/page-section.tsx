@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import type { SectionItem, SectionType } from "@/schema/resume/data";
 import { getSectionTitle } from "@/utils/resume/section";
 import { cn } from "@/utils/style";
+import { ResumePageContext } from "../preview/context";
 import { useResumeStore } from "../store/resume";
 
 type PageSectionProps<T extends SectionType> = {
@@ -19,12 +21,21 @@ export function PageSection<T extends SectionType>({ type, className, children, 
 		return true;
 	});
 
+	const { pageIndex, itemDistribution } = useContext(ResumePageContext);
+	const isContinuation = (() => {
+		if (!itemDistribution || !itemDistribution[type]) return false;
+		const firstPageIndex = itemDistribution[type].findIndex((items) => items && items.length > 0);
+		return firstPageIndex !== -1 && firstPageIndex < pageIndex;
+	})();
+
 	if (section.hidden) return null;
 	if (items.length === 0) return null;
 
 	return (
 		<section data-section-id={type} className={cn(`page-section page-section-${type}`, className)}>
-			<h6 className="mb-1.5 text-(--page-primary-color)">{section.title || getSectionTitle(type)}</h6>
+			{!isContinuation && (
+				<h6 className="mb-1.5 text-(--page-primary-color)">{section.title || getSectionTitle(type)}</h6>
+			)}
 
 			<div
 				className="section-content grid gap-x-(--page-gap-x) gap-y-(--page-gap-y)"

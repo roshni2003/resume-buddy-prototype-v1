@@ -23,6 +23,14 @@ export function KakunaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-kakuna page-content space-y-(--page-gap-y) px-(--page-margin-x) py-(--page-margin-y)">
 			<style>{`
+				
+				
+				/* Profiles as grid */
+				.template-kakuna .page-section-profiles .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					gap: 0.75rem !important;
+				}
 				/* Skills as grid */
 				.template-kakuna .page-section-skills .section-content {
 					display: grid !important;
@@ -54,12 +62,13 @@ export function KakunaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					display: flex !important;
 					flex-direction: row !important;
 					align-items: center !important;
-					width: max-content !important;
+					justify-content: center !important;
+					width: fit-content !important;
 					max-width: 100% !important;
 					overflow: hidden !important;
 					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
 					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
-					border-radius: 9999px !important;
+					border-radius: 1rem !important;
 					padding: 0.35rem 0.75rem !important;
 				}
 
@@ -71,6 +80,7 @@ export function KakunaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					margin-bottom: 0 !important;
 					display: flex !important;
 					align-items: center !important;
+					justify-content: center !important;
 					column-gap: 0.35rem !important;
 				}
 
@@ -79,6 +89,9 @@ export function KakunaTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					font-size: 1em !important;
 					font-weight: 500 !important;
 					color: var(--page-primary-color) !important;
+					word-break: break-word !important;
+					text-align: center !important;
+					text-wrap: balance !important;
 				}
 				
 				.template-kakuna .interests-item .section-item-icon,

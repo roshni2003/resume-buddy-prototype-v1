@@ -21,22 +21,23 @@ export function ProfilesItem({ className, ...item }: ProfilesItemProps) {
 
 	return (
 		<div className={cn("profiles-item", className)}>
-			{/* Header */}
-			<div className="section-item-header profiles-item-header flex items-center gap-x-1.5">
-				<PageIcon icon={item.icon} className="section-item-icon profiles-item-icon" />
-				<strong className="section-item-title profiles-item-network">
-					<InlineEditableText value={item.network} placeholder="Network" onChange={handleNetworkChange} />
-				</strong>
-			</div>
+			<div className="section-item-header profiles-item-header flex items-start gap-x-1.5 mb-0!">
+				<PageIcon icon={item.icon} className="section-item-icon profiles-item-icon shrink-0 mt-[3px]" />
+				
+				<div className="flex flex-col min-w-0">
+					<strong className="section-item-title profiles-item-network">
+						<InlineEditableText value={item.network} placeholder="Network" onChange={handleNetworkChange} />
+					</strong>
 
-			{/* Website */}
-			{!item.options?.showLinkInTitle && (
-				<PageLink
-					{...item.website}
-					label={item.website.label || item.username}
-					className="section-item-website profiles-item-website"
-				/>
-			)}
+					{!item.options?.showLinkInTitle && (
+						<PageLink
+							{...item.website}
+							label={item.website.label || item.username}
+							className="section-item-website profiles-item-website"
+						/>
+					)}
+				</div>
+			</div>
 		</div>
 	);
 }

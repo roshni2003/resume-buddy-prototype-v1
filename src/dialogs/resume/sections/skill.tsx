@@ -95,7 +95,7 @@ export function CreateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 					hidden: false,
 					icon: "acorn",
 					name: skillName,
-					proficiency: levelLabels[level] || "",
+					proficiency: level === 0 ? "" : (levelLabels[level] || ""),
 					level: level,
 					keywords: [],
 				};

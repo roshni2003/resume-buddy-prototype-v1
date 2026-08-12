@@ -130,6 +130,22 @@ export interface UserAnalyticsItem {
 export interface UserAnalyticsResponse {
 	pagination: PaginationInfo;
 	users: UserAnalyticsItem[];
+	global?: {
+		tokens: {
+			totalTokens: number;
+			distinctUsers: number;
+			totalCostUsd?: number;
+		};
+		failureRate: {
+			totalCalls: number;
+			failedCalls: number;
+			failureRatePercent: number;
+			totalCostUsd?: number;
+		};
+		daily: any[];
+		weekly: any[];
+		monthly: any[];
+	};
 }
 
 // AI Invocation Specifics
@@ -167,6 +183,60 @@ export interface AIInvocationsResponse {
 	pagination: PaginationInfo & { totalInvocations: number };
 	summary: AIInvocationSummary;
 	invocations: AIInvocationItem[];
+}
+
+// Analytics New APIs
+export interface KeyUsageDetail {
+	keyName: string;
+	totalTokens: number;
+	totalDollarUsed: number;
+}
+export interface KeyUsageResponse {
+	startDate: string;
+	endDate: string;
+	details: KeyUsageDetail[];
+}
+
+export interface JDMatchesResponse {
+	startDate: string;
+	endDate: string;
+	total: number;
+	averageScore: number;
+	percentages: {
+		strong: number;
+		good: number;
+		moderate: number;
+		need_work: number;
+	};
+	counts: {
+		strong: number;
+		good: number;
+		moderate: number;
+		need_work: number;
+	};
+}
+
+export interface ResumeClicksMetrics {
+	totalClicks: number;
+	uniqueUsers: number;
+}
+export interface ResumeClicksResponse {
+	startDate: string;
+	endDate: string;
+	metrics: {
+		"resume-upload": ResumeClicksMetrics;
+		"jd-matching": ResumeClicksMetrics;
+		"blank-template": ResumeClicksMetrics;
+		"resume-review": ResumeClicksMetrics;
+	};
+}
+
+export interface ErrorCountsResponse {
+	startDate: string;
+	endDate: string;
+	counts: {
+		[key: string]: number;
+	};
 }
 
 // JD Match
@@ -699,5 +769,41 @@ export const api = {
 			}
 			return res.json() as Promise<any>; // Should return the generated resume payload
 		});
+	},
+
+	// 21. GET: /analytics/key-usage
+	fetchKeyUsage: (startDate?: string, endDate?: string) => {
+		const params = new URLSearchParams();
+		if (startDate) params.append("startDate", startDate);
+		if (endDate) params.append("endDate", endDate);
+		const qs = params.toString();
+		return request<KeyUsageResponse>(`/analytics/key-usage${qs ? `?${qs}` : ""}`);
+	},
+
+	// 22. GET: /analytics/jd-matches
+	fetchJdMatches: (startDate?: string, endDate?: string) => {
+		const params = new URLSearchParams();
+		if (startDate) params.append("startDate", startDate);
+		if (endDate) params.append("endDate", endDate);
+		const qs = params.toString();
+		return request<JDMatchesResponse>(`/analytics/jd-matches${qs ? `?${qs}` : ""}`);
+	},
+
+	// 23. GET: /analytics/resume-clicks
+	fetchResumeClicks: (startDate?: string, endDate?: string) => {
+		const params = new URLSearchParams();
+		if (startDate) params.append("startDate", startDate);
+		if (endDate) params.append("endDate", endDate);
+		const qs = params.toString();
+		return request<ResumeClicksResponse>(`/analytics/resume-clicks${qs ? `?${qs}` : ""}`);
+	},
+
+	// 24. GET: /analytics/error-counts
+	fetchErrorCounts: (startDate?: string, endDate?: string) => {
+		const params = new URLSearchParams();
+		if (startDate) params.append("startDate", startDate);
+		if (endDate) params.append("endDate", endDate);
+		const qs = params.toString();
+		return request<ErrorCountsResponse>(`/analytics/error-counts${qs ? `?${qs}` : ""}`);
 	},
 };

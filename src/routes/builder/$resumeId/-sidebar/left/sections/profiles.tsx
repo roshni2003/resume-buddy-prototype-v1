@@ -25,7 +25,7 @@ type SocialNetwork = {
 const socialNetworks: SocialNetwork[] = [
 	{
 		name: "LinkedIn",
-		icon: "LinkedinLogo",
+		icon: "linkedin-logo",
 		iconNode: <LinkedinLogo weight="regular" className="h-4 w-4" />,
 		iconColor: "text-[#0077b5]",
 		borderColor: "border-[#0077b5]/30",
@@ -33,7 +33,7 @@ const socialNetworks: SocialNetwork[] = [
 	},
 	{
 		name: "GitHub",
-		icon: "GithubLogo",
+		icon: "github-logo",
 		iconNode: <GithubLogo weight="regular" className="h-4 w-4" />,
 		iconColor: "text-gray-800 dark:text-gray-200",
 		borderColor: "border-gray-300",
@@ -41,7 +41,7 @@ const socialNetworks: SocialNetwork[] = [
 	},
 	{
 		name: "Twitter",
-		icon: "TwitterLogo",
+		icon: "twitter-logo",
 		iconNode: <TwitterLogo weight="regular" className="h-4 w-4" />,
 		iconColor: "text-[#1da1f2]",
 		borderColor: "border-[#1da1f2]/30",
@@ -49,7 +49,7 @@ const socialNetworks: SocialNetwork[] = [
 	},
 	{
 		name: "Dribbble",
-		icon: "DribbbleLogo",
+		icon: "dribbble-logo",
 		iconNode: <DribbbleLogo weight="regular" className="h-4 w-4" />,
 		iconColor: "text-[#ea4c89]",
 		borderColor: "border-[#ea4c89]/30",
@@ -57,7 +57,7 @@ const socialNetworks: SocialNetwork[] = [
 	},
 	{
 		name: "Portfolio",
-		icon: "Globe",
+		icon: "globe",
 		iconNode: <Globe weight="regular" className="h-4 w-4" />,
 		iconColor: "text-emerald-600 dark:text-emerald-400",
 		borderColor: "border-emerald-200 dark:border-emerald-800/50",

@@ -33,6 +33,14 @@ export function DitgarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 	return (
 		<div className="template-ditgar page-content">
 			<style>{`
+				
+				
+				/* Profiles as grid */
+				.template-ditgar .page-section-profiles .section-content {
+					display: grid !important;
+					grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+					gap: 0.75rem !important;
+				}
 				/* Skills as grid */
 				.template-ditgar .page-section-skills .section-content {
 					display: grid !important;
@@ -64,10 +72,13 @@ export function DitgarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					display: flex !important;
 					flex-direction: row !important;
 					align-items: center !important;
-					width: auto !important;
+					justify-content: center !important;
+					width: fit-content !important;
+					max-width: 100% !important;
+					overflow: hidden !important;
 					background-color: color-mix(in srgb, var(--page-primary-color) 10%, transparent) !important;
 					border: 1px solid color-mix(in srgb, var(--page-primary-color) 20%, transparent) !important;
-					border-radius: 9999px !important;
+					border-radius: 1rem !important;
 					padding: 0.35rem 0.75rem !important;
 				}
 
@@ -79,6 +90,7 @@ export function DitgarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					margin-bottom: 0 !important;
 					display: flex !important;
 					align-items: center !important;
+					justify-content: center !important;
 					column-gap: 0.35rem !important;
 				}
 
@@ -87,6 +99,9 @@ export function DitgarTemplate({ pageIndex, pageLayout }: TemplateProps) {
 					font-size: 1em !important;
 					font-weight: 500 !important;
 					color: var(--page-primary-color) !important;
+					word-break: break-word !important;
+					text-align: center !important;
+					text-wrap: balance !important;
 				}
 				
 				.template-ditgar .interests-item .section-item-icon,
@@ -167,15 +182,15 @@ function Header() {
 	return (
 		<div
 			data-section-id="header"
-			className="page-header space-y-4 bg-(--page-primary-color) px-(--page-margin-x) py-(--page-margin-y) text-(--page-background-color)"
+			className="page-header flex flex-col gap-1.5 bg-(--page-primary-color) px-(--page-margin-x) py-(--page-margin-y) text-(--page-background-color)"
 		>
 			<PagePicture />
 
-			<div>
-				<h2 className="font-bold text-2xl">
+			<div className="flex flex-col gap-0">
+				<h2 className="font-bold text-2xl leading-none">
 					<InlineEditableText value={basics.name} placeholder="Your Name" onChange={handleNameChange} />
 				</h2>
-				<p>
+				<p className="text-sm leading-none mt-1">
 					<InlineEditableText
 						value={basics.headline}
 						placeholder="Your Professional Title"
@@ -185,32 +200,38 @@ function Header() {
 			</div>
 
 			<div className="flex flex-col items-start gap-y-2 text-sm [&>div>i]:text-(--page-background-color)!">
-				<div className="basics-item-location flex items-center gap-x-1.5">
-					<PageIcon icon="map-pin" className="ph-bold" />
-					<InlineEditableText value={basics.location} placeholder="City, Country" onChange={handleLocationChange} />
-				</div>
+				{basics.location && (
+					<div className="basics-item-location flex items-center gap-x-1.5">
+						<PageIcon icon="map-pin" className="ph-bold" />
+						<InlineEditableText value={basics.location} placeholder="City, Country" onChange={handleLocationChange} />
+					</div>
+				)}
 
-				<div className="basics-item-phone flex items-center gap-x-1.5">
-					<PageIcon icon="phone" className="ph-bold" />
-					<InlineEditableText
-						as="a"
-						href={basics.phone ? `tel:${basics.phone}` : undefined}
-						value={basics.phone}
-						placeholder="+91 98765 43210"
-						onChange={handlePhoneChange}
-					/>
-				</div>
+				{basics.phone && (
+					<div className="basics-item-phone flex items-center gap-x-1.5">
+						<PageIcon icon="phone" className="ph-bold" />
+						<InlineEditableText
+							as="a"
+							href={basics.phone ? `tel:${basics.phone}` : undefined}
+							value={basics.phone}
+							placeholder="+91 98765 43210"
+							onChange={handlePhoneChange}
+						/>
+					</div>
+				)}
 
-				<div className="basics-item-email break-anywhere flex min-w-0 items-center gap-x-1.5">
-					<PageIcon icon="envelope" className="ph-bold" />
-					<InlineEditableText
-						as="a"
-						href={basics.email ? `mailto:${basics.email}` : undefined}
-						value={basics.email}
-						placeholder="email@domain.com"
-						onChange={handleEmailChange}
-					/>
-				</div>
+				{basics.email && (
+					<div className="basics-item-email break-anywhere flex min-w-0 items-center gap-x-1.5">
+						<PageIcon icon="envelope" className="ph-bold" />
+						<InlineEditableText
+							as="a"
+							href={basics.email ? `mailto:${basics.email}` : undefined}
+							value={basics.email}
+							placeholder="email@domain.com"
+							onChange={handleEmailChange}
+						/>
+					</div>
+				)}
 
 				{basics.website.url && (
 					<div className="basics-item-website flex items-center gap-x-1.5">
