@@ -13,7 +13,7 @@ const sectionClassName = cn(
 	"grid grid-cols-5 border-(--page-primary-color) border-t pt-1",
 
 	// Section Content
-	"[&>.section-content]:col-span-4",
+	"[&>.section-content]:col-span-4 [&>.section-content]:col-start-2",
 );
 
 /**
