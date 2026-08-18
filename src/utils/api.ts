@@ -120,11 +120,13 @@ export interface DownloadStats {
 
 export interface UserAnalyticsItem {
 	userId: string | number;
+	name?: string;
+	email?: string;
 	hasAtLeastOneResume: boolean;
 	totalLiveResumes: number;
 	lastResumeUpdatedAt: string;
 	downloads: DownloadStats;
-	ai: AIStats;
+	ai?: AIStats;
 }
 
 export interface UserAnalyticsResponse {
@@ -189,11 +191,16 @@ export interface AIInvocationsResponse {
 export interface KeyUsageDetail {
 	keyName: string;
 	totalTokens: number;
-	totalDollarUsed: number;
+	totalDollarUsed?: number;
+	dollarUsed?: number;
+	totalCalls?: number;
 }
 export interface KeyUsageResponse {
 	startDate: string;
 	endDate: string;
+	totalTokens?: number;
+	totalDollarUsed?: number;
+	uniqueUsers?: number;
 	details: KeyUsageDetail[];
 }
 
@@ -238,6 +245,37 @@ export interface ErrorCountsResponse {
 		[key: string]: number;
 	};
 }
+
+export interface AnalyticsSummaryResponse {
+	startDate?: string | null;
+	endDate?: string | null;
+	totalUsers: number;
+	activeUsers: number;
+	totalResumesCreated: number;
+	totalDistinctAiUsers: number;
+	downloads: {
+		pdf: number;
+		docx: number;
+		total: number;
+		avgResumesPerUser?: number;
+		uniqueDownloaders?: number;
+		uniqueDownloadersPdf?: number;
+		uniqueDownloadersDocx?: number;
+	};
+}
+
+export interface AIUsageSplitResponse {
+	startDate?: string | null;
+	endDate?: string | null;
+	totalCalls: number;
+	successRatePercent: number;
+	failRatePercent: number;
+	totalTokens: number;
+	totalAiSpendUsd: number;
+	totalDistinctAiUsers: number;
+}
+
+
 
 // JD Match
 export interface JDMatchResult {
@@ -651,8 +689,12 @@ export const api = {
 		}),
 
 	// 13. GET: /analytics/users
-	fetchUserAnalytics: (page: number, limit: number) =>
-		request<UserAnalyticsResponse>(`/analytics/users?page=${page}&limit=${limit}`),
+	fetchUserAnalytics: (page: number, limit: number, startDate?: string, endDate?: string) => {
+		const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+		if (startDate) params.append("startDate", startDate);
+		if (endDate) params.append("endDate", endDate);
+		return request<UserAnalyticsResponse>(`/analytics/users?${params.toString()}`);
+	},
 
 	// 14. GET: /analytics/users/{user_id}/ai-invocations
 	fetchUserAIInvocations: (userId: string | number, page: number, limit: number) =>
@@ -805,5 +847,23 @@ export const api = {
 		if (endDate) params.append("endDate", endDate);
 		const qs = params.toString();
 		return request<ErrorCountsResponse>(`/analytics/error-counts${qs ? `?${qs}` : ""}`);
+	},
+
+	// 25. GET: /openapi/analytics/summary
+	fetchAnalyticsSummary: (startDate?: string, endDate?: string) => {
+		const params = new URLSearchParams();
+		if (startDate) params.append("startDate", startDate);
+		if (endDate) params.append("endDate", endDate);
+		const qs = params.toString();
+		return request<AnalyticsSummaryResponse>(`/analytics/summary${qs ? `?${qs}` : ""}`);
+	},
+
+	// 26. GET: /openapi/analytics/ai-usage-split
+	fetchAiUsageSplit: (startDate?: string, endDate?: string) => {
+		const params = new URLSearchParams();
+		if (startDate) params.append("startDate", startDate);
+		if (endDate) params.append("endDate", endDate);
+		const qs = params.toString();
+		return request<AIUsageSplitResponse>(`/analytics/ai-usage-split${qs ? `?${qs}` : ""}`);
 	},
 };
