@@ -367,7 +367,7 @@ export const useResumeStore = create<ResumeStore>()(
 				},
 				incrementReviewAttempts: () => {
 					set((state) => {
-						if (state.reviewAttempts < 2) {
+						if (state.reviewAttempts < 3) {
 							state.reviewAttempts += 1;
 
 							if (typeof window !== "undefined" && state.resume?.id) {
