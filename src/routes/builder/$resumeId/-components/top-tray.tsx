@@ -107,15 +107,15 @@ export function BuilderTopTray() {
 			return;
 		}
 
-		if (reviewAttempts >= 2) {
+		if (reviewAttempts >= 3) {
 			if (isMobile) {
 				toast.error("🚫 Review limit reached. Resets at 12 AM.");
 			}
 			return;
 		}
 
-		// If this is the LAST attempt (second click)
-		if (reviewAttempts === 1 && isMobile && !showLastAttemptConfirm) {
+		// If this is the LAST attempt (third click)
+		if (reviewAttempts === 2 && isMobile && !showLastAttemptConfirm) {
 			setShowLastAttemptConfirm(true);
 			return;
 		}
@@ -430,14 +430,14 @@ export function BuilderTopTray() {
 
 									isReviewing && "scale-[0.98] brightness-90",
 
-									reviewAttempts >= 2 && "!bg-gray-400 !text-white hover:!bg-gray-400 cursor-not-allowed",
+									reviewAttempts >= 3 && "!bg-gray-400 !text-white hover:!bg-gray-400 cursor-not-allowed",
 								)}
 								onClick={onFinalReview}
 								data-tour="btn-final-review"
 							>
 								{isReviewing ? (
 									<CircleNotchIcon className="animate-spin" />
-								) : reviewAttempts >= 2 ? (
+								) : reviewAttempts >= 3 ? (
 									<DeadEyes />
 								) : (
 									<motion.div whileHover={{ scale: 1.1 }}>
@@ -451,13 +451,13 @@ export function BuilderTopTray() {
 						</div>
 					</TooltipTrigger>
 
-					{reviewAttempts === 1 && (
+					{reviewAttempts === 2 && (
 						<TooltipContent>
 							⚠️ <Trans>One attempt left only!</Trans>
 						</TooltipContent>
 					)}
 
-					{reviewAttempts >= 2 && (
+					{reviewAttempts >= 3 && (
 						<TooltipContent>
 							🚫 <Trans>Review limit reached. Resets at 12 AM.</Trans>
 						</TooltipContent>
