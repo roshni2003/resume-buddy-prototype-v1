@@ -76,7 +76,7 @@ export function ResumeBuddyEditor() {
 	const handleFinalReview = async () => {
 		if (!resume) return;
 
-		if (reviewAttempts >= 2) {
+		if (reviewAttempts >= 3) {
 			toast.error("Review limit reached for today.");
 			return;
 		}
