@@ -10,6 +10,10 @@ import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthTok
 import { isStandaloneMode } from "@/utils/local-resumes";
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
+import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
+import { useSettingsStore } from "@/stores/settings";
+import { useTheme } from "@/components/theme/provider";
 
 const AUTH_GATE_TIMEOUT_MS = 60_000;
 const AUTH_GATE_POLL_MS = 500;
@@ -131,11 +135,20 @@ function AuthGate({ showAuthHelp }: { showAuthHelp?: boolean }) {
 	);
 }
 
-import { useSettingsStore } from "@/stores/settings";
-import { useTheme } from "@/components/theme/provider";
-
 function DashboardHeader() {
 	const { theme } = useTheme();
+	const navigate = useNavigate();
+	const [savedRecently, setSavedRecently] = useState(false);
+
+	const handleSaveAndContinue = (e: React.MouseEvent) => {
+		e.preventDefault();
+		setSavedRecently(true);
+		toast.success("Progress saved! You can resume anytime from the dashboard.");
+		setTimeout(() => {
+			navigate({ to: "/dashboard/resumes" });
+			setTimeout(() => setSavedRecently(false), 2000);
+		}, 300);
+	};
 
 	return (
 		<header
@@ -167,17 +180,24 @@ function DashboardHeader() {
 
 				{/* Right: Actions */}
 				<div className="flex items-center gap-3">
-					<Link
-						to="/dashboard/resumes"
-						className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-700/80 bg-slate-800/50 hover:bg-slate-800 text-xs sm:text-sm font-semibold text-slate-200 transition-colors"
+					<button
+						type="button"
+						onClick={handleSaveAndContinue}
+						className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-700/80 bg-slate-800/60 hover:bg-slate-700 hover:border-slate-600 text-xs sm:text-sm font-semibold text-slate-200 transition-all cursor-pointer shadow-sm active:scale-95"
 					>
-						<svg className="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-							<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-							<polyline points="17 21 17 13 7 13 7 21"/>
-							<polyline points="7 3 7 8 15 8"/>
-						</svg>
-						<span>Save and continue later</span>
-					</Link>
+						{savedRecently ? (
+							<svg className="size-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+								<polyline points="20 6 9 17 4 12" />
+							</svg>
+						) : (
+							<svg className="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+								<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+								<polyline points="17 21 17 13 7 13 7 21"/>
+								<polyline points="7 3 7 8 15 8"/>
+							</svg>
+						)}
+						<span>{savedRecently ? "Saved!" : "Save and continue later"}</span>
+					</button>
 				</div>
 			</div>
 		</header>

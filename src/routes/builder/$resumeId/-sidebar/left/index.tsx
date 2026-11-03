@@ -65,11 +65,15 @@ function getSectionComponent(type: LeftSidebarSection) {
 
 export function BuilderSidebarLeft() {
 	const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-	const layout = useResumeStore((state) => state.resume.data.metadata.layout);
+	const layout = useResumeStore((state) => state.resume?.data?.metadata?.layout);
 	const updateResumeData = useResumeStore((state) => state.updateResumeData);
 
 	const orderedSections = useMemo(() => {
-		const layoutSections = layout.pages.flatMap((page) => [...page.main, ...page.sidebar]);
+		const pages = Array.isArray(layout?.pages) ? layout.pages : [];
+		const layoutSections = pages.flatMap((page) => [
+			...(Array.isArray(page?.main) ? page.main : []),
+			...(Array.isArray(page?.sidebar) ? page.sidebar : []),
+		]);
 		const ordered: LeftSidebarSection[] = [];
 		const seen = new Set<string>();
 
@@ -87,7 +91,7 @@ export function BuilderSidebarLeft() {
 		}
 
 		return ordered;
-	}, [layout.pages]);
+	}, [layout?.pages]);
 
 	// Separate sections that can be reordered (content sections)
 	// from those that cannot (picture and basics are metadata, always in header)

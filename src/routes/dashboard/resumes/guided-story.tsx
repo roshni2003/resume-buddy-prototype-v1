@@ -24,6 +24,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { localResumeStore } from "@/utils/local-resumes";
 import { cn } from "@/utils/style";
+import { voiceAssistant, formatAchievementBullet } from "@/utils/voice-assistant";
 
 export const Route = createFileRoute("/dashboard/resumes/guided-story")({
 	component: GuidedStoryRoute,
@@ -62,12 +63,12 @@ export function GuidedStoryRoute() {
 	const [targetRole, setTargetRole] = useState("Frontend Developer");
 	const [fullName, setFullName] = useState("Roshni Jha");
 
-	// Voice Simulation State
-	const [isListening, setIsListening] = useState(false);
+	// Voice Interaction State: "idle" | "listening" | "thinking"
+	const [voiceState, setVoiceState] = useState<"idle" | "listening" | "thinking">("idle");
 	const [voiceTranscript, setVoiceTranscript] = useState("");
 
-	// Prototype 1 & 2: Collected Stories
-	const [stories, setStories] = useState<StoryItem[]>([
+	// Default stories template
+	const defaultStories: StoryItem[] = [
 		{
 			id: "story-1",
 			companyOrProject: "Vipasna Website",
@@ -82,25 +83,120 @@ export function GuidedStoryRoute() {
 			],
 			status: "approved",
 		},
-	]);
+	];
+
+	// Autosave hydration from localStorage
+	const getInitialStoryState = () => {
+		if (typeof window === "undefined") {
+			return {
+				stories: defaultStories,
+				step: "pick_topic" as const,
+				activeStoryType: "project" as const,
+				activeProjectName: "E-Commerce Dashboard",
+				activeContribution: "Built responsive analytics charts and order lists using React.",
+				activeProblem: "Loading state was unhandled and table would freeze on large loads.",
+				activeEvidence: "Reduced page lag by memoizing components and adding pagination.",
+				generatedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
+				editedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
+			};
+		}
+		try {
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				return {
+					stories: Array.isArray(parsed.stories) && parsed.stories.length > 0 ? parsed.stories : defaultStories,
+					step: parsed.step || "pick_topic",
+					activeStoryType: parsed.activeStoryType || "project",
+					activeProjectName: parsed.activeProjectName || "E-Commerce Dashboard",
+					activeContribution: parsed.activeContribution || "",
+					activeProblem: parsed.activeProblem || "",
+					activeEvidence: parsed.activeEvidence || "",
+					generatedBullet: parsed.generatedBullet || "",
+					editedBullet: parsed.editedBullet || "",
+				};
+			}
+		} catch (e) {
+			console.warn("[GuidedStory] Failed to parse saved draft from localStorage:", e);
+		}
+		return {
+			stories: defaultStories,
+			step: "pick_topic" as const,
+			activeStoryType: "project" as const,
+			activeProjectName: "E-Commerce Dashboard",
+			activeContribution: "Built responsive analytics charts and order lists using React.",
+			activeProblem: "Loading state was unhandled and table would freeze on large loads.",
+			activeEvidence: "Reduced page lag by memoizing components and adding pagination.",
+			generatedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
+			editedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
+		};
+	};
+
+	const initial = getInitialStoryState();
+
+	// Prototype 1 & 2: Collected Stories
+	const [stories, setStories] = useState<StoryItem[]>(initial.stories);
 
 	// Interactive Conversational Discovery State
 	const [currentStep, setCurrentStep] = useState<
 		"role_setup" | "pick_topic" | "describe_work" | "clarify_impact" | "generate_bullet" | "review_approve" | "success"
-	>("pick_topic");
+	>(initial.step);
 
 	// Active story under construction
-	const [activeStoryType, setActiveStoryType] = useState<"project" | "work" | "internship">("project");
-	const [activeProjectName, setActiveProjectName] = useState("E-Commerce Dashboard");
-	const [activeContribution, setActiveContribution] = useState("Built responsive analytics charts and order lists using React.");
-	const [activeProblem, setActiveProblem] = useState("Loading state was unhandled and table would freeze on large loads.");
-	const [activeEvidence, setActiveEvidence] = useState("Reduced page lag by memoizing components and adding pagination.");
-	const [generatedBullet, setGeneratedBullet] = useState(
-		"Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads."
-	);
-	const [editedBullet, setEditedBullet] = useState(
-		"Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads."
-	);
+	const [activeStoryType, setActiveStoryType] = useState<"project" | "work" | "internship">(initial.activeStoryType);
+	const [activeProjectName, setActiveProjectName] = useState(initial.activeProjectName);
+	const [activeContribution, setActiveContribution] = useState(initial.activeContribution);
+	const [activeProblem, setActiveProblem] = useState(initial.activeProblem);
+	const [activeEvidence, setActiveEvidence] = useState(initial.activeEvidence);
+	const [generatedBullet, setGeneratedBullet] = useState(initial.generatedBullet);
+	const [editedBullet, setEditedBullet] = useState(initial.editedBullet);
+
+	// Save automatically to localStorage after each state change
+	useEffect(() => {
+		try {
+			const draftPayload = {
+				stories,
+				step: currentStep,
+				activeStoryType,
+				activeProjectName,
+				activeContribution,
+				activeProblem,
+				activeEvidence,
+				generatedBullet,
+				editedBullet,
+				updatedAt: new Date().toISOString(),
+			};
+			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(draftPayload));
+		} catch (e) {
+			console.warn("[GuidedStory] Autosave error:", e);
+		}
+	}, [
+		stories,
+		currentStep,
+		activeStoryType,
+		activeProjectName,
+		activeContribution,
+		activeProblem,
+		activeEvidence,
+		generatedBullet,
+		editedBullet,
+	]);
+
+	// Clear saved story draft
+	const handleResetStoryDraft = () => {
+		setActiveProjectName("New Project");
+		setActiveContribution("");
+		setActiveProblem("");
+		setActiveEvidence("");
+		setGeneratedBullet("");
+		setEditedBullet("");
+		setCurrentStep("pick_topic");
+		try {
+			localStorage.removeItem("resume_buddy_guided_story_draft");
+		} catch {
+			// ignore
+		}
+	};
 
 	// Plan Items (Prototype 2 style progress)
 	const planItems: PlanItem[] = [
@@ -144,19 +240,67 @@ export function GuidedStoryRoute() {
 	const completedCount = planItems.filter((p) => p.status === "Completed").length;
 	const progressPercent = Math.round((completedCount / planItems.length) * 100);
 
-	// Toggle simulated voice recording
+	// Real Web Speech API voice recording with live transcription & 3 explicit states (idle, listening, thinking)
 	const toggleVoice = (onReceiveText: (txt: string) => void) => {
-		if (isListening) {
-			setIsListening(false);
-		} else {
-			setIsListening(true);
-			setVoiceTranscript("Listening... speak naturally about what you built...");
+		if (voiceState === "listening") {
+			voiceAssistant.stop();
+			setVoiceState("thinking");
+			setVoiceTranscript("Processing your speech...");
 			setTimeout(() => {
-				const mockSpokenText = "I created a web app using React and added real-time filtering for users.";
-				setVoiceTranscript(`Recognized: "${mockSpokenText}"`);
-				onReceiveText(mockSpokenText);
-				setIsListening(false);
-			}, 2200);
+				setVoiceState("idle");
+				setVoiceTranscript("");
+			}, 600);
+			return;
+		}
+
+		if (voiceAssistant.getSupported()) {
+			setVoiceState("listening");
+			setVoiceTranscript("Listening to your voice... speak now");
+
+			const started = voiceAssistant.start(
+				(transcript, isFinal) => {
+					setVoiceTranscript(`Heard: "${transcript}"`);
+					if (transcript) {
+						onReceiveText(transcript);
+					}
+					if (isFinal) {
+						setVoiceState("thinking");
+						setVoiceTranscript("Formatting statement...");
+						setTimeout(() => {
+							setVoiceState("idle");
+							setVoiceTranscript("");
+						}, 700);
+					}
+				},
+				(err) => {
+					console.warn("Speech recognition error:", err);
+					setVoiceTranscript("Microphone error or permission denied. Type your answer instead.");
+					setVoiceState("idle");
+				},
+				() => {
+					if (voiceState === "listening") {
+						setVoiceState("idle");
+					}
+				}
+			);
+
+			if (!started) {
+				setVoiceState("idle");
+			}
+		} else {
+			// Fallback for browsers without Web Speech support
+			setVoiceState("listening");
+			setVoiceTranscript("Speech recognition unavailable in this browser. Simulating input...");
+			setTimeout(() => {
+				setVoiceState("thinking");
+				setVoiceTranscript("Formatting statement with Zoe...");
+				setTimeout(() => {
+					const mockSpokenText = "Built a responsive web application in React and added real-time data filtering.";
+					onReceiveText(mockSpokenText);
+					setVoiceState("idle");
+					setVoiceTranscript(`Recognized: "${mockSpokenText}"`);
+				}, 600);
+			}, 1400);
 		}
 	};
 
@@ -227,11 +371,17 @@ export function GuidedStoryRoute() {
 					},
 				} as any,
 				metadata: {
-					template: "ditto",
-					layout: [
-						["summary", "experience"],
-						["education", "skills"],
-					],
+					template: "azurill",
+					layout: {
+						sidebarWidth: 30,
+						pages: [
+							{
+								fullWidth: false,
+								main: ["summary", "education", "experience"],
+								sidebar: ["profiles", "skills"],
+							},
+						],
+					},
 					typography: {
 						font: { family: "IBM Plex Sans", subsets: ["latin"], variants: ["regular", "700"] },
 						lineHeight: 1.5,
@@ -445,16 +595,28 @@ export function GuidedStoryRoute() {
 								<h1 className="text-2xl sm:text-3xl font-extrabold text-white">Achievement Studio</h1>
 							</div>
 
-							{currentStep !== "pick_topic" && (
-								<button
-									type="button"
-									onClick={() => setCurrentStep("pick_topic")}
-									className="text-xs text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer"
-								>
-									<ArrowLeft className="size-3.5" />
-									<span>Reset question</span>
-								</button>
-							)}
+							<div className="flex items-center gap-2">
+								{currentStep !== "pick_topic" && (
+									<button
+										type="button"
+										onClick={() => setCurrentStep("pick_topic")}
+										className="text-xs text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60"
+									>
+										<ArrowLeft className="size-3.5" />
+										<span>Previous step</span>
+									</button>
+								)}
+								{(activeContribution.trim() || currentStep !== "pick_topic") && (
+									<button
+										type="button"
+										onClick={handleResetStoryDraft}
+										className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10"
+									>
+										<Trash2 className="size-3.5" />
+										<span>Discard draft</span>
+									</button>
+								)}
+							</div>
 						</div>
 
 						{/* Step 1: Pick topic */}
@@ -554,22 +716,39 @@ export function GuidedStoryRoute() {
 										placeholder="e.g. I designed the database models and created the user login endpoints..."
 									/>
 
-									{/* Voice Control Indicator */}
+									{/* Voice Control Indicator (Idle, Listening, Thinking) */}
 									<div className="flex flex-wrap items-center justify-between gap-3 pt-2">
 										<div className="flex items-center gap-3">
 											<button
 												type="button"
 												onClick={() => toggleVoice((txt) => setActiveContribution(txt))}
 												className={cn(
-													"inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-													isListening
+													"inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+													voiceState === "listening"
 														? "bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse"
+														: voiceState === "thinking"
+														? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
 														: "bg-slate-800 hover:bg-slate-700 text-slate-300"
 												)}
 											>
-												{isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
-												<span>{isListening ? "Listening..." : "Use voice input"}</span>
+												{voiceState === "listening" ? (
+													<MicOff className="size-4 text-red-400" />
+												) : voiceState === "thinking" ? (
+													<RefreshCw className="size-4 animate-spin text-purple-400" />
+												) : (
+													<Mic className="size-4" />
+												)}
+												<span>
+													{voiceState === "listening"
+														? "Listening... (Click to stop)"
+														: voiceState === "thinking"
+														? "Thinking / Formatting..."
+														: "Use voice input"}
+												</span>
 											</button>
+											<span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+												{voiceState === "listening" ? "● LIVE SPEECH" : voiceState === "thinking" ? "● PROCESSING" : "IDLE"}
+											</span>
 											{voiceTranscript && <span className="text-xs text-slate-400 italic">{voiceTranscript}</span>}
 										</div>
 
@@ -610,9 +789,14 @@ export function GuidedStoryRoute() {
 										<button
 											type="button"
 											onClick={() => {
-												const combined = `${activeContribution} Result: ${activeEvidence}`;
-												setGeneratedBullet(combined);
-												setEditedBullet(combined);
+												const bullet = formatAchievementBullet({
+													role: targetRole,
+													contribution: activeContribution,
+													problem: activeProblem,
+													evidenceResult: activeEvidence,
+												});
+												setGeneratedBullet(bullet);
+												setEditedBullet(bullet);
 												setCurrentStep("generate_bullet");
 											}}
 											className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
@@ -623,8 +807,12 @@ export function GuidedStoryRoute() {
 										<button
 											type="button"
 											onClick={() => {
-												setGeneratedBullet(activeContribution);
-												setEditedBullet(activeContribution);
+												const bullet = formatAchievementBullet({
+													role: targetRole,
+													contribution: activeContribution,
+												});
+												setGeneratedBullet(bullet);
+												setEditedBullet(bullet);
 												setCurrentStep("generate_bullet");
 											}}
 											className="px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300 text-xs font-semibold cursor-pointer"
@@ -910,6 +1098,21 @@ export function GuidedStoryRoute() {
 									))}
 								</div>
 							))}
+
+							{/* Progressive Interim Draft Preview (Not approved) */}
+							{(activeContribution.trim() || editedBullet.trim()) && currentStep !== "success" && (
+								<div className="space-y-1 pt-1 border-t border-dashed border-amber-200">
+									<div className="flex items-center justify-between">
+										<span className="font-semibold text-slate-800">{activeProjectName || "In-Progress Story"}</span>
+										<span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+											Draft — not approved
+										</span>
+									</div>
+									<p className="text-[11px] text-slate-500 italic leading-relaxed">
+										• {editedBullet.trim() || activeContribution.trim()}
+									</p>
+								</div>
+							)}
 						</div>
 
 						{/* Skills Section */}
