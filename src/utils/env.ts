@@ -8,11 +8,13 @@ export const env = createEnv({
 	runtimeEnv: {
 		...process.env,
 		VITE_FLAG_DEBUG_PRINTER: import.meta.env.VITE_FLAG_DEBUG_PRINTER,
+		VITE_STANDALONE_MODE: import.meta.env.VITE_STANDALONE_MODE,
 	},
 	emptyStringAsUndefined: true,
 
 	client: {
 		VITE_FLAG_DEBUG_PRINTER: stringbool.default(false),
+		VITE_STANDALONE_MODE: stringbool.default(false),
 	},
 
 	server: {

@@ -6,6 +6,7 @@ import { LoadingScreen } from "@/components/layout/loading-screen";
 import { ResumePreview } from "@/components/resume/preview";
 import { useResumeStore } from "@/components/resume/store/resume";
 import { env } from "@/utils/env";
+import { isStandaloneMode } from "@/utils/local-resumes";
 import { verifyPrinterToken } from "@/utils/printer-token";
 
 const searchSchema = z.object({
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/printer/$resumeId")({
 	},
 	// @ts-expect-error - types mis-match
 	beforeLoad: ({ params, search }) => {
-		if (env.VITE_FLAG_DEBUG_PRINTER) return {};
+		if (env.VITE_FLAG_DEBUG_PRINTER || isStandaloneMode()) return {};
 
 		// Allow preview token for dashboard cards
 		if (search?.token === "preview") return {};

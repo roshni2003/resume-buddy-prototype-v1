@@ -1,8 +1,9 @@
 import type { ResumeData } from "@/schema/resume/data";
 import { getAuthToken } from "@/utils/auth-token";
 import { defaultResumeData } from "@/schema/resume/data";
+import { isStandaloneMode, localResumeStore } from "@/utils/local-resumes";
 
-const VITE_AI_BASE_URL_DEV = import.meta.env.VITE_AI_BASE_URL_DEV as string;
+const VITE_AI_BASE_URL_DEV = (import.meta.env.VITE_AI_BASE_URL_DEV as string) || "";
 
 export const UNAUTHORIZED_EVENT = "app:unauthorized";
 export const UNAUTHORIZED_FLAG_KEY = "app:unauthorized:pending";
@@ -566,65 +567,146 @@ const mapResume = (resume: ResumeSummary): ResumeSummary => {
 export const api = {
 	// 1. GET: /resumes/user
 	fetchResumes: async (options: { tags?: string[]; sort?: string } = {}) => {
-		const searchParams = new URLSearchParams();
-		if (options.tags?.length) {
-			for (const tag of options.tags) {
-				searchParams.append("tags", tag);
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			return localResumeStore.getAll().map(mapResume);
+		}
+		try {
+			const searchParams = new URLSearchParams();
+			if (options.tags?.length) {
+				for (const tag of options.tags) {
+					searchParams.append("tags", tag);
+				}
 			}
-		}
-		if (options.sort) {
-			searchParams.append("sort", options.sort);
-		}
-		const queryString = searchParams.toString();
-		const resumes = await request<ResumeSummary[]>(`/resumes/user${queryString ? `?${queryString}` : ""}`);
+			if (options.sort) {
+				searchParams.append("sort", options.sort);
+			}
+			const queryString = searchParams.toString();
+			const resumes = await request<ResumeSummary[]>(`/resumes/user${queryString ? `?${queryString}` : ""}`);
 
-		return resumes.map(mapResume);
+			return resumes.map(mapResume);
+		} catch (error) {
+			console.warn("Falling back to local resume store for fetchResumes", error);
+			return localResumeStore.getAll().map(mapResume);
+		}
 	},
 
 	// 2. GET: /resumes/{id}
 	fetchResume: async (id: string) => {
-		const resume = await request<ResumeSummary>(`/resumes/${id}`);
-		return mapResume(resume);
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			const local = localResumeStore.getById(id);
+			if (local) return mapResume(local);
+		}
+		try {
+			const resume = await request<ResumeSummary>(`/resumes/${id}`);
+			return mapResume(resume);
+		} catch (error) {
+			console.warn(`Falling back to local resume store for fetchResume(${id})`, error);
+			const local = localResumeStore.getById(id);
+			if (local) return mapResume(local);
+			throw error;
+		}
 	},
 
 	// 3. PUT: /resumes/{id}
-	updateResume: (id: string, data: Partial<Omit<ResumeSummary, "id" | "createdAt" | "updatedAt">>) =>
-		request<void>(`/resumes/${id}`, {
-			method: "PUT",
-			body: JSON.stringify(data),
-		}),
+	updateResume: async (id: string, data: Partial<Omit<ResumeSummary, "id" | "createdAt" | "updatedAt">>) => {
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			const existing = localResumeStore.getById(id);
+			if (existing) {
+				localResumeStore.save({
+					...existing,
+					...data,
+					data: (data.data as ResumeData) || existing.data,
+					updatedAt: new Date(),
+				});
+				return;
+			}
+		}
+		try {
+			await request<void>(`/resumes/${id}`, {
+				method: "PUT",
+				body: JSON.stringify(data),
+			});
+		} catch (error) {
+			console.warn(`Falling back to local resume store for updateResume(${id})`, error);
+			const existing = localResumeStore.getById(id);
+			if (existing) {
+				localResumeStore.save({
+					...existing,
+					...data,
+					data: (data.data as ResumeData) || existing.data,
+					updatedAt: new Date(),
+				});
+			}
+		}
+	},
 
 	// 4. DELETE: /resumes/{id}
-	deleteResume: (id: string) =>
-		request<void>(`/resumes/${id}`, {
-			method: "DELETE",
-		}),
+	deleteResume: async (id: string) => {
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			localResumeStore.delete(id);
+			return;
+		}
+		try {
+			await request<void>(`/resumes/${id}`, {
+				method: "DELETE",
+			});
+		} catch (error) {
+			console.warn(`Falling back to local resume store for deleteResume(${id})`, error);
+			localResumeStore.delete(id);
+		}
+	},
 
 	// 5. POST: /resumes
-	createResume: (data: {
+	createResume: async (data: {
 		name: string;
 		slug: string;
 		tags?: string[];
 		data?: ResumeData;
 		isPublic?: boolean;
 		withSampleData?: boolean;
-	}) =>
-		request<{ id: string }>("/resumes", {
-			method: "POST",
-			body: JSON.stringify(data),
-		}),
+	}) => {
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			return localResumeStore.create(data);
+		}
+		try {
+			return await request<{ id: string }>("/resumes", {
+				method: "POST",
+				body: JSON.stringify(data),
+			});
+		} catch (error) {
+			console.warn("Falling back to local resume store for createResume", error);
+			return localResumeStore.create(data);
+		}
+	},
 
 	// 6. POST: /resumes/{id}/duplicate
-	duplicateResume: (id: string, overrides: { name?: string; slug?: string; tags?: string[] } = {}) =>
-		request<{ id: string }>(`/resumes/${id}/duplicate`, {
-			method: "POST",
-			body: JSON.stringify(overrides),
-		}),
+	duplicateResume: async (id: string, overrides: { name?: string; slug?: string; tags?: string[] } = {}) => {
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			return localResumeStore.duplicate(id, overrides);
+		}
+		try {
+			return await request<{ id: string }>(`/resumes/${id}/duplicate`, {
+				method: "POST",
+				body: JSON.stringify(overrides),
+			});
+		} catch (error) {
+			console.warn(`Falling back to local resume store for duplicateResume(${id})`, error);
+			return localResumeStore.duplicate(id, overrides);
+		}
+	},
 
 	// 7. GET: /resumes/statistics (Dashboard summary)
 	fetchStatistics: async () => {
-		const stats = await request<ResumeStatistics>("/resumes/statistics");
-		return stats;
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			return localResumeStore.getStatistics();
+		}
+		try {
+			const stats = await request<ResumeStatistics>("/resumes/statistics");
+			return stats;
+		} catch (error) {
+			console.warn("Falling back to local resume statistics", error);
+			return localResumeStore.getStatistics();
+		}
 	},
 
 	// 7a. GET: /resume/statistics/{id} (Individual resume statistics)

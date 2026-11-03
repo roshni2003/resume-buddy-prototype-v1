@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
 // authClient used in index.tsx for session
 import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
+import { isStandaloneMode } from "@/utils/local-resumes";
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 
@@ -16,44 +17,7 @@ const AUTH_GATE_POLL_MS = 500;
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
 	beforeLoad: async ({ context }) => {
-		if (typeof window === "undefined") {
-			return { session: context.session, needsAuth: false, isAuthenticated: Boolean(context.session?.user) };
-		}
-
-		const url = new URL(window.location.href);
-		const devBypass = import.meta.env.DEV && url.searchParams.get("test") === "true";
-
-		const urlToken = getUrlToken();
-		if (urlToken) {
-			await persistAuthToken(urlToken);
-		}
-
-		const token = getAuthToken();
-		const hasToken = isValidToken(token);
-		const hasUrlToken = isValidToken(urlToken);
-
-		// If there's a token in storage but it's invalid/expired, wipe it.
-		// This prevents stale tokens (local/session/cookie) from blocking the "no token" redirect.
-		if (token && !hasToken) {
-			clearAuthToken();
-		}
-
-		const tokenAfterClear = getAuthToken();
-		const hasTokenAfterClear = isValidToken(tokenAfterClear);
-
-		// If there's NO token in storage and NO token in the URL, user is not logged in.
-		// Instead of automatically redirecting, we show the Auth Help gate so users know what to do.
-		if (!hasTokenAfterClear && !hasUrlToken && !devBypass) {
-			return { session: context.session, needsAuth: true, isAuthenticated: false, showAuthHelp: true };
-		}
-
-		// At this point: either token is valid OR we have a URL token in-flight.
-		// If token isn't valid yet, render AuthGate to poll until storage commits.
-		if (!hasTokenAfterClear && hasUrlToken && !devBypass) {
-			return { session: context.session, needsAuth: true, isAuthenticated: false };
-		}
-
-		return { session: context.session, needsAuth: false, isAuthenticated: hasTokenAfterClear || devBypass };
+		return { session: context.session, needsAuth: false, isAuthenticated: true };
 	},
 });
 
@@ -175,72 +139,45 @@ function DashboardHeader() {
 
 	return (
 		<header
-			className="sticky top-0 z-30 border-b"
-			style={{
-				background: theme === "light" ? "rgba(255, 255, 255, 0.85)" : "rgba(9, 13, 22, 0.85)",
-				borderColor: theme === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
-				backdropFilter: "blur(20px)",
-				WebkitBackdropFilter: "blur(20px)",
-			}}
+			className="sticky top-0 z-30 border-b border-slate-800/80 bg-[#060b13]/90 backdrop-blur-md"
 		>
 			<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5">
-				{/* Left: Logo */}
-				<Link
-					to="/dashboard/resumes"
-					className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
-				>
-					<img src="/zoe-icon.png"
-						alt="Resume Buddy"
-						className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9 dark:bg-slate-100 dark:p-[2px] dark:rounded-full" />
-					<span
-						className={`font-bold text-base sm:text-lg ${theme === "light" ? "text-slate-900" : "text-white"}`}
-						style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-					>
-						Resume Buddy
-					</span>
-				</Link>
-
-
-				{/* Right: Settings & User menu */}
-				<div className="flex items-center gap-2 sm:gap-4">
-					<nav className="hidden items-center gap-1 sm:flex">
-						{/* TODO: Add logic to conditionally render Analytics link for admins only if needed */}
-						<Link
-							to="/dashboard/admin/analytics"
-							activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
-							className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
-						>
-							User Analytics
-						</Link>
-					</nav>
-
+				{/* Left: Logo & Prototype Badge */}
+				<div className="flex items-center gap-3">
 					<Link
-						to="/dashboard/settings"
-						activeProps={{ className: theme === "light" ? "bg-slate-200 text-slate-900 shadow-sm" : "bg-white/10 text-white shadow-sm" }}
-						className={`flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${theme === "light" ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+						to="/dashboard/resumes"
+						className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90"
 					>
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-							<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-							<circle cx="12" cy="12" r="3"></circle>
-						</svg>
-						<span className="hidden sm:inline text-sm font-medium">Settings</span>
+						<div className="size-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-base shadow-sm shadow-emerald-500/20">
+							Z
+						</div>
+						<span
+							className="font-bold text-base sm:text-lg text-white"
+							style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+						>
+							Resume Buddy
+						</span>
 					</Link>
 
-					<UserDropdownMenu>
-						{({ session: userSession }) => (
-							<button className="flex items-center justify-center rounded-full transition-all hover:ring-2 hover:ring-white/20 cursor-pointer">
-								<Avatar className="size-8">
-									<AvatarImage src={userSession.user.image ?? undefined} />
-									<AvatarFallback
-										className="text-xs text-white"
-										style={{ background: "rgba(0,208,156,0.2)" }}
-									>
-										{getInitials(userSession.user.name)}
-									</AvatarFallback>
-								</Avatar>
-							</button>
-						)}
-					</UserDropdownMenu>
+					<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+						<span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
+						Prototype v1 · simulated AI
+					</span>
+				</div>
+
+				{/* Right: Actions */}
+				<div className="flex items-center gap-3">
+					<Link
+						to="/dashboard/resumes"
+						className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-700/80 bg-slate-800/50 hover:bg-slate-800 text-xs sm:text-sm font-semibold text-slate-200 transition-colors"
+					>
+						<svg className="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+							<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+							<polyline points="17 21 17 13 7 13 7 21"/>
+							<polyline points="7 3 7 8 15 8"/>
+						</svg>
+						<span>Save and continue later</span>
+					</Link>
 				</div>
 			</div>
 		</header>
@@ -249,40 +186,8 @@ function DashboardHeader() {
 
 function RouteComponent() {
 	useLingui();
-	const routeContext = Route.useRouteContext() as any;
-	const needsAuth = routeContext?.needsAuth;
-	const showAuthHelpFromContext = routeContext?.showAuthHelp;
-
 	const { theme } = useTheme();
 	const { backgroundTheme } = useSettingsStore();
-	
-	const [isClientUnauth, setIsClientUnauth] = useState(false);
-
-	useEffect(() => {
-		// Safety net: if beforeLoad didn't redirect for some reason (stale cached context,
-		// in-app browser quirks, etc.), ensure we still send unauthenticated users to Zuvy.
-		const urlToken = getUrlToken();
-		const token = getAuthToken();
-		const devBypass = import.meta.env.DEV && new URL(window.location.href).searchParams.get("test") === "true";
-
-		if (!devBypass && !isValidToken(token) && !isValidToken(urlToken)) {
-			// Instead of auto-redirecting anywhere, we set isClientUnauth to true
-			// so the AuthGate with manual copy-paste instructions shows up.
-			setIsClientUnauth(true);
-		}
-	}, []);
-
-	useEffect(() => {
-		const token = getAuthToken();
-		console.log("[auth-debug] dashboard.RouteComponent mounted", {
-			path: window.location.pathname + window.location.search + window.location.hash,
-			hasStoredToken: Boolean(token),
-		});
-	}, []);
-
-	if (needsAuth || isClientUnauth) {
-		return <AuthGate showAuthHelp={showAuthHelpFromContext || isClientUnauth} />;
-	}
 
 	const getBackgroundStyle = () => {
 		if (theme === "light") return { background: "var(--color-background)" };

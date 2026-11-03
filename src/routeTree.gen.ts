@@ -27,6 +27,8 @@ import { Route as UploadsUserIdSplatRouteImport } from "./routes/uploads/$userId
 import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
 import { Route as DashboardResumesUploadRouteImport } from "./routes/dashboard/resumes/upload";
 import { Route as DashboardResumesMatchRouteImport } from "./routes/dashboard/resumes/match";
+import { Route as DashboardResumesManualBuilderRouteImport } from "./routes/dashboard/resumes/manual-builder";
+import { Route as DashboardResumesGuidedStoryRouteImport } from "./routes/dashboard/resumes/guided-story";
 import { Route as DashboardAdminAnalyticsRouteImport } from "./routes/dashboard/admin/analytics";
 import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
 import { Route as ApiOpenapiSplatRouteImport } from "./routes/api/openapi.$";
@@ -122,6 +124,18 @@ const DashboardResumesMatchRoute = DashboardResumesMatchRouteImport.update({
   path: "/resumes/match",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
+const DashboardResumesManualBuilderRoute =
+  DashboardResumesManualBuilderRouteImport.update({
+    id: "/resumes/manual-builder",
+    path: "/resumes/manual-builder",
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
+const DashboardResumesGuidedStoryRoute =
+  DashboardResumesGuidedStoryRouteImport.update({
+    id: "/resumes/guided-story",
+    path: "/resumes/guided-story",
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
 const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
   id: "/admin/analytics",
   path: "/admin/analytics",
@@ -158,6 +172,8 @@ export interface FileRoutesByFullPath {
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
+  "/dashboard/resumes/guided-story": typeof DashboardResumesGuidedStoryRoute;
+  "/dashboard/resumes/manual-builder": typeof DashboardResumesManualBuilderRoute;
   "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
   "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
@@ -179,6 +195,8 @@ export interface FileRoutesByTo {
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
+  "/dashboard/resumes/guided-story": typeof DashboardResumesGuidedStoryRoute;
+  "/dashboard/resumes/manual-builder": typeof DashboardResumesManualBuilderRoute;
   "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
   "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
@@ -204,6 +222,8 @@ export interface FileRoutesById {
   "/api/openapi/$": typeof ApiOpenapiSplatRoute;
   "/api/rpc/$": typeof ApiRpcSplatRoute;
   "/dashboard/admin/analytics": typeof DashboardAdminAnalyticsRoute;
+  "/dashboard/resumes/guided-story": typeof DashboardResumesGuidedStoryRoute;
+  "/dashboard/resumes/manual-builder": typeof DashboardResumesManualBuilderRoute;
   "/dashboard/resumes/match": typeof DashboardResumesMatchRoute;
   "/dashboard/resumes/upload": typeof DashboardResumesUploadRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
@@ -229,6 +249,8 @@ export interface FileRouteTypes {
     | "/api/openapi/$"
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
+    | "/dashboard/resumes/guided-story"
+    | "/dashboard/resumes/manual-builder"
     | "/dashboard/resumes/match"
     | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
@@ -250,6 +272,8 @@ export interface FileRouteTypes {
     | "/api/openapi/$"
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
+    | "/dashboard/resumes/guided-story"
+    | "/dashboard/resumes/manual-builder"
     | "/dashboard/resumes/match"
     | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
@@ -274,6 +298,8 @@ export interface FileRouteTypes {
     | "/api/openapi/$"
     | "/api/rpc/$"
     | "/dashboard/admin/analytics"
+    | "/dashboard/resumes/guided-story"
+    | "/dashboard/resumes/manual-builder"
     | "/dashboard/resumes/match"
     | "/dashboard/resumes/upload"
     | "/dashboard/settings/profile"
@@ -427,6 +453,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardResumesMatchRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/dashboard/resumes/manual-builder": {
+      id: "/dashboard/resumes/manual-builder";
+      path: "/resumes/manual-builder";
+      fullPath: "/dashboard/resumes/manual-builder";
+      preLoaderRoute: typeof DashboardResumesManualBuilderRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/guided-story": {
+      id: "/dashboard/resumes/guided-story";
+      path: "/resumes/guided-story";
+      fullPath: "/dashboard/resumes/guided-story";
+      preLoaderRoute: typeof DashboardResumesGuidedStoryRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     "/dashboard/admin/analytics": {
       id: "/dashboard/admin/analytics";
       path: "/admin/analytics";
@@ -473,6 +513,8 @@ const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute;
   DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute;
+  DashboardResumesGuidedStoryRoute: typeof DashboardResumesGuidedStoryRoute;
+  DashboardResumesManualBuilderRoute: typeof DashboardResumesManualBuilderRoute;
   DashboardResumesMatchRoute: typeof DashboardResumesMatchRoute;
   DashboardResumesUploadRoute: typeof DashboardResumesUploadRoute;
   DashboardSettingsProfileRoute: typeof DashboardSettingsProfileRoute;
@@ -483,6 +525,8 @@ interface DashboardRouteRouteChildren {
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
+  DashboardResumesGuidedStoryRoute: DashboardResumesGuidedStoryRoute,
+  DashboardResumesManualBuilderRoute: DashboardResumesManualBuilderRoute,
   DashboardResumesMatchRoute: DashboardResumesMatchRoute,
   DashboardResumesUploadRoute: DashboardResumesUploadRoute,
   DashboardSettingsProfileRoute: DashboardSettingsProfileRoute,
