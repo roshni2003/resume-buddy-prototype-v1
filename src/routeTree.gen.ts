@@ -9,34 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
-import { Route as SchemaDotjsonRouteImport } from "./routes/schema[.]json";
-import { Route as DashboardRouteRouteImport } from "./routes/dashboard/route";
 import { Route as HomeRouteRouteImport } from "./routes/_home/route";
-import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
-import { Route as AuthIndexRouteImport } from "./routes/auth/index";
-import { Route as HomeIndexRouteImport } from "./routes/_home/index";
-import { Route as PrinterResumeIdRouteImport } from "./routes/printer/$resumeId";
-import { Route as AuthLoginRouteImport } from "./routes/auth/login";
-import { Route as ApiHealthRouteImport } from "./routes/api/health";
+import { Route as DashboardRouteRouteImport } from "./routes/dashboard/route";
+import { Route as SchemaDotjsonRouteImport } from "./routes/schema[.]json";
 import { Route as UsernameSlugRouteImport } from "./routes/$username/$slug";
+import { Route as HomeIndexRouteImport } from "./routes/_home/index";
+import { Route as ApiHealthRouteImport } from "./routes/api/health";
+import { Route as AuthIndexRouteImport } from "./routes/auth/index";
+import { Route as AuthLoginRouteImport } from "./routes/auth/login";
 import { Route as BuilderResumeIdRouteRouteImport } from "./routes/builder/$resumeId/route";
-import { Route as DashboardSettingsIndexRouteImport } from "./routes/dashboard/settings/index";
-import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
-import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
-import { Route as UploadsUserIdSplatRouteImport } from "./routes/uploads/$userId.$";
-import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
-import { Route as DashboardResumesUploadRouteImport } from "./routes/dashboard/resumes/upload";
-import { Route as DashboardResumesMatchRouteImport } from "./routes/dashboard/resumes/match";
-import { Route as DashboardResumesManualBuilderRouteImport } from "./routes/dashboard/resumes/manual-builder";
-import { Route as DashboardResumesGuidedStoryRouteImport } from "./routes/dashboard/resumes/guided-story";
-import { Route as DashboardAdminAnalyticsRouteImport } from "./routes/dashboard/admin/analytics";
-import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
-import { Route as ApiOpenapiSplatRouteImport } from "./routes/api/openapi.$";
+import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
+import { Route as PrinterResumeIdRouteImport } from "./routes/printer/$resumeId";
 import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth.$";
+import { Route as ApiOpenapiSplatRouteImport } from "./routes/api/openapi.$";
+import { Route as ApiRpcSplatRouteImport } from "./routes/api/rpc.$";
+import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
+import { Route as DashboardAdminAnalyticsRouteImport } from "./routes/dashboard/admin/analytics";
+import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
+import { Route as DashboardResumesGuidedStoryRouteImport } from "./routes/dashboard/resumes/guided-story";
+import { Route as DashboardResumesManualBuilderRouteImport } from "./routes/dashboard/resumes/manual-builder";
+import { Route as DashboardResumesMatchRouteImport } from "./routes/dashboard/resumes/match";
+import { Route as DashboardResumesUploadRouteImport } from "./routes/dashboard/resumes/upload";
+import { Route as DashboardSettingsIndexRouteImport } from "./routes/dashboard/settings/index";
+import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
+import { Route as UploadsUserIdSplatRouteImport } from "./routes/uploads/$userId.$";
 
-const SchemaDotjsonRoute = SchemaDotjsonRouteImport.update({
-  id: "/schema.json",
-  path: "/schema.json",
+const HomeRouteRoute = HomeRouteRouteImport.update({
+  id: "/_home",
   getParentRoute: () => rootRouteImport,
 } as any);
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
@@ -44,38 +43,9 @@ const DashboardRouteRoute = DashboardRouteRouteImport.update({
   path: "/dashboard",
   getParentRoute: () => rootRouteImport,
 } as any);
-const HomeRouteRoute = HomeRouteRouteImport.update({
-  id: "/_home",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
-const AuthIndexRoute = AuthIndexRouteImport.update({
-  id: "/auth/",
-  path: "/auth/",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const HomeIndexRoute = HomeIndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => HomeRouteRoute,
-} as any);
-const PrinterResumeIdRoute = PrinterResumeIdRouteImport.update({
-  id: "/printer/$resumeId",
-  path: "/printer/$resumeId",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: "/auth/login",
-  path: "/auth/login",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiHealthRoute = ApiHealthRouteImport.update({
-  id: "/api/health",
-  path: "/api/health",
+const SchemaDotjsonRoute = SchemaDotjsonRouteImport.update({
+  id: "/schema.json",
+  path: "/schema.json",
   getParentRoute: () => rootRouteImport,
 } as any);
 const UsernameSlugRoute = UsernameSlugRouteImport.update({
@@ -83,67 +53,44 @@ const UsernameSlugRoute = UsernameSlugRouteImport.update({
   path: "/$username/$slug",
   getParentRoute: () => rootRouteImport,
 } as any);
+const HomeIndexRoute = HomeIndexRouteImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => HomeRouteRoute,
+} as any);
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: "/api/health",
+  path: "/api/health",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: "/auth/",
+  path: "/auth/",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: "/auth/login",
+  path: "/auth/login",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const BuilderResumeIdRouteRoute = BuilderResumeIdRouteRouteImport.update({
   id: "/builder/$resumeId",
   path: "/builder/$resumeId",
   getParentRoute: () => rootRouteImport,
 } as any);
-const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
-  id: "/settings/",
-  path: "/settings/",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
-const DashboardResumesIndexRoute = DashboardResumesIndexRouteImport.update({
-  id: "/resumes/",
-  path: "/resumes/",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
-const BuilderResumeIdIndexRoute = BuilderResumeIdIndexRouteImport.update({
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => BuilderResumeIdRouteRoute,
+  getParentRoute: () => DashboardRouteRoute,
 } as any);
-const UploadsUserIdSplatRoute = UploadsUserIdSplatRouteImport.update({
-  id: "/uploads/$userId/$",
-  path: "/uploads/$userId/$",
+const PrinterResumeIdRoute = PrinterResumeIdRouteImport.update({
+  id: "/printer/$resumeId",
+  path: "/printer/$resumeId",
   getParentRoute: () => rootRouteImport,
 } as any);
-const DashboardSettingsProfileRoute =
-  DashboardSettingsProfileRouteImport.update({
-    id: "/settings/profile",
-    path: "/settings/profile",
-    getParentRoute: () => DashboardRouteRoute,
-  } as any);
-const DashboardResumesUploadRoute = DashboardResumesUploadRouteImport.update({
-  id: "/resumes/upload",
-  path: "/resumes/upload",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
-const DashboardResumesMatchRoute = DashboardResumesMatchRouteImport.update({
-  id: "/resumes/match",
-  path: "/resumes/match",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
-const DashboardResumesManualBuilderRoute =
-  DashboardResumesManualBuilderRouteImport.update({
-    id: "/resumes/manual-builder",
-    path: "/resumes/manual-builder",
-    getParentRoute: () => DashboardRouteRoute,
-  } as any);
-const DashboardResumesGuidedStoryRoute =
-  DashboardResumesGuidedStoryRouteImport.update({
-    id: "/resumes/guided-story",
-    path: "/resumes/guided-story",
-    getParentRoute: () => DashboardRouteRoute,
-  } as any);
-const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
-  id: "/admin/analytics",
-  path: "/admin/analytics",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
-const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
-  id: "/api/rpc/$",
-  path: "/api/rpc/$",
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: "/api/auth/$",
+  path: "/api/auth/$",
   getParentRoute: () => rootRouteImport,
 } as any);
 const ApiOpenapiSplatRoute = ApiOpenapiSplatRouteImport.update({
@@ -151,9 +98,62 @@ const ApiOpenapiSplatRoute = ApiOpenapiSplatRouteImport.update({
   path: "/api/openapi/$",
   getParentRoute: () => rootRouteImport,
 } as any);
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: "/api/auth/$",
-  path: "/api/auth/$",
+const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
+  id: "/api/rpc/$",
+  path: "/api/rpc/$",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const BuilderResumeIdIndexRoute = BuilderResumeIdIndexRouteImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => BuilderResumeIdRouteRoute,
+} as any);
+const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
+  id: "/admin/analytics",
+  path: "/admin/analytics",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardResumesIndexRoute = DashboardResumesIndexRouteImport.update({
+  id: "/resumes/",
+  path: "/resumes/",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardResumesGuidedStoryRoute =
+  DashboardResumesGuidedStoryRouteImport.update({
+    id: "/resumes/guided-story",
+    path: "/resumes/guided-story",
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
+const DashboardResumesManualBuilderRoute =
+  DashboardResumesManualBuilderRouteImport.update({
+    id: "/resumes/manual-builder",
+    path: "/resumes/manual-builder",
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
+const DashboardResumesMatchRoute = DashboardResumesMatchRouteImport.update({
+  id: "/resumes/match",
+  path: "/resumes/match",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardResumesUploadRoute = DashboardResumesUploadRouteImport.update({
+  id: "/resumes/upload",
+  path: "/resumes/upload",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
+  id: "/settings/",
+  path: "/settings/",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardSettingsProfileRoute =
+  DashboardSettingsProfileRouteImport.update({
+    id: "/settings/profile",
+    path: "/settings/profile",
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
+const UploadsUserIdSplatRoute = UploadsUserIdSplatRouteImport.update({
+  id: "/uploads/$userId/$",
+  path: "/uploads/$userId/$",
   getParentRoute: () => rootRouteImport,
 } as any);
 
@@ -327,11 +327,11 @@ export interface RootRouteChildren {
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    "/schema.json": {
-      id: "/schema.json";
-      path: "/schema.json";
-      fullPath: "/schema.json";
-      preLoaderRoute: typeof SchemaDotjsonRouteImport;
+    "/_home": {
+      id: "/_home";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof HomeRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/dashboard": {
@@ -341,53 +341,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/_home": {
-      id: "/_home";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof HomeRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/dashboard/": {
-      id: "/dashboard/";
-      path: "/";
-      fullPath: "/dashboard/";
-      preLoaderRoute: typeof DashboardIndexRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/auth/": {
-      id: "/auth/";
-      path: "/auth";
-      fullPath: "/auth/";
-      preLoaderRoute: typeof AuthIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_home/": {
-      id: "/_home/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof HomeIndexRouteImport;
-      parentRoute: typeof HomeRouteRoute;
-    };
-    "/printer/$resumeId": {
-      id: "/printer/$resumeId";
-      path: "/printer/$resumeId";
-      fullPath: "/printer/$resumeId";
-      preLoaderRoute: typeof PrinterResumeIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/auth/login": {
-      id: "/auth/login";
-      path: "/auth/login";
-      fullPath: "/auth/login";
-      preLoaderRoute: typeof AuthLoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/health": {
-      id: "/api/health";
-      path: "/api/health";
-      fullPath: "/api/health";
-      preLoaderRoute: typeof ApiHealthRouteImport;
+    "/schema.json": {
+      id: "/schema.json";
+      path: "/schema.json";
+      fullPath: "/schema.json";
+      preLoaderRoute: typeof SchemaDotjsonRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/$username/$slug": {
@@ -397,6 +355,34 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UsernameSlugRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/_home/": {
+      id: "/_home/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof HomeIndexRouteImport;
+      parentRoute: typeof HomeRouteRoute;
+    };
+    "/api/health": {
+      id: "/api/health";
+      path: "/api/health";
+      fullPath: "/api/health";
+      preLoaderRoute: typeof ApiHealthRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/auth/": {
+      id: "/auth/";
+      path: "/auth";
+      fullPath: "/auth/";
+      preLoaderRoute: typeof AuthIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/auth/login": {
+      id: "/auth/login";
+      path: "/auth/login";
+      fullPath: "/auth/login";
+      preLoaderRoute: typeof AuthLoginRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/builder/$resumeId": {
       id: "/builder/$resumeId";
       path: "/builder/$resumeId";
@@ -404,81 +390,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof BuilderResumeIdRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/dashboard/settings/": {
-      id: "/dashboard/settings/";
-      path: "/settings";
-      fullPath: "/dashboard/settings/";
-      preLoaderRoute: typeof DashboardSettingsIndexRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/dashboard/resumes/": {
-      id: "/dashboard/resumes/";
-      path: "/resumes";
-      fullPath: "/dashboard/resumes/";
-      preLoaderRoute: typeof DashboardResumesIndexRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/builder/$resumeId/": {
-      id: "/builder/$resumeId/";
+    "/dashboard/": {
+      id: "/dashboard/";
       path: "/";
-      fullPath: "/builder/$resumeId/";
-      preLoaderRoute: typeof BuilderResumeIdIndexRouteImport;
-      parentRoute: typeof BuilderResumeIdRouteRoute;
+      fullPath: "/dashboard/";
+      preLoaderRoute: typeof DashboardIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
     };
-    "/uploads/$userId/$": {
-      id: "/uploads/$userId/$";
-      path: "/uploads/$userId/$";
-      fullPath: "/uploads/$userId/$";
-      preLoaderRoute: typeof UploadsUserIdSplatRouteImport;
+    "/printer/$resumeId": {
+      id: "/printer/$resumeId";
+      path: "/printer/$resumeId";
+      fullPath: "/printer/$resumeId";
+      preLoaderRoute: typeof PrinterResumeIdRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/dashboard/settings/profile": {
-      id: "/dashboard/settings/profile";
-      path: "/settings/profile";
-      fullPath: "/dashboard/settings/profile";
-      preLoaderRoute: typeof DashboardSettingsProfileRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/dashboard/resumes/upload": {
-      id: "/dashboard/resumes/upload";
-      path: "/resumes/upload";
-      fullPath: "/dashboard/resumes/upload";
-      preLoaderRoute: typeof DashboardResumesUploadRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/dashboard/resumes/match": {
-      id: "/dashboard/resumes/match";
-      path: "/resumes/match";
-      fullPath: "/dashboard/resumes/match";
-      preLoaderRoute: typeof DashboardResumesMatchRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/dashboard/resumes/manual-builder": {
-      id: "/dashboard/resumes/manual-builder";
-      path: "/resumes/manual-builder";
-      fullPath: "/dashboard/resumes/manual-builder";
-      preLoaderRoute: typeof DashboardResumesManualBuilderRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/dashboard/resumes/guided-story": {
-      id: "/dashboard/resumes/guided-story";
-      path: "/resumes/guided-story";
-      fullPath: "/dashboard/resumes/guided-story";
-      preLoaderRoute: typeof DashboardResumesGuidedStoryRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/dashboard/admin/analytics": {
-      id: "/dashboard/admin/analytics";
-      path: "/admin/analytics";
-      fullPath: "/dashboard/admin/analytics";
-      preLoaderRoute: typeof DashboardAdminAnalyticsRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/api/rpc/$": {
-      id: "/api/rpc/$";
-      path: "/api/rpc/$";
-      fullPath: "/api/rpc/$";
-      preLoaderRoute: typeof ApiRpcSplatRouteImport;
+    "/api/auth/$": {
+      id: "/api/auth/$";
+      path: "/api/auth/$";
+      fullPath: "/api/auth/$";
+      preLoaderRoute: typeof ApiAuthSplatRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/api/openapi/$": {
@@ -488,11 +418,81 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ApiOpenapiSplatRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/api/auth/$": {
-      id: "/api/auth/$";
-      path: "/api/auth/$";
-      fullPath: "/api/auth/$";
-      preLoaderRoute: typeof ApiAuthSplatRouteImport;
+    "/api/rpc/$": {
+      id: "/api/rpc/$";
+      path: "/api/rpc/$";
+      fullPath: "/api/rpc/$";
+      preLoaderRoute: typeof ApiRpcSplatRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/builder/$resumeId/": {
+      id: "/builder/$resumeId/";
+      path: "/";
+      fullPath: "/builder/$resumeId/";
+      preLoaderRoute: typeof BuilderResumeIdIndexRouteImport;
+      parentRoute: typeof BuilderResumeIdRouteRoute;
+    };
+    "/dashboard/admin/analytics": {
+      id: "/dashboard/admin/analytics";
+      path: "/admin/analytics";
+      fullPath: "/dashboard/admin/analytics";
+      preLoaderRoute: typeof DashboardAdminAnalyticsRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/": {
+      id: "/dashboard/resumes/";
+      path: "/resumes";
+      fullPath: "/dashboard/resumes/";
+      preLoaderRoute: typeof DashboardResumesIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/guided-story": {
+      id: "/dashboard/resumes/guided-story";
+      path: "/resumes/guided-story";
+      fullPath: "/dashboard/resumes/guided-story";
+      preLoaderRoute: typeof DashboardResumesGuidedStoryRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/manual-builder": {
+      id: "/dashboard/resumes/manual-builder";
+      path: "/resumes/manual-builder";
+      fullPath: "/dashboard/resumes/manual-builder";
+      preLoaderRoute: typeof DashboardResumesManualBuilderRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/match": {
+      id: "/dashboard/resumes/match";
+      path: "/resumes/match";
+      fullPath: "/dashboard/resumes/match";
+      preLoaderRoute: typeof DashboardResumesMatchRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/resumes/upload": {
+      id: "/dashboard/resumes/upload";
+      path: "/resumes/upload";
+      fullPath: "/dashboard/resumes/upload";
+      preLoaderRoute: typeof DashboardResumesUploadRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/settings/": {
+      id: "/dashboard/settings/";
+      path: "/settings";
+      fullPath: "/dashboard/settings/";
+      preLoaderRoute: typeof DashboardSettingsIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/settings/profile": {
+      id: "/dashboard/settings/profile";
+      path: "/settings/profile";
+      fullPath: "/dashboard/settings/profile";
+      preLoaderRoute: typeof DashboardSettingsProfileRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/uploads/$userId/$": {
+      id: "/uploads/$userId/$";
+      path: "/uploads/$userId/$";
+      fullPath: "/uploads/$userId/$";
+      preLoaderRoute: typeof UploadsUserIdSplatRouteImport;
       parentRoute: typeof rootRouteImport;
     };
   }

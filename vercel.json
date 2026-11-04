@@ -1,19 +1,4 @@
 {
-	"buildCommand": "pnpm build && cp -r migrations .output/server/ || true",
-	"outputDirectory": ".output/public",
-	"framework": null,
-	"installCommand": "pnpm install",
-	"devCommand": "pnpm dev",
-	"functions": {
-		"api/**/*.js": {
-			"memory": 2048,
-			"maxDuration": 30
-		}
-	},
-	"rewrites": [
-		{
-			"source": "/(.*)",
-			"destination": "/api/index"
-		}
-	]
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": "tanstack-start"
 }

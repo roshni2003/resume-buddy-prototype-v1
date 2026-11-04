@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { lingui } from "@lingui/vite-plugin";
+import { nitro } from "nitro/vite";
 import tailwindcss from "@tailwindcss/vite";
 // TanStack Start Vite integration (required for SSR + file-based routing)
 // eslint-disable-next-line import/no-unresolved
@@ -90,6 +91,7 @@ const config = defineConfig({
 		lingui(),
 		tailwindcss(),
 		tanstackStart({ router: { semicolons: true, quoteStyle: "double" } }),
+		nitro(),
 		react({ babel: { plugins: ["@lingui/babel-plugin-lingui-macro"] } }),
 		VitePWA({
 			outDir: "public",
