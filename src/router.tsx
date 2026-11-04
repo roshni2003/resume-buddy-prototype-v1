@@ -36,6 +36,19 @@ export const getRouter = async () => {
 		context: { orpc, queryClient, theme, locale, session, flags },
 	});
 
+	// Ensure compatibility between @tanstack/react-router-ssr-query and router.serverSsr
+	router.serverSsrLifecycle = {
+		...router.serverSsrLifecycle,
+		onServerSsrAttach: [
+			...(router.serverSsrLifecycle?.onServerSsrAttach ?? []),
+			(serverSsr: any) => {
+				if (!serverSsr.isDehydrated) {
+					serverSsr.isDehydrated = () => true;
+				}
+			},
+		],
+	};
+
 	setupRouterSsrQueryIntegration({
 		router,
 		queryClient,
