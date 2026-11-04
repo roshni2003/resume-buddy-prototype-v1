@@ -98,29 +98,66 @@ export function ManualBuilderRoute() {
 	const [project, setProject] = useState(initialDraft.project);
 	const [statement, setStatement] = useState(initialDraft.statement);
 
-	// Autosave manual builder values to localStorage
+	// Autosave manual builder values to localStorage only when user has entered meaningful data
 	useEffect(() => {
 		try {
-			const payload = {
-				fullName,
-				targetRole,
-				email,
-				phone,
-				location,
-				school,
-				degree,
-				eduYear,
-				eduScore,
-				skills,
-				project,
-				statement,
-				step,
-			};
-			localStorage.setItem("resume_buddy_manual_draft", JSON.stringify(payload));
+			const hasAnyData =
+				Boolean(fullName.trim()) ||
+				Boolean(targetRole.trim()) ||
+				Boolean(email.trim()) ||
+				Boolean(phone.trim()) ||
+				Boolean(location.trim()) ||
+				Boolean(school.trim()) ||
+				Boolean(degree.trim()) ||
+				Boolean(eduYear.trim()) ||
+				Boolean(eduScore.trim()) ||
+				Boolean(skills.trim()) ||
+				Boolean(project.trim()) ||
+				Boolean(statement.trim());
+
+			if (hasAnyData) {
+				const payload = {
+					fullName,
+					targetRole,
+					email,
+					phone,
+					location,
+					school,
+					degree,
+					eduYear,
+					eduScore,
+					skills,
+					project,
+					statement,
+					step,
+				};
+				localStorage.setItem("resume_buddy_manual_draft", JSON.stringify(payload));
+			}
 		} catch {
 			// ignore
 		}
 	}, [fullName, targetRole, email, phone, location, school, degree, eduYear, eduScore, skills, project, statement, step]);
+
+	const handleResetDraft = () => {
+		setFullName("");
+		setTargetRole("");
+		setEmail("");
+		setPhone("");
+		setLocation("");
+		setSchool("");
+		setDegree("");
+		setEduYear("");
+		setEduScore("");
+		setSkills("");
+		setProject("");
+		setStatement("");
+		setStep(1);
+		try {
+			localStorage.removeItem("resume_buddy_manual_draft");
+		} catch {
+			// ignore
+		}
+	};
 
 	// Helper to mark checklist tasks as completed in localStorage
 	const markChecklistCompleted = (itemId: string) => {
@@ -270,6 +307,12 @@ export function ManualBuilderRoute() {
 			},
 		});
 
+		try {
+			localStorage.removeItem("resume_buddy_manual_draft");
+		} catch {
+			// ignore
+		}
+
 		navigate({ to: `/builder/${newResume.id}` as any });
 	};
 
@@ -399,7 +442,16 @@ export function ManualBuilderRoute() {
 						<ArrowLeft className="size-4" />
 						<span>Dashboard</span>
 					</button>
-					<span className="text-slate-500">Open-session draft</span>
+					<div className="flex items-center gap-3">
+						<button
+							type="button"
+							onClick={handleResetDraft}
+							className="text-xs text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+						>
+							Clear form
+						</button>
+						<span className="text-slate-500">Open-session draft</span>
+					</div>
 				</div>
 
 				{/* Progress Indicator */}

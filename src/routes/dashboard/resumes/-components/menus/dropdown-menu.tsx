@@ -28,8 +28,19 @@ export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
 
 	const { mutate: deleteResume } = useMutation({
 		mutationFn: (id: string) => api.deleteResume(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["resumes"] });
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ["resumes"] });
+			try {
+				const remaining = await api.fetchResumes();
+				if (!remaining || remaining.length === 0) {
+					localStorage.removeItem("resume_buddy_checklist");
+					localStorage.removeItem("resume_buddy_manual_draft");
+					localStorage.removeItem("resume_buddy_guided_story_draft");
+					window.dispatchEvent(new Event("storage"));
+				}
+			} catch {
+				// ignore
+			}
 		},
 	});
 

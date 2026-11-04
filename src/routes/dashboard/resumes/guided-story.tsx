@@ -59,56 +59,43 @@ export function GuidedStoryRoute() {
 	// Navigation Tabs inside Workspace
 	const [activeTab, setActiveTab] = useState<WorkspaceTab>("stories");
 
-	// User target role & basic info
-	const [targetRole, setTargetRole] = useState("Frontend Developer");
-	const [fullName, setFullName] = useState("Roshni Jha");
+	// User target role & basic info (clean inputs by default)
+	const [targetRole, setTargetRole] = useState("");
+	const [fullName, setFullName] = useState("");
 
 	// Voice Interaction State: "idle" | "listening" | "thinking"
 	const [voiceState, setVoiceState] = useState<"idle" | "listening" | "thinking">("idle");
 	const [voiceTranscript, setVoiceTranscript] = useState("");
 
 	// Default stories template
-	const defaultStories: StoryItem[] = [
-		{
-			id: "story-1",
-			companyOrProject: "Vipasna Website",
-			type: "project",
-			role: "Frontend Developer",
-			contribution: "Built a responsive web portal using React and TailwindCSS.",
-			problem: "Pages were sluggish on mobile devices and had poor layout adaptability.",
-			approach: "Refactored UI into atomic components and implemented responsive fluid CSS grids.",
-			evidenceResult: "The pages adapted seamlessly to desktop and mobile screen sizes.",
-			finalBullets: [
-				"Built a website using React and MUI, ensuring full mobile and desktop viewport adaptability.",
-			],
-			status: "approved",
-		},
-	];
+	const defaultStories: StoryItem[] = [];
 
 	// Autosave hydration from localStorage
 	const getInitialStoryState = () => {
+		const emptyState = {
+			stories: [] as StoryItem[],
+			step: "pick_topic" as const,
+			activeStoryType: "project" as const,
+			activeProjectName: "",
+			activeContribution: "",
+			activeProblem: "",
+			activeEvidence: "",
+			generatedBullet: "",
+			editedBullet: "",
+		};
+
 		if (typeof window === "undefined") {
-			return {
-				stories: defaultStories,
-				step: "pick_topic" as const,
-				activeStoryType: "project" as const,
-				activeProjectName: "E-Commerce Dashboard",
-				activeContribution: "Built responsive analytics charts and order lists using React.",
-				activeProblem: "Loading state was unhandled and table would freeze on large loads.",
-				activeEvidence: "Reduced page lag by memoizing components and adding pagination.",
-				generatedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
-				editedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
-			};
+			return emptyState;
 		}
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
 				const parsed = JSON.parse(saved);
 				return {
-					stories: Array.isArray(parsed.stories) && parsed.stories.length > 0 ? parsed.stories : defaultStories,
+					stories: Array.isArray(parsed.stories) ? parsed.stories : [],
 					step: parsed.step || "pick_topic",
 					activeStoryType: parsed.activeStoryType || "project",
-					activeProjectName: parsed.activeProjectName || "E-Commerce Dashboard",
+					activeProjectName: parsed.activeProjectName || "",
 					activeContribution: parsed.activeContribution || "",
 					activeProblem: parsed.activeProblem || "",
 					activeEvidence: parsed.activeEvidence || "",
@@ -119,17 +106,7 @@ export function GuidedStoryRoute() {
 		} catch (e) {
 			console.warn("[GuidedStory] Failed to parse saved draft from localStorage:", e);
 		}
-		return {
-			stories: defaultStories,
-			step: "pick_topic" as const,
-			activeStoryType: "project" as const,
-			activeProjectName: "E-Commerce Dashboard",
-			activeContribution: "Built responsive analytics charts and order lists using React.",
-			activeProblem: "Loading state was unhandled and table would freeze on large loads.",
-			activeEvidence: "Reduced page lag by memoizing components and adding pagination.",
-			generatedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
-			editedBullet: "Architected high-performance analytics charts and paginated order tables in React, eliminating UI freezes on heavy data loads.",
-		};
+		return emptyState;
 	};
 
 	const initial = getInitialStoryState();
@@ -151,22 +128,33 @@ export function GuidedStoryRoute() {
 	const [generatedBullet, setGeneratedBullet] = useState(initial.generatedBullet);
 	const [editedBullet, setEditedBullet] = useState(initial.editedBullet);
 
-	// Save automatically to localStorage after each state change
+	// Save automatically to localStorage after each state change only when meaningful user data exists
 	useEffect(() => {
 		try {
-			const draftPayload = {
-				stories,
-				step: currentStep,
-				activeStoryType,
-				activeProjectName,
-				activeContribution,
-				activeProblem,
-				activeEvidence,
-				generatedBullet,
-				editedBullet,
-				updatedAt: new Date().toISOString(),
-			};
-			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(draftPayload));
+			const hasData =
+				stories.length > 0 ||
+				Boolean(activeProjectName.trim()) ||
+				Boolean(activeContribution.trim()) ||
+				Boolean(activeProblem.trim()) ||
+				Boolean(activeEvidence.trim()) ||
+				Boolean(generatedBullet.trim()) ||
+				Boolean(editedBullet.trim());
+
+			if (hasData) {
+				const draftPayload = {
+					stories,
+					step: currentStep,
+					activeStoryType,
+					activeProjectName,
+					activeContribution,
+					activeProblem,
+					activeEvidence,
+					generatedBullet,
+					editedBullet,
+					updatedAt: new Date().toISOString(),
+				};
+				localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(draftPayload));
+			}
 		} catch (e) {
 			console.warn("[GuidedStory] Autosave error:", e);
 		}
@@ -184,7 +172,7 @@ export function GuidedStoryRoute() {
 
 	// Clear saved story draft
 	const handleResetStoryDraft = () => {
-		setActiveProjectName("New Project");
+		setActiveProjectName("");
 		setActiveContribution("");
 		setActiveProblem("");
 		setActiveEvidence("");
@@ -670,6 +658,7 @@ export function GuidedStoryRoute() {
 										value={activeProjectName}
 										onChange={(e) => setActiveProjectName(e.target.value)}
 										className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+										placeholder="e.g. E-Commerce Dashboard or Vipasna Website"
 									/>
 								</div>
 
@@ -1078,9 +1067,9 @@ export function GuidedStoryRoute() {
 					{/* Live Rendered Document Card */}
 					<div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl min-h-[380px] text-xs space-y-4">
 						<div className="border-b border-slate-200 pb-3">
-							<h3 className="text-xl font-bold font-serif text-slate-950">{fullName}</h3>
-							<p className="text-emerald-700 font-semibold text-[11px] mt-0.5">{targetRole}</p>
-							<p className="text-slate-500 text-[11px]">roshni.jha@example.com • Bangalore, India</p>
+							<h3 className="text-xl font-bold font-serif text-slate-950">{fullName || "Your Name"}</h3>
+							<p className="text-emerald-700 font-semibold text-[11px] mt-0.5">{targetRole || "Target Role"}</p>
+							<p className="text-slate-500 text-[11px]">Contact details optional</p>
 						</div>
 
 						{/* Experience Section */}

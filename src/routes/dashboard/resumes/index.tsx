@@ -50,6 +50,7 @@ export function DashboardResumesRoute() {
 	const [checklist, setChecklist] = useState(() => {
 		if (typeof window === "undefined") return defaultChecklist;
 		try {
+			// If no resumes exist in localStorage or store, default to fresh checklist
 			const saved = localStorage.getItem("resume_buddy_checklist");
 			if (saved) {
 				const parsed = JSON.parse(saved);
@@ -64,6 +65,20 @@ export function DashboardResumesRoute() {
 		return defaultChecklist;
 	});
 
+	// If there are 0 resumes, ensure checklist starts clean as "To do"
+	useEffect(() => {
+		if (resumes.length === 0) {
+			try {
+				localStorage.removeItem("resume_buddy_checklist");
+				localStorage.removeItem("resume_buddy_manual_draft");
+				localStorage.removeItem("resume_buddy_guided_story_draft");
+			} catch {
+				// ignore
+			}
+			setChecklist(defaultChecklist.map((item) => ({ ...item, status: "To do" })));
+		}
+	}, [resumes.length]);
+
 	// Re-sync checklist status when returning from builder or after saving
 	useEffect(() => {
 		const syncChecklist = () => {
@@ -77,6 +92,8 @@ export function DashboardResumesRoute() {
 							return match ? { ...item, status: match.status } : item;
 						})
 					);
+				} else {
+					setChecklist(defaultChecklist.map((item) => ({ ...item, status: "To do" })));
 				}
 			} catch {
 				// ignore
@@ -127,6 +144,17 @@ export function DashboardResumesRoute() {
 		if (!resumeId) return;
 		try {
 			await api.deleteResume(resumeId);
+			const remaining = resumes.filter((r: any) => r.id !== resumeId);
+			if (remaining.length === 0) {
+				try {
+					localStorage.removeItem("resume_buddy_checklist");
+					localStorage.removeItem("resume_buddy_manual_draft");
+					localStorage.removeItem("resume_buddy_guided_story_draft");
+				} catch {
+					// ignore
+				}
+				setChecklist(defaultChecklist.map((item) => ({ ...item, status: "To do" })));
+			}
 			await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 		} catch (err) {
 			console.error("Failed to delete resume:", err);
@@ -138,7 +166,7 @@ export function DashboardResumesRoute() {
 			{/* Welcome Heading */}
 			<div>
 				<h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
-					Welcome back, Roshni.
+					Welcome back!
 				</h1>
 				<p className="text-slate-400 text-base sm:text-lg">
 					What would you like to work on today?
@@ -247,8 +275,8 @@ export function DashboardResumesRoute() {
 							type="button"
 							onClick={() => {
 								navigate({
-									to: "/dashboard/resumes/manual-builder",
-									search: { step: 2 },
+									to: (nextPendingItem?.path || "/dashboard/resumes/manual-builder") as any,
+									search: (nextPendingItem?.search || {}) as any,
 								});
 							}}
 							className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer active:scale-95"
@@ -339,12 +367,12 @@ export function DashboardResumesRoute() {
 					{resumes.map((resume: any, index: number) => {
 						const dateFormatted = resume.updatedAt
 							? new Date(resume.updatedAt).toLocaleDateString("en-US", {
-									month: "short",
-									day: "numeric",
-									year: "numeric",
-									hour: "numeric",
-									minute: "numeric",
-								})
+								month: "short",
+								day: "numeric",
+								year: "numeric",
+								hour: "numeric",
+								minute: "numeric",
+							})
 							: "Sep 29, 2026 at 11:29 AM";
 
 						return (
