@@ -15,11 +15,27 @@ import { getTheme } from "./utils/theme";
 export const getRouter = async () => {
 	const queryClient = getQueryClient();
 
+	const safeGetTheme = async () => {
+		try {
+			return await getTheme();
+		} catch {
+			return "dark" as const;
+		}
+	};
+
+	const safeGetLocale = async () => {
+		try {
+			return await getLocale();
+		} catch {
+			return "en-US" as const;
+		}
+	};
+
 	const [theme, locale, session, flags] = await Promise.all([
-		getTheme(),
-		getLocale(),
-		getSession(),
-		client.flags.get(),
+		safeGetTheme(),
+		safeGetLocale(),
+		getSession().catch(() => null),
+		client.flags.get().catch(() => ({ disableSignups: false, disableEmailAuth: false })),
 	]);
 
 	await loadLocale(locale);

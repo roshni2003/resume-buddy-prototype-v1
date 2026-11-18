@@ -39,7 +39,18 @@ const title = `${appName} — ${tagline}`;
 const description =
 	"Resume Buddy is a free resume builder with AI assistance that simplifies the process of creating, updating, and sharing your resume.";
 
-await loadLocale(await getLocale());
+try {
+	const initialLocale = await (async () => {
+		try {
+			return await getLocale();
+		} catch {
+			return "en-US" as const;
+		}
+	})();
+	await loadLocale(initialLocale);
+} catch {
+	// Fallback during SSR module load
+}
 
 export const Route = createRootRouteWithContext<RouterContext>()({
 	shellComponent: RootDocument,
@@ -47,6 +58,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 		const appUrl = "https://api-testing.d3s88q50fgekpa.amplifyapp.com";
 		return {
 			links: [
+				{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+				{ rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+				{ rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" },
 				{ rel: "stylesheet", href: appCss },
 				// Icons - Zoe Resume Builder
 				{ rel: "icon", href: "/zoe-icon.png", type: "image/png", sizes: "128x128" },
@@ -140,9 +154,25 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 				// ignore
 			}
 		}
+		const safeGetTheme = async () => {
+			try {
+				return await getTheme();
+			} catch {
+				return "dark" as const;
+			}
+		};
+
+		const safeGetLocale = async () => {
+			try {
+				return await getLocale();
+			} catch {
+				return "en-US" as const;
+			}
+		};
+
 		const [theme, locale, session, flags] = await Promise.all([
-			getTheme(),
-			getLocale(),
+			safeGetTheme(),
+			safeGetLocale(),
 			getSession().catch(() => null),
 			client.flags.get().catch(() => ({ disableSignups: false, disableEmailAuth: false })),
 		]);

@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
-import { clearAuthToken, getAuthToken } from "@/utils/auth-token";
+import {
+	clearAuthToken,
+	createPrototypeToken,
+	getAuthToken,
+	getStoredUserProfile,
+	isValidToken,
+	persistAuthToken,
+	safeDecodeJwtPayload,
+	setStoredUserProfile,
+} from "@/utils/auth-token";
 
 export interface User {
 	id: string;
@@ -20,38 +29,70 @@ export const useAuth = () => {
 			const storedToken = getAuthToken();
 			setToken(storedToken);
 
-			if (storedToken) {
-				try {
-					const payload = JSON.parse(atob(storedToken.split(".")[1]));
+			if (storedToken && isValidToken(storedToken)) {
+				const profile = getStoredUserProfile();
+				const payload = safeDecodeJwtPayload(storedToken) as any;
+
+				if (payload || profile) {
 					setUser({
-						id: payload.sub,
-						email: payload.email,
-						name: payload.name,
-						role: payload.role,
-						rolesList: payload.rolesList,
+						id: payload?.sub || "prototype_user",
+						email: profile?.email || payload?.email || "user@example.com",
+						name: profile?.name || payload?.name || profile?.email?.split("@")[0] || "User",
+						role: payload?.role || "user",
+						rolesList: payload?.rolesList,
 					});
-				} catch (error) {
-					console.error("Failed to decode token", error);
+					setIsLoading(false);
+					return;
 				}
 			}
+
+			setUser(null);
 			setIsLoading(false);
 		};
 
 		loadAuth();
 
-		// Listen for storage changes (e.g. from the test panel)
+		// Listen for storage changes
 		window.addEventListener("storage", loadAuth);
-		return () => window.removeEventListener("storage", loadAuth);
+		window.addEventListener("auth_changed", loadAuth);
+		return () => {
+			window.removeEventListener("storage", loadAuth);
+			window.removeEventListener("auth_changed", loadAuth);
+		};
 	}, []);
+
+	const loginPrototype = async (email: string, name?: string) => {
+		const newToken = createPrototypeToken(email, name);
+		await persistAuthToken(newToken);
+		setStoredUserProfile({ email: email.trim().toLowerCase(), name: name?.trim() });
+		setToken(newToken);
+		setUser({
+			id: `user_${Date.now()}`,
+			email: email.trim().toLowerCase(),
+			name: name?.trim() || email.split("@")[0],
+			role: "user",
+		});
+		window.dispatchEvent(new Event("storage"));
+		window.dispatchEvent(new Event("auth_changed"));
+	};
 
 	const logout = () => {
 		clearAuthToken();
 		setUser(null);
 		setToken(null);
-		const isDev = typeof window !== "undefined" && window.location.hostname.includes("amplifyapp.com");
-		const zuvyBase = isDev ? "https://dev.app.zuvy.org" : "https://app.zuvy.org";
-		window.location.href = `${zuvyBase}/?zoeRedirectUrl=zoe.zuvy.org%3FreturnUrl%3D${encodeURIComponent(window.location.origin)}`;
+		window.dispatchEvent(new Event("storage"));
+		window.dispatchEvent(new Event("auth_changed"));
+		if (typeof window !== "undefined") {
+			window.location.href = "/";
+		}
 	};
 
-	return { user, token, isLoading, logout };
+	return {
+		user,
+		token,
+		isLoading,
+		isAuthenticated: Boolean(user && token),
+		logout,
+		loginPrototype,
+	};
 };

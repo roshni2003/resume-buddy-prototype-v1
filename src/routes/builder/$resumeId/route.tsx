@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
+import { createIsomorphicFn, createServerFn } from "@tanstack/react-start";
 import { getCookie, setCookie } from "@tanstack/react-start/server";
+import Cookies from "js-cookie";
 import type React from "react";
 import { useEffect } from "react";
 import { type Layout, usePanelRef } from "react-resizable-panels";
@@ -33,7 +34,13 @@ export const Route = createFileRoute("/builder/$resumeId")({
 		return { session: context.session };
 	},
 	loader: async ({ params, context }) => {
-		const layout = await getBuilderLayoutServerFn();
+		let layout = defaultLayout;
+		try {
+			const res = await getBuilderLayout();
+			if (res) layout = res;
+		} catch {
+			layout = defaultLayout;
+		}
 
 		// Use prefetchQuery instead of ensureQueryData so SSR doesn't hard-crash
 		// if the backend requires a token (since SSR has no access to localStorage).
@@ -70,6 +77,24 @@ function RouteComponent() {
 
 	useEffect(() => {
 		initialize(resume ?? null);
+		if (resume?.id) {
+			try {
+				localStorage.setItem(
+					"resume_buddy_last_worked",
+					JSON.stringify({
+						resumeId: resume.id,
+						resumeName: resume.name || "Untitled Resume",
+						type: "builder",
+						title: resume.name ? `Continue editing ${resume.name}` : "Continue editing resume",
+						path: `/builder/${resume.id}`,
+						search: {},
+						updatedAt: new Date().toISOString(),
+					})
+				);
+			} catch {
+				// ignore
+			}
+		}
 		return () => initialize(null);
 	}, [resume, initialize]);
 
@@ -101,7 +126,10 @@ function BuilderLayout({ initialLayout, ...props }: BuilderLayoutProps) {
 	}));
 
 	const onLayoutChange = useDebounceCallback((layout: Layout) => {
-		setBuilderLayoutServerFn({ data: layout });
+		if (typeof window !== "undefined") {
+			Cookies.set(BUILDER_LAYOUT_COOKIE_NAME, JSON.stringify(layout));
+		}
+		setBuilderLayoutServerFn({ data: layout }).catch(() => {});
 	}, 200);
 
 	useEffect(() => {
@@ -210,13 +238,27 @@ const BUILDER_LAYOUT_COOKIE_NAME = "builder_layout";
 const layoutSchema = z.record(z.string(), z.number()).catch(defaultLayout);
 
 const setBuilderLayoutServerFn = createServerFn({ method: "POST" })
-	.inputValidator(layoutSchema)
+	.validator(layoutSchema)
 	.handler(async ({ data }) => {
 		setCookie(BUILDER_LAYOUT_COOKIE_NAME, JSON.stringify(data));
 	});
 
-const getBuilderLayoutServerFn = createServerFn({ method: "GET" }).handler(async () => {
-	const layout = getCookie(BUILDER_LAYOUT_COOKIE_NAME);
-	if (!layout) return defaultLayout;
-	return layoutSchema.parse(JSON.parse(layout));
-});
+const getBuilderLayout = createIsomorphicFn()
+	.client(() => {
+		const layout = Cookies.get(BUILDER_LAYOUT_COOKIE_NAME);
+		if (!layout) return defaultLayout;
+		try {
+			return layoutSchema.parse(JSON.parse(layout));
+		} catch {
+			return defaultLayout;
+		}
+	})
+	.server(async () => {
+		try {
+			const layout = getCookie(BUILDER_LAYOUT_COOKIE_NAME);
+			if (!layout) return defaultLayout;
+			return layoutSchema.parse(JSON.parse(layout));
+		} catch {
+			return defaultLayout;
+		}
+	});

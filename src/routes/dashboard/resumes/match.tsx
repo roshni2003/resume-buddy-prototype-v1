@@ -330,7 +330,7 @@ function MatchToJobRouteComponent() {
 
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				window.history.replaceState(null, "", "/dashboard/resumes");
-				navigate({ to: "/builder/$resumeId", params: { resumeId: newResume.id } });
+				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any });
 			} catch (e) {
 				console.error("Failed to tailor resume with onboarding", e);
 				setIsCreating(false);
@@ -369,7 +369,7 @@ function MatchToJobRouteComponent() {
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				// Force the history stack to have Dashboard before Builder so back button works correctly
 				window.history.replaceState(null, "", "/dashboard/resumes");
-				navigate({ to: "/builder/$resumeId", params: { resumeId: newResume.id } });
+				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any });
 			} catch(e) {
 				console.error("Failed to create tailored resume", e);
 				setIsCreating(false);
@@ -462,7 +462,7 @@ function MatchToJobRouteComponent() {
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				// Force the history stack to have Dashboard before Builder so back button works correctly
 				window.history.replaceState(null, "", "/dashboard/resumes");
-				navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id } });
+				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any });
 			} catch (e) {
 				console.error("Failed to create resume", e);
 				setIsCreating(false);

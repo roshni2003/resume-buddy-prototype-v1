@@ -9,10 +9,16 @@ export const UNAUTHORIZED_EVENT = "app:unauthorized";
 export const UNAUTHORIZED_FLAG_KEY = "app:unauthorized:pending";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-	const url = path.startsWith("http") ? path : `${VITE_AI_BASE_URL_DEV}${path}`;
+	let url = path.startsWith("http") ? path : `${VITE_AI_BASE_URL_DEV}${path}`;
+	if (!url.startsWith("http")) {
+		if (typeof window !== "undefined") {
+			url = `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
+		} else {
+			const baseUrl = process.env.APP_URL || "http://localhost:3000";
+			url = `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+		}
+	}
 	const token = getAuthToken();
-
-
 
 	const isGet = !options.method || options.method.toUpperCase() === "GET";
 	const response = await fetch(url, {

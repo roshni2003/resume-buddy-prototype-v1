@@ -76,6 +76,23 @@ function RouteComponent() {
 
 		// Expand the accordion and scroll it into view
 		navigateToSection(sectionId);
+
+		try {
+			const saved = localStorage.getItem("resume_buddy_last_worked");
+			const existing = saved ? JSON.parse(saved) : {};
+			const sectionLabel = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+			localStorage.setItem(
+				"resume_buddy_last_worked",
+				JSON.stringify({
+					...existing,
+					title: `Work on ${sectionLabel} details`,
+					sectionId,
+					updatedAt: new Date().toISOString(),
+				})
+			);
+		} catch {
+			// ignore
+		}
 	};
 
 	// ── Hover highlight ────────────────────────────────────────────────────────

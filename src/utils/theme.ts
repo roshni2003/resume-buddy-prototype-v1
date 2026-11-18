@@ -34,7 +34,7 @@ export const getTheme = createIsomorphicFn()
 	});
 
 export const setThemeServerFn = createServerFn({ method: "POST" })
-	.inputValidator(themeSchema)
+	.validator(themeSchema)
 	.handler(async ({ data }) => {
 		setCookie(storageKey, data);
 	});

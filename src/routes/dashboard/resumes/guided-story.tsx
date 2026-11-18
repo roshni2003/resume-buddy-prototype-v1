@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import {
 	ArrowLeft,
 	ArrowRight,
@@ -19,18 +20,55 @@ import {
 	Flame,
 	Plus,
 	Trash2,
+	Camera,
+	Upload,
+	User,
+	Palette,
+	Download,
+	ChevronDown,
+	ChevronRight,
+	Briefcase,
+	FolderGit2,
+	GraduationCap,
+	HeartHandshake,
+	X,
+	ExternalLink,
+	LogOut,
+	Volume2,
 } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { zodValidator } from "@tanstack/zod-adapter";
+import { useState, useEffect, useRef } from "react";
+import z from "zod";
 import { localResumeStore } from "@/utils/local-resumes";
+import { defaultResumeData, type ResumeData } from "@/schema/resume/data";
 import { cn } from "@/utils/style";
 import { voiceAssistant, formatAchievementBullet } from "@/utils/voice-assistant";
+import { generateBulletsWithDeepSeek, getDeepSeekApiKey } from "@/utils/deepseek-client";
+
+const searchSchema = z.object({
+	step: z.enum(["direction", "outline", "plan"]).optional(),
+});
 
 export const Route = createFileRoute("/dashboard/resumes/guided-story")({
 	component: GuidedStoryRoute,
+	validateSearch: zodValidator(searchSchema),
 });
 
 type WorkspaceTab = "plan" | "stories" | "details" | "export";
+type OutlineCategory = "work" | "projects" | "education" | "volunteer";
+
+interface OutlineEntry {
+	id: string;
+	category: OutlineCategory;
+	title: string;
+	organization?: string;
+	dates?: string;
+	description?: string;
+	points?: string[];
+	answers?: string[];
+	priorityScore?: number;
+}
 
 interface PlanItem {
 	id: string;
@@ -43,7 +81,7 @@ interface PlanItem {
 interface StoryItem {
 	id: string;
 	companyOrProject: string;
-	type: "project" | "work" | "internship";
+	type: "project" | "work" | "internship" | "education";
 	role: string;
 	contribution: string;
 	problem: string;
@@ -55,481 +93,2903 @@ interface StoryItem {
 
 export function GuidedStoryRoute() {
 	const navigate = useNavigate();
+	const search = Route.useSearch();
 
-	// Navigation Tabs inside Workspace
-	const [activeTab, setActiveTab] = useState<WorkspaceTab>("stories");
+	// Wizard Stages: direction (Step 1) -> outline (Step 2) -> plan (Step 3 / Editor)
+	const [wizardStep, setWizardStep] = useState<"direction" | "outline" | "plan">(() => {
+		if (search?.step) return search.step;
+		return "direction";
+	});
 
-	// User target role & basic info (clean inputs by default)
-	const [targetRole, setTargetRole] = useState("");
-	const [fullName, setFullName] = useState("");
-
-	// Voice Interaction State: "idle" | "listening" | "thinking"
-	const [voiceState, setVoiceState] = useState<"idle" | "listening" | "thinking">("idle");
-	const [voiceTranscript, setVoiceTranscript] = useState("");
-
-	// Default stories template
-	const defaultStories: StoryItem[] = [];
-
-	// Autosave hydration from localStorage
-	const getInitialStoryState = () => {
-		const emptyState = {
-			stories: [] as StoryItem[],
-			step: "pick_topic" as const,
-			activeStoryType: "project" as const,
-			activeProjectName: "",
-			activeContribution: "",
-			activeProblem: "",
-			activeEvidence: "",
-			generatedBullet: "",
-			editedBullet: "",
-		};
-
-		if (typeof window === "undefined") {
-			return emptyState;
+	useEffect(() => {
+		if (search?.step) {
+			setWizardStep(search.step);
 		}
+	}, [search?.step]);
+
+	// Navigation Tabs inside Workspace (Step 3)
+	const [activeTab, setActiveTab] = useState<WorkspaceTab>("plan");
+
+	// Step 1: Direction State
+	const [targetRole, setTargetRole] = useState(() => {
+		if (typeof window === "undefined") return "Frontend Developer";
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
-				const parsed = JSON.parse(saved);
-				return {
-					stories: Array.isArray(parsed.stories) ? parsed.stories : [],
-					step: parsed.step || "pick_topic",
-					activeStoryType: parsed.activeStoryType || "project",
-					activeProjectName: parsed.activeProjectName || "",
-					activeContribution: parsed.activeContribution || "",
-					activeProblem: parsed.activeProblem || "",
-					activeEvidence: parsed.activeEvidence || "",
-					generatedBullet: parsed.generatedBullet || "",
-					editedBullet: parsed.editedBullet || "",
-				};
+				const p = JSON.parse(saved);
+				if (p.targetRole) return p.targetRole;
 			}
-		} catch (e) {
-			console.warn("[GuidedStory] Failed to parse saved draft from localStorage:", e);
-		}
-		return emptyState;
-	};
+		} catch {}
+		return "Frontend Developer";
+	});
+	const [jobDescription, setJobDescription] = useState("");
+	const [showJobDescription, setShowJobDescription] = useState(false);
 
-	const initial = getInitialStoryState();
+	// Step 2: Story Collection State
+	const [rawStoryText, setRawStoryText] = useState("");
+	const [isAnalyzingStory, setIsAnalyzingStory] = useState(false);
+	const [activeInputMode, setActiveInputMode] = useState<"natural_story" | "manual_tabs">("natural_story");
+	const [zoeFeedbackMessage, setZoeFeedbackMessage] = useState<string | null>(null);
 
-	// Prototype 1 & 2: Collected Stories
-	const [stories, setStories] = useState<StoryItem[]>(initial.stories);
+	// Step 2 Manual Outline State
+	const [outlineCategory, setOutlineCategory] = useState<OutlineCategory>("work");
+	const [workTitle, setWorkTitle] = useState("");
+	const [workCompany, setWorkCompany] = useState("");
+	const [workDates, setWorkDates] = useState("");
 
-	// Interactive Conversational Discovery State
+	const [projectTitle, setProjectTitle] = useState("");
+	const [projectTech, setProjectTech] = useState("");
+	const [projectDates, setProjectDates] = useState("");
+
+	const [eduDegree, setEduDegree] = useState("");
+	const [eduSchool, setEduSchool] = useState("");
+	const [eduDates, setEduDates] = useState("");
+
+	const [volRole, setVolRole] = useState("");
+	const [volOrg, setVolOrg] = useState("");
+	const [volDates, setVolDates] = useState("");
+
+	const [outlineEntries, setOutlineEntries] = useState<OutlineEntry[]>(() => {
+		if (typeof window === "undefined") return [];
+		try {
+			const saved = localStorage.getItem("resume_buddy_outline_entries");
+			if (saved) return JSON.parse(saved);
+		} catch {}
+		return [
+			{
+				id: "sample-work-1",
+				category: "work",
+				title: "Frontend Developer",
+				organization: "Acme Tech",
+				dates: "Jul 2023 – Present",
+			},
+		];
+	});
+
+	const [showVoiceOption, setShowVoiceOption] = useState(false);
+	const [isSpeakingOutline, setIsSpeakingOutline] = useState(false);
+
+	// Experience confirmation screen states
+	const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+	const [isAddingManual, setIsAddingManual] = useState(false);
+	const [newManualTitle, setNewManualTitle] = useState("");
+	const [newManualCategory, setNewManualCategory] = useState<OutlineCategory>("work");
+	const [newManualOrg, setNewManualOrg] = useState("");
+	const [newManualDesc, setNewManualDesc] = useState("");
+
+	// Resume editor states
+	const [fullName, setFullName] = useState(() => {
+		if (typeof window === "undefined") return "Priya Sharma";
+		try {
+			const savedProfile = localStorage.getItem("resume_buddy_user_profile");
+			if (savedProfile) {
+				const p = JSON.parse(savedProfile);
+				if (p.name) return p.name;
+			}
+		} catch {}
+		return "Priya Sharma";
+	});
+	const [createdResumeId, setCreatedResumeId] = useState<string | null>(null);
+	const [pictureUrl, setPictureUrl] = useState("");
+	const [showPicture, setShowPicture] = useState(true);
+	const [pictureShape, setPictureShape] = useState<"circle" | "rounded" | "square">("circle");
+	const [selectedTemplate, setSelectedTemplate] = useState(() => {
+		if (typeof window === "undefined") return "Azurill";
+		try {
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (p.selectedTemplate) return p.selectedTemplate;
+			}
+		} catch {}
+		return "Azurill";
+	});
+	const [showTemplateModal, setShowTemplateModal] = useState(false);
+	const [savedToLibrary, setSavedToLibrary] = useState(false);
+
+	// Stories & Interactive Chat State
+	const [stories, setStories] = useState<StoryItem[]>([]);
+	const [selectedExperienceId, setSelectedExperienceId] = useState<string | null>(null);
+	const [experienceAnswers, setExperienceAnswers] = useState<Record<string, string[]>>({});
+	const [experienceInputText, setExperienceInputText] = useState("");
+	const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
+	const [isSpeakingAnswer, setIsSpeakingAnswer] = useState(false);
+
+	// Final summary and confirmation review modal state (Section 10, 11, 12)
+	const [showFinalSummaryModal, setShowFinalSummaryModal] = useState(false);
+	const [editingPointKey, setEditingPointKey] = useState<string | null>(null);
+	const [editingPointText, setEditingPointText] = useState("");
+	const [addingPointEntryId, setAddingPointEntryId] = useState<string | null>(null);
+	const [newPointInputText, setNewPointInputText] = useState("");
+
+	// UI Toggle: hide resume preview
+	const [hideResumePreview, setHideResumePreview] = useState(false);
+	const [storyCategoryFilter, setStoryCategoryFilter] = useState<"all" | "work" | "projects">("all");
+	const [activeExplorationQuestionIndex, setActiveExplorationQuestionIndex] = useState<Record<string, number>>({});
+	const [isAudioMuted, setIsAudioMuted] = useState(false);
+	const [editingDetailEntryId, setEditingDetailEntryId] = useState<string | null>(null);
+	const [showHowZoeHelpsModal, setShowHowZoeHelpsModal] = useState(false);
+	const [professionalSummary, setProfessionalSummary] = useState("");
+	const [isEditingSummary, setIsEditingSummary] = useState(false);
+
+	// Stories view mode: "overview" (matching user's screenshot) or "interview" (active question-answer)
+	const [storiesViewMode, setStoriesViewMode] = useState<"overview" | "interview">("overview");
+	const [interviewActiveEntryId, setInterviewActiveEntryId] = useState<string | null>(null);
+	const [showZoeSectionPrompt, setShowZoeSectionPrompt] = useState(true);
+	const [activeSectionPromptType, setActiveSectionPromptType] = useState<"projects" | "education" | "volunteer">("projects");
+	// Tab 03: Supporting Details state (matching screenshot media_1795019454591_659f3f35.jpg)
+	const [detailsSubTab, setDetailsSubTab] = useState<"contact" | "skills" | "summary">("contact");
+	const [contactEmail, setContactEmail] = useState("you@example.com");
+	const [contactPhone, setContactPhone] = useState("");
+	const [contactLocation, setContactLocation] = useState("");
+	const [contactLinks, setContactLinks] = useState("");
+	const [skillsList, setSkillsList] = useState<string[]>([
+		"React",
+		"TypeScript",
+		"JavaScript",
+		"HTML/CSS",
+		"Tailwind CSS",
+		"Next.js",
+		"Git",
+	]);
+	const [newSkillInput, setNewSkillInput] = useState("");
+
 	const [currentStep, setCurrentStep] = useState<
 		"role_setup" | "pick_topic" | "describe_work" | "clarify_impact" | "generate_bullet" | "review_approve" | "success"
-	>(initial.step);
+	>("pick_topic");
+	const [activeStoryType, setActiveStoryType] = useState<"project" | "work" | "internship" | "education">("work");
+	const [activeProjectName, setActiveProjectName] = useState("");
+	const [activeContribution, setActiveContribution] = useState("");
+	const [activeProblem, setActiveProblem] = useState("");
+	const [activeEvidence, setActiveEvidence] = useState("");
+	const [generatedBullet, setGeneratedBullet] = useState("");
+	const [editedBullet, setEditedBullet] = useState("");
+	const [isRecording, setIsRecording] = useState(false);
+	const [chatInput, setChatInput] = useState("");
 
-	// Active story under construction
-	const [activeStoryType, setActiveStoryType] = useState<"project" | "work" | "internship">(initial.activeStoryType);
-	const [activeProjectName, setActiveProjectName] = useState(initial.activeProjectName);
-	const [activeContribution, setActiveContribution] = useState(initial.activeContribution);
-	const [activeProblem, setActiveProblem] = useState(initial.activeProblem);
-	const [activeEvidence, setActiveEvidence] = useState(initial.activeEvidence);
-	const [generatedBullet, setGeneratedBullet] = useState(initial.generatedBullet);
-	const [editedBullet, setEditedBullet] = useState(initial.editedBullet);
+	// Calculate priority score for an experience based on target role relevance and strength
+	const computeExperiencePriority = (entry: OutlineEntry, roleTarget = targetRole): number => {
+		let score = 50; // base score
+		const targetWords = (roleTarget || "Developer").toLowerCase().split(/\s+/).filter(Boolean);
+		const titleLower = entry.title.toLowerCase();
+		const descLower = (entry.description || "").toLowerCase();
+		const orgLower = (entry.organization || "").toLowerCase();
+		const combined = `${titleLower} ${descLower} ${orgLower}`;
 
-	// Save automatically to localStorage after each state change only when meaningful user data exists
-	useEffect(() => {
-		try {
-			const hasData =
-				stories.length > 0 ||
-				Boolean(activeProjectName.trim()) ||
-				Boolean(activeContribution.trim()) ||
-				Boolean(activeProblem.trim()) ||
-				Boolean(activeEvidence.trim()) ||
-				Boolean(generatedBullet.trim()) ||
-				Boolean(editedBullet.trim());
-
-			if (hasData) {
-				const draftPayload = {
-					stories,
-					step: currentStep,
-					activeStoryType,
-					activeProjectName,
-					activeContribution,
-					activeProblem,
-					activeEvidence,
-					generatedBullet,
-					editedBullet,
-					updatedAt: new Date().toISOString(),
-				};
-				localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(draftPayload));
+		// Target role alignment (+30 to +50 points)
+		for (const word of targetWords) {
+			if (word.length > 2 && combined.includes(word)) {
+				score += 25;
 			}
-		} catch (e) {
-			console.warn("[GuidedStory] Autosave error:", e);
 		}
-	}, [
-		stories,
-		currentStep,
-		activeStoryType,
-		activeProjectName,
-		activeContribution,
-		activeProblem,
-		activeEvidence,
-		generatedBullet,
-		editedBullet,
-	]);
 
-	// Clear saved story draft
-	const handleResetStoryDraft = () => {
-		setActiveProjectName("");
-		setActiveContribution("");
-		setActiveProblem("");
-		setActiveEvidence("");
-		setGeneratedBullet("");
-		setEditedBullet("");
-		setCurrentStep("pick_topic");
-		try {
-			localStorage.removeItem("resume_buddy_guided_story_draft");
-		} catch {
-			// ignore
+		// High-impact leadership and technical keywords (+15 to +30 points)
+		if (combined.includes("lead") || combined.includes("senior") || combined.includes("architect")) score += 20;
+		if (combined.includes("mentor") || combined.includes("guided") || combined.includes("coached")) score += 25; // Mentorship strongly strengthens resume
+		if (combined.includes("ai") || combined.includes("llm") || combined.includes("speech") || combined.includes("real-time")) score += 20;
+		if (combined.includes("built") || combined.includes("engineered") || combined.includes("shipped") || combined.includes("launched")) score += 15;
+
+		// Category weighting
+		if (entry.category === "work") score += 15;
+		if (entry.category === "projects") score += 10;
+
+		// Extra points if already has verified bullets
+		if (entry.points && entry.points.length > 0) {
+			score += entry.points.length * 10;
 		}
+
+		return score;
 	};
 
-	// Plan Items (Prototype 2 style progress)
+	// Helper to insert or sort an entry in the priority list without disrupting order
+	const insertWithPriority = (list: OutlineEntry[], newEntry: OutlineEntry): OutlineEntry[] => {
+		const newScore = newEntry.priorityScore ?? computeExperiencePriority(newEntry);
+		const entryWithScore = { ...newEntry, priorityScore: newScore };
+
+		// If the list is empty, return with new item
+		if (list.length === 0) return [entryWithScore];
+
+		// Find the first index where existing entry has a strictly lower priority score
+		const insertIdx = list.findIndex(
+			(existing) => (existing.priorityScore ?? computeExperiencePriority(existing)) < newScore
+		);
+
+		if (insertIdx === -1) {
+			// Append at the end if lower than all
+			return [...list, entryWithScore];
+		}
+
+		const updated = [...list];
+		updated.splice(insertIdx, 0, entryWithScore);
+		return updated;
+	};
+
+	// Sort outline entries by priority
+	const sortEntriesByPriority = (entries: OutlineEntry[]): OutlineEntry[] => {
+		return [...entries].sort((a, b) => {
+			const scoreA = a.priorityScore ?? computeExperiencePriority(a);
+			const scoreB = b.priorityScore ?? computeExperiencePriority(b);
+			return scoreB - scoreA;
+		});
+	};
+
+	// Handlers for Step 2: Add Entry
+	const handleAddWorkEntry = () => {
+		if (!workTitle.trim()) {
+			toast.error("Please enter a job title");
+			return;
+		}
+		const newEntry: OutlineEntry = {
+			id: `work_${Date.now()}`,
+			category: "work",
+			title: workTitle.trim(),
+			organization: workCompany.trim() || undefined,
+			dates: workDates.trim() || undefined,
+		};
+		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
+		setWorkTitle("");
+		setWorkCompany("");
+		setWorkDates("");
+		toast.success("Work experience prioritized and added to outline!");
+	};
+
+	const handleAddProjectEntry = () => {
+		if (!projectTitle.trim()) {
+			toast.error("Please enter a project title");
+			return;
+		}
+		const newEntry: OutlineEntry = {
+			id: `proj_${Date.now()}`,
+			category: "projects",
+			title: projectTitle.trim(),
+			organization: projectTech.trim() || undefined,
+			dates: projectDates.trim() || undefined,
+		};
+		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
+		setProjectTitle("");
+		setProjectTech("");
+		setProjectDates("");
+		toast.success("Project prioritized and added to outline!");
+	};
+
+	const handleAddEducationEntry = () => {
+		if (!eduDegree.trim()) {
+			toast.error("Please enter a degree or certificate");
+			return;
+		}
+		const newEntry: OutlineEntry = {
+			id: `edu_${Date.now()}`,
+			category: "education",
+			title: eduDegree.trim(),
+			organization: eduSchool.trim() || undefined,
+			dates: eduDates.trim() || undefined,
+		};
+		setOutlineEntries((prev) => [...prev, newEntry]);
+		setEduDegree("");
+		setEduSchool("");
+		setEduDates("");
+		toast.success("Education added to outline!");
+	};
+
+	const handleAddVolunteerEntry = () => {
+		if (!volRole.trim()) {
+			toast.error("Please enter a role or activity");
+			return;
+		}
+		const newEntry: OutlineEntry = {
+			id: `vol_${Date.now()}`,
+			category: "volunteer",
+			title: volRole.trim(),
+			organization: volOrg.trim() || undefined,
+			dates: volDates.trim() || undefined,
+		};
+		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
+		setVolRole("");
+		setVolOrg("");
+		setVolDates("");
+		toast.success("Activity prioritized and added to outline!");
+	};
+
+	const handleRemoveEntry = (id: string) => {
+		setOutlineEntries((prev) => prev.filter((item) => item.id !== id));
+		toast.info("Experience removed");
+	};
+
+	const handleUpdateEntry = (id: string, updates: Partial<OutlineEntry>) => {
+		setOutlineEntries((prev) =>
+			prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
+		);
+	};
+
+	const handleAddManualExperience = () => {
+		if (!newManualTitle.trim()) {
+			toast.error("Please enter a title or role for the experience");
+			return;
+		}
+		const newEntry: OutlineEntry = {
+			id: `entry_manual_${Date.now()}`,
+			category: newManualCategory,
+			title: newManualTitle.trim(),
+			organization: newManualOrg.trim() || undefined,
+			description: newManualDesc.trim() || undefined,
+			dates: "Recent",
+		};
+		// Zoe decides where it belongs in the priority order without disrupting existing order
+		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
+		setNewManualTitle("");
+		setNewManualOrg("");
+		setNewManualDesc("");
+		setIsAddingManual(false);
+		toast.success("Experience placed in priority order!");
+	};
+
+	// Automatically generate and update professional summary using verified experiences and target role
+	useEffect(() => {
+		if (isEditingSummary && professionalSummary) return; // don't override manual edits in progress
+
+		const role = targetRole || "Frontend Developer";
+		const topExperiences = outlineEntries.filter((e) => e.category === "work" || e.category === "projects");
+		const expTitles = topExperiences.slice(0, 3).map((e) => e.title);
+		const bulletSample = topExperiences.flatMap((e) => e.points || []).slice(0, 2);
+
+		let autoSummary = `${role} with demonstrated experience in modern software engineering`;
+		if (expTitles.length > 0) {
+			autoSummary += `, having contributed to ${expTitles.join(", ")}`;
+		}
+		if (bulletSample.length > 0) {
+			autoSummary += `. Proven ability to ${bulletSample[0].charAt(0).toLowerCase() + bulletSample[0].slice(1).replace(/\.$/, "")}`;
+		} else {
+			autoSummary += `. Committed to engineering reliable user interfaces, driving cross-team collaboration, and delivering scalable outcomes`;
+		}
+		autoSummary += ".";
+
+		setProfessionalSummary(autoSummary);
+	}, [outlineEntries, targetRole, isEditingSummary]);
+
+	// Save outline entries to localStorage
+	useEffect(() => {
+		try {
+			localStorage.setItem("resume_buddy_outline_entries", JSON.stringify(outlineEntries));
+		} catch {}
+	}, [outlineEntries]);
+
+	// Create or update resume when user clicks "See my plan →"
+	const handleSeeMyPlan = () => {
+		// Include any un-submitted field currently in inputs
+		let currentEntries = [...outlineEntries];
+		if (workTitle.trim()) {
+			currentEntries.push({
+				id: `work_${Date.now()}`,
+				category: "work",
+				title: workTitle.trim(),
+				organization: workCompany.trim() || undefined,
+				dates: workDates.trim() || undefined,
+			});
+			setWorkTitle("");
+			setWorkCompany("");
+			setWorkDates("");
+		}
+		if (projectTitle.trim()) {
+			currentEntries.push({
+				id: `proj_${Date.now()}`,
+				category: "projects",
+				title: projectTitle.trim(),
+				organization: projectTech.trim() || undefined,
+				dates: projectDates.trim() || undefined,
+			});
+			setProjectTitle("");
+			setProjectTech("");
+			setProjectDates("");
+		}
+		if (eduDegree.trim()) {
+			currentEntries.push({
+				id: `edu_${Date.now()}`,
+				category: "education",
+				title: eduDegree.trim(),
+				organization: eduSchool.trim() || undefined,
+				dates: eduDates.trim() || undefined,
+			});
+			setEduDegree("");
+			setEduSchool("");
+			setEduDates("");
+		}
+
+		setOutlineEntries(currentEntries);
+
+		const workList = currentEntries.filter((e) => e.category === "work");
+		const projList = currentEntries.filter((e) => e.category === "projects");
+		const eduList = currentEntries.filter((e) => e.category === "education");
+		const volList = currentEntries.filter((e) => e.category === "volunteer");
+
+		// Construct populated ResumeData strictly complying with Reactive Resume v4 schema
+		const newResumeData: ResumeData = {
+			...defaultResumeData,
+			basics: {
+				...defaultResumeData.basics,
+				name: fullName || "Your Name",
+				headline: targetRole || "Frontend Developer",
+				email: "you@example.com",
+			},
+			summary: {
+				...defaultResumeData.summary,
+				hidden: false,
+				content: `<p>Targeting ${targetRole || "Frontend Developer"}. Experienced professional dedicated to building modern, user-focused solutions and collaborating effectively to deliver measurable results.</p>`,
+			},
+			sections: {
+				...defaultResumeData.sections,
+				experience: {
+					title: "Experience",
+					columns: 1,
+					hidden: false,
+					items:
+						workList.length > 0
+							? workList.map((w) => ({
+									id: w.id,
+									hidden: false,
+									company: w.organization || "Company",
+									position: w.title,
+									location: "Remote / Hybrid",
+									period: w.dates || "2023 – Present",
+									website: { url: "", label: "" },
+									description: `<p>Spearheaded features and responsive web development as ${w.title}. Collaborated with cross-functional teams to improve user engagement and deliver key releases.</p>`,
+								}))
+							: [
+									{
+										id: "exp_1",
+										hidden: false,
+										company: "Tech Solutions",
+										position: targetRole || "Frontend Developer",
+										location: "Remote",
+										period: "2023 – Present",
+										website: { url: "", label: "" },
+										description: `<p>Developed modern, high-performance web experiences using React, TypeScript, and Tailwind CSS.</p>`,
+									},
+								],
+				},
+				projects: {
+					title: "Projects",
+					columns: 1,
+					hidden: false,
+					items: projList.map((p) => ({
+						id: p.id,
+						hidden: false,
+						name: p.title,
+						role: p.organization || "Lead Developer",
+						period: p.dates || "2024",
+						website: { url: "", label: "" },
+						description: `<p>Engineered ${p.title} delivering intuitive UI and robust performance.</p>`,
+					})),
+				},
+				education: {
+					title: "Education",
+					columns: 1,
+					hidden: false,
+					items:
+						eduList.length > 0
+							? eduList.map((e) => ({
+									id: e.id,
+									hidden: false,
+									school: e.organization || "University",
+									degree: e.title || "Bachelor's Degree",
+									area: targetRole || "Computer Science",
+									grade: "",
+									location: "",
+									period: e.dates || "2020 – 2024",
+									website: { url: "", label: "" },
+									description: "<p>Completed relevant coursework and practical software development projects.</p>",
+									currentlyStudyingHere: false,
+								}))
+							: [
+									{
+										id: "edu_1",
+										hidden: false,
+										school: "University of Technology",
+										degree: "Bachelor of Science",
+										area: targetRole || "Computer Science",
+										grade: "",
+										location: "",
+										period: "2020 – 2024",
+										website: { url: "", label: "" },
+										description: "<p>Completed relevant coursework in modern software architecture and systems design.</p>",
+										currentlyStudyingHere: false,
+									},
+								],
+				},
+				volunteer: {
+					title: "Volunteering & Activities",
+					columns: 1,
+					hidden: false,
+					items: volList.map((v) => ({
+						id: v.id,
+						hidden: false,
+						organization: v.organization || "Community",
+						position: v.title || "Volunteer",
+						location: "",
+						period: v.dates || "2023",
+						website: { url: "", label: "" },
+						description: "<p>Supported community initiatives and team events.</p>",
+					})),
+				},
+			},
+		};
+
+		// Create in store
+		const created = localResumeStore.create({
+			name: targetRole ? `${targetRole} Resume` : "My Resume",
+			data: newResumeData,
+		});
+		setCreatedResumeId(created.id);
+
+		// Initialize stories for Achievement Studio
+		const initialStories: StoryItem[] = workList.map((w, idx) => ({
+			id: `story_${idx}`,
+			companyOrProject: w.organization ? `${w.title} at ${w.organization}` : w.title,
+			type: "work",
+			role: w.title,
+			contribution: w.description || `Led development and delivery as ${w.title}`,
+			problem: "Workflows needed faster execution and clearer interface navigation",
+			approach: "Streamlined architecture and engineered reliable user features",
+			evidenceResult: "Delivered key releases with high responsiveness and robust quality",
+			finalBullets: [
+				w.description || `Built responsive solutions and key features as ${w.title}${w.organization ? ` at ${w.organization}` : ""}.`,
+				`Collaborated across workflows to eliminate bottlenecks and enhance performance.`,
+			],
+			status: "approved",
+		}));
+
+		setStories(initialStories);
+		setActiveProjectName(workList[0]?.organization || targetRole || "Frontend Project");
+		setActiveContribution(workList[0]?.title || "Frontend development");
+
+		// Save state payload and update last worked
+		try {
+			localStorage.setItem(
+				"resume_buddy_guided_story_draft",
+				JSON.stringify({
+					targetRole,
+					fullName,
+					stories: initialStories,
+					selectedTemplate,
+					createdResumeId: created.id,
+					updatedAt: new Date().toISOString(),
+				})
+			);
+			localStorage.setItem(
+				"resume_buddy_last_worked",
+				JSON.stringify({
+					resumeId: created.id,
+					resumeName: targetRole ? `${targetRole} Resume` : "My Resume",
+					type: "guided-story",
+					title: `Continue editing ${targetRole ? `${targetRole} Resume` : "resume"}`,
+					path: "/dashboard/resumes/guided-story",
+					search: { step: "plan" },
+					updatedAt: new Date().toISOString(),
+				})
+			);
+		} catch {}
+
+		setWizardStep("plan");
+		setActiveTab("plan");
+		toast.success("Your plan is ready!");
+		navigate({
+			to: "/dashboard/resumes/guided-story",
+			search: { step: "plan" },
+		});
+	};
+
+	// Start with these experiences: transition straight into Achievement Studio
+	const handleStartWithTheseExperiences = () => {
+		handleSeeMyPlan();
+		if (outlineEntries.length > 0) {
+			setSelectedExperienceId(outlineEntries[0].id);
+		}
+		setActiveTab("stories");
+		toast.success("Experiences confirmed! Let's craft your achievement statements.");
+	};
+
+	// Plan Items for Step 3
 	const planItems: PlanItem[] = [
 		{
 			id: "target_role",
 			title: "Target Role & Profile",
-			description: targetRole || "Define your desired career direction",
-			status: targetRole ? "Completed" : "Not started",
-			tab: "plan",
+			description: targetRole || "Frontend Developer",
+			status: targetRole ? "Completed" : "In progress",
+			tab: "details",
 		},
 		{
-			id: "stories",
-			title: "Work & Project Stories",
-			description: `${stories.length} verified experience bullet${stories.length > 1 ? "s" : ""} generated`,
-			status: stories.some((s) => s.status === "approved") ? "Completed" : "In progress",
+			id: "experience",
+			title: "Work Experience & Stories",
+			description: `${outlineEntries.filter((e) => e.category === "work").length} role(s) outlined`,
+			status: outlineEntries.filter((e) => e.category === "work").length > 0 ? "Completed" : "In progress",
+			tab: "stories",
+		},
+		{
+			id: "projects",
+			title: "Projects & Technical Evidence",
+			description: `${outlineEntries.filter((e) => e.category === "projects").length} project(s) outlined`,
+			status: outlineEntries.filter((e) => e.category === "projects").length > 0 ? "Completed" : "Not started",
 			tab: "stories",
 		},
 		{
 			id: "education",
-			title: "Education details",
-			description: "Add degree, university and timeline",
-			status: "In progress",
+			title: "Education & Qualifications",
+			description: `${outlineEntries.filter((e) => e.category === "education").length} education entry added`,
+			status: outlineEntries.filter((e) => e.category === "education").length > 0 ? "Completed" : "Not started",
 			tab: "details",
-		},
-		{
-			id: "skills",
-			title: "Core technical skills",
-			description: "React, TypeScript, CSS architecture, Tailwind",
-			status: "In progress",
-			tab: "details",
-		},
-		{
-			id: "export",
-			title: "Review layout & export",
-			description: "Inspect template styles and download PDF",
-			status: "Needs review",
-			tab: "export",
 		},
 	];
 
-	const completedCount = planItems.filter((p) => p.status === "Completed").length;
-	const progressPercent = Math.round((completedCount / planItems.length) * 100);
+	const handleWorkOnPlanItem = (itemId: string) => {
+		if (itemId === "target_role") {
+			setActiveTab("details");
+			toast.info("Update your target role and full name here.");
+		} else if (itemId === "experience") {
+			setStoryCategoryFilter("work");
+			const firstWork = outlineEntries.find((e) => e.category === "work");
+			if (firstWork) {
+				setSelectedExperienceId(firstWork.id);
+			} else {
+				// If no work entry exists yet, add a starter one
+				const newEntry: OutlineEntry = {
+					id: `work_${Date.now()}`,
+					category: "work",
+					title: targetRole ? `Software Engineer (${targetRole})` : "Software Engineer",
+					organization: "Tech Company",
+					dates: "2023 – Present",
+					description: "Working on modern web applications and features",
+					points: [],
+				};
+				setOutlineEntries((prev) => [...prev, newEntry]);
+				setSelectedExperienceId(newEntry.id);
+			}
+			setActiveTab("stories");
+			toast.success("Ready to explore your work experience and achievements.");
+		} else if (itemId === "projects") {
+			setStoryCategoryFilter("projects");
+			const firstProject = outlineEntries.find((e) => e.category === "projects");
+			if (firstProject) {
+				setSelectedExperienceId(firstProject.id);
+			} else {
+				// If no project entry exists yet, add a starter one
+				const newProj: OutlineEntry = {
+					id: `proj_${Date.now()}`,
+					category: "projects",
+					title: "AI Resume Builder & Web Application",
+					organization: "React, TypeScript, Vite, Tailwind CSS",
+					dates: "2024",
+					description: "Interactive real-time resume editor with AI guidance",
+					points: [],
+				};
+				setOutlineEntries((prev) => [...prev, newProj]);
+				setSelectedExperienceId(newProj.id);
+			}
+			setActiveTab("stories");
+			toast.success("Ready to explore your technical projects.");
+		} else if (itemId === "education") {
+			setActiveTab("details");
+			toast.info("Manage your education degrees and qualifications below.");
+		}
+	};
 
-	// Real Web Speech API voice recording with live transcription & 3 explicit states (idle, listening, thinking)
-	const toggleVoice = (onReceiveText: (txt: string) => void) => {
-		if (voiceState === "listening") {
-			voiceAssistant.stop();
-			setVoiceState("thinking");
-			setVoiceTranscript("Processing your speech...");
-			setTimeout(() => {
-				setVoiceState("idle");
-				setVoiceTranscript("");
-			}, 600);
-			return;
+	// Generate focused, contextual questions tailored to each experience (one by one)
+	const getFocusedQuestionsForExperience = (entry: OutlineEntry) => {
+		const lowerTitle = entry.title.toLowerCase();
+		const lowerDesc = (entry.description || "").toLowerCase();
+		const org = entry.organization ? ` at ${entry.organization}` : "";
+
+		// AI Resume Builder
+		if (lowerTitle.includes("resume builder") || lowerDesc.includes("resume builder") || (lowerTitle.includes("resume") && lowerTitle.includes("ai"))) {
+			return [
+				{
+					question: `For the ${entry.title}, what parts did you personally build?`,
+					placeholder: "e.g. Built the real-time resume preview, interactive editor, and instant template rendering...",
+					hint: "Implementation details, specific components, or real-time preview features you built.",
+					stepLabel: "Your contribution",
+				},
+				{
+					question: `For the resume preview feature, did you get any feedback or see it used once shipped?`,
+					placeholder: "e.g. Enabled instant sub-second feedback for job seekers and reduced resume crafting time by 40%...",
+					hint: "Results, evidence, user feedback, or speed improvements once live.",
+					stepLabel: "Results & evidence",
+				},
+			];
 		}
 
-		if (voiceAssistant.getSupported()) {
-			setVoiceState("listening");
-			setVoiceTranscript("Listening to your voice... speak now");
+		// English Learning App / Placement feature
+		if (lowerTitle.includes("english") || lowerDesc.includes("english") || lowerTitle.includes("placement") || lowerDesc.includes("placement")) {
+			return [
+				{
+					question: `What did you work on in the placement feature for ${entry.organization || "the application"}?`,
+					placeholder: "e.g. Ensured speech-to-speech accuracy, eliminated transcription issues, missing words, and duplicate content...",
+					hint: "Feature mechanics, speech-to-speech system, transcription accuracy, or edge case handling.",
+					stepLabel: "The work & challenge",
+				},
+				{
+					question: `How did the placement feature impact learners or the evaluation workflow?`,
+					placeholder: "e.g. Successfully assessed over 2,000 learners with 98% transcription reliability and faster student onboarding...",
+					hint: "Scale, evaluation turnaround time, student numbers, or error reduction.",
+					stepLabel: "Results & evidence",
+				},
+			];
+		}
+
+		// Mentoring / Guiding Juniors
+		if (lowerTitle.includes("mentor") || lowerDesc.includes("mentor") || lowerTitle.includes("junior") || lowerDesc.includes("junior") || lowerTitle.includes("guide")) {
+			return [
+				{
+					question: `What were the juniors working on, and how did you guide them?`,
+					placeholder: "e.g. Guided juniors building the resume builder UI, helped them get past initial struggles with AI tools like Claude and Codex...",
+					hint: "Key topics, UI patterns, AI tooling adoption, or code review practices.",
+					stepLabel: "Your contribution",
+				},
+				{
+					question: `What was the outcome of your mentoring for the team's velocity and independence?`,
+					placeholder: "e.g. Enabled 3 junior developers to ship production features independently within their first sprint...",
+					hint: "Confidence, velocity improvements, PR turnaround, or quality benchmarks.",
+					stepLabel: "Results & evidence",
+				},
+			];
+		}
+
+		// General projects
+		if (entry.category === "projects" || lowerTitle.includes("app") || lowerTitle.includes("system") || lowerTitle.includes("feature")) {
+			return [
+				{
+					question: `What parts of ${entry.title} did you specifically build or architect?`,
+					placeholder: "e.g. Built responsive UI components, integrated APIs, and handled real-time state...",
+					hint: "Key modules you owned, stack used, and core technical contributions.",
+					stepLabel: "The work & challenge",
+				},
+				{
+					question: `What was the measured performance or user outcome of ${entry.title}?`,
+					placeholder: "e.g. Improved page load time by 35% and supported 5,000+ active monthly users...",
+					hint: "Performance metrics, reliability, user adoption, or benchmarks.",
+					stepLabel: "Results & evidence",
+				},
+			];
+		}
+
+		// General work / internship
+		if (entry.category === "work") {
+			return [
+				{
+					question: `What were your main contributions and responsibilities as ${entry.title}${org}?`,
+					placeholder: "e.g. Led feature development, engineered responsive interfaces, and collaborated across product sprints...",
+					hint: "Key responsibilities, features delivered, and technical decisions made.",
+					stepLabel: "Your contribution",
+				},
+				{
+					question: `What was a key challenge or measurable impact achieved in this role?`,
+					placeholder: "e.g. Reduced release cycles by 25% and eliminated critical frontend rendering bottlenecks...",
+					hint: "Measurable metrics, latency, efficiency, or team impact.",
+					stepLabel: "Results & evidence",
+				},
+			];
+		}
+
+		// Volunteer / Activities
+		if (entry.category === "volunteer") {
+			return [
+				{
+					question: `What initiatives did you lead or support during ${entry.title}${org}?`,
+					placeholder: "e.g. Organized workshops, assisted members, and built community documentation...",
+					hint: "Specific activities, workshops, and coaching you provided.",
+					stepLabel: "Your contribution",
+				},
+				{
+					question: `What impact did this activity have on the participants or community?`,
+					placeholder: "e.g. Trained 50+ aspiring developers and fostered inclusive peer learning...",
+					hint: "Attendance, participant outcomes, or community feedback.",
+					stepLabel: "Results & evidence",
+				},
+			];
+		}
+
+		// Education
+		return [
+			{
+				question: `What key projects, coursework, or achievements did you complete for ${entry.title}?`,
+				placeholder: "e.g. Capstone software engineering project, data structures honors coursework...",
+				hint: "Academic highlights, major projects, or notable awards.",
+				stepLabel: "Academic highlights",
+			},
+		];
+	};
+
+	const getFocusedQuestionForExperience = (entry: OutlineEntry) => {
+		const questions = getFocusedQuestionsForExperience(entry);
+		const currentIdx = activeExplorationQuestionIndex[entry.id] || 0;
+		return questions[Math.min(currentIdx, questions.length - 1)];
+	};
+
+	// Convert user answer into refined, bulleted experience points dynamically
+	const handleSaveExperienceAnswer = async (entryId: string, answerText: string) => {
+		const trimmed = answerText.trim();
+		if (!trimmed) return;
+
+		setIsSubmittingAnswer(true);
+
+		const targetEntry = outlineEntries.find((e) => e.id === entryId);
+		let newPoints: string[] = [];
+
+		try {
+			// Leverage DeepSeek API if configured, with graceful local heuristic fallback
+			newPoints = await generateBulletsWithDeepSeek(
+				targetEntry?.title || "Role",
+				targetEntry?.organization,
+				trimmed,
+				targetEntry?.description || ""
+			);
+		} catch (err) {
+			console.warn("AI generation failed, using local point parser:", err);
+			const pointsFromAnswer = trimmed
+				.split(/(?:\r?\n)+|(?<=[.!?])\s+|;\s*|(?:\s+and\s+(?:also|additionally|helped|supported)\s+)/i)
+				.map((s) => s.trim())
+				.filter((s) => s.length > 5)
+				.map((pt) => {
+					const clean = pt.replace(/[.,;]+$/, "").trim();
+					return clean.charAt(0).toUpperCase() + clean.slice(1);
+				});
+			newPoints = pointsFromAnswer.length > 0 ? pointsFromAnswer : [trimmed.charAt(0).toUpperCase() + trimmed.slice(1)];
+		}
+
+		// Update outline entry dynamically (cap at at most 3-4 concise, non-repetitive points total per experience)
+		setOutlineEntries((prev) =>
+			prev.map((item) => {
+				if (item.id === entryId) {
+					const existingPoints = item.points || [];
+					const existingAnswers = item.answers || [];
+					// Deduplicate and filter out near-identical variations
+					const combined = [...existingPoints, ...newPoints];
+					const uniquePoints: string[] = [];
+					for (const pt of combined) {
+						const lower = pt.toLowerCase();
+						const isDuplicate = uniquePoints.some((existing) => {
+							const existingLower = existing.toLowerCase();
+							return (
+								existingLower === lower ||
+								(existingLower.includes(lower.slice(0, 30)) && Math.abs(existing.length - pt.length) < 20)
+							);
+						});
+						if (!isDuplicate) {
+							uniquePoints.push(pt);
+						}
+					}
+					// Strictly cap at max 3 polished points per experience
+					const cappedPoints = uniquePoints.slice(0, 3);
+					const mergedAnswers = [...existingAnswers, trimmed];
+					return {
+						...item,
+						points: cappedPoints,
+						answers: mergedAnswers,
+					};
+				}
+				return item;
+			})
+		);
+
+		// Record in local answer state
+		setExperienceAnswers((prev) => ({
+			...prev,
+			[entryId]: [...(prev[entryId] || []), trimmed],
+		}));
+
+		// Also update or add to stories for the Live Resume Document preview
+		setStories((prev) => {
+			const title = targetEntry?.title || "Key Experience";
+			const existingIndex = prev.findIndex(
+				(s) => s.id === `story_${entryId}` || s.companyOrProject.toLowerCase().includes(title.toLowerCase())
+			);
+
+			if (existingIndex >= 0) {
+				const existing = prev[existingIndex];
+				const updatedBullets = Array.from(new Set([...existing.finalBullets, ...newPoints]));
+				const updatedList = [...prev];
+				updatedList[existingIndex] = {
+					...existing,
+					finalBullets: updatedBullets,
+					status: "approved",
+				};
+				return updatedList;
+			} else {
+				const newStoryItem: StoryItem = {
+					id: `story_${entryId}`,
+					companyOrProject: targetEntry?.organization ? `${title} at ${targetEntry.organization}` : title,
+					type: targetEntry?.category === "projects" ? "project" : "work",
+					role: targetEntry?.title || "Contributor",
+					contribution: trimmed,
+					problem: "",
+					approach: "",
+					evidenceResult: "",
+					finalBullets: newPoints,
+					status: "approved",
+				};
+				return [newStoryItem, ...prev];
+			}
+		});
+
+		setExperienceInputText("");
+		setIsSubmittingAnswer(false);
+
+		// Advance question index for this experience or move to next experience
+		const allQs = getFocusedQuestionsForExperience(targetEntry || outlineEntries[0]);
+		const currentIdx = activeExplorationQuestionIndex[entryId] || 0;
+		if (currentIdx + 1 < allQs.length) {
+			setActiveExplorationQuestionIndex((prev) => ({
+				...prev,
+				[entryId]: currentIdx + 1,
+			}));
+			toast.success("Live draft updated! Moving to the next question.");
+		} else {
+			// Find next experience in the outline
+			const currentEntryIdx = outlineEntries.findIndex((e) => e.id === entryId);
+			const nextEntry = outlineEntries[currentEntryIdx + 1];
+			if (nextEntry) {
+				setSelectedExperienceId(nextEntry.id);
+				toast.success(`Completed! Moving to next experience: ${nextEntry.title}`);
+			} else {
+				toast.success("All experiences explored! Review your final summary.");
+			}
+		}
+	};
+
+	// Handlers for Final Summary Point Editing, Removing, and Adding (Sections 10, 11, 12)
+	const handleEditPoint = (entryId: string, index: number, updatedText: string) => {
+		if (!updatedText.trim()) return;
+		setOutlineEntries((prev) =>
+			prev.map((e) => {
+				if (e.id === entryId && e.points) {
+					const pts = [...e.points];
+					pts[index] = updatedText.trim();
+					return { ...e, points: pts };
+				}
+				return e;
+			})
+		);
+		setEditingPointKey(null);
+		setEditingPointText("");
+		toast.success("Point updated");
+	};
+
+	const handleRemovePoint = (entryId: string, index: number) => {
+		setOutlineEntries((prev) =>
+			prev.map((e) => {
+				if (e.id === entryId && e.points) {
+					const pts = e.points.filter((_, i) => i !== index);
+					return { ...e, points: pts };
+				}
+				return e;
+			})
+		);
+		toast.info("Point removed");
+	};
+
+	const handleAddPointToEntry = (entryId: string, pointText: string) => {
+		if (!pointText.trim()) return;
+		const clean = pointText.trim().replace(/^[•\-\*\s]+/, "");
+		setOutlineEntries((prev) =>
+			prev.map((e) => {
+				if (e.id === entryId) {
+					const pts = e.points ? [...e.points, clean] : [clean];
+					return { ...e, points: pts };
+				}
+				return e;
+			})
+		);
+		setAddingPointEntryId(null);
+		setNewPointInputText("");
+		toast.success("New point added");
+	};
+
+	// Final Confirmation & Content Generation (Section 11 & 12)
+	const handleConfirmAndGenerateFinal = () => {
+		setShowFinalSummaryModal(false);
+
+		// Commit all verified points into structured stories and localResumeStore
+		const workList = outlineEntries.filter((e) => e.category === "work");
+		const projList = outlineEntries.filter((e) => e.category === "projects");
+		const eduList = outlineEntries.filter((e) => e.category === "education");
+		const volList = outlineEntries.filter((e) => e.category === "volunteer");
+
+		const updatedStories: StoryItem[] = outlineEntries.map((e, idx) => {
+			const bulletList =
+				e.points && e.points.length > 0
+					? e.points
+					: [e.description || `Built responsive solutions and key features as ${e.title}.`];
+
+			return {
+				id: `final_story_${e.id || idx}`,
+				companyOrProject: e.organization ? `${e.title} at ${e.organization}` : e.title,
+				type: e.category === "projects" ? "project" : "work",
+				role: e.title,
+				contribution: e.description || bulletList[0] || e.title,
+				problem: "",
+				approach: "",
+				evidenceResult: "",
+				finalBullets: bulletList,
+				status: "approved",
+			};
+		});
+
+		setStories(updatedStories);
+
+		// Update resume in store
+		if (createdResumeId) {
+			const existing = localResumeStore.get(createdResumeId);
+			if (existing) {
+				const updatedData: ResumeData = {
+					...existing.data,
+					sections: {
+						...existing.data.sections,
+						experience: {
+							title: "Experience",
+							columns: 1,
+							hidden: false,
+							items: workList.map((w) => ({
+								id: w.id,
+								hidden: false,
+								company: w.organization || "Company",
+								position: w.title,
+								location: "Remote / Hybrid",
+								period: w.dates || "2023 – Present",
+								website: { url: "", label: "" },
+								description: (w.points || [w.description || "Spearheaded feature development."])
+									.map((p) => `<p>• ${p}</p>`)
+									.join(""),
+							})),
+						},
+						projects: {
+							title: "Projects",
+							columns: 1,
+							hidden: false,
+							items: projList.map((p) => ({
+								id: p.id,
+								hidden: false,
+								name: p.title,
+								role: p.organization || "Lead Developer",
+								period: p.dates || "2024",
+								website: { url: "", label: "" },
+								description: (p.points || [p.description || "Engineered core modules."])
+									.map((p) => `<p>• ${p}</p>`)
+									.join(""),
+							})),
+						},
+					},
+				};
+				localResumeStore.update(createdResumeId, { data: updatedData });
+			}
+		}
+
+		toast.success("Final experience content confirmed and saved!");
+	};
+
+	// Toggle voice assistant for answering experience question
+	const handleToggleVoiceExperience = (entryId: string) => {
+		if (isSpeakingAnswer) {
+			setIsSpeakingAnswer(false);
+			voiceAssistant.stop();
+			toast.info("Voice recording stopped");
+		} else {
+			const baseText = experienceInputText ? experienceInputText.trim() : "";
+			setIsSpeakingAnswer(true);
+			toast.info("Listening... Click mic or stop when you're done speaking");
 
 			const started = voiceAssistant.start(
-				(transcript, isFinal) => {
-					setVoiceTranscript(`Heard: "${transcript}"`);
-					if (transcript) {
-						onReceiveText(transcript);
-					}
-					if (isFinal) {
-						setVoiceState("thinking");
-						setVoiceTranscript("Formatting statement...");
-						setTimeout(() => {
-							setVoiceState("idle");
-							setVoiceTranscript("");
-						}, 700);
-					}
+				(transcript) => {
+					const combined = baseText ? `${baseText} ${transcript}` : transcript;
+					setExperienceInputText(combined);
 				},
 				(err) => {
-					console.warn("Speech recognition error:", err);
-					setVoiceTranscript("Microphone error or permission denied. Type your answer instead.");
-					setVoiceState("idle");
+					console.warn("Speech error:", err);
+					setIsSpeakingAnswer(false);
 				},
 				() => {
-					if (voiceState === "listening") {
-						setVoiceState("idle");
-					}
+					setIsSpeakingAnswer(false);
 				}
 			);
 
 			if (!started) {
-				setVoiceState("idle");
+				setIsSpeakingAnswer(false);
 			}
-		} else {
-			// Fallback for browsers without Web Speech support
-			setVoiceState("listening");
-			setVoiceTranscript("Speech recognition unavailable in this browser. Simulating input...");
-			setTimeout(() => {
-				setVoiceState("thinking");
-				setVoiceTranscript("Formatting statement with Zoe...");
-				setTimeout(() => {
-					const mockSpokenText = "Built a responsive web application in React and added real-time data filtering.";
-					onReceiveText(mockSpokenText);
-					setVoiceState("idle");
-					setVoiceTranscript(`Recognized: "${mockSpokenText}"`);
-				}, 600);
-			}, 1400);
 		}
 	};
 
-	// Save and Hand off to the real Resume Buddy Editor
-	const handleHandoffToEditor = () => {
-		const newResume = localResumeStore.create({
-			name: `${fullName}'s Resume - ${targetRole || "Story Based"}`,
-			data: {
-				basics: {
-					name: fullName,
-					headline: targetRole,
-					email: "roshni.jha@example.com",
-					phone: "+91 98765 43210",
-					location: "Bangalore, India",
-					website: { url: "", label: "" },
-					customFields: [],
-				},
-				summary: {
-					title: "Summary",
-					columns: 1,
-					hidden: false,
-					content: `<p>Frontend Engineer targeting ${targetRole} positions with proven experience building robust web applications.</p>`,
-				},
-				sections: {
-					experience: {
-						title: "Experience & Projects",
-						columns: 1,
-						hidden: false,
-						items: stories.map((s, idx) => ({
-							id: s.id || `exp-${idx}`,
-							hidden: false,
-							company: s.companyOrProject,
-							position: s.role || targetRole,
-							period: "2023 - Present",
-							location: "Remote",
-							website: { url: "", label: "" },
-							description: s.finalBullets.map((b) => `<p>• ${b}</p>`).join(""),
-						})),
-					},
-					education: {
-						title: "Education",
-						columns: 1,
-						hidden: false,
-						items: [
-							{
-								id: "edu-1",
-								hidden: false,
-								institution: "Tech Institute of Science",
-								degree: "Bachelor of Technology",
-								area: "Computer Science",
-								period: "2020 - 2024",
-								score: "",
-								website: { url: "", label: "" },
-								description: "",
-							},
-						],
-					},
-					skills: {
-						title: "Skills",
-						columns: 1,
-						hidden: false,
-						items: [
-							{ id: "s-1", hidden: false, name: "React", icon: "", proficiency: "", level: 1, keywords: [] },
-							{ id: "s-2", hidden: false, name: "TypeScript", icon: "", proficiency: "", level: 1, keywords: [] },
-							{ id: "s-3", hidden: false, name: "TailwindCSS", icon: "", proficiency: "", level: 1, keywords: [] },
-							{ id: "s-4", hidden: false, name: "Responsive Design", icon: "", proficiency: "", level: 1, keywords: [] },
-						],
-					},
-				} as any,
-				metadata: {
-					template: "azurill",
-					layout: {
-						sidebarWidth: 30,
-						pages: [
-							{
-								fullWidth: false,
-								main: ["summary", "education", "experience"],
-								sidebar: ["profiles", "skills"],
-							},
-						],
-					},
-					typography: {
-						font: { family: "IBM Plex Sans", subsets: ["latin"], variants: ["regular", "700"] },
-						lineHeight: 1.5,
-						size: 14,
-					},
-					theme: { background: "#ffffff", text: "#000000", primary: "#10b981" },
-					page: { format: "a4" },
-				},
-			},
-		});
+	// Voice recording state for Step 3 Story Prompt
+	const [isSpeakingPlanStory, setIsSpeakingPlanStory] = useState(false);
 
-		navigate({ to: `/builder/${newResume.id}` as any });
+	// Toggle voice assistant in Step 3 Story Prompt
+	const handleToggleVoicePlanStory = () => {
+		if (isSpeakingPlanStory) {
+			setIsSpeakingPlanStory(false);
+			voiceAssistant.stop();
+			toast.info("Voice recording stopped");
+		} else {
+			const baseText = rawStoryText ? rawStoryText.trim() : "";
+			setIsSpeakingPlanStory(true);
+			toast.info("Listening... Click mic again when you're done speaking");
+
+			const started = voiceAssistant.start(
+				(transcript) => {
+					const combined = baseText ? `${baseText} ${transcript}` : transcript;
+					setRawStoryText(combined);
+				},
+				(err) => {
+					console.warn("Speech recognition error:", err);
+					setIsSpeakingPlanStory(false);
+				},
+				() => {
+					setIsSpeakingPlanStory(false);
+				}
+			);
+
+			if (!started) {
+				setIsSpeakingPlanStory(false);
+			}
+		}
 	};
 
-	return (
-		<div className="flex flex-col lg:flex-row min-h-[calc(100vh-5rem)] -m-4 sm:-m-6 text-slate-100">
-			{/* Left Workspace Sidebar (Narendra Prototype 2 Navigation) */}
-			<aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-slate-800/80 bg-[#060b13] p-5 shrink-0">
-				<div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-4 px-2">
-					YOUR RESUME WORKSPACE
-				</div>
-				<nav className="space-y-1.5">
-					<button
-						type="button"
-						onClick={() => setActiveTab("plan")}
-						className={cn(
-							"w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer text-left",
-							activeTab === "plan"
-								? "bg-[#0b1f1a] text-emerald-400 border border-emerald-500/20"
-								: "text-slate-400 hover:text-white hover:bg-slate-800/50"
-						)}
-					>
-						<div className="flex items-center gap-3">
-							<Compass className="size-4" />
-							<span>Your Plan</span>
+	// Parse and extract separate stories naturally without inventing details
+	const handleAnalyzeNaturalStory = (textToParse?: string) => {
+		const text = (textToParse !== undefined ? textToParse : rawStoryText).trim();
+		if (!text) {
+			toast.error("Please type or speak about your work experience first.");
+			return;
+		}
+
+		setIsAnalyzingStory(true);
+
+		// Break response into distinct sentences and clauses
+		const segments = text
+			.split(/(?:\r?\n)+|(?<=[.!?])\s+|;\s*|(?:\s+and\s+(?:also|additionally|then)\s+)/i)
+			.map((s) => s.trim())
+			.filter((s) => s.length > 8);
+
+		const newEntries: OutlineEntry[] = [];
+
+		for (let i = 0; i < segments.length; i++) {
+			const seg = segments[i];
+			// Clean leading filler words
+			const clean = seg
+				.replace(/^(i've\s+done|i've\s+been|i\s+worked\s+on|i\s+have\s+worked\s+on|worked\s+on|i\s+built|built|i\s+created|created|i\s+developed|developed|i\s+helped|helped|i\s+was\s+responsible\s+for|responsible\s+for|i\s+am|my\s+work\s+was)\s+/i, "")
+				.trim();
+
+			const titleCase = clean.charAt(0).toUpperCase() + clean.slice(1);
+			const lower = seg.toLowerCase();
+
+			let category: OutlineCategory = "work";
+			if (lower.includes("degree") || lower.includes("bachelor") || lower.includes("master") || lower.includes("university") || lower.includes("college") || lower.includes("graduated")) {
+				category = "education";
+			} else if (lower.includes("volunteer") || lower.includes("community") || lower.includes("mentor") || lower.includes("taught") || lower.includes("hackathon") || lower.includes("club")) {
+				category = "volunteer";
+			} else if (lower.includes("app") || lower.includes("project") || lower.includes("builder") || lower.includes("feature") || lower.includes("website") || lower.includes("tool") || lower.includes("system") || lower.includes("platform")) {
+				category = "projects";
+			}
+
+			newEntries.push({
+				id: `entry_${Date.now()}_${i}`,
+				category,
+				title: titleCase.replace(/[.,;]+$/, ""),
+				organization: lower.includes("for ") ? seg.split(/for /i)[1]?.split(/[,.]/)[0]?.trim() : undefined,
+				dates: "Recent",
+				description: seg,
+			});
+		}
+
+		if (newEntries.length === 0) {
+			newEntries.push({
+				id: `entry_${Date.now()}`,
+				category,
+				title: text.replace(/[.,;]+$/, ""),
+				dates: "Recent",
+				description: text,
+			});
+		}
+
+		setOutlineEntries((prev) => {
+			// Merge while avoiding exact duplicates and preserving priority order
+			const existingTitles = new Set(prev.map((p) => p.title.toLowerCase()));
+			const filtered = newEntries.filter((n) => !existingTitles.has(n.title.toLowerCase()));
+			// Zoe arranges all collected experiences in priority order based on relevance & strength
+			let merged = [...prev];
+			for (const item of filtered) {
+				merged = insertWithPriority(merged, item);
+			}
+			return sortEntriesByPriority(merged);
+		});
+
+		setIsAnalyzingStory(false);
+		setZoeFeedbackMessage(
+			`I identified ${newEntries.length} distinct experience${newEntries.length > 1 ? "s" : ""} from what you shared! You can refine each one below or add more details.`
+		);
+		toast.success(`Zoe recognized ${newEntries.length} separate experiences!`);
+	};
+
+	// Voice Simulation with natural speech recognition
+	const handleToggleVoiceOutline = () => {
+		if (isSpeakingOutline) {
+			setIsSpeakingOutline(false);
+			voiceAssistant.stop();
+			toast.info("Voice recording stopped");
+		} else {
+			const baseText = rawStoryText ? rawStoryText.trim() : "";
+			setIsSpeakingOutline(true);
+			toast.info("Listening... Tell Zoe about yourself and your work (click mic when done)");
+
+			const started = voiceAssistant.start(
+				(transcript) => {
+					const combined = baseText ? `${baseText} ${transcript}` : transcript;
+					setRawStoryText(combined);
+				},
+				(err) => {
+					console.warn("Speech recognition error:", err);
+					setIsSpeakingOutline(false);
+				},
+				() => {
+					setIsSpeakingOutline(false);
+				}
+			);
+
+			if (!started) {
+				setIsSpeakingOutline(false);
+			}
+		}
+	};
+
+	// Photo file upload
+	// Template change handler with localStorage & store synchronization
+	const handleSelectTemplate = (templateName: string) => {
+		setSelectedTemplate(templateName);
+		try {
+			const savedDraft = localStorage.getItem("resume_buddy_guided_story_draft");
+			const parsedDraft = savedDraft ? JSON.parse(savedDraft) : {};
+			parsedDraft.selectedTemplate = templateName;
+			parsedDraft.updatedAt = new Date().toISOString();
+			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(parsedDraft));
+
+			if (createdResumeId) {
+				const existing = localResumeStore.get(createdResumeId);
+				if (existing) {
+					const updatedData = {
+						...existing.data,
+						metadata: {
+							...existing.data.metadata,
+							template: templateName.toLowerCase() as any,
+						},
+					};
+					localResumeStore.update(createdResumeId, { data: updatedData });
+				}
+			}
+		} catch (e) {
+			console.error("Failed to save selected template", e);
+		}
+	};
+
+	const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			if (typeof reader.result === "string") {
+				setPictureUrl(reader.result);
+				setShowPicture(true);
+				toast.success("Profile photo updated!");
+			}
+		};
+		reader.readAsDataURL(file);
+	};
+
+	// ── STEP 1: DIRECTION (MATCHING IMAGE 1) ──────────────────────────────────
+	if (wizardStep === "direction") {
+		return (
+			<div
+				className="min-h-screen text-slate-100 flex flex-col justify-between p-4 sm:p-8 lg:p-12 font-sans selection:bg-emerald-500/30 selection:text-white"
+				style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+			>
+				<div className="w-full max-w-4xl mx-auto space-y-10">
+					{/* Header Top Bar */}
+					<div className="flex items-center justify-between pb-6 border-b border-slate-800/80">
+						<button
+							type="button"
+							onClick={() => navigate({ to: "/dashboard/resumes" as any })}
+							className="group inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+						>
+							<ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
+							<span>Home</span>
+						</button>
+
+						{/* Stepper / Breadcrumbs */}
+						<div className="flex items-center gap-2 text-xs sm:text-sm font-mono tracking-wider">
+							<span className="text-emerald-400 font-bold">1 · Direction</span>
+							<span className="text-slate-600">—</span>
+							<span className="text-slate-500">2 · Outline</span>
+							<span className="text-slate-600">—</span>
+							<span className="text-slate-500">3 · Your plan</span>
 						</div>
-						<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
-							{completedCount}/{planItems.length}
-						</span>
-					</button>
-
-					<button
-						type="button"
-						onClick={() => setActiveTab("stories")}
-						className={cn(
-							"w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer text-left",
-							activeTab === "stories"
-								? "bg-[#0b1f1a] text-emerald-400 border border-emerald-500/20"
-								: "text-slate-400 hover:text-white hover:bg-slate-800/50"
-						)}
-					>
-						<div className="flex items-center gap-3">
-							<Sparkles className="size-4" />
-							<span>Your Stories</span>
-						</div>
-						<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-							{stories.length}
-						</span>
-					</button>
-
-					<button
-						type="button"
-						onClick={() => navigate({ to: "/dashboard/resumes/manual-builder" as any })}
-						className={cn(
-							"w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer text-left",
-							activeTab === "details"
-								? "bg-[#0b1f1a] text-emerald-400 border border-emerald-500/20"
-								: "text-slate-400 hover:text-white hover:bg-slate-800/50"
-						)}
-					>
-						<Edit3 className="size-4" />
-						<span>Details</span>
-					</button>
-
-					<button
-						type="button"
-						onClick={() => setActiveTab("export")}
-						className={cn(
-							"w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer text-left",
-							activeTab === "export"
-								? "bg-[#0b1f1a] text-emerald-400 border border-emerald-500/20"
-								: "text-slate-400 hover:text-white hover:bg-slate-800/50"
-						)}
-					>
-						<CheckCircle className="size-4" />
-						<span>Review & Export</span>
-					</button>
-				</nav>
-
-				{/* Mini Workspace Progress */}
-				<div className="mt-8 p-4 rounded-xl border border-slate-800 bg-[#09101d] space-y-3">
-					<div className="flex items-center justify-between text-xs font-semibold">
-						<span className="text-slate-400">Target Role</span>
-						<span className="text-emerald-400 font-bold">{targetRole}</span>
 					</div>
-					<div className="space-y-1">
-						<div className="flex justify-between text-[11px] text-slate-400">
-							<span>Overall Readiness</span>
-							<span className="text-slate-300 font-bold">{progressPercent}%</span>
-						</div>
-						<div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-							<div
-								className="h-full bg-emerald-500 rounded-full transition-all duration-300"
-								style={{ width: `${progressPercent}%` }}
+
+					{/* Question Title Block */}
+					<div className="space-y-3">
+						<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
+							START WITH A DIRECTION
+						</span>
+						<h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+							What role are you targeting?
+						</h1>
+						<p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-xl">
+							Tell Zoe the role you're aiming for. You can type any title or pick an idea below—this shapes all subsequent questions and guidance.
+						</p>
+					</div>
+
+					{/* Card Container (Image 1) */}
+					<div className="rounded-2xl border border-slate-800/80 bg-[#09101d] p-6 sm:p-8 shadow-2xl space-y-6">
+						{/* Target role field */}
+						<div className="space-y-3">
+							<label htmlFor="target-role" className="block text-xs font-semibold text-slate-300">
+								What role are you targeting?
+							</label>
+							<input
+								id="target-role"
+								type="text"
+								value={targetRole}
+								onChange={(e) => setTargetRole(e.target.value)}
+								placeholder="e.g. Frontend Developer, Product Manager..."
+								autoFocus
+								className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 text-white placeholder:text-slate-500 px-4 py-3.5 text-base font-semibold transition-all outline-none"
 							/>
-						</div>
-					</div>
-				</div>
-			</aside>
 
-			{/* Center: Interactive Main Content */}
-			<main className="flex-1 p-6 sm:p-10 max-w-3xl overflow-y-auto">
-				{/* Top Status */}
-				<div className="flex items-center justify-between text-xs text-slate-400 mb-6">
-					<button
-						type="button"
-						onClick={() => navigate({ to: "/dashboard/resumes" as any })}
-						className="inline-flex items-center gap-2 hover:text-white transition-colors cursor-pointer"
-					>
-						<ArrowLeft className="size-4" />
-						<span>Dashboard</span>
-					</button>
-					<span className="text-slate-500">Open-session draft</span>
-				</div>
-
-				{/* TAB 1: YOUR PLAN (Prototype 2 Personalized Roadmap) */}
-				{activeTab === "plan" && (
-					<div className="space-y-6">
-						<div>
-							<div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">
-								YOUR RESUME PLAN
+							{/* Suggested Role Pills */}
+							<div className="space-y-1.5 pt-1">
+								<span className="text-[11px] font-medium text-slate-400">
+									Suggestions (or type your own above):
+								</span>
+								<div className="flex flex-wrap gap-2">
+									{[
+										"Frontend Developer",
+										"Backend Developer",
+										"Full Stack Developer",
+										"UI/UX Designer",
+										"Product Manager",
+										"Data Analyst",
+									].map((role) => (
+										<button
+											key={role}
+											type="button"
+											onClick={() => setTargetRole(role)}
+											className={cn(
+												"px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border",
+												targetRole.toLowerCase() === role.toLowerCase()
+													? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-sm"
+													: "bg-slate-900/80 text-slate-300 border-slate-700/80 hover:bg-slate-800 hover:text-white"
+											)}
+										>
+											{role}
+										</button>
+									))}
+								</div>
 							</div>
-							<h1 className="text-3xl font-extrabold text-white mb-2">Let's bring your story out.</h1>
-							<p className="text-sm text-slate-400">
-								One experience at a time. A draft that reflects your authentic work without fabricated metrics.
+
+							<p className="text-xs text-slate-400 pt-1">
+								Not sure of the title? A broad area or level is enough to get started.
 							</p>
 						</div>
 
-						{/* Next Recommended Step Hero */}
-						<div className="rounded-2xl border border-emerald-500/40 bg-[#081a1f] p-6 space-y-4">
-							<div className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-								RECOMMENDED NEXT STEP
-							</div>
-							<h2 className="text-xl font-bold text-white">Capture an achievement with Zoe</h2>
-							<p className="text-sm text-slate-300">
-								You have {stories.length} story captured. Zoe will interview you on one project and craft verified impact bullet points.
-							</p>
+						{/* Optional Job Description Accordion */}
+						<div className="pt-1">
 							<button
 								type="button"
-								onClick={() => setActiveTab("stories")}
-								className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
+								onClick={() => setShowJobDescription(!showJobDescription)}
+								className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
 							>
-								<span>Start Achievement Studio</span>
+								{showJobDescription ? (
+									<ChevronDown className="size-3.5 text-emerald-400" />
+								) : (
+									<ChevronRight className="size-3.5 text-slate-400" />
+								)}
+								<span>I have a job description · Optional</span>
+							</button>
+
+							{showJobDescription && (
+								<div className="mt-3 animate-in fade-in duration-200">
+									<textarea
+										rows={4}
+										value={jobDescription}
+										onChange={(e) => setJobDescription(e.target.value)}
+										placeholder="Paste requirements, key skills, or job posting text here to tailor your statements..."
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 p-3.5 text-xs text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none"
+									/>
+								</div>
+							)}
+						</div>
+
+						{/* Bottom Actions */}
+						<div className="flex items-center justify-between pt-4 border-t border-slate-800/80">
+							<button
+								type="button"
+								onClick={() => setWizardStep("outline")}
+								className="text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
+							>
+								Decide later
+							</button>
+
+							<button
+								type="button"
+								onClick={() => setWizardStep("outline")}
+								className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-sm shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+							>
+								<span>Build my outline</span>
 								<ArrowRight className="size-4" />
 							</button>
+						</div>
+					</div>
+				</div>
+
+				<div className="text-center text-xs text-slate-500 pt-8">
+					Step 1 of 3 · Your progress is saved automatically
+				</div>
+			</div>
+		);
+	}
+
+	// ── STEP 2: OUTLINE (MATCHING IMAGE 2) ────────────────────────────────────
+	if (wizardStep === "outline") {
+		return (
+			<div
+				className="min-h-screen text-slate-100 flex flex-col justify-between p-4 sm:p-8 lg:p-12 font-sans selection:bg-emerald-500/30 selection:text-white"
+				style={{ background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" }}
+			>
+				<div className="w-full max-w-4xl mx-auto space-y-10">
+					{/* Header Top Bar */}
+					<div className="flex items-center justify-between pb-6 border-b border-slate-800/80">
+						<button
+							type="button"
+							onClick={() => navigate({ to: "/dashboard/resumes" as any })}
+							className="group inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+						>
+							<ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
+							<span>Home</span>
+						</button>
+
+						{/* Stepper / Breadcrumbs */}
+						<div className="flex items-center gap-2 text-xs sm:text-sm font-mono tracking-wider">
+							<button
+								type="button"
+								onClick={() => setWizardStep("direction")}
+								className="text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+							>
+								1 · Direction
+							</button>
+							<span className="text-slate-600">—</span>
+							<span className="text-emerald-400 font-bold">2 · Outline</span>
+							<span className="text-slate-600">—</span>
+							<span className="text-slate-500">3 · Your plan</span>
+						</div>
+					</div>
+
+					{/* Question Title Block */}
+					<div className="space-y-3">
+						<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
+							A BRIEF OUTLINE
+						</span>
+						<h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+							What can we draw from?
+						</h1>
+						<p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-xl">
+							Add a role, project, activity, or qualification. Start with your most recent or relevant entry—you can add more later.
+						</p>
+					</div>
+
+					{/* Mode Switcher */}
+					<div className="flex items-center gap-3">
+						<button
+							type="button"
+							onClick={() => setActiveInputMode("natural_story")}
+							className={cn(
+								"flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+								activeInputMode === "natural_story"
+									? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20"
+									: "bg-slate-900/60 text-slate-300 border-slate-700/80 hover:bg-slate-800"
+							)}
+						>
+							<Sparkles className="size-4" />
+							<span>Talk with Zoe (Story Collection)</span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => setActiveInputMode("manual_tabs")}
+							className={cn(
+								"flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+								activeInputMode === "manual_tabs"
+									? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20"
+									: "bg-slate-900/60 text-slate-300 border-slate-700/80 hover:bg-slate-800"
+							)}
+						>
+							<FileText className="size-4" />
+							<span>Structured Outline</span>
+						</button>
+					</div>
+
+					{/* ── MODE 1: NATURAL STORY COLLECTION WITH ZOE ── */}
+					{activeInputMode === "natural_story" && (
+						<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#09121d] p-6 sm:p-8 shadow-2xl space-y-6">
+							{/* Zoe Prompt Box */}
+							<div className="flex items-start gap-4">
+								<div className="size-10 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 shrink-0 shadow-md shadow-emerald-500/20 font-black text-sm">
+									Z
+								</div>
+								<div className="space-y-1.5 flex-1">
+									<div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+										<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+										<span>ZOE · STORY COLLECTION FOR {targetRole.toUpperCase()}</span>
+									</div>
+									<h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
+										"Tell me about yourself and the work you've done so far."
+									</h2>
+									<p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+										Speak or type naturally in your own words. Mention your projects, roles, or achievements—Zoe will identify individual experiences without turning everything into a generic summary.
+									</p>
+								</div>
+							</div>
+
+							{/* Interactive Input Area */}
+							<div className="space-y-3">
+								<div className="relative rounded-2xl border border-slate-700/80 bg-[#0b1424] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all">
+									<textarea
+										rows={5}
+										value={rawStoryText}
+										onChange={(e) => setRawStoryText(e.target.value)}
+										placeholder="e.g. Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers..."
+										className="w-full bg-transparent text-white placeholder:text-slate-500 p-4 text-sm leading-relaxed outline-none resize-none"
+									/>
+
+									{/* Action Footer inside Box */}
+									<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
+										<button
+											type="button"
+											onClick={handleToggleVoiceOutline}
+											className={cn(
+												"inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm",
+												isSpeakingOutline
+													? "bg-rose-500 text-white animate-pulse"
+													: "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+											)}
+										>
+											<Mic className="size-3.5 text-emerald-400" />
+											<span>{isSpeakingOutline ? "Listening... (Click to stop)" : "Speak your story"}</span>
+										</button>
+
+										<div className="flex items-center gap-2">
+											<button
+												type="button"
+												onClick={() => {
+													const sample = "Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers.";
+													setRawStoryText(sample);
+													handleAnalyzeNaturalStory(sample);
+												}}
+												className="text-[11px] font-semibold text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer px-2 py-1 rounded hover:bg-slate-800"
+											>
+												Insert example
+											</button>
+											<button
+												type="button"
+												disabled={isAnalyzingStory || !rawStoryText.trim()}
+												onClick={() => handleAnalyzeNaturalStory()}
+												className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+											>
+												<Sparkles className="size-3.5" />
+												<span>{isAnalyzingStory ? "Extracting stories..." : "Extract experiences"}</span>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							{/* Feedback Notice from Zoe */}
+							{zoeFeedbackMessage && (
+								<div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-start gap-3 animate-in fade-in duration-200">
+									<CheckCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+									<p className="text-xs text-emerald-200 leading-relaxed">
+										{zoeFeedbackMessage}
+									</p>
+								</div>
+							)}
+
+							{/* Identified Experiences Confirmation Section */}
+							{outlineEntries.length > 0 && (
+								<div className="pt-4 space-y-4 border-t border-slate-800/90">
+									<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
+										<div>
+											<h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+												<span>Identified experiences</span>
+												<span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+													{outlineEntries.length}
+												</span>
+											</h3>
+											<p className="text-xs text-slate-400 mt-0.5">
+												Each experience is isolated as its own card. Rename titles, edit descriptions, remove, or add new items.
+											</p>
+										</div>
+										<button
+											type="button"
+											onClick={() => setIsAddingManual(true)}
+											className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer self-start sm:self-auto"
+										>
+											<Plus className="size-3.5 text-emerald-400" />
+											<span>Add another experience</span>
+										</button>
+									</div>
+
+									{/* Manual Add Card Form Modal / Expandable */}
+									{isAddingManual && (
+										<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#081522] p-4 sm:p-5 space-y-3.5 animate-in fade-in duration-200">
+											<div className="flex items-center justify-between">
+												<span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+													Add experience manually
+												</span>
+												<button
+													type="button"
+													onClick={() => setIsAddingManual(false)}
+													className="text-slate-400 hover:text-white text-xs cursor-pointer p-1"
+												>
+													<X className="size-4" />
+												</button>
+											</div>
+
+											<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+												<div className="sm:col-span-2 space-y-1">
+													<label className="text-[11px] font-semibold text-slate-300">Title / Role</label>
+													<input
+														type="text"
+														value={newManualTitle}
+														onChange={(e) => setNewManualTitle(e.target.value)}
+														placeholder="e.g. AI Resume Builder, Senior Developer, etc."
+														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
+														autoFocus
+													/>
+												</div>
+												<div className="space-y-1">
+													<label className="text-[11px] font-semibold text-slate-300">Category</label>
+													<select
+														value={newManualCategory}
+														onChange={(e) => setNewManualCategory(e.target.value as OutlineCategory)}
+														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white px-3 py-2 text-xs outline-none focus:border-emerald-500"
+													>
+														<option value="work">Work & Internship</option>
+														<option value="projects">Project</option>
+														<option value="education">Education</option>
+														<option value="volunteer">Volunteering & Activity</option>
+													</select>
+												</div>
+											</div>
+
+											<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+												<div className="space-y-1">
+													<label className="text-[11px] font-semibold text-slate-300">Organization / Context (Optional)</label>
+													<input
+														type="text"
+														value={newManualOrg}
+														onChange={(e) => setNewManualOrg(e.target.value)}
+														placeholder="e.g. Acme Tech, English Learning App"
+														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
+													/>
+												</div>
+												<div className="space-y-1">
+													<label className="text-[11px] font-semibold text-slate-300">Description / Details</label>
+													<input
+														type="text"
+														value={newManualDesc}
+														onChange={(e) => setNewManualDesc(e.target.value)}
+														placeholder="What did you build, lead, or achieve?"
+														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
+													/>
+												</div>
+											</div>
+
+											<div className="flex items-center justify-end gap-2 pt-1">
+												<button
+													type="button"
+													onClick={() => setIsAddingManual(false)}
+													className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white"
+												>
+													Cancel
+												</button>
+												<button
+													type="button"
+													onClick={handleAddManualExperience}
+													className="px-4 py-1.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs shadow transition-all cursor-pointer"
+												>
+													Save experience
+												</button>
+											</div>
+										</div>
+									)}
+
+									{/* List of Experience Cards */}
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+										{outlineEntries.map((entry, idx) => {
+											const isEditing = editingEntryId === entry.id;
+											return (
+												<div
+													key={entry.id}
+													className={cn(
+														"rounded-2xl border p-4 sm:p-5 space-y-3 transition-all shadow-md relative",
+														isEditing
+															? "border-emerald-500/70 bg-[#091524] ring-1 ring-emerald-500/40"
+															: "border-slate-800/90 bg-[#09111c] hover:border-slate-700"
+													)}
+												>
+													{/* Card Header */}
+													<div className="flex items-center justify-between gap-2">
+														<div className="flex items-center gap-1.5">
+															<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+																#{idx + 1} · {entry.category}
+															</span>
+															{entry.dates && (
+																<span className="text-[10px] text-slate-400">· {entry.dates}</span>
+															)}
+														</div>
+
+														<div className="flex items-center gap-1">
+															<button
+																type="button"
+																onClick={() => setEditingEntryId(isEditing ? null : entry.id)}
+																className={cn(
+																	"p-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+																	isEditing
+																		? "bg-emerald-500/20 text-emerald-300"
+																		: "text-slate-400 hover:text-white hover:bg-slate-800"
+																)}
+																title={isEditing ? "Done editing" : "Edit experience"}
+															>
+																{isEditing ? <Check className="size-3.5" /> : <Edit3 className="size-3.5" />}
+															</button>
+															<button
+																type="button"
+																onClick={() => handleRemoveEntry(entry.id)}
+																className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+																title="Remove experience"
+															>
+																<Trash2 className="size-3.5" />
+															</button>
+														</div>
+													</div>
+
+													{/* Card Content or Inline Edit Form */}
+													{isEditing ? (
+														<div className="space-y-3 pt-1">
+															<div className="space-y-1">
+																<label className="text-[10px] font-semibold text-slate-400">Rename Title</label>
+																<input
+																	type="text"
+																	value={entry.title}
+																	onChange={(e) => handleUpdateEntry(entry.id, { title: e.target.value })}
+																	className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+																/>
+															</div>
+
+															<div className="grid grid-cols-2 gap-2">
+																<div className="space-y-1">
+																	<label className="text-[10px] font-semibold text-slate-400">Category</label>
+																	<select
+																		value={entry.category}
+																		onChange={(e) => handleUpdateEntry(entry.id, { category: e.target.value as OutlineCategory })}
+																		className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-2 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+																	>
+																		<option value="work">Work</option>
+																		<option value="projects">Projects</option>
+																		<option value="education">Education</option>
+																		<option value="volunteer">Volunteering</option>
+																	</select>
+																</div>
+																<div className="space-y-1">
+																	<label className="text-[10px] font-semibold text-slate-400">Organization</label>
+																	<input
+																		type="text"
+																		value={entry.organization || ""}
+																		onChange={(e) => handleUpdateEntry(entry.id, { organization: e.target.value })}
+																		placeholder="Optional"
+																		className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+																	/>
+																</div>
+															</div>
+
+															<div className="space-y-1">
+																<label className="text-[10px] font-semibold text-slate-400">Edit Description</label>
+																<textarea
+																	rows={2}
+																	value={entry.description || ""}
+																	onChange={(e) => handleUpdateEntry(entry.id, { description: e.target.value })}
+																	placeholder="Describe key responsibilities, tech, or impact..."
+																	className="w-full rounded-lg bg-[#0b1424] border border-slate-700 p-2 text-xs text-white focus:border-emerald-500 outline-none resize-none"
+																/>
+															</div>
+
+															<div className="text-right">
+																<button
+																	type="button"
+																	onClick={() => setEditingEntryId(null)}
+																	className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs"
+																>
+																	Save
+																</button>
+															</div>
+														</div>
+													) : (
+														<div className="space-y-2">
+															<h4 className="text-sm font-bold text-white leading-snug">
+																{entry.title}
+															</h4>
+
+															{entry.organization && (
+																<p className="text-xs text-slate-400">
+																	Organization: <span className="text-slate-200 font-medium">{entry.organization}</span>
+																</p>
+															)}
+
+															{entry.description ? (
+																<p className="text-xs text-slate-300 line-clamp-3 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed">
+																	{entry.description}
+																</p>
+															) : (
+																<p className="text-[11px] text-slate-500 italic">
+																	No description yet. Click edit to draft details.
+																</p>
+															)}
+														</div>
+													)}
+												</div>
+											);
+										})}
+									</div>
+
+									{/* Anything else worth adding? Confirmation Footer */}
+									<div className="rounded-2xl border border-emerald-500/30 bg-[#081820]/90 p-5 sm:p-6 mt-6 space-y-4">
+										<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+											<div>
+												<h4 className="text-base font-bold text-white flex items-center gap-2">
+													<Sparkles className="size-4 text-emerald-400" />
+													<span>Anything else worth adding?</span>
+												</h4>
+												<p className="text-xs text-slate-300 mt-1">
+													You can add more details or extra experiences now, or proceed straight to crafting verified bullet points.
+												</p>
+											</div>
+										</div>
+
+										<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-slate-800/80">
+											<button
+												type="button"
+												onClick={() => {
+													window.scrollTo({ top: 300, behavior: "smooth" });
+													toast.info("Describe more projects or responsibilities above!");
+												}}
+												className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm transition-all cursor-pointer"
+											>
+												<Plus className="size-4 text-emerald-400" />
+												<span>Add more details</span>
+											</button>
+
+											<button
+												type="button"
+												onClick={handleStartWithTheseExperiences}
+												className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+											>
+												<span>Start with these experiences</span>
+												<ArrowRight className="size-4" />
+											</button>
+										</div>
+									</div>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* ── MODE 2: STRUCTURED OUTLINE TABS (IMAGE 2) ── */}
+					{activeInputMode === "manual_tabs" && (
+					<div className="rounded-2xl border border-slate-800/80 bg-[#09101d] p-6 sm:p-8 shadow-2xl space-y-6">
+						{/* Tabs Row */}
+						<div className="flex flex-wrap items-center gap-2 pb-2">
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("work")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "work"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Work & internships
+							</button>
+
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("projects")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "projects"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Projects
+							</button>
+
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("education")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "education"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Education
+							</button>
+
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("volunteer")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "volunteer"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Volunteering & activities
+							</button>
+						</div>
+
+						{/* Form Fields: Work & Internships */}
+						{outlineCategory === "work" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Job title
+										</label>
+										<input
+											type="text"
+											value={workTitle}
+											onChange={(e) => setWorkTitle(e.target.value)}
+											placeholder="e.g. Frontend Developer"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Company or organization · Optional
+										</label>
+										<input
+											type="text"
+											value={workCompany}
+											onChange={(e) => setWorkCompany(e.target.value)}
+											placeholder="Organization or context"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={workDates}
+										onChange={(e) => setWorkDates(e.target.value)}
+										placeholder="e.g. Jul 2023 – Present"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										We'll develop the description together.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddWorkEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add work experience</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Form Fields: Projects */}
+						{outlineCategory === "projects" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Project title
+										</label>
+										<input
+											type="text"
+											value={projectTitle}
+											onChange={(e) => setProjectTitle(e.target.value)}
+											placeholder="e.g. E-Commerce Dashboard"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Technologies or role · Optional
+										</label>
+										<input
+											type="text"
+											value={projectTech}
+											onChange={(e) => setProjectTech(e.target.value)}
+											placeholder="e.g. React, Next.js, Stripe"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={projectDates}
+										onChange={(e) => setProjectDates(e.target.value)}
+										placeholder="e.g. Jan 2024 – May 2024"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										We'll develop the description together.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddProjectEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add project</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Form Fields: Education */}
+						{outlineCategory === "education" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Degree or qualification
+										</label>
+										<input
+											type="text"
+											value={eduDegree}
+											onChange={(e) => setEduDegree(e.target.value)}
+											placeholder="e.g. B.Tech Computer Science"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											School or university
+										</label>
+										<input
+											type="text"
+											value={eduSchool}
+											onChange={(e) => setEduSchool(e.target.value)}
+											placeholder="e.g. State University"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={eduDates}
+										onChange={(e) => setEduDates(e.target.value)}
+										placeholder="e.g. 2020 – 2024"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										Academic details and certifications.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddEducationEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add education</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Form Fields: Volunteering */}
+						{outlineCategory === "volunteer" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Role or activity
+										</label>
+										<input
+											type="text"
+											value={volRole}
+											onChange={(e) => setVolRole(e.target.value)}
+											placeholder="e.g. Open Source Contributor"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Organization · Optional
+										</label>
+										<input
+											type="text"
+											value={volOrg}
+											onChange={(e) => setVolOrg(e.target.value)}
+											placeholder="Organization or community"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={volDates}
+										onChange={(e) => setVolDates(e.target.value)}
+										placeholder="e.g. 2023"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										Extracurriculars, leadership, and community roles.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddVolunteerEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add activity</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* List of Captured Outline Entries */}
+						{outlineEntries.length > 0 && (
+							<div className="pt-4 border-t border-slate-800/80 space-y-2">
+								<span className="text-xs font-semibold text-slate-300 block">
+									Captured in your outline ({outlineEntries.length})
+								</span>
+								<div className="flex flex-wrap gap-2">
+									{outlineEntries.map((entry) => (
+										<div
+											key={entry.id}
+											className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900/80 text-xs text-slate-200 shadow-sm"
+										>
+											<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase">
+												{entry.category}
+											</span>
+											<span className="font-semibold text-white">{entry.title}</span>
+											{entry.organization && <span className="text-slate-400">· {entry.organization}</span>}
+											<button
+												type="button"
+												onClick={() => handleRemoveEntry(entry.id)}
+												className="text-slate-500 hover:text-rose-400 transition-colors cursor-pointer ml-1"
+											>
+												<X className="size-3.5" />
+											</button>
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+					</div>
+					)}
+
+					{/* Voice Recording Accordion */}
+					<div className="space-y-3">
+						<button
+							type="button"
+							onClick={() => setShowVoiceOption(!showVoiceOption)}
+							className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+						>
+							{showVoiceOption ? (
+								<ChevronDown className="size-3.5 text-emerald-400" />
+							) : (
+								<ChevronRight className="size-3.5 text-slate-400" />
+							)}
+							<span>Prefer to speak your outline?</span>
+						</button>
+
+						{showVoiceOption && (
+							<div className="rounded-2xl border border-emerald-500/30 bg-[#081b22]/90 p-5 flex items-center justify-between gap-4 animate-in fade-in duration-200">
+								<div className="space-y-1">
+									<div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+										<Mic className="size-3.5" />
+										<span>Voice Outline Assistant</span>
+									</div>
+									<p className="text-xs text-slate-300">
+										Speak freely about your recent experiences. Zoe will extract roles, tools, and timelines.
+									</p>
+								</div>
+								<button
+									type="button"
+									onClick={handleToggleVoiceOutline}
+									className={cn(
+										"inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm",
+										isSpeakingOutline
+											? "bg-rose-500 text-white animate-pulse"
+											: "bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950"
+									)}
+								>
+									<Mic className="size-4" />
+									<span>{isSpeakingOutline ? "Stop Recording" : "Start Speaking"}</span>
+								</button>
+							</div>
+						)}
+
+						{/* Bottom Actions Bar (Image 2) */}
+						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-slate-800/80">
+							<div>
+								<button
+									type="button"
+									onClick={() => setWizardStep("direction")}
+									className="text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
+								>
+									Back to direction
+								</button>
+								<p className="text-xs text-slate-500 mt-1">
+									Start with one item if you like. There is no need to list everything before seeing your draft.
+								</p>
+							</div>
+
+							<button
+								type="button"
+								onClick={handleSeeMyPlan}
+								className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-sm shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+							>
+								<span>See my plan</span>
+								<ArrowRight className="size-4" />
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<div className="text-center text-xs text-slate-500 pt-8">
+					Step 2 of 3 · Your progress is saved automatically
+				</div>
+			</div>
+		);
+	}
+
+	// ── STEP 3: YOUR PLAN / THE EDITOR WORKSPACE ──────────────────────────────
+	return (
+		<div className="flex flex-col lg:flex-row min-h-[calc(100vh-4rem)] w-full flex-1 text-slate-100 font-sans">
+			{/* Left Column: Interactive Plan & Editor Tools */}
+			<main className="flex-1 min-w-0 p-6 sm:p-8 lg:p-10 overflow-y-auto">
+				{/* Top Stepper & Navigation Bar styled exactly like reference image */}
+				<div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-2 border-b border-slate-900/60">
+					{/* Stepper with click navigation */}
+					<div className="flex items-center gap-6 text-xs sm:text-sm font-semibold tracking-wide">
+						<button
+							type="button"
+							onClick={() => setActiveTab("plan")}
+							className={cn(
+								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								activeTab === "plan"
+									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									: "text-slate-400 hover:text-slate-200"
+							)}
+						>
+							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">01</span>
+							<span>Your plan</span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => setActiveTab("stories")}
+							className={cn(
+								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								activeTab === "stories"
+									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									: "text-slate-400 hover:text-slate-200"
+							)}
+						>
+							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">02</span>
+							<span>Your stories</span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => setActiveTab("details")}
+							className={cn(
+								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								activeTab === "details"
+									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									: "text-slate-400 hover:text-slate-200"
+							)}
+						>
+							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">03</span>
+							<span>Details</span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => setActiveTab("export")}
+							className={cn(
+								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								activeTab === "export"
+									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									: "text-slate-400 hover:text-slate-200"
+							)}
+						>
+							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">04</span>
+							<span>Review & export</span>
+						</button>
+					</div>
+
+					{/* Right side controls matching screenshot: How Zoe helps, Direction & Save & leave */}
+					<div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
+						<button
+							type="button"
+							onClick={() => setShowTemplateModal(true)}
+							className="inline-flex items-center gap-1.5 hover:text-emerald-300 transition-colors cursor-pointer text-slate-300"
+						>
+							<Palette className="size-3.5 text-emerald-400" />
+							<span>Template: <strong className="text-white">{selectedTemplate}</strong></span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => setShowHowZoeHelpsModal(true)}
+							className="inline-flex items-center gap-1.5 hover:text-emerald-300 transition-colors cursor-pointer text-slate-300"
+						>
+							<Sparkles className="size-3.5 text-emerald-400" />
+							<span>How Zoe helps</span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => setWizardStep("direction")}
+							className="inline-flex items-center gap-1.5 hover:text-emerald-400 transition-colors cursor-pointer"
+						>
+							<Compass className="size-3.5" />
+							<span>Direction</span>
+						</button>
+
+						<button
+							type="button"
+							onClick={() => {
+								toast.success("Progress saved! Returning to dashboard.");
+								navigate({ to: "/dashboard/resumes" as any });
+							}}
+							className="inline-flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+						>
+							<LogOut className="size-3.5" />
+							<span>Save & leave</span>
+						</button>
+					</div>
+				</div>
+
+				{/* TAB 1: PLAN VIEW */}
+				{activeTab === "plan" && (
+					<div className="space-y-6">
+						{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle */}
+						<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+							<span className="font-semibold text-slate-300">
+								{targetRole || "Frontend Developer"}
+							</span>
+
+							<div className="flex items-center gap-4">
+								<span className="flex items-center gap-1.5 text-[11px] text-slate-400">
+									<span className="size-1.5 rounded-full bg-emerald-400" />
+									<span>Saved on this device</span>
+								</span>
+
+								<button
+									type="button"
+									onClick={() => setHideResumePreview(!hideResumePreview)}
+									className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+								>
+									<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
+								</button>
+							</div>
+						</div>
+
+						{/* Hero Header matching screenshot */}
+						<div className="space-y-2 pt-2">
+							<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400/90 font-bold block">
+								A ROUTE, AT YOUR PACE
+							</span>
+							<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+								Let's bring your story out.
+							</h1>
+							<p className="text-sm text-slate-400 max-w-xl">
+								One useful step at a time. Zoe puts the most useful step first; you can choose anything.
+							</p>
+						</div>
+
+						{/* Large Featured Zoe Next Step Card (Green Accent Card in screenshot) */}
+						<div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-[#0b2319] via-[#091b15] to-[#071310] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
+							<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-emerald-300/80">
+								<div className="flex items-center gap-2">
+									<span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+									<span>ZOE / YOUR NEXT STEP</span>
+								</div>
+								<ExternalLink className="size-3.5 text-emerald-400/60" />
+							</div>
+
+							<div className="space-y-1">
+								<span className="text-xs text-emerald-400/80 font-medium block">
+									Zoe suggests
+								</span>
+								<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+									{outlineEntries[0]?.title || "Sr. Frontend Developer"}
+								</h2>
+								<p className="text-sm text-emerald-100/80 pt-1">
+									Talk through the main things you did here. Zoe drafts a statement for each.
+								</p>
+							</div>
+
+							<div className="pt-1 text-xs text-emerald-300/70">
+								<strong className="text-emerald-200 uppercase tracking-wider text-[10px] mr-2">WHY THIS FIRST</strong>
+								<span>It's your most recent role and close to your target role.</span>
+							</div>
+
+							<div className="pt-2 flex flex-wrap items-center gap-4">
+								<button
+									type="button"
+									onClick={() => {
+										setActiveTab("stories");
+										if (outlineEntries[0]) {
+											setSelectedExperienceId(outlineEntries[0].id);
+										}
+									}}
+									className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+								>
+									<Mic className="size-4 text-slate-950" />
+									<span>Talk through this</span>
+								</button>
+
+								<span className="text-xs text-emerald-300/60">
+									You can choose a different step below.
+								</span>
+							</div>
+
+							<div className="flex items-center justify-between pt-4 border-t border-emerald-500/10 text-[10px] font-mono text-emerald-400/60">
+								<span>0 OF 10 PLAN ITEMS FINISHED</span>
+								<div className="flex items-center gap-1">
+									<span className="size-1 rounded-full bg-emerald-500/40" />
+									<span className="size-1 rounded-full bg-emerald-500/40" />
+									<span className="size-1 rounded-full bg-emerald-500/40" />
+								</div>
+							</div>
+						</div>
+
+						{/* Your Experience Section list matching screenshot */}
+						<div className="space-y-3 pt-2">
+							<div className="flex items-center justify-between">
+								<h3 className="text-lg font-bold text-white">Your experience</h3>
+								<span className="text-xs text-slate-500">
+									Ordered by what will strengthen the resume most.
+								</span>
+							</div>
+						</div>
+						{/* Conversational AI Story Prompt Box */}
+						<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#09131d] p-6 sm:p-7 shadow-[0_0_40px_rgba(16,185,129,0.08)] space-y-5">
+							<div className="flex items-start gap-4">
+								<div className="size-11 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-lg shadow-emerald-500/30 shrink-0">
+									Z
+								</div>
+								<div className="space-y-1 flex-1 min-w-0">
+									<div className="flex flex-wrap items-center gap-2">
+										<span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+											ZOE · DRAFT A STATEMENT
+										</span>
+										<span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+											Target: {targetRole || "Developer"}
+										</span>
+									</div>
+									<h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+										"Talk through the main things you did here."
+									</h2>
+									<p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+										Describe your work in your own words. You can mention multiple projects, features, responsibilities, or mentoring experiences together in one response. Zoe will identify them as separate experiences without blending them into a generic summary.
+									</p>
+								</div>
+							</div>
+
+							{/* Editable Story Input Area */}
+							<div className="space-y-3">
+								<div className="relative rounded-2xl border border-slate-700/80 bg-[#0b1424] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all">
+									<textarea
+										rows={4}
+										value={rawStoryText}
+										onChange={(e) => setRawStoryText(e.target.value)}
+										placeholder="e.g. Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers..."
+										className="w-full bg-transparent text-white placeholder:text-slate-500 p-4 text-sm leading-relaxed outline-none resize-none"
+									/>
+
+									<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
+										<button
+											type="button"
+											onClick={handleToggleVoicePlanStory}
+											className={cn(
+												"inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm",
+												isSpeakingPlanStory
+													? "bg-rose-500 text-white animate-pulse"
+													: "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+											)}
+										>
+											<Mic className="size-3.5 text-emerald-400" />
+											<span>{isSpeakingPlanStory ? "Listening... (Click to finish)" : "Voice input"}</span>
+										</button>
+
+										<div className="flex items-center gap-2">
+											<button
+												type="button"
+												onClick={() => {
+													const sample =
+														"Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers.";
+													setRawStoryText(sample);
+													handleAnalyzeNaturalStory(sample);
+												}}
+												className="text-[11px] font-semibold text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer px-2 py-1 rounded hover:bg-slate-800"
+											>
+												Insert example
+											</button>
+											<button
+												type="button"
+												disabled={isAnalyzingStory || !rawStoryText.trim()}
+												onClick={() => handleAnalyzeNaturalStory()}
+												className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+											>
+												<Sparkles className="size-3.5" />
+												<span>{isAnalyzingStory ? "Identifying experiences..." : "Draft statements & separate"}</span>
+											</button>
+										</div>
+									</div>
+								</div>
+
+								{/* Zoe Feedback Notice */}
+								{zoeFeedbackMessage && (
+									<div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-start gap-3 animate-in fade-in duration-200">
+										<CheckCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+										<p className="text-xs text-emerald-200 leading-relaxed">{zoeFeedbackMessage}</p>
+									</div>
+								)}
+
+								{/* Identified Experiences Confirmation Section inside Plan */}
+								{outlineEntries.length > 0 && (
+									<div className="space-y-4 pt-4 border-t border-slate-800/90">
+										<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+											<div>
+												<h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+													<span>Identified experiences</span>
+													<span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+														{outlineEntries.length}
+													</span>
+												</h3>
+												<p className="text-xs text-slate-400 mt-0.5">
+													Each experience is separated as its own editable item.
+												</p>
+											</div>
+
+											<button
+												type="button"
+												onClick={() => setIsAddingManual(true)}
+												className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer self-start sm:self-auto"
+											>
+												<Plus className="size-3.5 text-emerald-400" />
+												<span>Add another experience</span>
+											</button>
+										</div>
+
+										{/* Manual Add Card Form Modal / Expandable */}
+										{isAddingManual && (
+											<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#081522] p-4 sm:p-5 space-y-3.5 animate-in fade-in duration-200">
+												<div className="flex items-center justify-between">
+													<span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+														Add experience manually
+													</span>
+													<button
+														type="button"
+														onClick={() => setIsAddingManual(false)}
+														className="text-slate-400 hover:text-white text-xs cursor-pointer p-1"
+													>
+														<X className="size-4" />
+													</button>
+												</div>
+
+												<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+													<div className="sm:col-span-2 space-y-1">
+														<label className="text-[11px] font-semibold text-slate-300">Title / Role</label>
+														<input
+															type="text"
+															value={newManualTitle}
+															onChange={(e) => setNewManualTitle(e.target.value)}
+															placeholder="e.g. AI Resume Builder, Senior Developer, etc."
+															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
+															autoFocus
+														/>
+													</div>
+													<div className="space-y-1">
+														<label className="text-[11px] font-semibold text-slate-300">Category</label>
+														<select
+															value={newManualCategory}
+															onChange={(e) => setNewManualCategory(e.target.value as OutlineCategory)}
+															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white px-3 py-2 text-xs outline-none focus:border-emerald-500"
+														>
+															<option value="work">Work & Internship</option>
+															<option value="projects">Project</option>
+															<option value="education">Education</option>
+															<option value="volunteer">Volunteering & Activity</option>
+														</select>
+													</div>
+												</div>
+
+												<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+													<div className="space-y-1">
+														<label className="text-[11px] font-semibold text-slate-300">Organization / Context (Optional)</label>
+														<input
+															type="text"
+															value={newManualOrg}
+															onChange={(e) => setNewManualOrg(e.target.value)}
+															placeholder="e.g. Acme Tech, English Learning App"
+															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
+														/>
+													</div>
+													<div className="space-y-1">
+														<label className="text-[11px] font-semibold text-slate-300">Description / Details</label>
+														<input
+															type="text"
+															value={newManualDesc}
+															onChange={(e) => setNewManualDesc(e.target.value)}
+															placeholder="What did you build, lead, or achieve?"
+															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
+														/>
+													</div>
+												</div>
+
+												<div className="flex items-center justify-end gap-2 pt-1">
+													<button
+														type="button"
+														onClick={() => setIsAddingManual(false)}
+														className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white"
+													>
+														Cancel
+													</button>
+													<button
+														type="button"
+														onClick={handleAddManualExperience}
+														className="px-4 py-1.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs shadow transition-all cursor-pointer"
+													>
+														Save experience
+													</button>
+												</div>
+											</div>
+										)}
+
+										{/* Cards Grid */}
+										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+											{outlineEntries.map((entry, idx) => {
+												const isEditing = editingEntryId === entry.id;
+												return (
+													<div
+														key={entry.id}
+														className={cn(
+															"rounded-2xl border p-4 sm:p-5 space-y-3 transition-all shadow-md relative flex flex-col justify-between",
+															isEditing
+																? "border-emerald-500/70 bg-[#091524] ring-1 ring-emerald-500/40"
+																: "border-slate-800/90 bg-[#07101c] hover:border-slate-700"
+														)}
+													>
+														<div className="space-y-3">
+															{/* Header */}
+															<div className="flex items-center justify-between gap-2">
+																<div className="flex items-center gap-1.5">
+																	<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+																		#{idx + 1} · {entry.category}
+																	</span>
+																	{entry.dates && (
+																		<span className="text-[10px] text-slate-400">· {entry.dates}</span>
+																	)}
+																</div>
+
+																<div className="flex items-center gap-1">
+																	<button
+																		type="button"
+																		onClick={() => setEditingEntryId(isEditing ? null : entry.id)}
+																		className={cn(
+																			"p-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+																			isEditing
+																				? "bg-emerald-500/20 text-emerald-300"
+																				: "text-slate-400 hover:text-white hover:bg-slate-800"
+																		)}
+																		title={isEditing ? "Done editing" : "Edit experience"}
+																	>
+																		{isEditing ? <Check className="size-3.5" /> : <Edit3 className="size-3.5" />}
+																	</button>
+																	<button
+																		type="button"
+																		onClick={() => handleRemoveEntry(entry.id)}
+																		className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+																		title="Remove experience"
+																	>
+																		<Trash2 className="size-3.5" />
+																	</button>
+																</div>
+															</div>
+
+															{/* Edit or display */}
+															{isEditing ? (
+																<div className="space-y-2.5 pt-1">
+																	<div className="space-y-1">
+																		<label className="text-[10px] font-semibold text-slate-400">Rename Title</label>
+																		<input
+																			type="text"
+																			value={entry.title}
+																			onChange={(e) => handleUpdateEntry(entry.id, { title: e.target.value })}
+																			className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+																		/>
+																	</div>
+																	<div className="space-y-1">
+																		<label className="text-[10px] font-semibold text-slate-400">Organization / Context</label>
+																		<input
+																			type="text"
+																			value={entry.organization || ""}
+																			onChange={(e) => handleUpdateEntry(entry.id, { organization: e.target.value })}
+																			className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
+																		/>
+																	</div>
+																	<div className="space-y-1">
+																		<label className="text-[10px] font-semibold text-slate-400">Edit Description</label>
+																		<textarea
+																			rows={2}
+																			value={entry.description || ""}
+																			onChange={(e) => handleUpdateEntry(entry.id, { description: e.target.value })}
+																			className="w-full rounded-lg bg-[#0b1424] border border-slate-700 p-2 text-xs text-white focus:border-emerald-500 outline-none resize-none"
+																		/>
+																	</div>
+																	<div className="text-right">
+																		<button
+																			type="button"
+																			onClick={() => setEditingEntryId(null)}
+																			className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs"
+																		>
+																			Save
+																		</button>
+																	</div>
+																</div>
+															) : (
+																<div className="space-y-1.5">
+																	<h4 className="text-sm font-bold text-white line-clamp-2">
+																		{entry.title}
+																	</h4>
+																	{entry.organization && (
+																		<p className="text-xs text-slate-400">
+																			Context: <span className="text-slate-200">{entry.organization}</span>
+																		</p>
+																	)}
+																	{entry.description && (
+																		<p className="text-xs text-slate-300 line-clamp-3 bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 leading-relaxed">
+																			{entry.description}
+																		</p>
+																	)}
+																</div>
+															)}
+														</div>
+
+														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between mt-2">
+															<span className="text-[11px] text-slate-400">{entry.dates || "Recent"}</span>
+															<button
+																type="button"
+																onClick={() => {
+																	setActiveProjectName(entry.title);
+																	setActiveContribution(entry.description || entry.title);
+																	setActiveTab("stories");
+																}}
+																className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
+															>
+																Refine statement →
+															</button>
+														</div>
+													</div>
+												);
+											})}
+										</div>
+
+										{/* Anything else worth adding? Confirmation Box */}
+										<div className="rounded-2xl border border-emerald-500/30 bg-[#081820]/90 p-5 sm:p-6 mt-4 space-y-4">
+											<div>
+												<h4 className="text-base font-bold text-white flex items-center gap-2">
+													<Sparkles className="size-4 text-emerald-400" />
+													<span>Anything else worth adding?</span>
+												</h4>
+												<p className="text-xs text-slate-300 mt-1">
+													You can add more details to your story above, or continue with these confirmed experiences.
+												</p>
+											</div>
+
+											<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-slate-800/80">
+												<button
+													type="button"
+													onClick={() => {
+														window.scrollTo({ top: 100, behavior: "smooth" });
+														toast.info("Add more details in the story input box above!");
+													}}
+													className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm transition-all cursor-pointer"
+												>
+													<Plus className="size-4 text-emerald-400" />
+													<span>Add more details</span>
+												</button>
+
+												<button
+													type="button"
+													onClick={handleStartWithTheseExperiences}
+													className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+												>
+													<span>Start with these experiences</span>
+													<ArrowRight className="size-4" />
+												</button>
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
 						</div>
 
 						{/* Section Checklist */}
 						<div className="space-y-3">
-							<h3 className="text-base font-bold text-white">Your complete plan</h3>
+							<h3 className="text-base font-bold text-white">Your plan items</h3>
 							<div className="rounded-2xl border border-slate-800 bg-[#09101d] divide-y divide-slate-800">
 								{planItems.map((item) => (
 									<div key={item.id} className="flex items-center justify-between p-4 sm:p-5">
@@ -548,448 +3008,10 @@ export function GuidedStoryRoute() {
 										</div>
 										<button
 											type="button"
-											onClick={() => {
-												if (item.tab === "details") {
-													navigate({ to: "/dashboard/resumes/manual-builder" as any });
-												} else {
-													setActiveTab(item.tab);
-												}
-											}}
-											className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+											onClick={() => handleWorkOnPlanItem(item.id)}
+											className="px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-300 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
 										>
-											Open
-										</button>
-									</div>
-								))}
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* TAB 2: YOUR STORIES & ACHIEVEMENT STUDIO (Prototype 1 & 2 Combined) */}
-				{activeTab === "stories" && (
-					<div className="space-y-6">
-						{/* Mode Switcher / Breadcrumb */}
-						<div className="flex items-center justify-between">
-							<div>
-								<div className="flex items-center gap-2 mb-1">
-									<span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-										IMPROVE MY EXPERIENCE
-									</span>
-									<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30">
-										AI RESPONSES SIMULATED
-									</span>
-								</div>
-								<h1 className="text-2xl sm:text-3xl font-extrabold text-white">Achievement Studio</h1>
-							</div>
-
-							<div className="flex items-center gap-2">
-								{currentStep !== "pick_topic" && (
-									<button
-										type="button"
-										onClick={() => setCurrentStep("pick_topic")}
-										className="text-xs text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60"
-									>
-										<ArrowLeft className="size-3.5" />
-										<span>Previous step</span>
-									</button>
-								)}
-								{(activeContribution.trim() || currentStep !== "pick_topic") && (
-									<button
-										type="button"
-										onClick={handleResetStoryDraft}
-										className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10"
-									>
-										<Trash2 className="size-3.5" />
-										<span>Discard draft</span>
-									</button>
-								)}
-							</div>
-						</div>
-
-						{/* Step 1: Pick topic */}
-						{currentStep === "pick_topic" && (
-							<div className="space-y-6">
-								<p className="text-sm text-slate-400">
-									Choose which experience or project to talk through. Zoe will ask focused follow-ups and build authentic bullets.
-								</p>
-
-								{/* Experience type selector */}
-								<div>
-									<label className="block text-xs font-semibold text-slate-300 mb-2">Experience type</label>
-									<div className="flex flex-wrap gap-3">
-										{[
-											{ id: "project", label: "Project" },
-											{ id: "internship", label: "Internship" },
-											{ id: "work", label: "Work experience" },
-										].map((t) => (
-											<button
-												key={t.id}
-												type="button"
-												onClick={() => setActiveStoryType(t.id as any)}
-												className={cn(
-													"inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-colors cursor-pointer",
-													activeStoryType === t.id
-														? "border-emerald-500 bg-[#071d18] text-emerald-300"
-														: "border-slate-800 bg-[#09101d] text-slate-300 hover:border-slate-700"
-												)}
-											>
-												<div
-													className={cn(
-														"size-3.5 rounded-full border flex items-center justify-center",
-														activeStoryType === t.id ? "border-emerald-500 bg-emerald-500" : "border-slate-600"
-													)}
-												>
-													{activeStoryType === t.id && <div className="size-1.5 rounded-full bg-slate-950" />}
-												</div>
-												<span>{t.label}</span>
-											</button>
-										))}
-									</div>
-								</div>
-
-								{/* Role / Project name */}
-								<div>
-									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-										Project, organization, or role name
-									</label>
-									<input
-										type="text"
-										value={activeProjectName}
-										onChange={(e) => setActiveProjectName(e.target.value)}
-										className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
-										placeholder="e.g. E-Commerce Dashboard or Vipasna Website"
-									/>
-								</div>
-
-								<div className="flex items-center gap-3">
-									<button
-										type="button"
-										onClick={() => setActiveProjectName("Vipasna Website")}
-										className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors cursor-pointer"
-									>
-										Use sample project
-									</button>
-									<button
-										type="button"
-										onClick={() => setCurrentStep("describe_work")}
-										className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
-									>
-										<span>Continue</span>
-										<ArrowRight className="size-4" />
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* Step 2: Describe your contribution naturally (Text or Voice) */}
-						{currentStep === "describe_work" && (
-							<div className="space-y-6">
-								<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-6 space-y-4">
-									<div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-										<Lightbulb className="size-4" />
-										<span>ZOE ASKS:</span>
-									</div>
-									<h2 className="text-xl font-bold text-white">
-										What was your main contribution on {activeProjectName}?
-									</h2>
-									<p className="text-xs text-slate-400">
-										Speak or type naturally. Describe the technologies you used and the problems you tackled.
-									</p>
-
-									<textarea
-										rows={4}
-										value={activeContribution}
-										onChange={(e) => setActiveContribution(e.target.value)}
-										className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
-										placeholder="e.g. I designed the database models and created the user login endpoints..."
-									/>
-
-									{/* Voice Control Indicator (Idle, Listening, Thinking) */}
-									<div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-										<div className="flex items-center gap-3">
-											<button
-												type="button"
-												onClick={() => toggleVoice((txt) => setActiveContribution(txt))}
-												className={cn(
-													"inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-													voiceState === "listening"
-														? "bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse"
-														: voiceState === "thinking"
-														? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
-														: "bg-slate-800 hover:bg-slate-700 text-slate-300"
-												)}
-											>
-												{voiceState === "listening" ? (
-													<MicOff className="size-4 text-red-400" />
-												) : voiceState === "thinking" ? (
-													<RefreshCw className="size-4 animate-spin text-purple-400" />
-												) : (
-													<Mic className="size-4" />
-												)}
-												<span>
-													{voiceState === "listening"
-														? "Listening... (Click to stop)"
-														: voiceState === "thinking"
-														? "Thinking / Formatting..."
-														: "Use voice input"}
-												</span>
-											</button>
-											<span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-												{voiceState === "listening" ? "● LIVE SPEECH" : voiceState === "thinking" ? "● PROCESSING" : "IDLE"}
-											</span>
-											{voiceTranscript && <span className="text-xs text-slate-400 italic">{voiceTranscript}</span>}
-										</div>
-
-										<button
-											type="button"
-											onClick={() => setCurrentStep("clarify_impact")}
-											className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
-										>
-											<span>Next question</span>
-											<ArrowRight className="size-4" />
-										</button>
-									</div>
-								</div>
-							</div>
-						)}
-
-						{/* Step 3: Zoe identifies gaps and asks for verifiable results */}
-						{currentStep === "clarify_impact" && (
-							<div className="space-y-6">
-								<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-6 space-y-4">
-									<div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-										<HelpCircle className="size-4" />
-										<span>ZOE'S FOLLOW-UP:</span>
-									</div>
-									<h2 className="text-xl font-bold text-white">Can you share a result or evidence?</h2>
-									<p className="text-xs text-slate-400">
-										What changed after your work? Include a result only if you can support it. Never invent fake percentages.
-									</p>
-
-									<textarea
-										rows={3}
-										value={activeEvidence}
-										onChange={(e) => setActiveEvidence(e.target.value)}
-										className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
-									/>
-
-									<div className="flex flex-wrap items-center gap-3 pt-2">
-										<button
-											type="button"
-											onClick={() => {
-												const bullet = formatAchievementBullet({
-													role: targetRole,
-													contribution: activeContribution,
-													problem: activeProblem,
-													evidenceResult: activeEvidence,
-												});
-												setGeneratedBullet(bullet);
-												setEditedBullet(bullet);
-												setCurrentStep("generate_bullet");
-											}}
-											className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
-										>
-											<span>Generate professional bullet</span>
-											<ArrowRight className="size-4" />
-										</button>
-										<button
-											type="button"
-											onClick={() => {
-												const bullet = formatAchievementBullet({
-													role: targetRole,
-													contribution: activeContribution,
-												});
-												setGeneratedBullet(bullet);
-												setEditedBullet(bullet);
-												setCurrentStep("generate_bullet");
-											}}
-											className="px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300 text-xs font-semibold cursor-pointer"
-										>
-											Skip — no verifiable metric
-										</button>
-									</div>
-								</div>
-							</div>
-						)}
-
-						{/* Step 4: Review and verify generated bullet */}
-						{currentStep === "generate_bullet" && (
-							<div className="space-y-6">
-								<div>
-									<h2 className="text-2xl font-bold text-white mb-1">Your resume bullet</h2>
-									<p className="text-xs text-slate-400">
-										Drafted only from the exact words you provided. No exaggerated figures added.
-									</p>
-								</div>
-
-								<div className="rounded-2xl border-l-4 border-l-emerald-500 border border-slate-800 bg-[#091523] p-6 text-sm text-slate-200 leading-relaxed">
-									{editedBullet}
-								</div>
-
-								<div className="flex items-center gap-2 text-xs text-amber-300">
-									<Sparkles className="size-4 shrink-0" />
-									<span>Verify this statement before approving it to your resume.</span>
-								</div>
-
-								<div className="flex items-center gap-3 pt-2">
-									<button
-										type="button"
-										onClick={() => setCurrentStep("review_approve")}
-										className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
-									>
-										<span>Review and edit</span>
-										<ArrowRight className="size-4" />
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* Step 5: Edit and Approve (User in complete control) */}
-						{currentStep === "review_approve" && (
-							<div className="space-y-6">
-								<h2 className="text-2xl font-bold text-white">Choose your final version</h2>
-
-								<div className="space-y-2">
-									<div className="text-xs font-bold uppercase tracking-wider text-slate-400">YOUR ORIGINAL</div>
-									<p className="text-sm text-slate-300 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-										{activeContribution}
-									</p>
-								</div>
-
-								<div className="space-y-2">
-									<label className="block text-xs font-semibold text-slate-300">Edit the suggestion</label>
-									<textarea
-										rows={4}
-										value={editedBullet}
-										onChange={(e) => setEditedBullet(e.target.value)}
-										className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
-									/>
-								</div>
-
-								<div className="flex flex-wrap items-center gap-3 pt-2">
-									<button
-										type="button"
-										onClick={() => {
-											const newStory: StoryItem = {
-												id: `story-${Date.now()}`,
-												companyOrProject: activeProjectName,
-												type: activeStoryType,
-												role: targetRole,
-												contribution: activeContribution,
-												problem: activeProblem,
-												approach: "",
-												evidenceResult: activeEvidence,
-												finalBullets: [editedBullet],
-												status: "approved",
-											};
-											setStories([newStory, ...stories]);
-											setCurrentStep("success");
-										}}
-										className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
-									>
-										<Check className="size-4" />
-										<span>Approve improved version</span>
-									</button>
-									<button
-										type="button"
-										onClick={() => {
-											const newStory: StoryItem = {
-												id: `story-${Date.now()}`,
-												companyOrProject: activeProjectName,
-												type: activeStoryType,
-												role: targetRole,
-												contribution: activeContribution,
-												problem: "",
-												approach: "",
-												evidenceResult: "",
-												finalBullets: [activeContribution],
-												status: "approved",
-											};
-											setStories([newStory, ...stories]);
-											setCurrentStep("success");
-										}}
-										className="px-5 py-3 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300 text-sm font-semibold transition-colors cursor-pointer"
-									>
-										Keep my original version
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* Success / Story Added View */}
-						{currentStep === "success" && (
-							<div className="space-y-6">
-								<div className="rounded-2xl border border-emerald-500/30 bg-[#06181b] p-6 space-y-4">
-									<div className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
-										<CheckCircle className="size-5" />
-										<span>Achievement added to your resume</span>
-									</div>
-									<h2 className="text-xl font-bold text-white">{activeProjectName}</h2>
-									<p className="text-sm text-slate-200 leading-relaxed bg-[#0a1f24] p-4 rounded-xl border border-emerald-500/20">
-										• {editedBullet}
-									</p>
-								</div>
-
-								<div className="flex flex-wrap items-center gap-3">
-									<button
-										type="button"
-										onClick={handleHandoffToEditor}
-										className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-sm transition-all cursor-pointer"
-									>
-										<span>Transfer to Resume Editor</span>
-										<ArrowRight className="size-4" />
-									</button>
-									<button
-										type="button"
-										onClick={() => {
-											setActiveProjectName("Second Project");
-											setActiveContribution("");
-											setActiveEvidence("");
-											setCurrentStep("describe_work");
-										}}
-										className="px-5 py-3 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300 text-sm font-semibold transition-colors cursor-pointer"
-									>
-										Capture another achievement
-									</button>
-									<button
-										type="button"
-										onClick={() => setActiveTab("export")}
-										className="px-4 py-3 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
-									>
-										Review layout & export
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* List of previously captured stories */}
-						<div className="pt-8 border-t border-slate-800/80 space-y-4">
-							<h3 className="text-base font-bold text-white flex items-center gap-2">
-								<span>Captured stories</span>
-								<span className="text-xs font-normal text-slate-400">({stories.length})</span>
-							</h3>
-							<div className="space-y-3">
-								{stories.map((story) => (
-									<div
-										key={story.id}
-										className="p-4 rounded-xl border border-slate-800 bg-[#09101d] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-									>
-										<div className="space-y-1">
-											<div className="flex items-center gap-2">
-												<span className="text-sm font-bold text-white">{story.companyOrProject}</span>
-												<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-													{story.status}
-												</span>
-											</div>
-											<p className="text-xs text-slate-400 line-clamp-1">{story.finalBullets[0]}</p>
-										</div>
-										<button
-											type="button"
-											onClick={handleHandoffToEditor}
-											className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer shrink-0"
-										>
-											<span>Edit in builder</span>
+											<span>Work on this</span>
 											<ArrowRight className="size-3" />
 										</button>
 									</div>
@@ -999,54 +3021,1304 @@ export function GuidedStoryRoute() {
 					</div>
 				)}
 
-				{/* TAB 3: REVIEW & EXPORT */}
-				{activeTab === "export" && (
+				{/* TAB 2: STORIES (YOUR STORIES SECTION OVERVIEW & EXPLORATION) */}
+				{activeTab === "stories" && (
 					<div className="space-y-6">
-						<div>
-							<h1 className="text-3xl font-extrabold text-white mb-2">Review layout & export</h1>
-							<p className="text-sm text-slate-400">
-								Inspect your story-based resume. Everything captured here directly transfers into the full resume editor.
+						{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle */}
+						<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+							<span className="font-semibold text-slate-300">
+								{targetRole || "Frontend Developer"}
+							</span>
+
+							<div className="flex items-center gap-4">
+								<span className="flex items-center gap-1.5 text-[11px] text-slate-400">
+									<span className="size-1.5 rounded-full bg-emerald-400" />
+									<span>Saved on this device</span>
+								</span>
+
+								<button
+									type="button"
+									onClick={() => setHideResumePreview(!hideResumePreview)}
+									className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+								>
+									<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
+								</button>
+							</div>
+						</div>
+
+						{/* Hero Header exactly matching screenshot */}
+						<div className="space-y-2 pt-1">
+							<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
+								YOUR STORIES
+							</span>
+							<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+								Your experience.<br />All the useful parts.
+							</h1>
+							<p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+								Work, projects, activities, and education. Open any entry, add something new, or return to your plan. Zoe asks about a few pieces of work in each entry, then drafts a statement for each.
 							</p>
 						</div>
 
-						{/* Quick summary of captured content */}
-						<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-6 space-y-4">
-							<div className="flex items-center justify-between">
-								<h3 className="text-base font-bold text-white">Resume content snapshot</h3>
-								<span className="text-xs text-emerald-400 font-semibold">{stories.length} stories ready</span>
-							</div>
+						{/* If user clicked to interview an entry directly, show the Interview Studio mode with back button */}
+						{storiesViewMode === "interview" && interviewActiveEntryId ? (
+							<div className="space-y-4">
+								<button
+									type="button"
+									onClick={() => setStoriesViewMode("overview")}
+									className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
+								>
+									<ArrowLeft className="size-3.5" />
+									<span>Back to all stories overview</span>
+								</button>
 
-							<div className="space-y-2 text-sm text-slate-300">
-								<div><strong>Target Role:</strong> {targetRole}</div>
-								<div><strong>Candidate:</strong> {fullName}</div>
+								{(() => {
+									const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+									if (!activeEntry) return null;
+									const focusedQ = getFocusedQuestionForExperience(activeEntry);
+
+									return (
+										<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#091524] p-6 sm:p-7 shadow-2xl space-y-5">
+											{/* Header Controls: Zoe pill, Hear again, Choose voice */}
+											<div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
+												<div className="flex items-center gap-3">
+													<span className="text-xs font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+														Zoe
+													</span>
+													<button
+														type="button"
+														onClick={() => {
+															if ("speechSynthesis" in window) {
+																window.speechSynthesis.cancel();
+																const utterance = new SpeechSynthesisUtterance(focusedQ.question);
+																utterance.rate = 1.0;
+																window.speechSynthesis.speak(utterance);
+															}
+														}}
+														className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+													>
+														<Volume2 className="size-3.5 text-emerald-400" />
+														<span>Hear again</span>
+													</button>
+												</div>
+
+												<div className="flex items-center gap-2">
+													<span className="text-xs text-slate-400 font-medium">Choose voice</span>
+													<span className="text-[10px] text-emerald-400 font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+														Kokoro AI
+													</span>
+												</div>
+											</div>
+
+											{/* About Tag */}
+											<div>
+												<span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+													About: {activeEntry.title}
+												</span>
+											</div>
+
+											{/* Targeted Question */}
+											<div className="space-y-1.5">
+												<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+													{focusedQ.question}
+												</h3>
+												<p className="text-xs text-slate-400">
+													You can describe it in your own words. Zoe will help with the wording.
+												</p>
+											</div>
+
+											{/* Voice recording button */}
+											<div className="flex items-center gap-3">
+												<button
+													type="button"
+													onClick={() => {
+														if (isSpeakingAnswer) {
+															setIsSpeakingAnswer(false);
+														} else {
+															const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+															if (!SpeechRec) {
+																toast.error("Speech recognition not supported in this browser.");
+																return;
+															}
+															try {
+																const recognition = new SpeechRec();
+																recognition.continuous = false;
+																recognition.interimResults = false;
+																recognition.lang = "en-US";
+																recognition.onstart = () => setIsSpeakingAnswer(true);
+																recognition.onresult = (evt: any) => {
+																	const transcript = evt.results[0][0].transcript;
+																	setExperienceInputText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+																	setIsSpeakingAnswer(false);
+																};
+																recognition.onerror = () => setIsSpeakingAnswer(false);
+																recognition.onend = () => setIsSpeakingAnswer(false);
+																recognition.start();
+															} catch (err) {
+																setIsSpeakingAnswer(false);
+															}
+														}
+													}}
+													className={cn(
+														"px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer",
+														isSpeakingAnswer
+															? "bg-rose-500/20 border-2 border-rose-500 text-rose-300 animate-pulse"
+															: "bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
+													)}
+												>
+													<Mic className="size-4 text-emerald-400" />
+													<span>{isSpeakingAnswer ? "Stop recording..." : "Speak your answer"}</span>
+												</button>
+												<span className="text-[11px] text-slate-500">
+													{isSpeakingAnswer ? "Listening... Speak naturally" : "Your voice, in your words. Review before sending."}
+												</span>
+											</div>
+
+											{/* Direct Answer Textarea */}
+											<div className="space-y-3">
+												<textarea
+													rows={4}
+													value={experienceInputText}
+													onChange={(e) => setExperienceInputText(e.target.value)}
+													placeholder="Your words go here. Speak or type..."
+													className="w-full rounded-2xl border border-slate-700 bg-[#060c14] p-4 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none transition-colors"
+												/>
+
+												<div className="flex items-center justify-between pt-1">
+													<button
+														type="button"
+														onClick={() => setStoriesViewMode("overview")}
+														className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+													>
+														Skip question
+													</button>
+
+													<button
+														type="button"
+														disabled={isSubmittingAnswer || !experienceInputText.trim()}
+														onClick={async () => {
+															await handleSaveExperienceAnswer(activeEntry.id, experienceInputText);
+															setStoriesViewMode("overview");
+														}}
+														className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+													>
+														<span>{isSubmittingAnswer ? "Crafting point..." : "Send answer"}</span>
+														<ArrowRight className="size-4" />
+													</button>
+												</div>
+											</div>
+										</div>
+									);
+								})()}
+							</div>
+						) : (
+							/* Overview Mode: Exactly matching screenshots 1, 2, and 3 */
+							<div className="space-y-7">
+								{/* Zoe / Your Next Section Card (Purple/Navy gradient callout box) */}
+								{showZoeSectionPrompt && (
+									<div className="rounded-2xl border border-indigo-900/60 bg-gradient-to-b from-[#131226] via-[#0f0e20] to-[#0a0917] p-6 sm:p-7 shadow-xl relative space-y-4">
+										<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-indigo-300/80">
+											<div className="flex items-center gap-2">
+												<span className="size-2 rounded-full bg-indigo-400 animate-pulse" />
+												<span>ZOE / YOUR NEXT SECTION</span>
+											</div>
+											<ExternalLink className="size-3.5 text-indigo-400/60" />
+										</div>
+
+										<div className="space-y-1.5">
+											<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+												{activeSectionPromptType === "projects" && "What about projects?"}
+												{activeSectionPromptType === "education" && "What about education?"}
+												{activeSectionPromptType === "volunteer" && "What about volunteering & activities?"}
+											</h3>
+											<p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+												{activeSectionPromptType === "projects" && "Have you built something through coursework, personal practice, freelance work, or volunteering that you would like to include?"}
+												{activeSectionPromptType === "education" && "Degrees, bootcamps, certifications, or coursework you'd like highlighted on your resume."}
+												{activeSectionPromptType === "volunteer" && "Community leadership, mentoring, clubs, or extracurricular initiatives."}
+											</p>
+										</div>
+
+										<div className="flex flex-wrap items-center gap-3 pt-2">
+											<button
+												type="button"
+												onClick={() => {
+													setIsAddingManual(true);
+													setNewManualCategory(activeSectionPromptType === "projects" ? "projects" : activeSectionPromptType === "education" ? "education" : "volunteer");
+												}}
+												className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+											>
+												<Plus className="size-4" />
+												<span>Add a {activeSectionPromptType === "projects" ? "project" : activeSectionPromptType === "education" ? "degree" : "activity"}</span>
+											</button>
+
+											<button
+												type="button"
+												onClick={() => {
+													if (activeSectionPromptType === "projects") {
+														setActiveSectionPromptType("education");
+													} else if (activeSectionPromptType === "education") {
+														setActiveSectionPromptType("volunteer");
+													} else {
+														setShowZoeSectionPrompt(false);
+													}
+												}}
+												className="px-4 py-2.5 rounded-xl border border-slate-800 bg-[#0b0a1a] hover:bg-[#121028] text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+											>
+												Nothing to add here
+											</button>
+
+											<button
+												type="button"
+												onClick={() => setShowZoeSectionPrompt(false)}
+												className="px-4 py-2.5 rounded-xl text-slate-400 hover:text-white font-medium text-xs transition-colors cursor-pointer"
+											>
+												Decide later
+											</button>
+										</div>
+									</div>
+								)}
+
+								{/* SECTION 1: Work & internships */}
+								<div className="space-y-3.5">
+									<div className="flex items-center justify-between pb-1">
+										<div className="flex items-center gap-2.5">
+											<h3 className="text-base sm:text-lg font-bold text-white">Work & internships</h3>
+											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+												{outlineEntries.filter((e) => e.category === "work").length}
+											</span>
+										</div>
+
+										<button
+										type="button"
+										onClick={() => {
+											setIsAddingManual(true);
+											setNewManualCategory("work");
+										}}
+										className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5" />
+										<span>Add</span>
+									</button>
+									</div>
+
+									{/* Work Entry Cards */}
+									<div className="space-y-4">
+										{outlineEntries.filter((e) => e.category === "work").map((entry) => {
+											const points = entry.points || [];
+											return (
+												<div
+													key={entry.id}
+													className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-5 shadow-lg relative"
+												>
+													<div className="flex items-start justify-between gap-4">
+														<div>
+															<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block mb-1">
+																WORK EXPERIENCE
+															</span>
+															<h4 className="text-lg font-bold text-white tracking-tight">
+																{entry.title}
+															</h4>
+															<p className="text-xs text-slate-400 mt-0.5">
+																{entry.organization || "NavGurukul"} · {entry.dates || "Jul 2023 – Present"}
+															</p>
+														</div>
+
+														<div className="flex items-center gap-2">
+															<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
+																Finished for now
+															</span>
+															<button
+																type="button"
+																onClick={() => {
+																	setInterviewActiveEntryId(entry.id);
+																	setStoriesViewMode("interview");
+																}}
+																className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+																title="Edit experience"
+															>
+																<Edit3 className="size-4" />
+															</button>
+														</div>
+													</div>
+
+													{/* Generated bullets with Edit annotations as seen in screenshot 2 */}
+													<div className="space-y-3.5 pt-1">
+														{points.length > 0 ? (
+															points.map((pt, pIdx) => (
+																<div key={pIdx} className="space-y-1">
+																	<p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+																		{pt}
+																	</p>
+																	<div className="flex items-center gap-2 text-[11px] text-slate-400">
+																		<button
+																							type="button"
+																							onClick={() => {
+																								setEditingPointKey(`${entry.id}_${pIdx}`);
+																								setEditingPointText(pt);
+																								setShowFinalSummaryModal(true);
+																			}}
+															className="text-emerald-400 hover:underline font-semibold cursor-pointer"
+														>
+															Edit
+														</button>
+														<span className="text-slate-500">·</span>
+														<span className="text-slate-400 italic">
+															{pIdx === 0 && "Feedback or usage once testing is done"}
+															{pIdx === 1 && "Whether accuracy issues were fixed or improved"}
+															{pIdx >= 2 && "Key technical contribution and outcome"}
+														</span>
+													</div>
+												</div>
+											))
+										) : (
+											<div className="space-y-1">
+												<p className="text-xs text-slate-400 italic">
+													{entry.description || "Talk with Zoe or write directly to draft resume points."}
+												</p>
+											</div>
+										)}
+									</div>
+
+									{/* Card Footer: Bullets count and actions */}
+									<div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+										<span className="text-[11px] font-mono text-slate-400">
+											BULLETS {points.length} of up to 5
+										</span>
+
+										<div className="flex items-center gap-2">
+											<button
+												type="button"
+												onClick={() => {
+													setInterviewActiveEntryId(entry.id);
+													setStoriesViewMode("interview");
+												}}
+												className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+											>
+												Reopen entry
+											</button>
+
+											<button
+												type="button"
+												onClick={() => {
+													setInterviewActiveEntryId(entry.id);
+													setStoriesViewMode("interview");
+												}}
+												className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-colors cursor-pointer"
+											>
+												<Mic className="size-3.5" />
+												<span>Add another story</span>
+											</button>
+
+											<button
+												type="button"
+												onClick={() => {
+													setShowFinalSummaryModal(true);
+												}}
+												className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+											>
+												Write directly
+											</button>
+										</div>
+									</div>
+								</div>
+							);
+						})}
+
+						{outlineEntries.filter((e) => e.category === "work").length === 0 && (
+							<div className="p-5 rounded-2xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
+								No work experiences added yet. Click "+ Add" above to add your employment.
+							</div>
+						)}
+					</div>
+				</div>
+
+				{/* SECTION 2: Projects */}
+				<div className="space-y-3.5">
+					<div className="flex items-center justify-between pb-1">
+						<div className="flex items-center gap-2.5">
+							<h3 className="text-base sm:text-lg font-bold text-white">Projects</h3>
+							<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+								{outlineEntries.filter((e) => e.category === "projects").length}
+							</span>
+						</div>
+
+						<button
+						type="button"
+						onClick={() => {
+							setIsAddingManual(true);
+							setNewManualCategory("projects");
+						}}
+						className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+					>
+						<Plus className="size-3.5" />
+						<span>Add</span>
+					</button>
+				</div>
+
+				{outlineEntries.filter((e) => e.category === "projects").length > 0 ? (
+					<div className="space-y-4">
+						{outlineEntries.filter((e) => e.category === "projects").map((entry) => {
+							const points = entry.points || [];
+							return (
+								<div
+									key={entry.id}
+									className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-4 shadow-lg"
+								>
+									<div className="flex items-start justify-between gap-4">
+										<div>
+											<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block mb-1">
+												PROJECT
+											</span>
+											<h4 className="text-lg font-bold text-white tracking-tight">
+												{entry.title}
+											</h4>
+											<p className="text-xs text-slate-400 mt-0.5">
+												{entry.organization || "Independent Project"} {entry.dates ? `· ${entry.dates}` : ""}
+											</p>
+										</div>
+
+										<div className="flex items-center gap-2">
+											<button
+										type="button"
+										onClick={() => {
+											setInterviewActiveEntryId(entry.id);
+											setStoriesViewMode("interview");
+										}}
+										className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+										title="Edit project"
+									>
+										<Edit3 className="size-4" />
+									</button>
+									</div>
+								</div>
+
+								<div className="space-y-2 pt-1">
+									{points.length > 0 ? (
+										points.map((pt, pIdx) => (
+											<p key={pIdx} className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+												{pt}
+											</p>
+										))
+									) : (
+										<p className="text-xs text-slate-400 italic">
+											{entry.description || "A class project, personal project, or something you built."}
+										</p>
+									)}
+								</div>
+
+								<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+									<span className="text-[11px] font-mono text-slate-400">
+										BULLETS {points.length} of up to 3
+									</span>
+									<button
+									type="button"
+									onClick={() => {
+										setInterviewActiveEntryId(entry.id);
+										setStoriesViewMode("interview");
+									}}
+									className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+									>
+										<Mic className="size-3.5" />
+										<span>Talk with Zoe</span>
+									</button>
+								</div>
+							</div>
+						);
+					})}
+				</div>
+			) : (
+				<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+					A class project, personal project, or something you built.
+				</div>
+			)}
+		</div>
+
+		{/* SECTION 3: Volunteering & activities */}
+		<div className="space-y-3.5">
+			<div className="flex items-center justify-between pb-1">
+				<div className="flex items-center gap-2.5">
+					<h3 className="text-base sm:text-lg font-bold text-white">Volunteering & activities</h3>
+					<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+						{outlineEntries.filter((e) => e.category === "volunteer").length}
+					</span>
+				</div>
+
+				<button
+					type="button"
+					onClick={() => {
+						setIsAddingManual(true);
+						setNewManualCategory("volunteer");
+					}}
+					className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+				>
+					<Plus className="size-3.5" />
+					<span>Add</span>
+				</button>
+			</div>
+
+			{outlineEntries.filter((e) => e.category === "volunteer").length > 0 ? (
+				<div className="space-y-4">
+					{outlineEntries.filter((e) => e.category === "volunteer").map((entry) => {
+						const points = entry.points || [];
+						return (
+							<div
+								key={entry.id}
+								className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
+							>
+								<div className="flex items-start justify-between gap-4">
 								<div>
-									<strong>Experiences:</strong>
-									<ul className="list-disc pl-5 mt-1 space-y-1 text-xs text-slate-400">
-										{stories.map((s) => (
-											<li key={s.id}>{s.companyOrProject}: {s.finalBullets[0]}</li>
-										))}
-									</ul>
+									<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
+										ACTIVITY
+									</span>
+									<h4 className="text-lg font-bold text-white tracking-tight">
+										{entry.title}
+									</h4>
+									<p className="text-xs text-slate-400 mt-0.5">
+										{entry.organization || "XL Bootcamp"} {entry.dates ? `· ${entry.dates}` : ""}
+									</p>
+								</div>
+
+								<div className="flex items-center gap-2">
+									<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
+										Ready to explore
+									</span>
+									<button
+									onClick={() => {
+										setInterviewActiveEntryId(entry.id);
+										setStoriesViewMode("interview");
+									}}
+									className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+									title="Edit activity"
+									>
+										<Edit3 className="size-4" />
+									</button>
 								</div>
 							</div>
 
-							<div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-slate-800">
+							<div className="pt-2">
+								<span className="text-[11px] font-mono text-slate-400">
+									BULLETS {points.length} of up to 3
+								</span>
+							</div>
+
+							<div className="pt-2 flex items-center gap-3">
 								<button
 									type="button"
-									onClick={handleHandoffToEditor}
-									className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-md transition-all cursor-pointer"
+									onClick={() => {
+										setInterviewActiveEntryId(entry.id);
+										setStoriesViewMode("interview");
+									}}
+									className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold cursor-pointer"
 								>
-									<span>Transfer into full Resume Editor</span>
+									<Mic className="size-3.5 text-emerald-400" />
+									<span>Talk with Zoe</span>
+								</button>
+
+								<button
+									type="button"
+									onClick={() => {
+										setShowFinalSummaryModal(true);
+									}}
+									className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold cursor-pointer"
+								>
+									Write directly
+								</button>
+							</div>
+						</div>
+					);
+				})}
+			</div>
+		) : (
+			<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+				Mentoring, volunteering, leadership, or community activities.
+			</div>
+		)}
+	</div>
+
+	{/* SECTION 4: Education */}
+	<div className="space-y-3.5">
+		<div className="flex items-center justify-between pb-1">
+			<div className="flex items-center gap-2.5">
+				<h3 className="text-base sm:text-lg font-bold text-white">Education</h3>
+				<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+					{outlineEntries.filter((e) => e.category === "education").length}
+				</span>
+			</div>
+
+			<button
+				type="button"
+				onClick={() => {
+					setIsAddingManual(true);
+					setNewManualCategory("education");
+				}}
+				className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+			>
+				<Plus className="size-3.5" />
+				<span>Add</span>
+			</button>
+		</div>
+
+		{outlineEntries.filter((e) => e.category === "education").length > 0 ? (
+			<div className="space-y-3">
+				{outlineEntries.filter((e) => e.category === "education").map((edu) => (
+					<div
+						key={edu.id}
+						className="flex items-center justify-between p-4 rounded-xl border border-slate-800 bg-[#070e19]"
+					>
+						<div className="space-y-0.5">
+							<div className="text-sm font-semibold text-white">{edu.title}</div>
+							<div className="text-xs text-slate-400">
+								{edu.organization || "Institution"} {edu.dates ? `· ${edu.dates}` : ""}
+							</div>
+						</div>
+						<button
+							type="button"
+							onClick={() => {
+								setOutlineEntries((prev) => prev.filter((e) => e.id !== edu.id));
+								toast.success("Education entry removed");
+							}}
+							className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+						>
+							<Trash2 className="size-4" />
+						</button>
+					</div>
+				))}
+			</div>
+		) : (
+			<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+				Qualifications, training, coursework, and learning achievements. Stories are optional.
+			</div>
+		)}
+	</div>
+
+	{/* Bottom Navigation Buttons matching screenshot 3 */}
+	<div className="flex items-center gap-4 pt-4 border-t border-slate-800/80">
+		<button
+			type="button"
+			onClick={() => setActiveTab("plan")}
+			className="text-xs text-slate-400 hover:text-white font-semibold transition-colors cursor-pointer"
+		>
+			View my plan
+		</button>
+
+		<button
+			type="button"
+			onClick={() => setActiveTab("details")}
+			className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors cursor-pointer"
+		>
+			<span>Continue to details</span>
+			<ArrowRight className="size-3.5" />
+		</button>
+	</div>
+</div>
+						)}
+					</div>
+				)}
+
+				{/* TAB 3: DETAILS EDIT (Matching exact layout from user screenshot) */}
+				{activeTab === "details" && (
+					<div className="space-y-6">
+						{/* Supporting Details Header */}
+						<div>
+							<div className="text-[11px] font-mono font-bold uppercase tracking-widest text-emerald-400 mb-1.5">
+								SUPPORTING DETAILS
+							</div>
+							<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
+								Make the draft yours.
+							</h1>
+							<p className="text-sm text-slate-400">
+								Add exact details and confirm what belongs in your resume.
+							</p>
+						</div>
+
+						{/* Sub-tab pills: Contact, Skills, Summary */}
+						<div className="flex items-center justify-between gap-2 pt-1">
+							<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => setDetailsSubTab("contact")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+									detailsSubTab === "contact"
+										? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+										: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+								)}
+							>
+								Contact
+							</button>
+							<button
+								type="button"
+								onClick={() => setDetailsSubTab("skills")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+									detailsSubTab === "skills"
+										? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+										: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+								)}
+							>
+								Skills
+							</button>
+							<button
+								type="button"
+								onClick={() => setDetailsSubTab("summary")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+									detailsSubTab === "summary"
+										? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+										: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+								)}
+							>
+								Summary
+							</button>
+							</div>
+
+							<button
+								type="button"
+								onClick={() => setShowTemplateModal(true)}
+								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+							>
+								<Palette className="size-3.5 text-emerald-400" />
+								<span>Change Template</span>
+							</button>
+						</div>
+
+						{/* Sub-tab 1: Contact & professional links card (Exact replica of screenshot) */}
+						{detailsSubTab === "contact" && (
+							<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
+								<div className="space-y-1">
+									<h2 className="text-base sm:text-lg font-bold text-white">
+										Contact & professional links
+									</h2>
+									<p className="text-xs text-slate-400">
+										Typing is best for names, addresses, and exact URLs.
+									</p>
+								</div>
+
+								{/* 2-column input fields */}
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+									{/* Full name */}
+									<div className="space-y-1.5">
+										<label className="block text-xs font-medium text-slate-300">
+											Full name
+										</label>
+										<input
+											type="text"
+											value={fullName}
+											onChange={(e) => setFullName(e.target.value)}
+											placeholder="Your name"
+											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+										/>
+									</div>
+
+									{/* Professional headline Optional */}
+									<div className="space-y-1.5">
+										<label className="block text-xs font-medium text-slate-300">
+											Professional headline <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+										</label>
+										<input
+											type="text"
+											value={targetRole}
+											onChange={(e) => setTargetRole(e.target.value)}
+											placeholder="Frontend Developer"
+											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+										/>
+									</div>
+
+									{/* Email */}
+									<div className="space-y-1.5">
+										<label className="block text-xs font-medium text-slate-300">
+											Email
+										</label>
+										<input
+											type="email"
+											value={contactEmail}
+											onChange={(e) => setContactEmail(e.target.value)}
+											placeholder="you@example.com"
+											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+										/>
+									</div>
+
+									{/* Phone Optional */}
+									<div className="space-y-1.5">
+										<label className="block text-xs font-medium text-slate-300">
+											Phone <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+										</label>
+										<input
+											type="tel"
+											value={contactPhone}
+											onChange={(e) => setContactPhone(e.target.value)}
+											placeholder="Your phone number"
+											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+										/>
+									</div>
+
+									{/* Location Optional */}
+									<div className="space-y-1.5">
+										<label className="block text-xs font-medium text-slate-300">
+											Location <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+										</label>
+										<input
+											type="text"
+											value={contactLocation}
+											onChange={(e) => setContactLocation(e.target.value)}
+											placeholder="City, country"
+											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+										/>
+									</div>
+
+									{/* Professional links Optional */}
+									<div className="space-y-1.5">
+										<label className="block text-xs font-medium text-slate-300">
+											Professional links <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+										</label>
+										<input
+											type="text"
+											value={contactLinks}
+											onChange={(e) => setContactLinks(e.target.value)}
+											placeholder="Portfolio, LinkedIn, GitHub"
+											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+										/>
+									</div>
+								</div>
+
+								{/* Primary Action Button (Light Lime/Emerald rounded pill button as in screenshot) */}
+								<div className="pt-2">
+									<button
+										type="button"
+										onClick={() => {
+											handleSaveProgress();
+											toast.success("Contact details saved!");
+										}}
+										className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
+									>
+										Save details
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Sub-tab 2: Skills */}
+						{detailsSubTab === "skills" && (
+							<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
+								<div className="space-y-1">
+									<h2 className="text-base sm:text-lg font-bold text-white">
+										Technical & Professional Skills
+									</h2>
+									<p className="text-xs text-slate-400">
+										Highlight the core technologies, tools, and methodologies you use.
+									</p>
+								</div>
+
+								{/* Skills Pills */}
+								<div className="flex flex-wrap gap-2 pt-1">
+									{skillsList.map((skill) => (
+										<span
+											key={skill}
+											className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-emerald-300 font-medium"
+										>
+											<span>{skill}</span>
+											<button
+												type="button"
+												onClick={() => setSkillsList((prev) => prev.filter((s) => s !== skill))}
+												className="text-slate-500 hover:text-rose-400 transition-colors p-0.5"
+												title={`Remove ${skill}`}
+											>
+												<X className="size-3" />
+											</button>
+										</span>
+									))}
+								</div>
+
+								{/* Add new skill inline input */}
+								<div className="flex items-center gap-3 pt-2 max-w-md">
+									<input
+										type="text"
+										value={newSkillInput}
+										onChange={(e) => setNewSkillInput(e.target.value)}
+										onKeyDown={(e) => {
+											if (e.key === "Enter" && newSkillInput.trim()) {
+												e.preventDefault();
+												if (!skillsList.includes(newSkillInput.trim())) {
+													setSkillsList((prev) => [...prev, newSkillInput.trim()]);
+												}
+												setNewSkillInput("");
+											}
+										}}
+										placeholder="Add a skill (e.g. Next.js, Redux, Docker)"
+										className="flex-1 rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+									/>
+									<button
+										type="button"
+										onClick={() => {
+											if (newSkillInput.trim()) {
+												if (!skillsList.includes(newSkillInput.trim())) {
+													setSkillsList((prev) => [...prev, newSkillInput.trim()]);
+												}
+												setNewSkillInput("");
+											}
+										}}
+										className="px-4 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer"
+									>
+										Add
+									</button>
+								</div>
+
+								{/* Save button */}
+								<div className="pt-2">
+									<button
+										type="button"
+										onClick={() => {
+											handleSaveProgress();
+											toast.success("Skills saved!");
+										}}
+										className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
+									>
+										Save details
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Sub-tab 3: Summary */}
+						{detailsSubTab === "summary" && (
+							<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
+								<div className="space-y-1">
+									<h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+										<Sparkles className="size-4 text-emerald-400" />
+										<span>Professional Summary</span>
+									</h2>
+									<p className="text-xs text-slate-400">
+										Zoe automatically generates this summary from your verified experiences. Edit it freely anytime.
+									</p>
+								</div>
+
+								<div className="space-y-3">
+									<textarea
+										rows={5}
+										value={professionalSummary}
+										onChange={(e) => setProfessionalSummary(e.target.value)}
+										placeholder="A brief 2–3 sentence overview highlighting your core strengths and domain experience..."
+										className="w-full rounded-xl border border-slate-800/90 bg-[#040810] p-4 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none leading-relaxed"
+									/>
+									<div className="flex items-center justify-between">
+										<button
+											type="button"
+											onClick={() => {
+												// Trigger re-generation
+												const generated = generateProfessionalSummary(outlineEntries, targetRole);
+												setProfessionalSummary(generated);
+												toast.success("Summary regenerated from experiences!");
+											}}
+											className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+										>
+											<Sparkles className="size-3.5" />
+											<span>Regenerate with Zoe</span>
+										</button>
+										<button
+											type="button"
+											onClick={() => {
+												handleSaveProgress();
+												toast.success("Professional summary saved!");
+											}}
+											className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
+										>
+											Save details
+										</button>
+									</div>
+								</div>
+							</div>
+						)}
+
+						{/* Education & Qualifications Section (Retained underneath for complete profile editing) */}
+						<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-5">
+							<div className="flex items-center justify-between">
+								<div>
+									<h3 className="text-base font-bold text-white flex items-center gap-2">
+										<GraduationCap className="size-4 text-emerald-400" />
+										<span>Education & Qualifications</span>
+									</h3>
+									<p className="text-xs text-slate-400 mt-0.5">
+										Add degrees, certifications, and academic background.
+									</p>
+								</div>
+								<span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+									{outlineEntries.filter((e) => e.category === "education").length} entries
+								</span>
+							</div>
+
+							{/* Existing Education List */}
+							<div className="space-y-2.5">
+								{outlineEntries.filter((e) => e.category === "education").length > 0 ? (
+									outlineEntries
+										.filter((e) => e.category === "education")
+										.map((edu) => (
+											<div
+												key={edu.id}
+												className="flex items-center justify-between p-3.5 rounded-xl border border-slate-800 bg-[#040810]"
+											>
+												<div className="space-y-0.5">
+													<div className="text-sm font-semibold text-white">{edu.title}</div>
+													<div className="text-xs text-slate-400">
+														{edu.organization || "Institution"} {edu.dates ? `· ${edu.dates}` : ""}
+													</div>
+												</div>
+												<button
+													type="button"
+													onClick={() => {
+														setOutlineEntries((prev) => prev.filter((e) => e.id !== edu.id));
+														toast.success("Education entry removed");
+													}}
+													className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+													title="Remove education"
+												>
+													<Trash2 className="size-4" />
+												</button>
+											</div>
+										))
+								) : (
+									<div className="p-4 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
+										No education entries added yet. Use the quick form below to add one.
+									</div>
+								)}
+							</div>
+
+							{/* Add Education Form */}
+							<div className="p-4 rounded-xl border border-slate-800/80 bg-[#040810] space-y-3">
+								<h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+									Add Degree or Qualification
+								</h4>
+								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<div>
+										<label className="block text-[11px] font-semibold text-slate-400 mb-1">
+											Degree / Certificate
+										</label>
+										<input
+											type="text"
+											value={eduDegree}
+											onChange={(e) => setEduDegree(e.target.value)}
+											placeholder="e.g. B.Tech Computer Science"
+											className="w-full rounded-lg border border-slate-800 bg-[#070e19] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-[11px] font-semibold text-slate-400 mb-1">
+											School / College
+										</label>
+										<input
+											type="text"
+											value={eduSchool}
+											onChange={(e) => setEduSchool(e.target.value)}
+											placeholder="e.g. University of Technology"
+											className="w-full rounded-lg border border-slate-800 bg-[#070e19] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-[11px] font-semibold text-slate-400 mb-1">
+											Dates / Year
+										</label>
+										<input
+											type="text"
+											value={eduDates}
+											onChange={(e) => setEduDates(e.target.value)}
+											placeholder="e.g. 2020 – 2024"
+											className="w-full rounded-lg border border-slate-800 bg-[#070e19] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+										/>
+									</div>
+								</div>
+								<div className="flex justify-end pt-1">
+									<button
+										type="button"
+										onClick={handleAddEducationEntry}
+										className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 text-xs font-bold transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5" />
+										<span>Add Education Entry</span>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* TAB 4: REVIEW & EXPORT */}
+				{activeTab === "export" && (
+					<div className="space-y-6">
+						<div>
+							<div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">
+								REVIEW & EXPORT
+							</div>
+							<h2 className="text-2xl font-bold text-white mb-1">Finalize and Download</h2>
+							<p className="text-sm text-slate-400">Review your full prioritized resume, choose styling, and export as PDF or JSON.</p>
+						</div>
+
+						{/* Full Resume Complete Review Card */}
+						<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-6 space-y-5">
+							<div className="flex items-center justify-between border-b border-slate-800 pb-4">
+								<div>
+									<h3 className="text-base font-bold text-white">Full Resume Overview</h3>
+									<p className="text-xs text-slate-400 mt-0.5">
+										Arranged in priority order based on strength and target role relevance.
+									</p>
+								</div>
+								<button
+									type="button"
+									onClick={() => setShowFinalSummaryModal(true)}
+									className="px-3.5 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-bold text-emerald-300 transition-colors cursor-pointer flex items-center gap-1.5"
+								>
+									<Edit3 className="size-3.5" />
+									<span>Edit All Bullet Points</span>
+								</button>
+							</div>
+
+							{/* Summary of Prioritized Experiences */}
+							<div className="space-y-4">
+								{outlineEntries.map((entry, idx) => (
+									<div key={entry.id} className="p-4 rounded-xl border border-slate-800/80 bg-[#070e1a] space-y-2">
+										<div className="flex items-center justify-between">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+													Priority #{idx + 1} · {entry.category}
+												</span>
+												<span className="text-sm font-bold text-white">{entry.title}</span>
+											</div>
+											<span className="text-xs text-slate-400">
+												{entry.organization ? `${entry.organization} · ` : ""}{entry.dates || "Recent"}
+											</span>
+										</div>
+
+										{entry.points && entry.points.length > 0 ? (
+											<ul className="space-y-1.5 pt-1 pl-1">
+												{entry.points.map((pt, pIdx) => (
+													<li key={pIdx} className="text-xs text-slate-300 flex items-start gap-2 leading-relaxed">
+														<span className="text-emerald-400 font-bold">•</span>
+														<span>{pt}</span>
+													</li>
+												))}
+											</ul>
+										) : (
+											<p className="text-xs text-slate-400 italic">
+												{entry.description || "No specific bullet points generated yet."}
+											</p>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+
+						{/* Template Choice */}
+						<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
+							<span className="text-xs font-bold text-slate-300">Choose Template</span>
+							<div className="flex flex-wrap gap-2">
+								{["Azurill", "Bronzor", "Chikorita", "Gengar"].map((tmpl) => (
+									<button
+										key={tmpl}
+										type="button"
+										onClick={() => handleSelectTemplate(tmpl)}
+										className={cn(
+											"px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border",
+											selectedTemplate === tmpl
+												? "bg-emerald-500 text-slate-950 border-emerald-500 font-bold"
+												: "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+										)}
+									>
+										{tmpl}
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Photo upload */}
+						<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
+							<span className="text-xs font-bold text-slate-300">Profile Photo</span>
+							<div className="flex items-center gap-4">
+								<input
+									type="file"
+									accept="image/*"
+									onChange={handlePhotoUpload}
+									className="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
+								/>
+							</div>
+						</div>
+
+						{/* Job-Specific Tailoring Banner / Option (Requirement 17) */}
+						<div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-r from-[#091b24] to-[#0d2830] p-6 space-y-4">
+							<div className="flex items-start justify-between">
+								<div className="space-y-1">
+									<div className="flex items-center gap-2">
+										<Target className="size-4 text-emerald-400" />
+										<span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+											JOB-SPECIFIC TAILORING
+										</span>
+									</div>
+									<h3 className="text-lg font-bold text-white">
+										Tailor this resume for a specific job opening
+									</h3>
+									<p className="text-xs text-slate-300 leading-relaxed max-w-xl">
+										Connect this completed resume to a specific job description. Zoe will match required skills, analyze keyword gaps, and shape a targeted version for the opportunity.
+									</p>
+								</div>
+								<span className="hidden sm:inline-flex text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+									Recommended Next
+								</span>
+							</div>
+
+							<div className="flex items-center gap-3 pt-1">
+								<button
+									type="button"
+									onClick={() => {
+										// Save current state and redirect to job match flow
+										if (createdResumeId) {
+											navigate({
+												to: "/dashboard/resumes/match" as any,
+												search: { resumeId: createdResumeId } as any,
+											});
+										} else {
+											handleSeeMyPlan();
+											navigate({ to: "/dashboard/resumes/match" as any });
+										}
+										toast.success("Opening Job Match & Tailoring!");
+									}}
+									className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+								>
+									<Sparkles className="size-4" />
+									<span>Tailor for a Specific Job</span>
 									<ArrowRight className="size-4" />
 								</button>
+							</div>
+						</div>
+
+						{/* Export Actions */}
+						<div className="p-5 rounded-2xl border border-emerald-500/30 bg-[#081820]/90 flex flex-wrap items-center justify-between gap-4">
+							<div className="space-y-0.5">
+								<h4 className="text-sm font-bold text-white">Download & Share</h4>
+								<p className="text-xs text-slate-400">Export high-resolution PDF print or raw JSON data.</p>
+							</div>
+
+							<div className="flex items-center gap-3">
+								<button
+									type="button"
+									onClick={() => {
+										const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(outlineEntries, null, 2));
+										const downloadAnchor = document.createElement("a");
+										downloadAnchor.setAttribute("href", dataStr);
+										downloadAnchor.setAttribute("download", `${fullName || "resume"}_data.json`);
+										document.body.appendChild(downloadAnchor);
+										downloadAnchor.click();
+										downloadAnchor.remove();
+										toast.success("Resume JSON exported!");
+									}}
+									className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-all cursor-pointer"
+								>
+									<FileText className="size-4 text-emerald-400" />
+									<span>Export JSON</span>
+								</button>
+
 								<button
 									type="button"
 									onClick={() => window.print()}
-									className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold text-sm transition-colors cursor-pointer"
+									className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
 								>
-									<span>PDF Export</span>
-									<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-										SIMULATED
-									</span>
+									<Download className="size-4" />
+									<span>Download / Print PDF</span>
 								</button>
 							</div>
 						</div>
@@ -1054,105 +4326,1237 @@ export function GuidedStoryRoute() {
 				)}
 			</main>
 
-			{/* Right Column: Live Resume Preview (Always synchronized) */}
-			<aside className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l border-slate-800/80 bg-[#060b13] p-6 shrink-0 flex flex-col justify-between">
-				<div className="space-y-6">
-					<div className="flex items-center justify-between">
-						<span className="text-sm font-bold text-white">Your resume</span>
-						<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30">
-							DEMO PREVIEW
-						</span>
-					</div>
+			{/* Right Column: Live Resume Document Preview (matches screenshot) */}
+			{!hideResumePreview && (
+				<aside className="w-full lg:w-[460px] xl:w-[500px] border-t lg:border-t-0 lg:border-l border-slate-900 bg-[#070d14] p-6 shrink-0 flex flex-col justify-between overflow-y-auto relative">
+					<div className="space-y-4 w-full">
+						{/* Header row in screenshot: THE OUTPUT & Live draft badge */}
+						<div className="flex items-center justify-between">
+							<div>
+								<span className="text-[10px] font-mono tracking-widest uppercase text-slate-500 font-bold block">
+									THE OUTPUT
+								</span>
+								<h3 className="text-base font-bold text-white mt-0.5">Your resume</h3>
+							</div>
 
-					{/* Live Rendered Document Card */}
-					<div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl min-h-[380px] text-xs space-y-4">
-						<div className="border-b border-slate-200 pb-3">
-							<h3 className="text-xl font-bold font-serif text-slate-950">{fullName || "Your Name"}</h3>
-							<p className="text-emerald-700 font-semibold text-[11px] mt-0.5">{targetRole || "Target Role"}</p>
-							<p className="text-slate-500 text-[11px]">Contact details optional</p>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={() => setShowTemplateModal(true)}
+									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+									title="Choose template"
+								>
+									<Palette className="size-3 text-emerald-400" />
+									<span>{selectedTemplate}</span>
+								</button>
+
+								<span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-emerald-500/30">
+									Live draft
+								</span>
+							</div>
 						</div>
 
-						{/* Experience Section */}
-						<div className="space-y-2">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								EXPERIENCE
-							</div>
-							{stories.map((story) => (
-								<div key={story.id} className="space-y-1">
-									<div className="font-semibold text-slate-900">{story.companyOrProject}</div>
-									{story.finalBullets.map((bullet, idx) => (
-										<p key={idx} className="text-[11px] text-slate-700 leading-relaxed">
-											• {bullet}
-										</p>
-									))}
-								</div>
-							))}
+						{/* Document Sheet Canvas with Dynamic Template Styles (Azurill, Bronzor, Chikorita, Gengar, Lapras, Onyx, Pikachu, Leafish, etc.) */}
+						{(() => {
+							const tmplKey = (selectedTemplate || "azurill").toLowerCase();
+							const isLeftSidebar = ["azurill", "ditgar", "ditto"].includes(tmplKey);
+							const isRightSidebar = ["chikorita", "leafish", "pikachu"].includes(tmplKey);
+							const isBannerHeader = ["lapras", "glalie"].includes(tmplKey);
+							const isHighContrast = ["gengar", "kakuna"].includes(tmplKey);
+							const isMinimalist = ["bronzor", "onyx", "rhyhorn"].includes(tmplKey);
 
-							{/* Progressive Interim Draft Preview (Not approved) */}
-							{(activeContribution.trim() || editedBullet.trim()) && currentStep !== "success" && (
-								<div className="space-y-1 pt-1 border-t border-dashed border-amber-200">
-									<div className="flex items-center justify-between">
-										<span className="font-semibold text-slate-800">{activeProjectName || "In-Progress Story"}</span>
-										<span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
-											Draft — not approved
+							// Template Accent Palette Configuration
+							const palette = (() => {
+								switch (tmplKey) {
+									case "azurill":
+										return {
+											borderTop: "border-t-[6px] border-t-blue-600",
+											primaryText: "text-blue-600",
+											primaryBg: "bg-blue-600",
+											badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
+											sidebarBg: "bg-blue-50/50",
+											sidebarBorder: "border-r border-blue-100",
+											headerFont: "font-serif",
+											sectionHeader: "text-blue-700 tracking-wider font-bold",
+											bulletDot: "text-blue-500",
+										};
+									case "bronzor":
+										return {
+											borderTop: "border-t-[6px] border-t-slate-700",
+											primaryText: "text-slate-800",
+											primaryBg: "bg-slate-700",
+											badgeBg: "bg-slate-100 text-slate-800 border-slate-300",
+											sidebarBg: "bg-slate-50/60",
+											sidebarBorder: "border-slate-200",
+											headerFont: "font-serif",
+											sectionHeader: "text-slate-800 tracking-wider font-bold",
+											bulletDot: "text-slate-600",
+										};
+									case "chikorita":
+										return {
+											borderTop: "border-t-[6px] border-t-emerald-600",
+											primaryText: "text-emerald-700",
+											primaryBg: "bg-emerald-600",
+											badgeBg: "bg-emerald-50 text-emerald-800 border-emerald-200",
+											sidebarBg: "bg-emerald-50/40",
+											sidebarBorder: "border-l border-emerald-100",
+											headerFont: "font-sans",
+											sectionHeader: "text-emerald-700 tracking-wider font-bold",
+											bulletDot: "text-emerald-600",
+										};
+									case "gengar":
+										return {
+											borderTop: "border-t-[6px] border-t-purple-700",
+											primaryText: "text-purple-700",
+											primaryBg: "bg-purple-700",
+											badgeBg: "bg-purple-50 text-purple-800 border-purple-200",
+											sidebarBg: "bg-purple-50/50",
+											sidebarBorder: "border-r border-purple-200",
+											headerFont: "font-mono",
+											sectionHeader: "text-purple-800 tracking-widest font-black",
+											bulletDot: "text-purple-600",
+										};
+									case "lapras":
+										return {
+											borderTop: "border-t-[6px] border-t-indigo-800",
+											primaryText: "text-indigo-800",
+											primaryBg: "bg-indigo-900",
+											badgeBg: "bg-indigo-50 text-indigo-800 border-indigo-200",
+											sidebarBg: "bg-indigo-50/30",
+											sidebarBorder: "border-indigo-100",
+											headerFont: "font-serif",
+											sectionHeader: "text-indigo-900 tracking-widest font-bold",
+											bulletDot: "text-indigo-700",
+										};
+									case "onyx":
+										return {
+											borderTop: "border-t-[6px] border-t-rose-600",
+											primaryText: "text-rose-700",
+											primaryBg: "bg-rose-600",
+											badgeBg: "bg-rose-50 text-rose-800 border-rose-200",
+											sidebarBg: "bg-stone-50",
+											sidebarBorder: "border-stone-200",
+											headerFont: "font-serif",
+											sectionHeader: "text-rose-700 tracking-wider font-bold",
+											bulletDot: "text-rose-600",
+										};
+									case "pikachu":
+										return {
+											borderTop: "border-t-[6px] border-t-amber-500",
+											primaryText: "text-amber-700",
+											primaryBg: "bg-amber-500",
+											badgeBg: "bg-amber-50 text-amber-800 border-amber-200",
+											sidebarBg: "bg-amber-50/40",
+											sidebarBorder: "border-l border-amber-200",
+											headerFont: "font-sans",
+											sectionHeader: "text-amber-700 tracking-wider font-bold",
+											bulletDot: "text-amber-500",
+										};
+									case "leafish":
+										return {
+											borderTop: "border-t-[6px] border-t-lime-600",
+											primaryText: "text-lime-700",
+											primaryBg: "bg-lime-600",
+											badgeBg: "bg-lime-50 text-lime-800 border-lime-200",
+											sidebarBg: "bg-lime-50/30",
+											sidebarBorder: "border-l border-lime-200",
+											headerFont: "font-serif",
+											sectionHeader: "text-lime-700 tracking-wider font-bold",
+											bulletDot: "text-lime-600",
+										};
+									case "ditgar":
+										return {
+											borderTop: "border-t-[6px] border-t-sky-600",
+											primaryText: "text-sky-700",
+											primaryBg: "bg-sky-600",
+											badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+											sidebarBg: "bg-sky-50/50",
+											sidebarBorder: "border-r border-sky-200",
+											headerFont: "font-sans",
+											sectionHeader: "text-sky-700 tracking-wider font-bold",
+											bulletDot: "text-sky-500",
+										};
+									case "ditto":
+										return {
+											borderTop: "border-t-[6px] border-t-pink-600",
+											primaryText: "text-pink-700",
+											primaryBg: "bg-pink-600",
+											badgeBg: "bg-pink-50 text-pink-800 border-pink-200",
+											sidebarBg: "bg-pink-50/40",
+											sidebarBorder: "border-r border-pink-200",
+											headerFont: "font-serif",
+											sectionHeader: "text-pink-700 tracking-wider font-bold",
+											bulletDot: "text-pink-500",
+										};
+									case "glalie":
+										return {
+											borderTop: "border-t-[6px] border-t-slate-600",
+											primaryText: "text-slate-700",
+											primaryBg: "bg-slate-800",
+											badgeBg: "bg-slate-100 text-slate-800 border-slate-300",
+											sidebarBg: "bg-slate-50",
+											sidebarBorder: "border-slate-200",
+											headerFont: "font-sans",
+											sectionHeader: "text-slate-700 tracking-wider font-bold",
+											bulletDot: "text-slate-500",
+										};
+									case "kakuna":
+										return {
+											borderTop: "border-t-[6px] border-t-yellow-600",
+											primaryText: "text-yellow-700",
+											primaryBg: "bg-yellow-600",
+											badgeBg: "bg-yellow-50 text-yellow-800 border-yellow-200",
+											sidebarBg: "bg-yellow-50/40",
+											sidebarBorder: "border-yellow-200",
+											headerFont: "font-sans",
+											sectionHeader: "text-yellow-700 tracking-wider font-bold",
+											bulletDot: "text-yellow-600",
+										};
+									default:
+										return {
+											borderTop: "border-t-[6px] border-t-blue-500",
+											primaryText: "text-blue-600",
+											primaryBg: "bg-blue-600",
+											badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
+											sidebarBg: "bg-slate-50",
+											sidebarBorder: "border-slate-200",
+											headerFont: "font-sans",
+											sectionHeader: "text-slate-700 tracking-wider font-bold",
+											bulletDot: "text-blue-500",
+										};
+								}
+							})();
+
+							// Shared Sub-renderers
+							const renderExperienceBlock = () => (
+								<div className="space-y-2.5">
+									<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+										<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+											EXPERIENCE
 										</span>
 									</div>
-									<p className="text-[11px] text-slate-500 italic leading-relaxed">
-										• {editedBullet.trim() || activeContribution.trim()}
-									</p>
+									{outlineEntries.filter((e) => e.category === "work").length > 0 ? (
+										outlineEntries
+											.filter((e) => e.category === "work")
+											.map((w) => (
+												<div key={w.id} className="space-y-1">
+													<div className="flex items-baseline justify-between gap-2">
+														<div className="text-xs font-bold text-slate-950">
+															{w.title}
+														</div>
+														<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+															{w.dates || "Jul 2023 – Present"}
+														</div>
+													</div>
+													<div className={cn("text-[11px] font-semibold", palette.primaryText)}>
+														{w.organization || "Company"}
+													</div>
+													{w.points && w.points.length > 0 ? (
+														<ul className="space-y-1 pt-0.5">
+															{w.points.map((pt, pIdx) => (
+																<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+																	<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
+																	<span>{pt}</span>
+																</li>
+															))}
+														</ul>
+													) : (
+														<p className="text-[11px] text-slate-400 italic">
+															Your contribution will appear here
+														</p>
+													)}
+												</div>
+											))
+									) : (
+										<div className="space-y-1">
+											<div className="text-xs font-bold text-slate-950">
+												Sr. Frontend Developer
+											</div>
+											<div className="text-[10px] text-slate-500 font-medium">
+												NavGurukul · Jul 2023 – Present
+											</div>
+											<p className="text-[11px] text-slate-400 italic">
+												Your contribution will appear here
+											</p>
+										</div>
+									)}
 								</div>
-							)}
+							);
+
+							const renderProjectsBlock = () => (
+								<div className="space-y-2.5">
+									<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+										<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+											PROJECTS & ACTIVITIES
+										</span>
+									</div>
+									{outlineEntries.filter((e) => e.category === "projects" || e.category === "volunteer").length > 0 ? (
+										outlineEntries
+											.filter((e) => e.category === "projects" || e.category === "volunteer")
+											.map((p) => (
+												<div key={p.id} className="space-y-1">
+													<div className="flex items-baseline justify-between gap-2">
+														<div className="text-xs font-bold text-slate-950">
+															{p.title}
+														</div>
+														{p.dates && (
+															<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+																{p.dates}
+															</div>
+														)}
+													</div>
+													<div className="text-[10px] text-slate-500 font-medium">
+														{p.organization || "Independent Project"}
+													</div>
+													{p.points && p.points.length > 0 ? (
+														<ul className="space-y-1 pt-0.5">
+															{p.points.map((pt, pIdx) => (
+																<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+																	<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
+																	<span>{pt}</span>
+																</li>
+															))}
+														</ul>
+													) : (
+														<p className="text-[11px] text-slate-400 italic">
+															Your contribution will appear here
+														</p>
+													)}
+												</div>
+											))
+									) : (
+										<div className="space-y-1">
+											<div className="text-xs font-bold text-slate-950">
+												Mentor
+											</div>
+											<div className="text-[10px] text-slate-500 font-medium">
+												XL Bootcamp
+											</div>
+											<p className="text-[11px] text-slate-400 italic">
+												Your contribution will appear here
+											</p>
+										</div>
+									)}
+								</div>
+							);
+
+							const renderEducationBlock = () => {
+								const edus = outlineEntries.filter((e) => e.category === "education");
+								if (edus.length === 0) return null;
+								return (
+									<div className="space-y-2">
+										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+												EDUCATION
+											</span>
+										</div>
+										<div className="space-y-2">
+											{edus.map((edu) => (
+												<div key={edu.id} className="space-y-0.5">
+													<div className="text-xs font-bold text-slate-950">
+														{edu.title}
+													</div>
+													<div className="text-[10px] text-slate-500 font-medium">
+														{edu.organization || "University"} {edu.dates ? `· ${edu.dates}` : ""}
+													</div>
+												</div>
+											))}
+										</div>
+									</div>
+								);
+							};
+
+							const renderSkillsBlock = () => {
+								if (!skillsList || skillsList.length === 0) return null;
+								return (
+									<div className="space-y-2">
+										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+												SKILLS
+											</span>
+										</div>
+										<div className="flex flex-wrap gap-1.5 pt-0.5">
+											{skillsList.map((skill, sIdx) => (
+												<span
+													key={sIdx}
+													className={cn("px-2 py-0.5 rounded text-[10px] font-medium border", palette.badgeBg)}
+												>
+													{skill}
+												</span>
+											))}
+										</div>
+									</div>
+								);
+							};
+
+							const renderContactItems = () => {
+								if (!contactEmail && !contactPhone && !contactLocation && !contactLinks) {
+									return <p className="text-[11px] text-slate-400 italic">Contact details will go here</p>;
+								}
+								return (
+									<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-600 font-medium pt-0.5">
+										{contactEmail && <span>{contactEmail}</span>}
+										{contactPhone && (
+											<>
+												<span className="text-slate-300">·</span>
+												<span>{contactPhone}</span>
+											</>
+										)}
+										{contactLocation && (
+											<>
+												<span className="text-slate-300">·</span>
+												<span>{contactLocation}</span>
+											</>
+										)}
+										{contactLinks && (
+											<>
+												<span className="text-slate-300">·</span>
+												<span>{contactLinks}</span>
+											</>
+										)}
+									</div>
+								);
+							};
+
+							return (
+								<div
+									className={cn(
+										"rounded-xl border border-slate-300 bg-[#faf8f5] text-slate-900 shadow-2xl min-h-[560px] text-xs w-full relative transition-all overflow-hidden",
+										palette.borderTop
+									)}
+								>
+									{/* Next button circular floating pill (as seen in screenshot right edge) */}
+									<button
+										type="button"
+										onClick={() => setActiveTab("stories")}
+										className="absolute -right-3.5 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white border border-slate-300 shadow-xl flex items-center justify-center text-slate-900 hover:scale-105 transition-transform cursor-pointer z-10"
+										title="Next: Your stories"
+									>
+										<ArrowRight className="size-4" />
+									</button>
+
+									{/* 1. BANNER HEADER LAYOUT (Lapras / Glalie) */}
+									{isBannerHeader && (
+										<div className="space-y-4">
+											<div className={cn("p-6 text-white", palette.primaryBg)}>
+												<div className="flex items-start justify-between gap-4">
+													<div className="space-y-1">
+														<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", palette.headerFont)}>
+															{fullName || "Your name"}
+														</h2>
+														<p className="text-xs font-semibold text-white/90">
+															{targetRole || "Frontend Developer"}
+														</p>
+														<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-white/80 pt-1">
+															{contactEmail && <span>{contactEmail}</span>}
+															{contactPhone && (
+																<>
+																	<span className="text-white/40">·</span>
+																	<span>{contactPhone}</span>
+																</>
+															)}
+															{contactLocation && (
+																<>
+																	<span className="text-white/40">·</span>
+																	<span>{contactLocation}</span>
+																</>
+															)}
+															{contactLinks && (
+																<>
+																	<span className="text-white/40">·</span>
+																	<span>{contactLinks}</span>
+																</>
+															)}
+														</div>
+													</div>
+													{showPicture && pictureUrl && (
+														<img
+															src={pictureUrl}
+															alt="Profile"
+															className={cn(
+																"size-14 object-cover border-2 border-white/40 shrink-0",
+																pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+															)}
+														/>
+													)}
+												</div>
+											</div>
+											<div className="p-6 pt-0 space-y-4">
+												{professionalSummary && (
+													<p className="text-[11px] text-slate-700 leading-relaxed italic border-l-2 border-slate-300 pl-3">
+														"{professionalSummary}"
+													</p>
+												)}
+												{renderExperienceBlock()}
+												{renderProjectsBlock()}
+												{renderEducationBlock()}
+												{renderSkillsBlock()}
+											</div>
+										</div>
+									)}
+
+									{/* 2. TWO-COLUMN LEFT SIDEBAR LAYOUT (Azurill / Ditgar / Ditto) */}
+									{isLeftSidebar && (
+										<div className="flex flex-col sm:flex-row min-h-[560px]">
+											{/* Left Sidebar */}
+											<div className={cn("sm:w-[36%] p-5 space-y-4", palette.sidebarBg, palette.sidebarBorder)}>
+												{showPicture && pictureUrl && (
+													<div className="flex justify-center pb-1">
+														<img
+															src={pictureUrl}
+															alt="Profile"
+															className={cn(
+																"size-16 object-cover border-2 border-slate-300 shadow-sm",
+																pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+															)}
+														/>
+													</div>
+												)}
+												<div className="space-y-1">
+													<span className={cn("text-[10px] font-mono tracking-widest uppercase block", palette.sectionHeader)}>
+														CONTACT
+													</span>
+													<div className="space-y-1 text-[11px] text-slate-700">
+														{contactEmail && <div className="break-all">{contactEmail}</div>}
+														{contactPhone && <div>{contactPhone}</div>}
+														{contactLocation && <div>{contactLocation}</div>}
+														{contactLinks && <div className="break-all">{contactLinks}</div>}
+														{!contactEmail && !contactPhone && !contactLocation && !contactLinks && (
+															<p className="text-[11px] text-slate-400 italic">No contact details yet</p>
+														)}
+													</div>
+												</div>
+												{renderSkillsBlock()}
+												{renderEducationBlock()}
+											</div>
+
+											{/* Main Body */}
+											<div className="sm:w-[64%] p-5 sm:p-6 space-y-4">
+												<div className="space-y-1 pb-2 border-b border-slate-200">
+													<h2 className={cn("text-2xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+														{fullName || "Your name"}
+													</h2>
+													<p className={cn("text-xs font-semibold", palette.primaryText)}>
+														{targetRole || "Frontend Developer"}
+													</p>
+													{professionalSummary && (
+														<p className="text-[11px] text-slate-700 pt-1.5 leading-relaxed">
+															{professionalSummary}
+														</p>
+													)}
+												</div>
+												{renderExperienceBlock()}
+												{renderProjectsBlock()}
+											</div>
+										</div>
+									)}
+
+									{/* 3. TWO-COLUMN RIGHT SIDEBAR LAYOUT (Chikorita / Leafish / Pikachu) */}
+									{isRightSidebar && (
+										<div className="p-5 sm:p-6 space-y-4">
+											<div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-200">
+												<div className="space-y-1">
+													<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+														{fullName || "Your name"}
+													</h2>
+													<p className={cn("text-xs font-bold", palette.primaryText)}>
+														{targetRole || "Frontend Developer"}
+													</p>
+													{renderContactItems()}
+												</div>
+												{showPicture && pictureUrl && (
+													<img
+														src={pictureUrl}
+														alt="Profile"
+														className={cn(
+															"size-14 object-cover border-2 border-slate-300 shadow-sm shrink-0",
+															pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+														)}
+													/>
+												)}
+											</div>
+
+											{professionalSummary && (
+												<p className="text-[11px] text-slate-700 leading-relaxed italic">
+													{professionalSummary}
+												</p>
+											)}
+
+											<div className="grid grid-cols-1 sm:grid-cols-12 gap-5">
+												<div className="sm:col-span-8 space-y-4">
+													{renderExperienceBlock()}
+													{renderProjectsBlock()}
+												</div>
+												<div className={cn("sm:col-span-4 p-4 rounded-lg space-y-4", palette.sidebarBg, palette.sidebarBorder)}>
+													{renderSkillsBlock()}
+													{renderEducationBlock()}
+												</div>
+											</div>
+										</div>
+									)}
+
+									{/* 4. CLASSIC SINGLE COLUMN MINIMALIST (Bronzor / Onyx / Gengar / Rhyhorn / Kakuna) */}
+									{(isMinimalist || isHighContrast) && (
+										<div className="p-6 sm:p-7 space-y-5">
+											{/* Header */}
+											<div className={cn("space-y-1.5 pb-3 border-b-2", palette.sidebarBorder || "border-slate-300")}>
+												<div className="flex items-start justify-between gap-4">
+													<div className="space-y-1">
+														<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+															{fullName || "Your name"}
+														</h2>
+														<p className={cn("text-xs font-bold", palette.primaryText)}>
+															{targetRole || "Frontend Developer"}
+														</p>
+													</div>
+													{showPicture && pictureUrl && (
+														<img
+															src={pictureUrl}
+															alt="Profile"
+															className={cn(
+																"size-14 object-cover border border-slate-300 shadow-sm shrink-0",
+																pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+															)}
+														/>
+													)}
+												</div>
+												{renderContactItems()}
+												{professionalSummary && (
+													<p className="text-[11px] text-slate-700 pt-1 leading-relaxed border-t border-slate-100">
+														{professionalSummary}
+													</p>
+												)}
+											</div>
+
+											{renderExperienceBlock()}
+											{renderProjectsBlock()}
+											{renderSkillsBlock()}
+											{renderEducationBlock()}
+										</div>
+									)}
+								</div>
+							);
+						})()}
+
+						{/* Footer under live draft: Draft wording appears as you talk & Read full resume */}
+						<div className="space-y-2 pt-1 text-xs">
+							<div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+								<span className="size-1.5 rounded-full bg-emerald-400" />
+								<span>Draft wording appears as you talk. You choose what makes it into your resume.</span>
+							</div>
+
+							<button
+								type="button"
+								onClick={() => setActiveTab("export")}
+								className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs font-semibold"
+							>
+								<span>👁 Read full resume</span>
+							</button>
 						</div>
 
-						{/* Skills Section */}
-						<div className="space-y-1">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								SKILLS
-							</div>
-							<p className="text-[11px] text-slate-600">
-								React, TypeScript, TailwindCSS, Responsive Design
-							</p>
-						</div>
+						{/* WHAT ZOE IS EXPLORING Section directly below the live resume preview */}
+						{(() => {
+							const activeEntry = outlineEntries.find((e) => e.id === (selectedExperienceId || outlineEntries[0]?.id)) || outlineEntries[0];
+							const activeIdx = activeEntry ? outlineEntries.findIndex((e) => e.id === activeEntry.id) : 0;
+							const totalBullets = outlineEntries.reduce((sum, e) => sum + (e.points?.length || 0), 0);
+							const currentQIndex = activeEntry ? (activeExplorationQuestionIndex[activeEntry.id] || 0) : 0;
+
+							return (
+								<div className="pt-4 border-t border-slate-800/90 space-y-3.5">
+									<div className="flex items-center justify-between">
+										<div>
+											<h4 className="text-sm font-bold text-white tracking-tight">
+												What Zoe is exploring
+											</h4>
+											<p className="text-[11px] text-slate-400">
+												{activeEntry ? `${activeEntry.title} · ${Math.max(1, activeIdx + 1)} of up to 5 bullets` : "Role overview"}
+											</p>
+										</div>
+										<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
+											{Math.max(1, activeIdx + 1)}/{Math.max(1, outlineEntries.length)}
+										</span>
+									</div>
+
+									{/* List of identified experiences with statuses */}
+									<div className="rounded-xl border border-slate-800/80 bg-[#09121e] divide-y divide-slate-800/80 overflow-hidden text-xs">
+										{/* Role overview item */}
+										<div className="p-3 space-y-0.5 bg-slate-900/40">
+											<div className="text-xs font-semibold text-slate-200">Role overview</div>
+											<div className="text-[11px] text-slate-400">
+												{targetRole || "Frontend Developer"}{fullName ? ` · ${fullName}` : ""}
+											</div>
+										</div>
+
+										{/* Each experience row */}
+										{outlineEntries.map((entry) => {
+											const isCurrent = activeEntry?.id === entry.id;
+											const hasPoints = entry.points && entry.points.length > 0;
+
+											return (
+												<div
+													key={entry.id}
+													onClick={() => {
+														setSelectedExperienceId(entry.id);
+														setActiveTab("stories");
+													}}
+													className={cn(
+														"p-3 flex items-center justify-between cursor-pointer transition-colors",
+														isCurrent ? "bg-emerald-500/10" : "hover:bg-slate-800/40"
+													)}
+												>
+													<div className="space-y-0.5">
+														<div className={cn("text-xs font-semibold", isCurrent ? "text-emerald-300 font-bold" : "text-white")}>
+															{entry.title}
+														</div>
+														<div className="text-[11px] text-slate-400">
+															{isCurrent ? "Asking now" : hasPoints ? `${entry.points?.length} bullet(s) drafted` : "In progress"}
+														</div>
+													</div>
+
+													<div className="flex items-center gap-1.5">
+														{isCurrent ? (
+															<span className="flex items-center gap-1">
+																<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+																<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse delay-75" />
+																<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse delay-150" />
+															</span>
+														) : hasPoints ? (
+															<CheckCircle className="size-3.5 text-emerald-400" />
+														) : (
+															<span className="text-slate-600 font-mono">···</span>
+														)}
+													</div>
+												</div>
+											);
+										})}
+									</div>
+
+									{/* Current Topic Breakdown & Checklist matching screenshot */}
+									{activeEntry && (
+										<div className="rounded-xl border border-slate-800/90 bg-[#060c14] p-3.5 space-y-2.5 text-xs">
+											<div className="flex items-center justify-between border-b border-slate-800 pb-2">
+												<div>
+													<span className="text-xs font-bold text-white block">
+														{activeEntry.title}
+													</span>
+													<span className="text-[10px] text-slate-400">
+														Ready to draft · Zoe will ask about the result once
+													</span>
+												</div>
+											</div>
+
+											{/* Checklist items */}
+											<div className="space-y-2 pt-1 text-[11px]">
+												<div className="flex items-start gap-2 text-slate-200">
+													<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
+													<div>
+														<span className="font-semibold text-white">The work & challenge</span>
+														<span className="text-[10px] text-emerald-400/90 font-mono ml-2">REQUIRED</span>
+														<p className="text-slate-400 text-[10px] mt-0.5">
+															{activeEntry.description || "Identified from your story"}
+														</p>
+													</div>
+												</div>
+
+												<div className="flex items-start gap-2 text-slate-200">
+													<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
+													<div>
+														<span className="font-semibold text-white">Your contribution</span>
+														<span className="text-[10px] text-emerald-400/90 font-mono ml-2">REQUIRED</span>
+														<p className="text-slate-400 text-[10px] mt-0.5">
+															{activeEntry.points && activeEntry.points.length > 0
+																? activeEntry.points[0]
+																: "Specific modules, preview rendering, and UI engineered"}
+														</p>
+													</div>
+												</div>
+
+												<div className={cn(
+													"p-2 rounded-lg border flex items-start gap-2",
+													currentQIndex >= 1
+														? "border-emerald-500/30 bg-emerald-950/20 text-slate-200"
+														: "border-emerald-500/40 bg-emerald-950/30 text-white"
+												)}>
+													<span className="size-2 rounded-full bg-emerald-400 mt-1 shrink-0" />
+													<div>
+														<div className="flex items-center gap-2">
+															<span className="font-bold text-white">Results & evidence</span>
+															<span className="text-[9px] font-mono text-emerald-300 px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-500/30">
+																{currentQIndex >= 1 ? "CAPTURED" : "ZOE IS ASKING NOW"}
+															</span>
+														</div>
+														<p className="text-slate-300 text-[10px] mt-0.5">
+															{currentQIndex >= 1 && activeEntry.points && activeEntry.points.length > 1
+																? activeEntry.points[1]
+																: "Impact, latency, user feedback, or measured outcomes"}
+														</p>
+													</div>
+												</div>
+
+												<div className="flex items-start gap-2 text-slate-400">
+													<Check className="size-3 text-slate-500 shrink-0 mt-0.5" />
+													<div>
+														<span className="font-semibold text-slate-300">Scale & complexity</span>
+														<span className="text-[9px] text-slate-500 font-mono ml-2">OPTIONAL</span>
+														<p className="text-slate-500 text-[10px] mt-0.5">
+															{activeEntry.organization ? `${activeEntry.organization} · ` : ""}Frontend preview rendering
+														</p>
+													</div>
+												</div>
+											</div>
+										</div>
+									)}
+								</div>
+							);
+						})()}
 					</div>
+				</aside>
+			)}
 
-					<p className="text-xs text-slate-500">Only approved statements appear on your live resume.</p>
-					<button
-						type="button"
-						onClick={handleHandoffToEditor}
-						className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer text-left"
+			{/* FINAL SUMMARY & CONFIRMATION MODAL (Sections 10, 11, 12) */}
+			{showFinalSummaryModal && (
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
+					onClick={() => setShowFinalSummaryModal(false)}
+				>
+					<div
+						className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl border border-emerald-500/40 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden"
+						onClick={(e) => e.stopPropagation()}
 					>
-						Open full resume editor & template customizer →
-					</button>
+						{/* Header */}
+						<div className="flex items-start justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
+							<div className="space-y-1">
+								<div className="flex items-center gap-2">
+									<span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+										FINAL EXPERIENCE SUMMARY & CONFIRMATION
+									</span>
+									<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+										{outlineEntries.length} Experiences
+									</span>
+								</div>
+								<h2 className="text-xl font-bold text-white leading-snug">
+									"Here's what we can add from your experience{outlineEntries[0]?.organization ? ` at ${outlineEntries[0].organization}` : ""}."
+								</h2>
+								<p className="text-xs text-slate-300">
+									Review your collected points across all experiences. Edit points, remove incorrect items, or add missing details before finalizing.
+								</p>
+							</div>
 
-					{/* What Zoe has captured checklist */}
-					<div className="pt-4 border-t border-slate-800/80 space-y-3">
-						<h4 className="text-xs font-bold text-white">What Zoe has captured</h4>
-						<div className="space-y-2 text-xs">
-							<div className="flex items-start gap-2 text-slate-300">
-								<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
-								<div>
-									<span className="font-bold text-white">Target role: </span>
-									<span>{targetRole}</span>
-								</div>
-							</div>
-							<div className="flex items-start gap-2 text-slate-300">
-								<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
-								<div>
-									<span className="font-bold text-white">Stories captured: </span>
-									<span>{stories.length} verified bullet point{stories.length > 1 ? "s" : ""}</span>
-								</div>
-							</div>
-							<div className="flex items-start gap-2 text-slate-400">
-								<Circle className="size-3.5 text-slate-600 shrink-0 mt-0.5" />
-								<div>
-									<span className="font-medium text-slate-300">Editor handoff: </span>
-									<span>Ready to transfer</span>
-								</div>
+							<button
+								type="button"
+								onClick={() => setShowFinalSummaryModal(false)}
+								className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+							>
+								✕
+							</button>
+						</div>
+
+						{/* Scrollable Experiences Review List */}
+						<div className="flex-1 overflow-y-auto p-6 space-y-5">
+							{outlineEntries.map((entry, eIdx) => {
+								const bulletList = entry.points && entry.points.length > 0
+									? entry.points
+									: [entry.description || `Built responsive solutions and key features as ${entry.title}.`];
+
+								return (
+									<div
+										key={entry.id}
+										className="rounded-2xl border border-slate-800 bg-[#09111e] p-5 space-y-3.5 shadow-md"
+									>
+										{/* Experience Header */}
+										<div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+													#{eIdx + 1} · {entry.category}
+												</span>
+												<h3 className="text-sm font-bold text-white">
+													{entry.title}
+												</h3>
+												{entry.organization && (
+													<span className="text-xs text-slate-400 font-medium">
+														at {entry.organization}
+													</span>
+												)}
+											</div>
+
+											<button
+												type="button"
+												onClick={() => {
+													setAddingPointEntryId(addingPointEntryId === entry.id ? null : entry.id);
+													setNewPointInputText("");
+												}}
+												className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-[11px] font-semibold text-slate-200 transition-colors cursor-pointer"
+											>
+												<Plus className="size-3 text-emerald-400" />
+												<span>Add bullet point</span>
+											</button>
+										</div>
+
+										{/* Inline New Point Input Form */}
+										{addingPointEntryId === entry.id && (
+											<div className="rounded-xl border border-emerald-500/40 bg-[#0b1728] p-3 space-y-2 animate-in fade-in duration-150">
+												<label className="text-[11px] font-semibold text-emerald-400">Add missing detail or point:</label>
+												<input
+													type="text"
+													value={newPointInputText}
+													onChange={(e) => setNewPointInputText(e.target.value)}
+													placeholder="e.g. Optimized real-time data sync reducing load times by 30%..."
+													className="w-full rounded-lg bg-[#07101c] border border-slate-700 px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none focus:border-emerald-500"
+													autoFocus
+												/>
+												<div className="flex items-center justify-end gap-2">
+													<button
+														type="button"
+														onClick={() => setAddingPointEntryId(null)}
+														className="text-xs text-slate-400 hover:text-white px-2 py-1"
+													>
+														Cancel
+													</button>
+													<button
+														type="button"
+														onClick={() => handleAddPointToEntry(entry.id, newPointInputText)}
+														className="px-3 py-1 rounded-lg bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs"
+													>
+														Add point
+													</button>
+												</div>
+											</div>
+										)}
+
+										{/* Bullet Points List */}
+										<div className="space-y-2">
+											{bulletList.map((bullet, bIdx) => {
+												const pointKey = `${entry.id}_${bIdx}`;
+												const isEditing = editingPointKey === pointKey;
+
+												return (
+													<div
+														key={pointKey}
+														className="rounded-xl border border-slate-800/90 bg-[#070e18] p-3 flex items-start justify-between gap-3 group hover:border-slate-700 transition-colors"
+													>
+														{isEditing ? (
+															<div className="flex-1 space-y-2">
+																<textarea
+																	rows={2}
+																	value={editingPointText}
+																	onChange={(e) => setEditingPointText(e.target.value)}
+																	className="w-full rounded-lg bg-[#0b1424] border border-emerald-500/60 p-2 text-xs text-white outline-none resize-none"
+																	autoFocus
+																/>
+																<div className="flex items-center justify-end gap-2">
+																	<button
+																		type="button"
+																		onClick={() => setEditingPointKey(null)}
+																		className="text-xs text-slate-400 hover:text-white px-2 py-1"
+																	>
+																		Cancel
+																	</button>
+																	<button
+																		type="button"
+																		onClick={() => handleEditPoint(entry.id, bIdx, editingPointText)}
+																		className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs"
+																	>
+																		Save
+																	</button>
+																</div>
+															</div>
+														) : (
+															<>
+																<div className="flex items-start gap-2 flex-1">
+																	<span className="text-emerald-400 font-bold text-sm leading-none mt-0.5">•</span>
+																	<p className="text-xs text-slate-200 leading-relaxed">
+																		{bullet}
+																	</p>
+																</div>
+																<div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setEditingPointKey(pointKey);
+																			setEditingPointText(bullet);
+																		}}
+																		className="p-1 rounded text-slate-400 hover:text-emerald-300 hover:bg-slate-800 transition-colors"
+																		title="Edit point"
+																	>
+																		<Edit3 className="size-3.5" />
+																	</button>
+																	<button
+																		type="button"
+																		onClick={() => handleRemovePoint(entry.id, bIdx)}
+																		className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+																		title="Remove point"
+																	>
+																		<Trash2 className="size-3.5" />
+																	</button>
+																</div>
+															</>
+														)}
+													</div>
+												);
+											})}
+										</div>
+									</div>
+								);
+							})}
+						</div>
+
+						{/* Footer Actions: Ask for Final Confirmation */}
+						<div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800 px-6 py-4 bg-[#091526]">
+							<span className="text-xs text-slate-300">
+								Does anything else need to be changed or added?
+							</span>
+
+							<div className="flex items-center gap-2.5 w-full sm:w-auto">
+								<button
+									type="button"
+									onClick={() => setShowFinalSummaryModal(false)}
+									className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors cursor-pointer"
+								>
+									Continue editing
+								</button>
+								<button
+									type="button"
+									onClick={handleConfirmAndGenerateFinal}
+									className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+								>
+									<Check className="size-4" />
+									<span>Confirm & Save Experiences</span>
+								</button>
 							</div>
 						</div>
 					</div>
 				</div>
-			</aside>
+			)}
+
+			{/* HOW ZOE HELPS EXPLANATION MODAL (Requirement 19) */}
+			{showHowZoeHelpsModal && (
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
+					onClick={() => setShowHowZoeHelpsModal(false)}
+				>
+					<div
+						className="relative w-full max-w-2xl max-h-[88vh] flex flex-col rounded-2xl border border-emerald-500/40 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden"
+						onClick={(e) => e.stopPropagation()}
+					>
+						{/* Header */}
+						<div className="flex items-start justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
+							<div className="space-y-1">
+								<div className="flex items-center gap-2">
+									<Sparkles className="size-4 text-emerald-400" />
+									<span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+										TRANSPARENCY & METHODOLOGY
+									</span>
+								</div>
+								<h2 className="text-xl font-bold text-white leading-snug">
+									How Zoe Helps You Craft Your Resume
+								</h2>
+								<p className="text-xs text-slate-300">
+									Understanding how Zoe analyzes your story, extracts verified experiences, and constructs achievement statements.
+								</p>
+							</div>
+
+							<button
+								type="button"
+								onClick={() => setShowHowZoeHelpsModal(false)}
+								className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+							>
+								<X className="size-5" />
+							</button>
+						</div>
+
+						{/* Content Body */}
+						<div className="overflow-y-auto p-6 space-y-5 text-xs text-slate-300 leading-relaxed">
+							{/* Section 1 */}
+							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+								<h3 className="text-sm font-bold text-white flex items-center gap-2">
+									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">1</span>
+									<span>Multi-Experience Identification</span>
+								</h3>
+								<p className="text-slate-300">
+									When you describe your work, Zoe parses your sentence structure, technologies, and achievements. Instead of blending everything into one generic summary, Zoe separates each project, feature, and mentoring contribution into standalone outline items.
+								</p>
+								<div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] font-mono text-emerald-300">
+									Prompt rule: Never invent technologies, statistics, or responsibilities not mentioned by the candidate.
+								</div>
+							</div>
+
+							{/* Section 2 */}
+							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+								<h3 className="text-sm font-bold text-white flex items-center gap-2">
+									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">2</span>
+									<span>Single-Focus Contextual Exploration</span>
+								</h3>
+								<p className="text-slate-300">
+									Instead of bombarding you with 4–5 repetitive questions per item, Zoe synthesizes what you already said and poses <strong>one specific question</strong> targeting only missing information (such as personal architecture contribution or user outcomes).
+								</p>
+								<div className="space-y-1 pt-1 text-[11px]">
+									<div className="text-slate-400 font-semibold">Achievement Interview Template:</div>
+									<div className="p-2 rounded bg-slate-950 border border-slate-800 text-slate-300 italic">
+										"For [Experience Title], what parts did you personally build or lead, and what was the outcome once shipped?"
+									</div>
+								</div>
+							</div>
+
+							{/* Section 3 */}
+							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+								<h3 className="text-sm font-bold text-white flex items-center gap-2">
+									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">3</span>
+									<span>Smart Priority Ordering</span>
+								</h3>
+								<p className="text-slate-300">
+									Zoe automatically calculates a strength and relevance score based on your target role (<strong className="text-white">{targetRole}</strong>). Leadership, mentoring, and technical architecture are prioritized at the top to give hiring managers maximum signal.
+								</p>
+							</div>
+
+							{/* Section 4 */}
+							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+								<h3 className="text-sm font-bold text-white flex items-center gap-2">
+									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">4</span>
+									<span>Live Summary & Workspace Outline</span>
+								</h3>
+								<p className="text-slate-300">
+									Your professional summary updates automatically as new experiences are verified. You maintain 100% control to review, edit, or remove any wording at any time.
+								</p>
+							</div>
+						</div>
+
+						{/* Footer */}
+						<div className="flex items-center justify-end border-t border-slate-800 px-6 py-4 bg-[#091526]">
+							<button
+								type="button"
+								onClick={() => setShowHowZoeHelpsModal(false)}
+								className="px-5 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer"
+							>
+								Got it
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+		
+			{/* Template Gallery Modal */}
+			{showTemplateModal && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+					<div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border border-slate-800 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden">
+						{/* Modal Header */}
+						<div className="flex items-center justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
+							<div className="flex items-center gap-3">
+								<div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+									<Palette className="size-4" />
+								</div>
+								<div>
+									<h2 className="text-lg font-bold text-white flex items-center gap-2">
+										<span>Choose a Template</span>
+										<span className="text-xs font-mono font-normal px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+											Current: {selectedTemplate}
+										</span>
+									</h2>
+									<p className="text-xs text-slate-400">
+										Select a visual layout for your resume. Changes reflect live on your resume sheet.
+									</p>
+								</div>
+							</div>
+
+							<button
+								type="button"
+								onClick={() => setShowTemplateModal(false)}
+								className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+							>
+								<X className="size-5" />
+							</button>
+						</div>
+
+						{/* Template Grid Body */}
+						<div className="overflow-y-auto p-6">
+							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+								{[
+									{ id: "Azurill", name: "Azurill", desc: "Two-column with bold sidebar", color: "bg-blue-500", img: "/templates/jpg/azurill.jpg" },
+									{ id: "Bronzor", name: "Bronzor", desc: "Corporate & conservative header", color: "bg-slate-700", img: "/templates/jpg/bronzor.jpg" },
+									{ id: "Chikorita", name: "Chikorita", desc: "Modern fresh two-column", color: "bg-emerald-600", img: "/templates/jpg/chikorita.jpg" },
+									{ id: "Gengar", name: "Gengar", desc: "High-contrast technical layout", color: "bg-purple-600", img: "/templates/jpg/gengar.jpg" },
+									{ id: "Lapras", name: "Lapras", desc: "Deep blue professional header", color: "bg-indigo-700", img: "/templates/jpg/lapras.jpg" },
+									{ id: "Onyx", name: "Onyx", desc: "Sharp minimalist structure", color: "bg-rose-600", img: "/templates/jpg/onyx.jpg" },
+									{ id: "Pikachu", name: "Pikachu", desc: "Dynamic accented layout", color: "bg-amber-500", img: "/templates/jpg/pikachu.jpg" },
+									{ id: "Leafish", name: "Leafish", desc: "Clean nature-inspired green", color: "bg-lime-600", img: "/templates/jpg/leafish.jpg" },
+									{ id: "Ditgar", name: "Ditgar", desc: "Grid-based modular layout", color: "bg-sky-600", img: "/templates/jpg/ditgar.jpg" },
+									{ id: "Ditto", name: "Ditto", desc: "Compact single-page design", color: "bg-pink-600", img: "/templates/jpg/ditto.jpg" },
+									{ id: "Glalie", name: "Glalie", desc: "Clean executive layout", color: "bg-slate-600", img: "/templates/jpg/glalie.jpg" },
+									{ id: "Kakuna", name: "Kakuna", desc: "Warm contrast traditional", color: "bg-yellow-600", img: "/templates/jpg/kakuna.jpg" },
+									{ id: "Rhyhorn", name: "Rhyhorn", desc: "Robust structured engineer layout", color: "bg-cyan-600", img: "/templates/jpg/rhyhorn.jpg" },
+								].map((tmpl) => {
+									const isSelected = selectedTemplate.toLowerCase() === tmpl.id.toLowerCase();
+									return (
+										<div
+											key={tmpl.id}
+											onClick={() => {
+												handleSelectTemplate(tmpl.id);
+												toast.success(`Template switched to ${tmpl.name}!`);
+											}}
+											className={cn(
+												"group relative rounded-xl border p-3 flex flex-col justify-between cursor-pointer transition-all bg-[#091524]",
+												isSelected
+													? "border-emerald-500 ring-2 ring-emerald-500/40 bg-[#091c28]"
+													: "border-slate-800 hover:border-slate-700 hover:bg-[#0c1a2d]"
+											)}
+										>
+											{/* Template Thumbnail Preview */}
+											<div className="relative aspect-[3/4] w-full rounded-lg bg-slate-900 overflow-hidden mb-2.5 border border-slate-800/80">
+												<img
+													src={tmpl.img}
+													alt={tmpl.name}
+													className="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
+													onError={(e) => {
+														// Fallback placeholder if image not rendered
+														(e.target as HTMLElement).style.display = "none";
+													}}
+												/>
+												<div className={cn("absolute top-2 left-2 size-3 rounded-full shadow-sm", tmpl.color)} />
+												{isSelected && (
+													<div className="absolute top-2 right-2 size-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-md">
+														<Check className="size-3 stroke-[3]" />
+													</div>
+												)}
+											</div>
+
+											{/* Info */}
+											<div className="space-y-0.5">
+												<div className="flex items-center justify-between">
+													<span className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
+														{tmpl.name}
+													</span>
+													{isSelected && (
+														<span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
+															Active
+														</span>
+													)}
+												</div>
+												<p className="text-[11px] text-slate-400 line-clamp-1">
+													{tmpl.desc}
+												</p>
+											</div>
+										</div>
+									);
+								})}
+							</div>
+						</div>
+
+						{/* Footer */}
+						<div className="flex items-center justify-between border-t border-slate-800 px-6 py-4 bg-[#091526]">
+							<span className="text-xs text-slate-400">
+								Selected: <strong className="text-white">{selectedTemplate}</strong>
+							</span>
+							<button
+								type="button"
+								onClick={() => setShowTemplateModal(false)}
+								className="px-5 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer shadow-md"
+							>
+								Done
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
 		</div>
 	);
 }

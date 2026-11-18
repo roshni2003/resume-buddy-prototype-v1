@@ -71,6 +71,9 @@ const config = defineConfig({
 		port: Number(process.env.PORT) || 3000,
 		strictPort: false,
 		allowedHosts: true,
+		watch: {
+			ignored: ["**/.output/**", "**/dist/**", "**/.git/**"],
+		},
 		hmr: {
 			host: "localhost",
 			port: Number(process.env.PORT) || 3000,

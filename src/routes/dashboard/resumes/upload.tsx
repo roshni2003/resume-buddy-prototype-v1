@@ -364,8 +364,8 @@ function UploadRouteComponent() {
 
 			await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 
-			toast.success("Resume created! Redirecting to editor...", { id: toastId });
-			navigate({ to: "/builder/$resumeId", params: { resumeId: resume.id } });
+			toast.success("Resume created! Opening your editor...", { id: toastId });
+			navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any });
 		} catch {
 			isCreatingRef.current = false;
 			toast.error("Failed to create resume. Please try again.");

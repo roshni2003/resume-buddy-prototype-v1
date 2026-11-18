@@ -18,7 +18,7 @@ type JwtPayload = {
 	exp?: number;
 };
 
-const safeDecodeJwtPayload = (token: string): JwtPayload | null => {
+export const safeDecodeJwtPayload = (token: string): JwtPayload | null => {
 	try {
 		const base64Url = token.split(".")[1];
 		if (!base64Url) return null;
@@ -125,6 +125,11 @@ export const clearAuthToken = (): void => {
 		// ignore
 	}
 	try {
+		localStorage.removeItem(USER_PROFILE_KEY);
+	} catch {
+		// ignore
+	}
+	try {
 		sessionStorage.removeItem(AUTH_TOKEN_KEY);
 	} catch {
 		// ignore
@@ -201,4 +206,58 @@ export const getUrlToken = (): string | null => {
 		log("getUrlToken: threw", e);
 	}
 	return null;
+};
+
+export const USER_PROFILE_KEY = "resume_buddy_user_profile";
+
+export interface StoredUserProfile {
+	email: string;
+	name?: string;
+}
+
+export const getStoredUserProfile = (): StoredUserProfile | null => {
+	if (typeof window === "undefined") return null;
+	try {
+		const raw = localStorage.getItem(USER_PROFILE_KEY);
+		if (raw) return JSON.parse(raw);
+	} catch {
+		// ignore
+	}
+	return null;
+};
+
+export const setStoredUserProfile = (profile: StoredUserProfile): void => {
+	if (typeof window === "undefined") return;
+	try {
+		localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
+	} catch {
+		// ignore
+	}
+};
+
+export const createPrototypeToken = (email: string, name?: string): string => {
+	const headerStr = JSON.stringify({ alg: "HS256", typ: "JWT" });
+	const payloadStr = JSON.stringify({
+		sub: `user_${Date.now()}`,
+		email: email.trim().toLowerCase(),
+		name: name?.trim() || email.trim().split("@")[0],
+		role: "user",
+		exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30 days
+	});
+
+	const toBase64 = (str: string) => {
+		try {
+			if (typeof window !== "undefined") {
+				return btoa(unescape(encodeURIComponent(str)))
+					.replace(/=/g, "")
+					.replace(/\+/g, "-")
+					.replace(/\//g, "_");
+			}
+			return Buffer.from(str).toString("base64url");
+		} catch {
+			return btoa(str).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+		}
+	};
+
+	return `${toBase64(headerStr)}.${toBase64(payloadStr)}.prototype_sig`;
 };

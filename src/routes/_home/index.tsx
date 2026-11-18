@@ -1,9 +1,21 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_home/")({
-	beforeLoad: ({ location }) => {
-		// Always redirect the root to the dashboard.
-		// Use location.searchStr to safely forward any query parameters (like ?token=) through the SSR redirect.
-		throw redirect({ href: `/dashboard/resumes${location.searchStr || ""}` });
-	},
+	component: RootRedirect,
 });
+
+function RootRedirect() {
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			window.location.replace(`/dashboard/resumes${window.location.search || ""}${window.location.hash || ""}`);
+		}
+	}, []);
+
+	return (
+		<div className="flex min-h-screen items-center justify-center bg-[#050b14] text-white">
+			<meta httpEquiv="refresh" content="0;url=/dashboard/resumes" />
+			<Navigate to="/dashboard/resumes" replace />
+		</div>
+	);
+}

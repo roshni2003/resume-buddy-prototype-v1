@@ -12,6 +12,7 @@ export interface SpeechRecognitionResult {
 export class VoiceAssistant {
 	private recognition: any = null;
 	private isSupported: boolean = false;
+	private shouldKeepListening: boolean = false;
 
 	constructor() {
 		if (typeof window !== "undefined") {
@@ -19,7 +20,7 @@ export class VoiceAssistant {
 				(window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 			if (SpeechRecognition) {
 				this.recognition = new SpeechRecognition();
-				this.recognition.continuous = false;
+				this.recognition.continuous = true;
 				this.recognition.interimResults = true;
 				this.recognition.lang = "en-US";
 				this.isSupported = true;
@@ -42,28 +43,47 @@ export class VoiceAssistant {
 		}
 
 		try {
+			this.shouldKeepListening = true;
+			let accumulatedFinalText = "";
+
 			this.recognition.onresult = (event: any) => {
 				let interimTranscript = "";
-				let finalTranscript = "";
 
 				for (let i = event.resultIndex; i < event.results.length; ++i) {
+					const piece = event.results[i][0]?.transcript || "";
 					if (event.results[i].isFinal) {
-						finalTranscript += event.results[i][0].transcript;
+						accumulatedFinalText += (accumulatedFinalText ? " " : "") + piece.trim();
 					} else {
-						interimTranscript += event.results[i][0].transcript;
+						interimTranscript += piece;
 					}
 				}
 
-				const currentText = finalTranscript || interimTranscript;
-				onResult(currentText.trim(), Boolean(finalTranscript));
+				const fullCurrentText = interimTranscript.trim()
+					? (accumulatedFinalText ? `${accumulatedFinalText} ${interimTranscript.trim()}` : interimTranscript.trim())
+					: accumulatedFinalText;
+
+				onResult(fullCurrentText, false);
 			};
 
 			this.recognition.onerror = (event: any) => {
 				console.warn("[VoiceAssistant] Speech error:", event.error);
+				if (event.error === "no-speech") {
+					// Ignore normal pauses
+					return;
+				}
 				if (onError) onError(event.error);
 			};
 
 			this.recognition.onend = () => {
+				if (this.shouldKeepListening) {
+					// Chrome occasionally stops after long pauses; auto-restart if user hasn't stopped
+					try {
+						this.recognition.start();
+						return;
+					} catch (e) {
+						// fall through if unable to restart
+					}
+				}
 				if (onEnd) onEnd();
 			};
 
@@ -77,6 +97,7 @@ export class VoiceAssistant {
 	}
 
 	public stop() {
+		this.shouldKeepListening = false;
 		if (this.recognition) {
 			try {
 				this.recognition.stop();
