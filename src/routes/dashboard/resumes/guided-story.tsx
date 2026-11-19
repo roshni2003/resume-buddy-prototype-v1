@@ -35,6 +35,7 @@ import {
 	ExternalLink,
 	LogOut,
 	Volume2,
+	Key,
 } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
@@ -44,7 +45,12 @@ import { localResumeStore } from "@/utils/local-resumes";
 import { defaultResumeData, type ResumeData } from "@/schema/resume/data";
 import { cn } from "@/utils/style";
 import { voiceAssistant, formatAchievementBullet } from "@/utils/voice-assistant";
-import { generateBulletsWithDeepSeek, getDeepSeekApiKey } from "@/utils/deepseek-client";
+import {
+	generateBulletsWithDeepSeek,
+	extractTopicsFromStory,
+	generateFollowUpQuestionForTopic,
+	getDeepSeekApiKey,
+} from "@/utils/deepseek-client";
 
 const searchSchema = z.object({
 	step: z.enum(["direction", "outline", "plan"]).optional(),
@@ -119,11 +125,41 @@ export function GuidedStoryRoute() {
 				const p = JSON.parse(saved);
 				if (p.targetRole) return p.targetRole;
 			}
-		} catch {}
+		} catch { }
 		return "Frontend Developer";
 	});
 	const [jobDescription, setJobDescription] = useState("");
 	const [showJobDescription, setShowJobDescription] = useState(false);
+
+	// Global Text-to-Speech voice synthesis helper
+	const speakText = (text: string) => {
+		if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+		try {
+			window.speechSynthesis.cancel();
+			const utterance = new SpeechSynthesisUtterance(text);
+			utterance.rate = 1.0;
+			utterance.pitch = 1.0;
+			utterance.lang = "en-US";
+			window.speechSynthesis.speak(utterance);
+		} catch (e) {
+			console.warn("Speech synthesis error:", e);
+		}
+	};
+
+	// Auto-speak questions when entering a step or changing active question
+	useEffect(() => {
+		if (wizardStep === "direction") {
+			const timer = setTimeout(() => {
+				speakText("What role are you targeting? Tell Zoe the role you are aiming for.");
+			}, 400);
+			return () => clearTimeout(timer);
+		} else if (wizardStep === "outline") {
+			const timer = setTimeout(() => {
+				speakText("What can we draw from? Tell me about yourself and the work you have done so far.");
+			}, 400);
+			return () => clearTimeout(timer);
+		}
+	}, [wizardStep]);
 
 	// Step 2: Story Collection State
 	const [rawStoryText, setRawStoryText] = useState("");
@@ -154,7 +190,7 @@ export function GuidedStoryRoute() {
 		try {
 			const saved = localStorage.getItem("resume_buddy_outline_entries");
 			if (saved) return JSON.parse(saved);
-		} catch {}
+		} catch { }
 		return [
 			{
 				id: "sample-work-1",
@@ -186,7 +222,7 @@ export function GuidedStoryRoute() {
 				const p = JSON.parse(savedProfile);
 				if (p.name) return p.name;
 			}
-		} catch {}
+		} catch { }
 		return "Priya Sharma";
 	});
 	const [createdResumeId, setCreatedResumeId] = useState<string | null>(null);
@@ -201,7 +237,7 @@ export function GuidedStoryRoute() {
 				const p = JSON.parse(saved);
 				if (p.selectedTemplate) return p.selectedTemplate;
 			}
-		} catch {}
+		} catch { }
 		return "Azurill";
 	});
 	const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -232,9 +268,41 @@ export function GuidedStoryRoute() {
 	const [professionalSummary, setProfessionalSummary] = useState("");
 	const [isEditingSummary, setIsEditingSummary] = useState(false);
 
-	// Stories view mode: "overview" (matching user's screenshot) or "interview" (active question-answer)
-	const [storiesViewMode, setStoriesViewMode] = useState<"overview" | "interview">("overview");
+	// Stories view mode: "overview" | "interview" (active question-answer) | "checklist" ("Here's what I heard") | "topic_drilldown" (asking about each topic one by one)
+	const [storiesViewMode, setStoriesViewMode] = useState<"overview" | "interview" | "checklist" | "topic_drilldown">("overview");
 	const [interviewActiveEntryId, setInterviewActiveEntryId] = useState<string | null>(null);
+
+	// "Here's what I heard" extracted points checklist state
+	const [extractedTopics, setExtractedTopics] = useState<Array<{ id: string; text: string; selected: boolean }>>([]);
+	const [customTopicInput, setCustomTopicInput] = useState("");
+	const [isAddingCustomTopic, setIsAddingCustomTopic] = useState(false);
+	const [isExtractingTopics, setIsExtractingTopics] = useState(false);
+
+	// Topic Drilldown state (asking questions for each checked topic one by one)
+	const [drilldownTopicIndex, setDrilldownTopicIndex] = useState(0);
+	const [currentTopicQuestion, setCurrentTopicQuestion] = useState("");
+	const [isLoadingTopicQuestion, setIsLoadingTopicQuestion] = useState(false);
+
+	// Quick Add Dialog for Projects / Volunteering / Education from Stories Overview
+	const [quickAddSectionModalOpen, setQuickAddSectionModalOpen] = useState(false);
+	const [quickAddCategory, setQuickAddCategory] = useState<OutlineCategory>("projects");
+	const [quickAddTitle, setQuickAddTitle] = useState("");
+	const [quickAddOrg, setQuickAddOrg] = useState("");
+	const [quickAddDates, setQuickAddDates] = useState("");
+	const [quickAddDescription, setQuickAddDescription] = useState("");
+
+	// Auto-speak question when user opens an interview for an experience
+	useEffect(() => {
+		if (activeTab === "stories" && storiesViewMode === "interview" && interviewActiveEntryId) {
+			const entry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+			if (entry) {
+				const q = getFocusedQuestionForExperience(entry);
+				if (q?.question) {
+					speakText(q.question);
+				}
+			}
+		}
+	}, [activeTab, storiesViewMode, interviewActiveEntryId]);
 	const [showZoeSectionPrompt, setShowZoeSectionPrompt] = useState(true);
 	const [activeSectionPromptType, setActiveSectionPromptType] = useState<"projects" | "education" | "volunteer">("projects");
 	// Tab 03: Supporting Details state (matching screenshot media_1795019454591_659f3f35.jpg)
@@ -421,9 +489,42 @@ export function GuidedStoryRoute() {
 		);
 	};
 
+	const handleSaveQuickAddSection = (startStoryInterview: boolean = true) => {
+		if (!quickAddTitle.trim()) {
+			toast.error("Please enter a title or role");
+			return;
+		}
+
+		const newEntry: OutlineEntry = {
+			id: `entry_${quickAddCategory}_${Date.now()}`,
+			category: quickAddCategory,
+			title: quickAddTitle.trim(),
+			organization: quickAddOrg.trim() || undefined,
+			dates: quickAddDates.trim() || undefined,
+			description: quickAddDescription.trim() || undefined,
+			points: [],
+		};
+
+		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
+		setQuickAddSectionModalOpen(false);
+		setQuickAddTitle("");
+		setQuickAddOrg("");
+		setQuickAddDates("");
+		setQuickAddDescription("");
+
+		if (startStoryInterview) {
+			setInterviewActiveEntryId(newEntry.id);
+			setSelectedExperienceId(newEntry.id);
+			setStoriesViewMode("interview");
+			toast.success(`Added ${newEntry.title}! Zoe is ready for your story.`);
+		} else {
+			toast.success(`Added ${newEntry.title} to your outline.`);
+		}
+	};
+
 	const handleAddManualExperience = () => {
 		if (!newManualTitle.trim()) {
-			toast.error("Please enter a title or role for the experience");
+			toast.error("Please provide a title");
 			return;
 		}
 		const newEntry: OutlineEntry = {
@@ -443,12 +544,9 @@ export function GuidedStoryRoute() {
 		toast.success("Experience placed in priority order!");
 	};
 
-	// Automatically generate and update professional summary using verified experiences and target role
-	useEffect(() => {
-		if (isEditingSummary && professionalSummary) return; // don't override manual edits in progress
-
-		const role = targetRole || "Frontend Developer";
-		const topExperiences = outlineEntries.filter((e) => e.category === "work" || e.category === "projects");
+	const generateProfessionalSummary = (entries: OutlineEntry[], roleName: string) => {
+		const role = roleName || "Frontend Developer";
+		const topExperiences = entries.filter((e) => e.category === "work" || e.category === "projects");
 		const expTitles = topExperiences.slice(0, 3).map((e) => e.title);
 		const bulletSample = topExperiences.flatMap((e) => e.points || []).slice(0, 2);
 
@@ -462,7 +560,36 @@ export function GuidedStoryRoute() {
 			autoSummary += `. Committed to engineering reliable user interfaces, driving cross-team collaboration, and delivering scalable outcomes`;
 		}
 		autoSummary += ".";
+		return autoSummary;
+	};
 
+	const handleSaveProgress = () => {
+		if (createdResumeId) {
+			const existing = localResumeStore.get(createdResumeId);
+			if (existing) {
+				localResumeStore.update(createdResumeId, {
+					data: {
+						...existing.data,
+						basics: {
+							...existing.data.basics,
+							name: fullName || existing.data.basics.name,
+							headline: targetRole || existing.data.basics.headline,
+						},
+						summary: {
+							...existing.data.summary,
+							content: `<p>${professionalSummary}</p>`,
+						},
+					},
+				});
+			}
+		}
+	};
+
+	// Automatically generate and update professional summary using verified experiences and target role
+	useEffect(() => {
+		if (isEditingSummary && professionalSummary) return; // don't override manual edits in progress
+
+		const autoSummary = generateProfessionalSummary(outlineEntries, targetRole);
 		setProfessionalSummary(autoSummary);
 	}, [outlineEntries, targetRole, isEditingSummary]);
 
@@ -470,7 +597,7 @@ export function GuidedStoryRoute() {
 	useEffect(() => {
 		try {
 			localStorage.setItem("resume_buddy_outline_entries", JSON.stringify(outlineEntries));
-		} catch {}
+		} catch { }
 	}, [outlineEntries]);
 
 	// Create or update resume when user clicks "See my plan →"
@@ -544,27 +671,27 @@ export function GuidedStoryRoute() {
 					items:
 						workList.length > 0
 							? workList.map((w) => ({
-									id: w.id,
-									hidden: false,
-									company: w.organization || "Company",
-									position: w.title,
-									location: "Remote / Hybrid",
-									period: w.dates || "2023 – Present",
-									website: { url: "", label: "" },
-									description: `<p>Spearheaded features and responsive web development as ${w.title}. Collaborated with cross-functional teams to improve user engagement and deliver key releases.</p>`,
-								}))
+								id: w.id,
+								hidden: false,
+								company: w.organization || "Company",
+								position: w.title,
+								location: "Remote / Hybrid",
+								period: w.dates || "2023 – Present",
+								website: { url: "", label: "" },
+								description: `<p>Spearheaded features and responsive web development as ${w.title}. Collaborated with cross-functional teams to improve user engagement and deliver key releases.</p>`,
+							}))
 							: [
-									{
-										id: "exp_1",
-										hidden: false,
-										company: "Tech Solutions",
-										position: targetRole || "Frontend Developer",
-										location: "Remote",
-										period: "2023 – Present",
-										website: { url: "", label: "" },
-										description: `<p>Developed modern, high-performance web experiences using React, TypeScript, and Tailwind CSS.</p>`,
-									},
-								],
+								{
+									id: "exp_1",
+									hidden: false,
+									company: "Tech Solutions",
+									position: targetRole || "Frontend Developer",
+									location: "Remote",
+									period: "2023 – Present",
+									website: { url: "", label: "" },
+									description: `<p>Developed modern, high-performance web experiences using React, TypeScript, and Tailwind CSS.</p>`,
+								},
+							],
 				},
 				projects: {
 					title: "Projects",
@@ -587,33 +714,33 @@ export function GuidedStoryRoute() {
 					items:
 						eduList.length > 0
 							? eduList.map((e) => ({
-									id: e.id,
+								id: e.id,
+								hidden: false,
+								school: e.organization || "University",
+								degree: e.title || "Bachelor's Degree",
+								area: targetRole || "Computer Science",
+								grade: "",
+								location: "",
+								period: e.dates || "2020 – 2024",
+								website: { url: "", label: "" },
+								description: "<p>Completed relevant coursework and practical software development projects.</p>",
+								currentlyStudyingHere: false,
+							}))
+							: [
+								{
+									id: "edu_1",
 									hidden: false,
-									school: e.organization || "University",
-									degree: e.title || "Bachelor's Degree",
+									school: "University of Technology",
+									degree: "Bachelor of Science",
 									area: targetRole || "Computer Science",
 									grade: "",
 									location: "",
-									period: e.dates || "2020 – 2024",
+									period: "2020 – 2024",
 									website: { url: "", label: "" },
-									description: "<p>Completed relevant coursework and practical software development projects.</p>",
+									description: "<p>Completed relevant coursework in modern software architecture and systems design.</p>",
 									currentlyStudyingHere: false,
-								}))
-							: [
-									{
-										id: "edu_1",
-										hidden: false,
-										school: "University of Technology",
-										degree: "Bachelor of Science",
-										area: targetRole || "Computer Science",
-										grade: "",
-										location: "",
-										period: "2020 – 2024",
-										website: { url: "", label: "" },
-										description: "<p>Completed relevant coursework in modern software architecture and systems design.</p>",
-										currentlyStudyingHere: false,
-									},
-								],
+								},
+							],
 				},
 				volunteer: {
 					title: "Volunteering & Activities",
@@ -686,7 +813,7 @@ export function GuidedStoryRoute() {
 					updatedAt: new Date().toISOString(),
 				})
 			);
-		} catch {}
+		} catch { }
 
 		setWizardStep("plan");
 		setActiveTab("plan");
@@ -920,6 +1047,176 @@ export function GuidedStoryRoute() {
 		const questions = getFocusedQuestionsForExperience(entry);
 		const currentIdx = activeExplorationQuestionIndex[entry.id] || 0;
 		return questions[Math.min(currentIdx, questions.length - 1)];
+	};
+
+	// Handler when user submits their initial answer to the experience question:
+	// Extracts key points / topics and transitions to the "Here's what I heard" checklist screen
+	const handleInitialStorySubmit = async (entryId: string, answerText: string) => {
+		const trimmed = answerText.trim();
+		if (!trimmed) return;
+
+		setIsExtractingTopics(true);
+		const targetEntry = outlineEntries.find((e) => e.id === entryId) || outlineEntries[0];
+
+		try {
+			// Extract 2 to 4 distinct topics/items from the answer
+			const extracted = await extractTopicsFromStory(
+				targetEntry.title,
+				targetEntry.organization,
+				trimmed
+			);
+
+			const topicItems = extracted.map((txt, idx) => ({
+				id: `topic_${Date.now()}_${idx}`,
+				text: txt,
+				selected: true,
+			}));
+
+			setExtractedTopics(topicItems);
+
+			// Also update outlineEntry answers
+			setExperienceAnswers((prev) => ({
+				...prev,
+				[entryId]: [...(prev[entryId] || []), trimmed],
+			}));
+
+			// Transition to checklist view mode
+			setStoriesViewMode("checklist");
+			setExperienceInputText("");
+
+			const orgName = targetEntry.organization || targetEntry.title;
+			speakText(`Here's what I heard. ${topicItems.length} things from ${orgName}. Each one can become a bullet.`);
+		} catch (err) {
+			console.warn("Failed to extract topics:", err);
+			// Fallback: create basic items
+			setExtractedTopics([
+				{ id: "1", text: trimmed.slice(0, 30), selected: true }
+			]);
+			setStoriesViewMode("checklist");
+		} finally {
+			setIsExtractingTopics(false);
+		}
+	};
+
+	// Start drilling down into each selected topic one by one
+	const handleStartWithSelectedTopics = async () => {
+		const selected = extractedTopics.filter((t) => t.selected);
+		if (selected.length === 0) {
+			toast.info("Please select at least one item to proceed.");
+			return;
+		}
+
+		setDrilldownTopicIndex(0);
+		setIsLoadingTopicQuestion(true);
+		setStoriesViewMode("topic_drilldown");
+
+		const targetEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+		const firstTopic = selected[0];
+
+		const q = await generateFollowUpQuestionForTopic(
+			firstTopic.text,
+			targetEntry.title,
+			targetEntry.organization
+		);
+
+		setCurrentTopicQuestion(q);
+		setIsLoadingTopicQuestion(false);
+		speakText(q);
+	};
+
+	// Save answer for a specific topic in the drilldown sequence
+	const handleSaveTopicDrilldownAnswer = async (answerText: string) => {
+		const trimmed = answerText.trim();
+		if (!trimmed) return;
+
+		setIsSubmittingAnswer(true);
+		const targetEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+		const selected = extractedTopics.filter((t) => t.selected);
+		const currentTopic = selected[drilldownTopicIndex];
+
+		let bullet = "";
+		try {
+			const bullets = await generateBulletsWithDeepSeek(
+				currentTopic ? currentTopic.text : targetEntry.title,
+				targetEntry.organization,
+				trimmed,
+				targetEntry.title
+			);
+			bullet = bullets[0] || trimmed;
+		} catch {
+			bullet = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+		}
+
+		// Add bullet to the outline entry
+		setOutlineEntries((prev) =>
+			prev.map((e) => {
+				if (e.id === targetEntry.id) {
+					const existing = e.points || [];
+					return {
+						...e,
+						points: Array.from(new Set([...existing, bullet])),
+					};
+				}
+				return e;
+			})
+		);
+
+		// Also update live stories preview
+		setStories((prev) => {
+			const title = targetEntry.title;
+			const existingIndex = prev.findIndex(
+				(s) => s.id === `story_${targetEntry.id}` || s.companyOrProject.toLowerCase().includes(title.toLowerCase())
+			);
+			if (existingIndex >= 0) {
+				const existing = prev[existingIndex];
+				const updatedList = [...prev];
+				updatedList[existingIndex] = {
+					...existing,
+					finalBullets: Array.from(new Set([...existing.finalBullets, bullet])),
+				};
+				return updatedList;
+			} else {
+				return [
+					{
+						id: `story_${targetEntry.id}`,
+						companyOrProject: targetEntry.organization ? `${title} at ${targetEntry.organization}` : title,
+						type: targetEntry.category === "projects" ? "project" : "work",
+						role: title,
+						contribution: trimmed,
+						problem: "",
+						approach: "",
+						evidenceResult: "",
+						finalBullets: [bullet],
+						status: "approved",
+					},
+					...prev,
+				];
+			}
+		});
+
+		setExperienceInputText("");
+		setIsSubmittingAnswer(false);
+		toast.success(`Bullet added to ${targetEntry.title}!`);
+
+		// Move to next topic if available
+		const nextIdx = drilldownTopicIndex + 1;
+		if (nextIdx < selected.length) {
+			setDrilldownTopicIndex(nextIdx);
+			setIsLoadingTopicQuestion(true);
+			const nextTopic = selected[nextIdx];
+			const nextQ = await generateFollowUpQuestionForTopic(
+				nextTopic.text,
+				targetEntry.title,
+				targetEntry.organization
+			);
+			setCurrentTopicQuestion(nextQ);
+			setIsLoadingTopicQuestion(false);
+			speakText(nextQ);
+		} else {
+			// All topics explored for this entry
+			toast.success("All points explored! Returning to overview.");
+			setStoriesViewMode("overview");
+		}
 	};
 
 	// Convert user answer into refined, bulleted experience points dynamically
@@ -1296,9 +1593,18 @@ export function GuidedStoryRoute() {
 		}
 
 		if (newEntries.length === 0) {
+			const lower = text.toLowerCase();
+			let fallbackCategory: OutlineCategory = "work";
+			if (lower.includes("degree") || lower.includes("bachelor") || lower.includes("university") || lower.includes("college")) {
+				fallbackCategory = "education";
+			} else if (lower.includes("volunteer") || lower.includes("community") || lower.includes("mentor")) {
+				fallbackCategory = "volunteer";
+			} else if (lower.includes("project") || lower.includes("app") || lower.includes("website")) {
+				fallbackCategory = "projects";
+			}
 			newEntries.push({
 				id: `entry_${Date.now()}`,
-				category,
+				category: fallbackCategory,
 				title: text.replace(/[.,;]+$/, ""),
 				dates: "Recent",
 				description: text,
@@ -1429,14 +1735,24 @@ export function GuidedStoryRoute() {
 
 					{/* Question Title Block */}
 					<div className="space-y-3">
-						<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
-							START WITH A DIRECTION
-						</span>
+						<div className="flex items-center justify-between">
+							<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
+								START WITH A DIRECTION
+							</span>
+							<button
+								type="button"
+								onClick={() => speakText("What role are you targeting? Tell Zoe the role you're aiming for.")}
+								className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer px-2.5 py-1 rounded-lg bg-slate-800/60 border border-slate-700/60"
+							>
+								<Volume2 className="size-3.5 text-emerald-400" />
+								<span>Hear again</span>
+							</button>
+						</div>
 						<h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
 							What role are you targeting?
 						</h1>
-						<p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-xl">
-							Tell Zoe the role you're aiming for. You can type any title or pick an idea below—this shapes all subsequent questions and guidance.
+						<p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
+							Tell Zoe the role you're aiming for. You can change it later.
 						</p>
 					</div>
 
@@ -1462,7 +1778,7 @@ export function GuidedStoryRoute() {
 								<span className="text-[11px] font-medium text-slate-400">
 									Suggestions (or type your own above):
 								</span>
-								<div className="flex flex-wrap gap-2">
+								<div className="flex flex-wrap gap-2 mt-3">
 									{[
 										"Frontend Developer",
 										"Backend Developer",
@@ -1587,9 +1903,19 @@ export function GuidedStoryRoute() {
 
 					{/* Question Title Block */}
 					<div className="space-y-3">
-						<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
-							A BRIEF OUTLINE
-						</span>
+						<div className="flex items-center justify-between">
+							<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
+								A BRIEF OUTLINE
+							</span>
+							<button
+								type="button"
+								onClick={() => speakText("What can we draw from? Add a role, project, activity, or qualification.")}
+								className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer px-2.5 py-1 rounded-lg bg-slate-800/60 border border-slate-700/60"
+							>
+								<Volume2 className="size-3.5 text-emerald-400" />
+								<span>Hear again</span>
+							</button>
+						</div>
 						<h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
 							What can we draw from?
 						</h1>
@@ -1598,741 +1924,333 @@ export function GuidedStoryRoute() {
 						</p>
 					</div>
 
-					{/* Mode Switcher */}
-					<div className="flex items-center gap-3">
-						<button
-							type="button"
-							onClick={() => setActiveInputMode("natural_story")}
-							className={cn(
-								"flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-								activeInputMode === "natural_story"
-									? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20"
-									: "bg-slate-900/60 text-slate-300 border-slate-700/80 hover:bg-slate-800"
-							)}
-						>
-							<Sparkles className="size-4" />
-							<span>Talk with Zoe (Story Collection)</span>
-						</button>
-
-						<button
-							type="button"
-							onClick={() => setActiveInputMode("manual_tabs")}
-							className={cn(
-								"flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-								activeInputMode === "manual_tabs"
-									? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20"
-									: "bg-slate-900/60 text-slate-300 border-slate-700/80 hover:bg-slate-800"
-							)}
-						>
-							<FileText className="size-4" />
-							<span>Structured Outline</span>
-						</button>
-					</div>
-
-					{/* ── MODE 1: NATURAL STORY COLLECTION WITH ZOE ── */}
-					{activeInputMode === "natural_story" && (
-						<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#09121d] p-6 sm:p-8 shadow-2xl space-y-6">
-							{/* Zoe Prompt Box */}
-							<div className="flex items-start gap-4">
-								<div className="size-10 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 shrink-0 shadow-md shadow-emerald-500/20 font-black text-sm">
-									Z
-								</div>
-								<div className="space-y-1.5 flex-1">
-									<div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-										<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-										<span>ZOE · STORY COLLECTION FOR {targetRole.toUpperCase()}</span>
-									</div>
-									<h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
-										"Tell me about yourself and the work you've done so far."
-									</h2>
-									<p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-										Speak or type naturally in your own words. Mention your projects, roles, or achievements—Zoe will identify individual experiences without turning everything into a generic summary.
-									</p>
-								</div>
-							</div>
-
-							{/* Interactive Input Area */}
-							<div className="space-y-3">
-								<div className="relative rounded-2xl border border-slate-700/80 bg-[#0b1424] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all">
-									<textarea
-										rows={5}
-										value={rawStoryText}
-										onChange={(e) => setRawStoryText(e.target.value)}
-										placeholder="e.g. Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers..."
-										className="w-full bg-transparent text-white placeholder:text-slate-500 p-4 text-sm leading-relaxed outline-none resize-none"
-									/>
-
-									{/* Action Footer inside Box */}
-									<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
-										<button
-											type="button"
-											onClick={handleToggleVoiceOutline}
-											className={cn(
-												"inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm",
-												isSpeakingOutline
-													? "bg-rose-500 text-white animate-pulse"
-													: "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
-											)}
-										>
-											<Mic className="size-3.5 text-emerald-400" />
-											<span>{isSpeakingOutline ? "Listening... (Click to stop)" : "Speak your story"}</span>
-										</button>
-
-										<div className="flex items-center gap-2">
-											<button
-												type="button"
-												onClick={() => {
-													const sample = "Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers.";
-													setRawStoryText(sample);
-													handleAnalyzeNaturalStory(sample);
-												}}
-												className="text-[11px] font-semibold text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer px-2 py-1 rounded hover:bg-slate-800"
-											>
-												Insert example
-											</button>
-											<button
-												type="button"
-												disabled={isAnalyzingStory || !rawStoryText.trim()}
-												onClick={() => handleAnalyzeNaturalStory()}
-												className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-											>
-												<Sparkles className="size-3.5" />
-												<span>{isAnalyzingStory ? "Extracting stories..." : "Extract experiences"}</span>
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							{/* Feedback Notice from Zoe */}
-							{zoeFeedbackMessage && (
-								<div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-start gap-3 animate-in fade-in duration-200">
-									<CheckCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
-									<p className="text-xs text-emerald-200 leading-relaxed">
-										{zoeFeedbackMessage}
-									</p>
-								</div>
-							)}
-
-							{/* Identified Experiences Confirmation Section */}
-							{outlineEntries.length > 0 && (
-								<div className="pt-4 space-y-4 border-t border-slate-800/90">
-									<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
-										<div>
-											<h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-												<span>Identified experiences</span>
-												<span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
-													{outlineEntries.length}
-												</span>
-											</h3>
-											<p className="text-xs text-slate-400 mt-0.5">
-												Each experience is isolated as its own card. Rename titles, edit descriptions, remove, or add new items.
-											</p>
-										</div>
-										<button
-											type="button"
-											onClick={() => setIsAddingManual(true)}
-											className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer self-start sm:self-auto"
-										>
-											<Plus className="size-3.5 text-emerald-400" />
-											<span>Add another experience</span>
-										</button>
-									</div>
-
-									{/* Manual Add Card Form Modal / Expandable */}
-									{isAddingManual && (
-										<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#081522] p-4 sm:p-5 space-y-3.5 animate-in fade-in duration-200">
-											<div className="flex items-center justify-between">
-												<span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-													Add experience manually
-												</span>
-												<button
-													type="button"
-													onClick={() => setIsAddingManual(false)}
-													className="text-slate-400 hover:text-white text-xs cursor-pointer p-1"
-												>
-													<X className="size-4" />
-												</button>
-											</div>
-
-											<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-												<div className="sm:col-span-2 space-y-1">
-													<label className="text-[11px] font-semibold text-slate-300">Title / Role</label>
-													<input
-														type="text"
-														value={newManualTitle}
-														onChange={(e) => setNewManualTitle(e.target.value)}
-														placeholder="e.g. AI Resume Builder, Senior Developer, etc."
-														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
-														autoFocus
-													/>
-												</div>
-												<div className="space-y-1">
-													<label className="text-[11px] font-semibold text-slate-300">Category</label>
-													<select
-														value={newManualCategory}
-														onChange={(e) => setNewManualCategory(e.target.value as OutlineCategory)}
-														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white px-3 py-2 text-xs outline-none focus:border-emerald-500"
-													>
-														<option value="work">Work & Internship</option>
-														<option value="projects">Project</option>
-														<option value="education">Education</option>
-														<option value="volunteer">Volunteering & Activity</option>
-													</select>
-												</div>
-											</div>
-
-											<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-												<div className="space-y-1">
-													<label className="text-[11px] font-semibold text-slate-300">Organization / Context (Optional)</label>
-													<input
-														type="text"
-														value={newManualOrg}
-														onChange={(e) => setNewManualOrg(e.target.value)}
-														placeholder="e.g. Acme Tech, English Learning App"
-														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
-													/>
-												</div>
-												<div className="space-y-1">
-													<label className="text-[11px] font-semibold text-slate-300">Description / Details</label>
-													<input
-														type="text"
-														value={newManualDesc}
-														onChange={(e) => setNewManualDesc(e.target.value)}
-														placeholder="What did you build, lead, or achieve?"
-														className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
-													/>
-												</div>
-											</div>
-
-											<div className="flex items-center justify-end gap-2 pt-1">
-												<button
-													type="button"
-													onClick={() => setIsAddingManual(false)}
-													className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white"
-												>
-													Cancel
-												</button>
-												<button
-													type="button"
-													onClick={handleAddManualExperience}
-													className="px-4 py-1.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs shadow transition-all cursor-pointer"
-												>
-													Save experience
-												</button>
-											</div>
-										</div>
-									)}
-
-									{/* List of Experience Cards */}
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-										{outlineEntries.map((entry, idx) => {
-											const isEditing = editingEntryId === entry.id;
-											return (
-												<div
-													key={entry.id}
-													className={cn(
-														"rounded-2xl border p-4 sm:p-5 space-y-3 transition-all shadow-md relative",
-														isEditing
-															? "border-emerald-500/70 bg-[#091524] ring-1 ring-emerald-500/40"
-															: "border-slate-800/90 bg-[#09111c] hover:border-slate-700"
-													)}
-												>
-													{/* Card Header */}
-													<div className="flex items-center justify-between gap-2">
-														<div className="flex items-center gap-1.5">
-															<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
-																#{idx + 1} · {entry.category}
-															</span>
-															{entry.dates && (
-																<span className="text-[10px] text-slate-400">· {entry.dates}</span>
-															)}
-														</div>
-
-														<div className="flex items-center gap-1">
-															<button
-																type="button"
-																onClick={() => setEditingEntryId(isEditing ? null : entry.id)}
-																className={cn(
-																	"p-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
-																	isEditing
-																		? "bg-emerald-500/20 text-emerald-300"
-																		: "text-slate-400 hover:text-white hover:bg-slate-800"
-																)}
-																title={isEditing ? "Done editing" : "Edit experience"}
-															>
-																{isEditing ? <Check className="size-3.5" /> : <Edit3 className="size-3.5" />}
-															</button>
-															<button
-																type="button"
-																onClick={() => handleRemoveEntry(entry.id)}
-																className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-																title="Remove experience"
-															>
-																<Trash2 className="size-3.5" />
-															</button>
-														</div>
-													</div>
-
-													{/* Card Content or Inline Edit Form */}
-													{isEditing ? (
-														<div className="space-y-3 pt-1">
-															<div className="space-y-1">
-																<label className="text-[10px] font-semibold text-slate-400">Rename Title</label>
-																<input
-																	type="text"
-																	value={entry.title}
-																	onChange={(e) => handleUpdateEntry(entry.id, { title: e.target.value })}
-																	className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-																/>
-															</div>
-
-															<div className="grid grid-cols-2 gap-2">
-																<div className="space-y-1">
-																	<label className="text-[10px] font-semibold text-slate-400">Category</label>
-																	<select
-																		value={entry.category}
-																		onChange={(e) => handleUpdateEntry(entry.id, { category: e.target.value as OutlineCategory })}
-																		className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-2 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-																	>
-																		<option value="work">Work</option>
-																		<option value="projects">Projects</option>
-																		<option value="education">Education</option>
-																		<option value="volunteer">Volunteering</option>
-																	</select>
-																</div>
-																<div className="space-y-1">
-																	<label className="text-[10px] font-semibold text-slate-400">Organization</label>
-																	<input
-																		type="text"
-																		value={entry.organization || ""}
-																		onChange={(e) => handleUpdateEntry(entry.id, { organization: e.target.value })}
-																		placeholder="Optional"
-																		className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-																	/>
-																</div>
-															</div>
-
-															<div className="space-y-1">
-																<label className="text-[10px] font-semibold text-slate-400">Edit Description</label>
-																<textarea
-																	rows={2}
-																	value={entry.description || ""}
-																	onChange={(e) => handleUpdateEntry(entry.id, { description: e.target.value })}
-																	placeholder="Describe key responsibilities, tech, or impact..."
-																	className="w-full rounded-lg bg-[#0b1424] border border-slate-700 p-2 text-xs text-white focus:border-emerald-500 outline-none resize-none"
-																/>
-															</div>
-
-															<div className="text-right">
-																<button
-																	type="button"
-																	onClick={() => setEditingEntryId(null)}
-																	className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs"
-																>
-																	Save
-																</button>
-															</div>
-														</div>
-													) : (
-														<div className="space-y-2">
-															<h4 className="text-sm font-bold text-white leading-snug">
-																{entry.title}
-															</h4>
-
-															{entry.organization && (
-																<p className="text-xs text-slate-400">
-																	Organization: <span className="text-slate-200 font-medium">{entry.organization}</span>
-																</p>
-															)}
-
-															{entry.description ? (
-																<p className="text-xs text-slate-300 line-clamp-3 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed">
-																	{entry.description}
-																</p>
-															) : (
-																<p className="text-[11px] text-slate-500 italic">
-																	No description yet. Click edit to draft details.
-																</p>
-															)}
-														</div>
-													)}
-												</div>
-											);
-										})}
-									</div>
-
-									{/* Anything else worth adding? Confirmation Footer */}
-									<div className="rounded-2xl border border-emerald-500/30 bg-[#081820]/90 p-5 sm:p-6 mt-6 space-y-4">
-										<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-											<div>
-												<h4 className="text-base font-bold text-white flex items-center gap-2">
-													<Sparkles className="size-4 text-emerald-400" />
-													<span>Anything else worth adding?</span>
-												</h4>
-												<p className="text-xs text-slate-300 mt-1">
-													You can add more details or extra experiences now, or proceed straight to crafting verified bullet points.
-												</p>
-											</div>
-										</div>
-
-										<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-slate-800/80">
-											<button
-												type="button"
-												onClick={() => {
-													window.scrollTo({ top: 300, behavior: "smooth" });
-													toast.info("Describe more projects or responsibilities above!");
-												}}
-												className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm transition-all cursor-pointer"
-											>
-												<Plus className="size-4 text-emerald-400" />
-												<span>Add more details</span>
-											</button>
-
-											<button
-												type="button"
-												onClick={handleStartWithTheseExperiences}
-												className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-											>
-												<span>Start with these experiences</span>
-												<ArrowRight className="size-4" />
-											</button>
-										</div>
-									</div>
-								</div>
-							)}
-						</div>
-					)}
-
-					{/* ── MODE 2: STRUCTURED OUTLINE TABS (IMAGE 2) ── */}
-					{activeInputMode === "manual_tabs" && (
+					{/* ── STRUCTURED OUTLINE (IMAGE 2) ── */}
 					<div className="rounded-2xl border border-slate-800/80 bg-[#09101d] p-6 sm:p-8 shadow-2xl space-y-6">
 						{/* Tabs Row */}
-						<div className="flex flex-wrap items-center gap-2 pb-2">
-							<button
-								type="button"
-								onClick={() => setOutlineCategory("work")}
-								className={cn(
-									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-									outlineCategory === "work"
-										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-								)}
-							>
-								Work & internships
-							</button>
+							<div className="flex flex-wrap items-center gap-2 pb-2">
+								<button
+									type="button"
+									onClick={() => setOutlineCategory("work")}
+									className={cn(
+										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+										outlineCategory === "work"
+											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+									)}
+								>
+									Work & internships
+								</button>
 
-							<button
-								type="button"
-								onClick={() => setOutlineCategory("projects")}
-								className={cn(
-									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-									outlineCategory === "projects"
-										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-								)}
-							>
-								Projects
-							</button>
+								<button
+									type="button"
+									onClick={() => setOutlineCategory("projects")}
+									className={cn(
+										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+										outlineCategory === "projects"
+											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+									)}
+								>
+									Projects
+								</button>
 
-							<button
-								type="button"
-								onClick={() => setOutlineCategory("education")}
-								className={cn(
-									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-									outlineCategory === "education"
-										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-								)}
-							>
-								Education
-							</button>
+								<button
+									type="button"
+									onClick={() => setOutlineCategory("education")}
+									className={cn(
+										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+										outlineCategory === "education"
+											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+									)}
+								>
+									Education
+								</button>
 
-							<button
-								type="button"
-								onClick={() => setOutlineCategory("volunteer")}
-								className={cn(
-									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-									outlineCategory === "volunteer"
-										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-								)}
-							>
-								Volunteering & activities
-							</button>
-						</div>
-
-						{/* Form Fields: Work & Internships */}
-						{outlineCategory === "work" && (
-							<div className="space-y-4 pt-1">
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Job title
-										</label>
-										<input
-											type="text"
-											value={workTitle}
-											onChange={(e) => setWorkTitle(e.target.value)}
-											placeholder="e.g. Frontend Developer"
-											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Company or organization · Optional
-										</label>
-										<input
-											type="text"
-											value={workCompany}
-											onChange={(e) => setWorkCompany(e.target.value)}
-											placeholder="Organization or context"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-								</div>
-
-								<div>
-									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-										Dates · Can confirm later
-									</label>
-									<input
-										type="text"
-										value={workDates}
-										onChange={(e) => setWorkDates(e.target.value)}
-										placeholder="e.g. Jul 2023 – Present"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-									/>
-								</div>
-
-								<div className="flex items-center justify-between pt-2">
-									<span className="text-xs text-slate-400">
-										We'll develop the description together.
-									</span>
-									<button
-										type="button"
-										onClick={handleAddWorkEntry}
-										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-									>
-										<Plus className="size-3.5 text-emerald-400" />
-										<span>Add work experience</span>
-									</button>
-								</div>
+								<button
+									type="button"
+									onClick={() => setOutlineCategory("volunteer")}
+									className={cn(
+										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+										outlineCategory === "volunteer"
+											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+									)}
+								>
+									Volunteering & activities
+								</button>
 							</div>
-						)}
 
-						{/* Form Fields: Projects */}
-						{outlineCategory === "projects" && (
-							<div className="space-y-4 pt-1">
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Project title
-										</label>
-										<input
-											type="text"
-											value={projectTitle}
-											onChange={(e) => setProjectTitle(e.target.value)}
-											placeholder="e.g. E-Commerce Dashboard"
-											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Technologies or role · Optional
-										</label>
-										<input
-											type="text"
-											value={projectTech}
-											onChange={(e) => setProjectTech(e.target.value)}
-											placeholder="e.g. React, Next.js, Stripe"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-								</div>
-
-								<div>
-									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-										Dates · Can confirm later
-									</label>
-									<input
-										type="text"
-										value={projectDates}
-										onChange={(e) => setProjectDates(e.target.value)}
-										placeholder="e.g. Jan 2024 – May 2024"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-									/>
-								</div>
-
-								<div className="flex items-center justify-between pt-2">
-									<span className="text-xs text-slate-400">
-										We'll develop the description together.
-									</span>
-									<button
-										type="button"
-										onClick={handleAddProjectEntry}
-										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-									>
-										<Plus className="size-3.5 text-emerald-400" />
-										<span>Add project</span>
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* Form Fields: Education */}
-						{outlineCategory === "education" && (
-							<div className="space-y-4 pt-1">
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Degree or qualification
-										</label>
-										<input
-											type="text"
-											value={eduDegree}
-											onChange={(e) => setEduDegree(e.target.value)}
-											placeholder="e.g. B.Tech Computer Science"
-											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											School or university
-										</label>
-										<input
-											type="text"
-											value={eduSchool}
-											onChange={(e) => setEduSchool(e.target.value)}
-											placeholder="e.g. State University"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-								</div>
-
-								<div>
-									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-										Dates · Can confirm later
-									</label>
-									<input
-										type="text"
-										value={eduDates}
-										onChange={(e) => setEduDates(e.target.value)}
-										placeholder="e.g. 2020 – 2024"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-									/>
-								</div>
-
-								<div className="flex items-center justify-between pt-2">
-									<span className="text-xs text-slate-400">
-										Academic details and certifications.
-									</span>
-									<button
-										type="button"
-										onClick={handleAddEducationEntry}
-										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-									>
-										<Plus className="size-3.5 text-emerald-400" />
-										<span>Add education</span>
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* Form Fields: Volunteering */}
-						{outlineCategory === "volunteer" && (
-							<div className="space-y-4 pt-1">
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Role or activity
-										</label>
-										<input
-											type="text"
-											value={volRole}
-											onChange={(e) => setVolRole(e.target.value)}
-											placeholder="e.g. Open Source Contributor"
-											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Organization · Optional
-										</label>
-										<input
-											type="text"
-											value={volOrg}
-											onChange={(e) => setVolOrg(e.target.value)}
-											placeholder="Organization or community"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-								</div>
-
-								<div>
-									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-										Dates · Can confirm later
-									</label>
-									<input
-										type="text"
-										value={volDates}
-										onChange={(e) => setVolDates(e.target.value)}
-										placeholder="e.g. 2023"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-									/>
-								</div>
-
-								<div className="flex items-center justify-between pt-2">
-									<span className="text-xs text-slate-400">
-										Extracurriculars, leadership, and community roles.
-									</span>
-									<button
-										type="button"
-										onClick={handleAddVolunteerEntry}
-										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-									>
-										<Plus className="size-3.5 text-emerald-400" />
-										<span>Add activity</span>
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* List of Captured Outline Entries */}
-						{outlineEntries.length > 0 && (
-							<div className="pt-4 border-t border-slate-800/80 space-y-2">
-								<span className="text-xs font-semibold text-slate-300 block">
-									Captured in your outline ({outlineEntries.length})
-								</span>
-								<div className="flex flex-wrap gap-2">
-									{outlineEntries.map((entry) => (
-										<div
-											key={entry.id}
-											className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900/80 text-xs text-slate-200 shadow-sm"
-										>
-											<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase">
-												{entry.category}
-											</span>
-											<span className="font-semibold text-white">{entry.title}</span>
-											{entry.organization && <span className="text-slate-400">· {entry.organization}</span>}
-											<button
-												type="button"
-												onClick={() => handleRemoveEntry(entry.id)}
-												className="text-slate-500 hover:text-rose-400 transition-colors cursor-pointer ml-1"
-											>
-												<X className="size-3.5" />
-											</button>
+							{/* Form Fields: Work & Internships */}
+							{outlineCategory === "work" && (
+								<div className="space-y-4 pt-1">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												Job title
+											</label>
+											<input
+												type="text"
+												value={workTitle}
+												onChange={(e) => setWorkTitle(e.target.value)}
+												placeholder="e.g. Frontend Developer"
+												autoFocus
+												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
 										</div>
-									))}
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												Company or organization · Optional
+											</label>
+											<input
+												type="text"
+												value={workCompany}
+												onChange={(e) => setWorkCompany(e.target.value)}
+												placeholder="Organization or context"
+												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
+										</div>
+									</div>
+
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Dates · Can confirm later
+										</label>
+										<input
+											type="text"
+											value={workDates}
+											onChange={(e) => setWorkDates(e.target.value)}
+											placeholder="e.g. Jul 2023 – Present"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+
+									<div className="flex items-center justify-between pt-2">
+										<span className="text-xs text-slate-400">
+											We'll develop the description together.
+										</span>
+										<button
+											type="button"
+											onClick={handleAddWorkEntry}
+											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5 text-emerald-400" />
+											<span>Add work experience</span>
+										</button>
+									</div>
 								</div>
-							</div>
-						)}
-					</div>
-					)}
+							)}
+
+							{/* Form Fields: Projects */}
+							{outlineCategory === "projects" && (
+								<div className="space-y-4 pt-1">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												Project title
+											</label>
+											<input
+												type="text"
+												value={projectTitle}
+												onChange={(e) => setProjectTitle(e.target.value)}
+												placeholder="e.g. E-Commerce Dashboard"
+												autoFocus
+												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
+										</div>
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												Technologies or role · Optional
+											</label>
+											<input
+												type="text"
+												value={projectTech}
+												onChange={(e) => setProjectTech(e.target.value)}
+												placeholder="e.g. React, Next.js, Stripe"
+												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
+										</div>
+									</div>
+
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Dates · Can confirm later
+										</label>
+										<input
+											type="text"
+											value={projectDates}
+											onChange={(e) => setProjectDates(e.target.value)}
+											placeholder="e.g. Jan 2024 – May 2024"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+
+									<div className="flex items-center justify-between pt-2">
+										<span className="text-xs text-slate-400">
+											We'll develop the description together.
+										</span>
+										<button
+											type="button"
+											onClick={handleAddProjectEntry}
+											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5 text-emerald-400" />
+											<span>Add project</span>
+										</button>
+									</div>
+								</div>
+							)}
+
+							{/* Form Fields: Education */}
+							{outlineCategory === "education" && (
+								<div className="space-y-4 pt-1">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												Degree or qualification
+											</label>
+											<input
+												type="text"
+												value={eduDegree}
+												onChange={(e) => setEduDegree(e.target.value)}
+												placeholder="e.g. B.Tech Computer Science"
+												autoFocus
+												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
+										</div>
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												School or university
+											</label>
+											<input
+												type="text"
+												value={eduSchool}
+												onChange={(e) => setEduSchool(e.target.value)}
+												placeholder="e.g. State University"
+												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
+										</div>
+									</div>
+
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Dates · Can confirm later
+										</label>
+										<input
+											type="text"
+											value={eduDates}
+											onChange={(e) => setEduDates(e.target.value)}
+											placeholder="e.g. 2020 – 2024"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+
+									<div className="flex items-center justify-between pt-2">
+										<span className="text-xs text-slate-400">
+											Academic details and certifications.
+										</span>
+										<button
+											type="button"
+											onClick={handleAddEducationEntry}
+											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5 text-emerald-400" />
+											<span>Add education</span>
+										</button>
+									</div>
+								</div>
+							)}
+
+							{/* Form Fields: Volunteering */}
+							{outlineCategory === "volunteer" && (
+								<div className="space-y-4 pt-1">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												Role or activity
+											</label>
+											<input
+												type="text"
+												value={volRole}
+												onChange={(e) => setVolRole(e.target.value)}
+												placeholder="e.g. Open Source Contributor"
+												autoFocus
+												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
+										</div>
+										<div>
+											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+												Organization · Optional
+											</label>
+											<input
+												type="text"
+												value={volOrg}
+												onChange={(e) => setVolOrg(e.target.value)}
+												placeholder="Organization or community"
+												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											/>
+										</div>
+									</div>
+
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Dates · Can confirm later
+										</label>
+										<input
+											type="text"
+											value={volDates}
+											onChange={(e) => setVolDates(e.target.value)}
+											placeholder="e.g. 2023"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+
+									<div className="flex items-center justify-between pt-2">
+										<span className="text-xs text-slate-400">
+											Extracurriculars, leadership, and community roles.
+										</span>
+										<button
+											type="button"
+											onClick={handleAddVolunteerEntry}
+											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5 text-emerald-400" />
+											<span>Add activity</span>
+										</button>
+									</div>
+								</div>
+							)}
+
+							{/* List of Captured Outline Entries */}
+							{outlineEntries.length > 0 && (
+								<div className="pt-4 border-t border-slate-800/80 space-y-2">
+									<span className="text-xs font-semibold text-slate-300 block">
+										Captured in your outline ({outlineEntries.length})
+									</span>
+									<div className="flex flex-wrap gap-2">
+										{outlineEntries.map((entry) => (
+											<div
+												key={entry.id}
+												className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900/80 text-xs text-slate-200 shadow-sm"
+											>
+												<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase">
+													{entry.category}
+												</span>
+												<span className="font-semibold text-white">{entry.title}</span>
+												{entry.organization && <span className="text-slate-400">· {entry.organization}</span>}
+												<button
+													type="button"
+													onClick={() => handleRemoveEntry(entry.id)}
+													className="text-slate-500 hover:text-rose-400 transition-colors cursor-pointer ml-1"
+												>
+													<X className="size-3.5" />
+												</button>
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+						</div>
 
 					{/* Voice Recording Accordion */}
 					<div className="space-y-3">
@@ -2412,24 +2330,69 @@ export function GuidedStoryRoute() {
 
 	// ── STEP 3: YOUR PLAN / THE EDITOR WORKSPACE ──────────────────────────────
 	return (
-		<div className="flex flex-col lg:flex-row min-h-[calc(100vh-4rem)] w-full flex-1 text-slate-100 font-sans">
-			{/* Left Column: Interactive Plan & Editor Tools */}
-			<main className="flex-1 min-w-0 p-6 sm:p-8 lg:p-10 overflow-y-auto">
-				{/* Top Stepper & Navigation Bar styled exactly like reference image */}
-				<div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-2 border-b border-slate-900/60">
-					{/* Stepper with click navigation */}
-					<div className="flex items-center gap-6 text-xs sm:text-sm font-semibold tracking-wide">
+		<div className="flex flex-col min-h-screen w-full flex-1 text-slate-100 font-sans bg-[#060b11]">
+			{/* Brand Header matching media_1795108245275_5bc0accd.png */}
+			<div className="w-full border-b border-slate-800/90 bg-[#040810] px-6 sm:px-8 py-3 flex items-center justify-between gap-4">
+				{/* Left: Zoe Green circle icon + Resume Buddy + Prototype v1 - simulated AI badge */}
+				<div className="flex items-center gap-3">
+					<div className="size-8 rounded-full bg-[#00d084] flex items-center justify-center text-slate-950 font-black text-sm tracking-tighter shadow-sm">
+						Z
+					</div>
+					<span className="font-extrabold text-white text-base sm:text-lg tracking-tight">
+						Resume Buddy
+					</span>
+					<span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#201805] border border-[#f59e0b]/40 text-[#f59e0b] text-[11px] font-semibold">
+						<span className="size-1.5 rounded-full bg-[#f59e0b]" />
+						<span>Prototype v1 - simulated AI</span>
+					</span>
+				</div>
+
+				{/* Right: DeepSeek API status pill + User pill + Logout button */}
+				<div className="flex items-center gap-3">
+					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 text-emerald-300 text-xs font-medium">
+						<Key className="size-3 text-emerald-400" />
+						<span>DeepSeek API</span>
+						<span className="size-1.5 rounded-full bg-emerald-400" />
+					</div>
+
+					<div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-700/80 bg-slate-900/90 text-slate-200 text-xs font-semibold">
+						<span className="size-2 rounded-full bg-emerald-400" />
+						<span>{fullName || "Roshni Jha"}</span>
+					</div>
+
+					<button
+						type="button"
+						onClick={() => {
+							toast.info("Logged out");
+							navigate({ to: "/dashboard/resumes" as any });
+						}}
+						className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-700/80 bg-slate-900/90 text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors cursor-pointer"
+					>
+						<LogOut className="size-3 text-slate-400" />
+						<span>Log out</span>
+					</button>
+				</div>
+			</div>
+
+			{/* Top Navigation Header: 01 Your plan, 02 Your stories, 03 Details, 04 Review & export */}
+			<header className="sticky top-0 z-30 w-full border-b border-slate-800/80 bg-[#070d14]/95 backdrop-blur-md px-6 sm:px-8 py-3.5">
+				<div className="flex items-center justify-between gap-4 w-full">
+					{/* Left: 01 Your plan, 02 Your stories, 03 Details, 04 Review & export */}
+					<nav className="flex items-center gap-6 sm:gap-8 text-xs sm:text-sm font-semibold tracking-wide">
 						<button
 							type="button"
 							onClick={() => setActiveTab("plan")}
 							className={cn(
-								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								"pb-3 -mb-3.5 transition-all cursor-pointer flex items-center gap-1.5",
 								activeTab === "plan"
-									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									? "text-[#ccf873] border-b-2 border-[#ccf873] font-bold"
 									: "text-slate-400 hover:text-slate-200"
 							)}
 						>
-							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">01</span>
+							<span className={cn(
+								"text-[11px] font-mono",
+								activeTab === "plan" ? "text-[#ccf873]" : "text-slate-500"
+							)}>01</span>
 							<span>Your plan</span>
 						</button>
 
@@ -2437,13 +2400,16 @@ export function GuidedStoryRoute() {
 							type="button"
 							onClick={() => setActiveTab("stories")}
 							className={cn(
-								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								"pb-3 -mb-3.5 transition-all cursor-pointer flex items-center gap-1.5",
 								activeTab === "stories"
-									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									? "text-[#ccf873] border-b-2 border-[#ccf873] font-bold"
 									: "text-slate-400 hover:text-slate-200"
 							)}
 						>
-							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">02</span>
+							<span className={cn(
+								"text-[11px] font-mono",
+								activeTab === "stories" ? "text-[#ccf873]" : "text-slate-500"
+							)}>02</span>
 							<span>Your stories</span>
 						</button>
 
@@ -2451,13 +2417,16 @@ export function GuidedStoryRoute() {
 							type="button"
 							onClick={() => setActiveTab("details")}
 							className={cn(
-								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								"pb-3 -mb-3.5 transition-all cursor-pointer flex items-center gap-1.5",
 								activeTab === "details"
-									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									? "text-[#ccf873] border-b-2 border-[#ccf873] font-bold"
 									: "text-slate-400 hover:text-slate-200"
 							)}
 						>
-							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">03</span>
+							<span className={cn(
+								"text-[11px] font-mono",
+								activeTab === "details" ? "text-[#ccf873]" : "text-slate-500"
+							)}>03</span>
 							<span>Details</span>
 						</button>
 
@@ -2465,43 +2434,28 @@ export function GuidedStoryRoute() {
 							type="button"
 							onClick={() => setActiveTab("export")}
 							className={cn(
-								"pb-2 transition-all cursor-pointer flex items-center gap-1.5",
+								"pb-3 -mb-3.5 transition-all cursor-pointer flex items-center gap-1.5",
 								activeTab === "export"
-									? "text-emerald-300 border-b-2 border-emerald-400 font-bold"
+									? "text-[#ccf873] border-b-2 border-[#ccf873] font-bold"
 									: "text-slate-400 hover:text-slate-200"
 							)}
 						>
-							<span className="text-[10px] font-mono text-emerald-400/80 font-bold">04</span>
+							<span className={cn(
+								"text-[11px] font-mono",
+								activeTab === "export" ? "text-[#ccf873]" : "text-slate-500"
+							)}>04</span>
 							<span>Review & export</span>
 						</button>
-					</div>
+					</nav>
 
-					{/* Right side controls matching screenshot: How Zoe helps, Direction & Save & leave */}
-					<div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
-						<button
-							type="button"
-							onClick={() => setShowTemplateModal(true)}
-							className="inline-flex items-center gap-1.5 hover:text-emerald-300 transition-colors cursor-pointer text-slate-300"
-						>
-							<Palette className="size-3.5 text-emerald-400" />
-							<span>Template: <strong className="text-white">{selectedTemplate}</strong></span>
-						</button>
-
-						<button
-							type="button"
-							onClick={() => setShowHowZoeHelpsModal(true)}
-							className="inline-flex items-center gap-1.5 hover:text-emerald-300 transition-colors cursor-pointer text-slate-300"
-						>
-							<Sparkles className="size-3.5 text-emerald-400" />
-							<span>How Zoe helps</span>
-						</button>
-
+					{/* Right: Direction, Save & leave (matching screenshot) */}
+					<div className="flex items-center gap-6 text-xs sm:text-sm font-semibold text-slate-300">
 						<button
 							type="button"
 							onClick={() => setWizardStep("direction")}
-							className="inline-flex items-center gap-1.5 hover:text-emerald-400 transition-colors cursor-pointer"
+							className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
 						>
-							<Compass className="size-3.5" />
+							<Compass className="size-4 text-slate-400" />
 							<span>Direction</span>
 						</button>
 
@@ -2511,13 +2465,19 @@ export function GuidedStoryRoute() {
 								toast.success("Progress saved! Returning to dashboard.");
 								navigate({ to: "/dashboard/resumes" as any });
 							}}
-							className="inline-flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+							className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors cursor-pointer"
 						>
-							<LogOut className="size-3.5" />
+							<LogOut className="size-4 text-slate-400" />
 							<span>Save & leave</span>
 						</button>
 					</div>
 				</div>
+			</header>
+
+			{/* Main Workspace Body: Split Left Plan & Right Live Preview */}
+			<div className="flex flex-col lg:flex-row flex-1 w-full min-h-0">
+				{/* Left Column: Interactive Plan & Editor Tools */}
+				<main className="flex-1 min-w-0 p-6 sm:p-8 lg:p-10 overflow-y-auto">
 
 				{/* TAB 1: PLAN VIEW */}
 				{activeTab === "plan" && (
@@ -2553,76 +2513,74 @@ export function GuidedStoryRoute() {
 								Let's bring your story out.
 							</h1>
 							<p className="text-xs sm:text-sm text-slate-400 max-w-xl">
-								One useful step at a time. Pick up here, or choose anything from your plan.
+								One useful step at a time. Zoe puts the most useful step first; you can choose anything.
 							</p>
 						</div>
 
-						{/* Large Featured Zoe Next Step Card (Green Accent Card matching screenshot 2) */}
-						<div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-[#0e271a] via-[#091b15] to-[#06120e] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
-							<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-emerald-300/80">
+						{/* ZOE / YOUR NEXT SECTION - What about projects / other categories */}
+						<div className="rounded-2xl border border-indigo-500/30 bg-[#0e1124] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
+							<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-indigo-300">
 								<div className="flex items-center gap-2">
-									<span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-									<span>ZOE / YOUR NEXT STEP</span>
+									<span className="size-2 rounded-full bg-indigo-400" />
+									<span>ZOE / YOUR NEXT SECTION</span>
 								</div>
-								<ExternalLink className="size-3.5 text-emerald-400/60" />
+								<ExternalLink className="size-3.5 text-indigo-400/60" />
 							</div>
 
 							<div className="space-y-1">
-								<span className="text-xs text-emerald-400/80 font-medium block">
-									Zoe suggests
-								</span>
 								<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-									{outlineEntries[0]?.title || "LinkedIn Student Ambassador"}
+									What about projects?
 								</h2>
-								<p className="text-xs sm:text-sm text-emerald-100/80 pt-0.5">
-									Your conversation is saved. Continue where you stopped.
+								<p className="text-xs sm:text-sm text-slate-300 pt-0.5">
+									Have you built something through coursework, personal practice, freelance work, or volunteering that you would like to include?
 								</p>
 							</div>
 
-							<div className="pt-2 flex flex-wrap items-center gap-4">
+							<div className="pt-2 flex flex-wrap items-center gap-3">
 								<button
 									type="button"
 									onClick={() => {
-										setActiveTab("stories");
-										if (outlineEntries[0]) {
-											setSelectedExperienceId(outlineEntries[0].id);
-										}
+										setQuickAddCategory("projects");
+										setQuickAddSectionModalOpen(true);
 									}}
-									className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+									className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
 								>
-									<Mic className="size-4 text-slate-950" />
-									<span>Continue with Zoe</span>
+									<span>+ Add a project</span>
 								</button>
-
-								<span className="text-xs text-emerald-300/60">
-									You can choose a different step below.
-								</span>
-							</div>
-
-							<div className="flex items-center justify-between pt-4 border-t border-emerald-500/10 text-[10px] font-mono text-emerald-400/60">
-								<span>2 OF 13 PLAN ITEMS FINISHED</span>
-								<div className="flex items-center gap-1">
-									<span className="size-1 rounded-full bg-emerald-500/40" />
-									<span className="size-1 rounded-full bg-emerald-500/40" />
-									<span className="size-1 rounded-full bg-emerald-500/40" />
-								</div>
+								<button
+									type="button"
+									onClick={() => toast.info("Noted! We'll proceed without projects for now.")}
+									className="px-5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs sm:text-sm transition-all cursor-pointer"
+								>
+									Nothing to add here
+								</button>
+								<button
+									type="button"
+									onClick={() => toast.info("You can return to add projects whenever you're ready.")}
+									className="text-xs text-slate-400 hover:text-slate-200 font-semibold px-2 py-1 transition-colors cursor-pointer"
+								>
+									Decide later
+								</button>
 							</div>
 						</div>
 
-						{/* Your Complete Plan List matching screenshot 2 */}
-						<div className="space-y-4 pt-2">
+						{/* SECTION 1: Your experience (Ordered by what will strengthen the resume most) */}
+						<div className="space-y-4 pt-3">
 							<div className="flex items-center justify-between">
-								<h3 className="text-base sm:text-lg font-bold text-white">Your complete plan</h3>
-								<span className="text-xs text-slate-500">Jump in anywhere</span>
+								<h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+									Your experience
+								</h3>
+								<span className="text-xs text-slate-400">
+									Ordered by what will strengthen the resume most.
+								</span>
 							</div>
 
 							<div className="space-y-3">
-								{/* 1. All parsed entries that need stories (Work, Projects, Leadership, Education) */}
-								{outlineEntries.map((entry, idx) => {
-									const isFirst = idx === 0;
-									const subtitle = isFirst
-										? "Your conversation is saved. Continue where you stopped."
-										: "Check whether the existing statement needs clearer contribution, scope, or results.";
+								{sortEntriesByPriority(outlineEntries).map((entry) => {
+									const isFinished = (entry.points && entry.points.length > 0);
+									const subtitle = isFinished
+										? "You're finished with this entry for now. Reopen it whenever you like."
+										: "Talk through the main things you did here. Zoe drafts a statement for each.";
 
 									return (
 										<div
@@ -2631,9 +2589,15 @@ export function GuidedStoryRoute() {
 										>
 											<div className="space-y-1.5 flex-1 min-w-0">
 												<div className="flex items-center gap-2">
-													<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-														To do
-													</span>
+													{isFinished ? (
+														<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
+															Done
+														</span>
+													) : (
+														<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+															To do
+														</span>
+													)}
 													<h4 className="text-sm font-bold text-white truncate">
 														{entry.title}
 													</h4>
@@ -2650,127 +2614,79 @@ export function GuidedStoryRoute() {
 														setActiveTab("stories");
 														setSelectedExperienceId(entry.id);
 														setInterviewActiveEntryId(entry.id);
-														setStoriesViewMode("interview");
+														if (isFinished) {
+															setStoriesViewMode("overview");
+														} else {
+															setStoriesViewMode("interview");
+														}
 													}}
-													className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+													className="px-4 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
 												>
 													Open
 												</button>
-												<button
-													type="button"
-													onClick={() => {
-														toast.info(`Saved ${entry.title} for later.`);
-													}}
-													className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-												>
-													Later
-												</button>
+												{!isFinished && (
+													<button
+														type="button"
+														onClick={() => {
+															toast.info(`Saved ${entry.title} for later.`);
+														}}
+														className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+													>
+														Later
+													</button>
+												)}
 											</div>
 										</div>
 									);
 								})}
+							</div>
+						</div>
 
-								{/* 2. Category Section Catch-all Checks */}
-								{[
-									{
-										id: "plan_cat_work",
-										title: "Work & internships",
-										subtitle: "Check whether there is anything else worth including.",
-										category: "work" as OutlineCategory,
-									},
-									{
-										id: "plan_cat_projects",
-										title: "Projects",
-										subtitle: "Check whether you have something relevant to include. Nothing to add is fine.",
-										category: "projects" as OutlineCategory,
-									},
-									{
-										id: "plan_cat_vol",
-										title: "Volunteering & activities",
-										subtitle: "Check whether you have something relevant to include. Nothing to add is fine.",
-										category: "volunteer" as OutlineCategory,
-									},
-									{
-										id: "plan_cat_edu",
-										title: "Education",
-										subtitle: "Check whether you have something relevant to include. Nothing to add is fine.",
-										category: "education" as OutlineCategory,
-									},
-								].map((catItem) => (
-									<div
-										key={catItem.id}
-										className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all"
-									>
-										<div className="space-y-1.5 flex-1 min-w-0">
-											<div className="flex items-center gap-2">
-												<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-													To do
-												</span>
-												<h4 className="text-sm font-bold text-white truncate">
-													{catItem.title}
-												</h4>
-											</div>
-											<p className="text-xs text-slate-400 leading-relaxed">
-												{catItem.subtitle}
-											</p>
-										</div>
+						{/* SECTION 2: Final checks (Quick steps before you export) */}
+						<div className="space-y-4 pt-6">
+							<div className="flex items-center justify-between">
+								<h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+									Final checks
+								</h3>
+								<span className="text-xs text-slate-400">
+									Quick steps before you export.
+								</span>
+							</div>
 
-										<div className="flex items-center gap-2 shrink-0">
-											<button
-												type="button"
-												onClick={() => {
-													setStoryCategoryFilter(catItem.category === "work" ? "work" : catItem.category === "projects" ? "projects" : "all");
-													setActiveTab("stories");
-													setStoriesViewMode("overview");
-												}}
-												className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-											>
-												Open
-											</button>
-											<button
-												type="button"
-												onClick={() => toast.info(`Saved ${catItem.title} for later.`)}
-												className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-											>
-												Later
-											</button>
-										</div>
-									</div>
-								))}
-
-								{/* 3. Review skills */}
-								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
-									<div className="space-y-1.5 flex-1 min-w-0">
+							<div className="space-y-3">
+								{/* Card 1: Anything else to include? */}
+								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 space-y-3 hover:border-slate-700 transition-all">
+									<div className="space-y-1">
 										<div className="flex items-center gap-2">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
-												Done
+											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+												1 of 4 checked
 											</span>
-											<h4 className="text-sm font-bold text-white">Review skills</h4>
 										</div>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											Only include skills you can use and explain. Suggestions need your confirmation.
+										<h4 className="text-sm font-bold text-white">Anything else to include?</h4>
+										<p className="text-xs text-slate-400">
+											Still to check: Projects, Volunteering & activities, Education. Nothing to add is fine.
 										</p>
 									</div>
-									<div className="flex items-center gap-2 shrink-0">
+									<div className="pt-1">
 										<button
 											type="button"
 											onClick={() => {
-												setActiveTab("details");
-												setDetailsSubTab("skills");
+												setActiveTab("stories");
+												setStoriesViewMode("overview");
 											}}
-											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+											className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
 										>
-											Open
+											<span>► Check each section</span>
 										</button>
 									</div>
 								</div>
 
-								{/* 4. Confirm contact details */}
+								{/* Card 2: Confirm contact details */}
 								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
 									<div className="space-y-1.5 flex-1 min-w-0">
 										<div className="flex items-center gap-2">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
-												Done
+											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+												To do
 											</span>
 											<h4 className="text-sm font-bold text-white">Confirm contact details</h4>
 										</div>
@@ -2789,10 +2705,17 @@ export function GuidedStoryRoute() {
 										>
 											Open
 										</button>
+										<button
+											type="button"
+											onClick={() => toast.info("Contact details check saved for later.")}
+											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Later
+										</button>
 									</div>
 								</div>
 
-								{/* 5. Confirm entry dates */}
+								{/* Card 3: Confirm entry dates */}
 								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
 									<div className="space-y-1.5 flex-1 min-w-0">
 										<div className="flex items-center gap-2">
@@ -2826,7 +2749,41 @@ export function GuidedStoryRoute() {
 									</div>
 								</div>
 
-								{/* 6. Review layout and export */}
+								{/* Card 4: Review skills */}
+								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+									<div className="space-y-1.5 flex-1 min-w-0">
+										<div className="flex items-center gap-2">
+											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+												To do
+											</span>
+											<h4 className="text-sm font-bold text-white">Review skills</h4>
+										</div>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											Only include skills you can use and explain. Suggestions need your confirmation.
+										</p>
+									</div>
+									<div className="flex items-center gap-2 shrink-0">
+										<button
+											type="button"
+											onClick={() => {
+												setActiveTab("details");
+												setDetailsSubTab("skills");
+											}}
+											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Open
+										</button>
+										<button
+											type="button"
+											onClick={() => toast.info("Skills review saved for later.")}
+											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Later
+										</button>
+									</div>
+								</div>
+
+								{/* Card 5: Review layout and export */}
 								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
 									<div className="space-y-1.5 flex-1 min-w-0">
 										<div className="flex items-center gap-2">
@@ -2879,52 +2836,66 @@ export function GuidedStoryRoute() {
 				{/* TAB 2: STORIES (YOUR STORIES SECTION OVERVIEW & EXPLORATION) */}
 				{activeTab === "stories" && (
 					<div className="space-y-6">
-						{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle */}
-						<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-							<span className="font-semibold text-slate-300">
-								{targetRole || "Frontend Developer"}
-							</span>
-
-							<div className="flex items-center gap-4">
-								<span className="flex items-center gap-1.5 text-[11px] text-slate-400">
-									<span className="size-1.5 rounded-full bg-emerald-400" />
-									<span>Saved on this device</span>
+						{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle (ONLY in overview mode) */}
+						{storiesViewMode === "overview" && (
+							<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+								<span className="font-semibold text-slate-300">
+									{targetRole || "Frontend Developer"}
 								</span>
 
-								<button
-									type="button"
-									onClick={() => setHideResumePreview(!hideResumePreview)}
-									className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
-								>
-									<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
-								</button>
+								<div className="flex items-center gap-4">
+									<span className="flex items-center gap-1.5 text-[11px] text-slate-400">
+										<span className="size-1.5 rounded-full bg-emerald-400" />
+										<span>Saved on this device</span>
+									</span>
+
+									<button
+										type="button"
+										onClick={() => setHideResumePreview(!hideResumePreview)}
+										className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+									>
+										<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
+									</button>
+								</div>
 							</div>
-						</div>
+						)}
 
-						{/* Hero Header exactly matching screenshot */}
-						<div className="space-y-2 pt-1">
-							<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
-								YOUR STORIES
-							</span>
-							<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-								Your experience.<br />All the useful parts.
-							</h1>
-							<p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-								Work, projects, activities, and education. Open any entry, add something new, or return to your plan. Zoe asks about a few pieces of work in each entry, then drafts a statement for each.
-							</p>
-						</div>
+						{/* Hero Header: ONLY in overview mode, NOT when telling story or in checklist/drilldown */}
+						{storiesViewMode === "overview" && (
+							<div className="space-y-2 pt-1">
+								<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
+									YOUR STORIES
+								</span>
+								<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+									Your experience.<br />All the useful parts.
+								</h1>
+								<p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+									Work, projects, activities, and education. Open any entry, add something new, or return to your plan. Zoe asks about a few pieces of work in each entry, then drafts a statement for each.
+								</p>
+							</div>
+						)}
 
-						{/* If user clicked to interview an entry directly, show the Interview Studio mode with back button */}
+						{/* If user clicked to interview an entry directly, show the Interview Studio mode */}
 						{storiesViewMode === "interview" && interviewActiveEntryId ? (
 							<div className="space-y-4">
-								<button
-									type="button"
-									onClick={() => setStoriesViewMode("overview")}
-									className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
-								>
-									<ArrowLeft className="size-3.5" />
-									<span>Back to all stories overview</span>
-								</button>
+								<div className="flex items-center justify-between">
+									<button
+										type="button"
+										onClick={() => setStoriesViewMode("overview")}
+										className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
+									>
+										<ArrowLeft className="size-3.5" />
+										<span>Back to all stories overview</span>
+									</button>
+
+									<button
+										type="button"
+										onClick={() => setHideResumePreview(!hideResumePreview)}
+										className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+									>
+										<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
+									</button>
+								</div>
 
 								{(() => {
 									const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
@@ -2988,27 +2959,24 @@ export function GuidedStoryRoute() {
 													onClick={() => {
 														if (isSpeakingAnswer) {
 															setIsSpeakingAnswer(false);
+															voiceAssistant.stop();
 														} else {
-															const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-															if (!SpeechRec) {
-																toast.error("Speech recognition not supported in this browser.");
-																return;
-															}
-															try {
-																const recognition = new SpeechRec();
-																recognition.continuous = false;
-																recognition.interimResults = false;
-																recognition.lang = "en-US";
-																recognition.onstart = () => setIsSpeakingAnswer(true);
-																recognition.onresult = (evt: any) => {
-																	const transcript = evt.results[0][0].transcript;
-																	setExperienceInputText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+															const baseText = experienceInputText ? experienceInputText.trim() : "";
+															setIsSpeakingAnswer(true);
+															const started = voiceAssistant.start(
+																(transcript) => {
+																	const combined = baseText ? `${baseText} ${transcript}` : transcript;
+																	setExperienceInputText(combined);
+																},
+																(err) => {
+																	console.warn("Speech error:", err);
 																	setIsSpeakingAnswer(false);
-																};
-																recognition.onerror = () => setIsSpeakingAnswer(false);
-																recognition.onend = () => setIsSpeakingAnswer(false);
-																recognition.start();
-															} catch (err) {
+																},
+																() => {
+																	setIsSpeakingAnswer(false);
+																}
+															);
+															if (!started) {
 																setIsSpeakingAnswer(false);
 															}
 														}
@@ -3049,14 +3017,11 @@ export function GuidedStoryRoute() {
 
 													<button
 														type="button"
-														disabled={isSubmittingAnswer || !experienceInputText.trim()}
-														onClick={async () => {
-															await handleSaveExperienceAnswer(activeEntry.id, experienceInputText);
-															setStoriesViewMode("overview");
-														}}
+														disabled={isExtractingTopics || !experienceInputText.trim()}
+														onClick={() => handleInitialStorySubmit(activeEntry.id, experienceInputText)}
 														className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
 													>
-														<span>{isSubmittingAnswer ? "Crafting point..." : "Send answer"}</span>
+														<span>{isExtractingTopics ? "Listening & analyzing..." : "Send answer"}</span>
 														<ArrowRight className="size-4" />
 													</button>
 												</div>
@@ -3065,6 +3030,358 @@ export function GuidedStoryRoute() {
 									);
 								})()}
 							</div>
+						) : storiesViewMode === "checklist" ? (
+							/* ── CHECKLIST MODE: "Here's what I heard" matching user screenshots 1 & 2 ── */
+							(() => {
+								const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+								const orgName = activeEntry?.organization || activeEntry?.title || "your experience";
+								const selectedCount = extractedTopics.filter((t) => t.selected).length;
+
+								return (
+									<div className="space-y-4">
+										{/* Breadcrumb Top Bar */}
+										<div className="flex items-center justify-between text-xs text-slate-400">
+											<div>
+												<span className="text-[10px] font-mono tracking-wider uppercase text-emerald-400 font-bold block">
+													Check the list
+												</span>
+												<div className="mt-1">
+													<span className="text-[10px] font-mono uppercase text-slate-400 tracking-wider">
+														{activeEntry?.category === "work" ? "WORK EXPERIENCE" : activeEntry?.category.toUpperCase()}
+													</span>
+													<h2 className="text-xl font-extrabold text-white">
+														{activeEntry?.title}
+													</h2>
+													<p className="text-xs text-slate-400">
+														{activeEntry?.organization} {activeEntry?.dates ? `· ${activeEntry.dates}` : ""}
+													</p>
+												</div>
+											</div>
+
+											<div className="text-right">
+												<span className="text-[11px] text-slate-400 block">
+													One conversation · a statement for each piece of work
+												</span>
+												<button
+													type="button"
+													onClick={() => setStoriesViewMode("overview")}
+													className="text-xs text-slate-400 hover:text-white mt-2 cursor-pointer font-semibold"
+												>
+													Pause
+												</button>
+											</div>
+										</div>
+
+										{/* Main Card */}
+										<div className="rounded-2xl border border-slate-800 bg-[#070e17] p-6 sm:p-8 shadow-2xl space-y-6">
+											{/* "Here's what I heard" Badge */}
+											<div className="inline-flex items-center px-2.5 py-1 rounded bg-[#102219] border border-emerald-500/40 text-[11px] font-mono font-bold text-emerald-300">
+												Here's what I heard
+											</div>
+
+											<div className="space-y-1">
+												<h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+													{extractedTopics.length} things from {orgName}.
+												</h3>
+												<p className="text-xs sm:text-sm text-slate-400">
+													Each one can become a bullet. Rename, set aside, or add anything that's missing.
+												</p>
+											</div>
+
+											{/* Checkbox Items List */}
+											<div className="space-y-2.5">
+												{extractedTopics.map((topic, idx) => (
+													<div
+														key={topic.id}
+														onClick={() => {
+															setExtractedTopics((prev) =>
+																prev.map((t) =>
+																	t.id === topic.id ? { ...t, selected: !t.selected } : t
+																)
+															);
+														}}
+														className={cn(
+															"flex items-center gap-3.5 p-3.5 rounded-xl border transition-all cursor-pointer",
+															topic.selected
+																? "border-emerald-500/50 bg-[#09181d] text-white"
+																: "border-slate-800 bg-slate-900/40 text-slate-400 hover:border-slate-700"
+														)}
+													>
+														<div
+															className={cn(
+																"size-5 rounded flex items-center justify-center transition-colors shrink-0",
+																topic.selected
+																	? "bg-emerald-500 text-slate-950 font-bold"
+																	: "border border-slate-600 bg-slate-800"
+															)}
+														>
+															{topic.selected && <Check className="size-3.5 stroke-[3]" />}
+														</div>
+														<span className="text-sm font-semibold flex-1">
+															{topic.text}
+														</span>
+													</div>
+												))}
+											</div>
+
+											{/* "Anything else from ... worth adding?" */}
+											<div className="pt-2 space-y-3">
+												<h4 className="text-sm font-bold text-white">
+													Anything else from {orgName} worth adding?
+												</h4>
+
+												{/* Speak your answer button */}
+												<div className="flex items-center gap-3">
+													<button
+														type="button"
+														onClick={() => {
+															if (isSpeakingAnswer) {
+																setIsSpeakingAnswer(false);
+																voiceAssistant.stop();
+															} else {
+																const baseText = customTopicInput ? customTopicInput.trim() : "";
+																setIsSpeakingAnswer(true);
+																const started = voiceAssistant.start(
+																	(transcript) => {
+																		const combined = baseText ? `${baseText} ${transcript}` : transcript;
+																		setCustomTopicInput(combined);
+																	},
+																	(err) => {
+																		console.warn("Speech error:", err);
+																		setIsSpeakingAnswer(false);
+																	},
+																	() => {
+																		setIsSpeakingAnswer(false);
+																	}
+																);
+																if (!started) {
+																	setIsSpeakingAnswer(false);
+																}
+															}
+														}}
+														className={cn(
+															"px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-bold transition-all cursor-pointer border",
+															isSpeakingAnswer
+																? "bg-rose-500/20 border-rose-500 text-rose-300 animate-pulse"
+																: "bg-[#112419] border-emerald-500/40 text-emerald-300 hover:bg-[#152e20]"
+														)}
+													>
+														<Mic className="size-4 text-emerald-400" />
+														<span>{isSpeakingAnswer ? "Stop recording..." : "Speak your answer"}</span>
+													</button>
+													<span className="text-[11px] text-slate-500">
+														{isSpeakingAnswer ? "Listening... Speak naturally" : "Your voice, in your words. Review before sending."}
+													</span>
+												</div>
+
+												{/* Optional add input */}
+												<div className="space-y-2">
+													<textarea
+														rows={2}
+														value={customTopicInput}
+														onChange={(e) => setCustomTopicInput(e.target.value)}
+														placeholder="Optional. Speak or type anything else from this role."
+														className="w-full rounded-xl border border-slate-800 bg-[#060b13] p-3 text-xs text-white placeholder-slate-600 focus:border-emerald-500 outline-none resize-none"
+													/>
+
+													{customTopicInput.trim() && (
+														<button
+															type="button"
+															onClick={() => {
+																if (!customTopicInput.trim()) return;
+																setExtractedTopics((prev) => [
+																	...prev,
+																	{ id: `custom_${Date.now()}`, text: customTopicInput.trim(), selected: true },
+																]);
+																setCustomTopicInput("");
+																toast.success("Added to checklist!");
+															}}
+															className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 cursor-pointer"
+														>
+															+ Add to the list
+														</button>
+													)}
+												</div>
+											</div>
+
+											{/* Bottom Action: Start with these N -> */}
+											<div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+												<button
+													type="button"
+													onClick={() => setStoriesViewMode("overview")}
+													className="text-xs text-slate-400 hover:text-white cursor-pointer font-semibold"
+												>
+													Decide later
+												</button>
+
+												<button
+													type="button"
+													onClick={handleStartWithSelectedTopics}
+													className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+												>
+													<span>Start with these {selectedCount} →</span>
+												</button>
+											</div>
+										</div>
+									</div>
+								);
+							})()
+						) : storiesViewMode === "topic_drilldown" ? (
+							/* ── TOPIC DRILLDOWN MODE: Asking questions for extracted points one by one ── */
+							(() => {
+								const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+								const selected = extractedTopics.filter((t) => t.selected);
+								const currentTopic = selected[drilldownTopicIndex];
+								const totalTopics = selected.length;
+
+								return (
+									<div className="space-y-4">
+										{/* Top breadcrumb */}
+										<div className="flex items-center justify-between text-xs text-slate-400">
+											<div className="flex items-center gap-2">
+												<button
+													type="button"
+													onClick={() => setStoriesViewMode("checklist")}
+													className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer font-semibold"
+												>
+													<ArrowLeft className="size-3.5" />
+													<span>Back to list</span>
+												</button>
+												<span className="text-slate-600">/</span>
+												<span className="text-emerald-400 font-mono font-bold">
+													Point {drilldownTopicIndex + 1} of {totalTopics}
+												</span>
+											</div>
+
+											<span className="text-[11px] text-slate-500 font-mono">
+												{activeEntry.title}
+											</span>
+										</div>
+
+										<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#091524] p-6 sm:p-7 shadow-2xl space-y-5">
+											{/* Zoe badge & audio controls */}
+											<div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
+												<div className="flex items-center gap-3">
+													<span className="text-xs font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+														Zoe
+													</span>
+													<button
+														type="button"
+														onClick={() => {
+															if (currentTopicQuestion) speakText(currentTopicQuestion);
+														}}
+														className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+													>
+														<Volume2 className="size-3.5 text-emerald-400" />
+														<span>Hear again</span>
+													</button>
+												</div>
+
+												<div className="flex items-center gap-2">
+													<span className="text-xs text-slate-400 font-medium">Topic:</span>
+													<span className="text-xs font-bold text-white px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700">
+														{currentTopic ? currentTopic.text : "Role contribution"}
+													</span>
+												</div>
+											</div>
+
+											{/* Focused Question for this specific extracted point */}
+											<div className="space-y-1.5">
+												<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+													{isLoadingTopicQuestion ? "Zoe is crafting a question..." : currentTopicQuestion}
+												</h3>
+												<p className="text-xs text-slate-400">
+													Focus on your specific role, challenge, tools used, or outcome. Zoe will draft the resume bullet.
+												</p>
+											</div>
+
+											{/* Speak voice recorder */}
+											<div className="flex items-center gap-3">
+												<button
+													type="button"
+													onClick={() => {
+														if (isSpeakingAnswer) {
+															setIsSpeakingAnswer(false);
+															voiceAssistant.stop();
+														} else {
+															const baseText = experienceInputText ? experienceInputText.trim() : "";
+															setIsSpeakingAnswer(true);
+															const started = voiceAssistant.start(
+																(transcript) => {
+																	const combined = baseText ? `${baseText} ${transcript}` : transcript;
+																	setExperienceInputText(combined);
+																},
+																(err) => {
+																	console.warn("Speech error:", err);
+																	setIsSpeakingAnswer(false);
+																},
+																() => {
+																	setIsSpeakingAnswer(false);
+																}
+															);
+															if (!started) {
+																setIsSpeakingAnswer(false);
+															}
+														}
+													}}
+													className={cn(
+														"px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer",
+														isSpeakingAnswer
+															? "bg-rose-500/20 border-2 border-rose-500 text-rose-300 animate-pulse"
+															: "bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
+													)}
+												>
+													<Mic className="size-4 text-emerald-400" />
+													<span>{isSpeakingAnswer ? "Stop recording..." : "Speak your answer"}</span>
+												</button>
+												<span className="text-[11px] text-slate-500">
+													{isSpeakingAnswer ? "Listening... Speak naturally" : "Your voice, in your words."}
+												</span>
+											</div>
+
+											{/* Direct Answer Textarea */}
+											<div className="space-y-3">
+												<textarea
+													rows={4}
+													value={experienceInputText}
+													onChange={(e) => setExperienceInputText(e.target.value)}
+													placeholder={`e.g. For ${currentTopic?.text || "this item"}, I designed the frontend architecture and...`}
+													className="w-full rounded-2xl border border-slate-700 bg-[#060c14] p-4 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none transition-colors"
+												/>
+
+												<div className="flex items-center justify-between pt-1">
+													<button
+														type="button"
+														onClick={() => {
+															// Skip to next topic
+															const nextIdx = drilldownTopicIndex + 1;
+															if (nextIdx < selected.length) {
+																setDrilldownTopicIndex(nextIdx);
+																handleStartWithSelectedTopics();
+															} else {
+																setStoriesViewMode("overview");
+															}
+														}}
+														className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+													>
+														Skip this point
+													</button>
+
+													<button
+														type="button"
+														disabled={isSubmittingAnswer || !experienceInputText.trim()}
+														onClick={() => handleSaveTopicDrilldownAnswer(experienceInputText)}
+														className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+													>
+														<span>{isSubmittingAnswer ? "Drafting bullet..." : "Send answer"}</span>
+														<ArrowRight className="size-4" />
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								);
+							})()
 						) : (
 							/* Overview Mode: Exactly matching screenshots 1, 2, and 3 */
 							<div className="space-y-7">
@@ -3096,8 +3413,9 @@ export function GuidedStoryRoute() {
 											<button
 												type="button"
 												onClick={() => {
-													setIsAddingManual(true);
-													setNewManualCategory(activeSectionPromptType === "projects" ? "projects" : activeSectionPromptType === "education" ? "education" : "volunteer");
+													const category = activeSectionPromptType === "projects" ? "projects" : activeSectionPromptType === "education" ? "education" : "volunteer";
+													setQuickAddCategory(category);
+													setQuickAddSectionModalOpen(true);
 												}}
 												className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
 											>
@@ -3143,16 +3461,16 @@ export function GuidedStoryRoute() {
 										</div>
 
 										<button
-										type="button"
-										onClick={() => {
-											setIsAddingManual(true);
-											setNewManualCategory("work");
-										}}
-										className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-									>
-										<Plus className="size-3.5" />
-										<span>Add</span>
-									</button>
+											type="button"
+											onClick={() => {
+												setIsAddingManual(true);
+												setNewManualCategory("work");
+											}}
+											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5" />
+											<span>Add</span>
+										</button>
 									</div>
 
 									{/* Work Entry Cards */}
@@ -3195,376 +3513,511 @@ export function GuidedStoryRoute() {
 														</div>
 													</div>
 
-													{/* Generated bullets with Edit annotations as seen in screenshot 2 */}
-													<div className="space-y-3.5 pt-1">
+													{/* Generated bullets with Edit annotations matching user's exact design */}
+													<div className="space-y-4 pt-1">
 														{points.length > 0 ? (
 															points.map((pt, pIdx) => (
-																<div key={pIdx} className="space-y-1">
-																	<p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+																<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
+																	<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
 																		{pt}
 																	</p>
-																	<div className="flex items-center gap-2 text-[11px] text-slate-400">
+																	<div className="flex items-center gap-2 text-[11px]">
 																		<button
-																							type="button"
-																							onClick={() => {
-																								setEditingPointKey(`${entry.id}_${pIdx}`);
-																								setEditingPointText(pt);
-																								setShowFinalSummaryModal(true);
+																			type="button"
+																			onClick={() => {
+																				setEditingPointKey(`${entry.id}_${pIdx}`);
+																				setEditingPointText(pt);
+																				setShowFinalSummaryModal(true);
 																			}}
-															className="text-emerald-400 hover:underline font-semibold cursor-pointer"
-														>
-															Edit
-														</button>
-														<span className="text-slate-500">·</span>
-														<span className="text-slate-400 italic">
-															{pIdx === 0 && "Feedback or usage once testing is done"}
-															{pIdx === 1 && "Whether accuracy issues were fixed or improved"}
-															{pIdx >= 2 && "Key technical contribution and outcome"}
+																			className="text-slate-400 hover:text-white font-medium cursor-pointer"
+																		>
+																			Edit
+																		</button>
+																		<span className="text-slate-400">
+																			{pIdx === 0 && "Feedback or usage once testing is done"}
+																			{pIdx === 1 && "Whether accuracy issues were fixed or improved"}
+																			{pIdx >= 2 && "Exact tools or outcome (transcription was unclear)"}
+																		</span>
+																	</div>
+																</div>
+															))
+														) : (
+															<div className="space-y-1">
+																<p className="text-xs text-slate-400 italic">
+																	{entry.description || "Talk with Zoe or write directly to draft resume points."}
+																</p>
+															</div>
+														)}
+													</div>
+
+													{/* Card Footer: Bullets count and actions */}
+													<div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+														<span className="text-[11px] font-mono text-slate-400">
+															BULLETS {points.length} of up to 5
 														</span>
+
+														<div className="flex items-center gap-2">
+															<button
+																type="button"
+																onClick={() => {
+																	setInterviewActiveEntryId(entry.id);
+																	setStoriesViewMode("interview");
+																}}
+																className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+															>
+																Reopen entry
+															</button>
+
+															<button
+																type="button"
+																onClick={() => {
+																	setInterviewActiveEntryId(entry.id);
+																	setStoriesViewMode("interview");
+																}}
+																className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-colors cursor-pointer"
+															>
+																<Mic className="size-3.5" />
+																<span>Add another story</span>
+															</button>
+
+															<button
+																type="button"
+																onClick={() => {
+																	setShowFinalSummaryModal(true);
+																}}
+																className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+															>
+																Write directly
+															</button>
+														</div>
 													</div>
 												</div>
-											))
-										) : (
-											<div className="space-y-1">
-												<p className="text-xs text-slate-400 italic">
-													{entry.description || "Talk with Zoe or write directly to draft resume points."}
-												</p>
+											);
+										})}
+
+										{outlineEntries.filter((e) => e.category === "work").length === 0 && (
+											<div className="p-5 rounded-2xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
+												No work experiences added yet. Click "+ Add" above to add your employment.
 											</div>
 										)}
 									</div>
-
-									{/* Card Footer: Bullets count and actions */}
-									<div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-										<span className="text-[11px] font-mono text-slate-400">
-											BULLETS {points.length} of up to 5
-										</span>
-
-										<div className="flex items-center gap-2">
-											<button
-												type="button"
-												onClick={() => {
-													setInterviewActiveEntryId(entry.id);
-													setStoriesViewMode("interview");
-												}}
-												className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
-											>
-												Reopen entry
-											</button>
-
-											<button
-												type="button"
-												onClick={() => {
-													setInterviewActiveEntryId(entry.id);
-													setStoriesViewMode("interview");
-												}}
-												className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-colors cursor-pointer"
-											>
-												<Mic className="size-3.5" />
-												<span>Add another story</span>
-											</button>
-
-											<button
-												type="button"
-												onClick={() => {
-													setShowFinalSummaryModal(true);
-												}}
-												className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
-											>
-												Write directly
-											</button>
-										</div>
-									</div>
 								</div>
-							);
-						})}
 
-						{outlineEntries.filter((e) => e.category === "work").length === 0 && (
-							<div className="p-5 rounded-2xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
-								No work experiences added yet. Click "+ Add" above to add your employment.
-							</div>
-						)}
-					</div>
-				</div>
-
-				{/* SECTION 2: Projects */}
-				<div className="space-y-3.5">
-					<div className="flex items-center justify-between pb-1">
-						<div className="flex items-center gap-2.5">
-							<h3 className="text-base sm:text-lg font-bold text-white">Projects</h3>
-							<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-								{outlineEntries.filter((e) => e.category === "projects").length}
-							</span>
-						</div>
-
-						<button
-						type="button"
-						onClick={() => {
-							setIsAddingManual(true);
-							setNewManualCategory("projects");
-						}}
-						className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-					>
-						<Plus className="size-3.5" />
-						<span>Add</span>
-					</button>
-				</div>
-
-				{outlineEntries.filter((e) => e.category === "projects").length > 0 ? (
-					<div className="space-y-4">
-						{outlineEntries.filter((e) => e.category === "projects").map((entry) => {
-							const points = entry.points || [];
-							return (
-								<div
-									key={entry.id}
-									className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-4 shadow-lg"
-								>
-									<div className="flex items-start justify-between gap-4">
-										<div>
-											<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block mb-1">
-												PROJECT
+								{/* SECTION 2: Projects */}
+								<div className="space-y-3.5">
+									<div className="flex items-center justify-between pb-1">
+										<div className="flex items-center gap-2.5">
+											<h3 className="text-base sm:text-lg font-bold text-white">Projects</h3>
+											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+												{outlineEntries.filter((e) => e.category === "projects").length}
 											</span>
-											<h4 className="text-lg font-bold text-white tracking-tight">
-												{entry.title}
-											</h4>
-											<p className="text-xs text-slate-400 mt-0.5">
-												{entry.organization || "Independent Project"} {entry.dates ? `· ${entry.dates}` : ""}
-											</p>
 										</div>
 
-										<div className="flex items-center gap-2">
-											<button
-										type="button"
-										onClick={() => {
-											setInterviewActiveEntryId(entry.id);
-											setStoriesViewMode("interview");
-										}}
-										className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
-										title="Edit project"
-									>
-										<Edit3 className="size-4" />
-									</button>
+										<button
+											type="button"
+											onClick={() => {
+												setIsAddingManual(true);
+												setNewManualCategory("projects");
+											}}
+											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5" />
+											<span>Add</span>
+										</button>
 									</div>
-								</div>
 
-								<div className="space-y-2 pt-1">
-									{points.length > 0 ? (
-										points.map((pt, pIdx) => (
-											<p key={pIdx} className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-												{pt}
-											</p>
-										))
+									{outlineEntries.filter((e) => e.category === "projects").length > 0 ? (
+										<div className="space-y-4">
+											{outlineEntries.filter((e) => e.category === "projects").map((entry) => {
+												const points = entry.points || [];
+												return (
+													<div
+														key={entry.id}
+														className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-4 shadow-lg"
+													>
+														<div className="flex items-start justify-between gap-4">
+															<div>
+																<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block mb-1">
+																	PROJECT
+																</span>
+																<h4 className="text-lg font-bold text-white tracking-tight">
+																	{entry.title}
+																</h4>
+																<p className="text-xs text-slate-400 mt-0.5">
+																	{entry.organization || "Independent Project"} {entry.dates ? `· ${entry.dates}` : ""}
+																</p>
+															</div>
+
+															<div className="flex items-center gap-2">
+																<button
+																	type="button"
+																	onClick={() => {
+																		setInterviewActiveEntryId(entry.id);
+																		setStoriesViewMode("interview");
+																	}}
+																	className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+																	title="Edit project"
+																>
+																	<Edit3 className="size-4" />
+																</button>
+															</div>
+														</div>
+
+														{/* Generated bullets with Edit annotations */}
+														<div className="space-y-4 pt-1">
+															{points.length > 0 ? (
+																points.map((pt, pIdx) => (
+																	<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
+																		<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+																			{pt}
+																		</p>
+																		<div className="flex items-center gap-2 text-[11px]">
+																			<button
+																				type="button"
+																				onClick={() => {
+																					setEditingPointKey(`${entry.id}_${pIdx}`);
+																					setEditingPointText(pt);
+																					setShowFinalSummaryModal(true);
+																				}}
+																				className="text-slate-400 hover:text-white font-medium cursor-pointer"
+																			>
+																				Edit
+																			</button>
+																			<span className="text-slate-400">
+																				{pIdx === 0 && "Key technical contribution and outcome"}
+																				{pIdx === 1 && "Feedback or usage once testing is done"}
+																				{pIdx >= 2 && "Exact tools or outcome"}
+																			</span>
+																		</div>
+																	</div>
+																))
+															) : (
+																<div className="space-y-1">
+																	<p className="text-xs text-slate-400 italic">
+																		{entry.description || "A class project, personal project, or something you built."}
+																	</p>
+																</div>
+															)}
+														</div>
+
+														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+															<span className="text-[11px] font-mono text-slate-400">
+																BULLETS {points.length} of up to 3
+															</span>
+															<div className="flex items-center gap-2">
+																<button
+																	type="button"
+																	onClick={() => {
+																		setInterviewActiveEntryId(entry.id);
+																		setStoriesViewMode("interview");
+																	}}
+																	className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+																>
+																	Reopen entry
+																</button>
+																<button
+																	type="button"
+																	onClick={() => {
+																		setInterviewActiveEntryId(entry.id);
+																		setStoriesViewMode("interview");
+																	}}
+																	className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+																>
+																	<Mic className="size-3.5" />
+																	<span>Add another story</span>
+																</button>
+															</div>
+														</div>
+													</div>
+												);
+											})}
+										</div>
 									) : (
-										<p className="text-xs text-slate-400 italic">
-											{entry.description || "A class project, personal project, or something you built."}
-										</p>
+										<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+											A class project, personal project, or something you built.
+										</div>
 									)}
 								</div>
 
-								<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-									<span className="text-[11px] font-mono text-slate-400">
-										BULLETS {points.length} of up to 3
-									</span>
+								{/* SECTION 3: Volunteering & activities */}
+								<div className="space-y-3.5">
+									<div className="flex items-center justify-between pb-1">
+										<div className="flex items-center gap-2.5">
+											<h3 className="text-base sm:text-lg font-bold text-white">Volunteering & activities</h3>
+											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+												{outlineEntries.filter((e) => e.category === "volunteer").length}
+											</span>
+										</div>
+
+										<button
+											type="button"
+											onClick={() => {
+												setIsAddingManual(true);
+												setNewManualCategory("volunteer");
+											}}
+											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5" />
+											<span>Add</span>
+										</button>
+									</div>
+
+									{outlineEntries.filter((e) => e.category === "volunteer").length > 0 ? (
+										<div className="space-y-4">
+											{outlineEntries.filter((e) => e.category === "volunteer").map((entry) => {
+												const points = entry.points || [];
+												return (
+													<div
+														key={entry.id}
+														className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
+													>
+														<div className="flex items-start justify-between gap-4">
+															<div>
+																<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
+																	ACTIVITY
+																</span>
+																<h4 className="text-lg font-bold text-white tracking-tight">
+																	{entry.title}
+																</h4>
+																<p className="text-xs text-slate-400 mt-0.5">
+																	{entry.organization || "XL Bootcamp"} {entry.dates ? `· ${entry.dates}` : ""}
+																</p>
+															</div>
+
+															<div className="flex items-center gap-2">
+																<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
+																	Ready to explore
+																</span>
+																<button
+																	onClick={() => {
+																		setInterviewActiveEntryId(entry.id);
+																		setStoriesViewMode("interview");
+																	}}
+																	className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+																	title="Edit activity"
+																>
+																	<Edit3 className="size-4" />
+																</button>
+															</div>
+														</div>
+
+														{/* Generated bullets with Edit annotations matching exact format */}
+														<div className="space-y-4 pt-1">
+															{points.length > 0 ? (
+																points.map((pt, pIdx) => (
+																	<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
+																		<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+																			{pt}
+																		</p>
+																		<div className="flex items-center gap-2 text-[11px]">
+																			<button
+																				type="button"
+																				onClick={() => {
+																					setEditingPointKey(`${entry.id}_${pIdx}`);
+																					setEditingPointText(pt);
+																					setShowFinalSummaryModal(true);
+																				}}
+																				className="text-slate-400 hover:text-white font-medium cursor-pointer"
+																			>
+																				Edit
+																			</button>
+																			<span className="text-slate-400">
+																				{pIdx === 0 && "Key contribution and community outcome"}
+																				{pIdx === 1 && "Feedback or participant growth"}
+																				{pIdx >= 2 && "Exact tools or outcome"}
+																			</span>
+																		</div>
+																	</div>
+																))
+															) : (
+																<p className="text-xs text-slate-400 italic">
+																	{entry.description || "Mentoring, volunteering, leadership, or community activities."}
+																</p>
+															)}
+														</div>
+
+														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+															<span className="text-[11px] font-mono text-slate-400">
+																BULLETS {points.length} of up to 3
+															</span>
+															<div className="flex items-center gap-2">
+																<button
+																	type="button"
+																	onClick={() => {
+																		setInterviewActiveEntryId(entry.id);
+																		setStoriesViewMode("interview");
+																	}}
+																	className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+																>
+																	Reopen entry
+																</button>
+																<button
+																	type="button"
+																	onClick={() => {
+																		setInterviewActiveEntryId(entry.id);
+																		setStoriesViewMode("interview");
+																	}}
+																	className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+																>
+																	<Mic className="size-3.5" />
+																	<span>Add another story</span>
+																</button>
+															</div>
+														</div>
+													</div>
+												);
+											})}
+										</div>
+									) : (
+										<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+											Mentoring, volunteering, leadership, or community activities.
+										</div>
+									)}
+								</div>
+
+								{/* SECTION 4: Education */}
+								<div className="space-y-3.5">
+									<div className="flex items-center justify-between pb-1">
+										<div className="flex items-center gap-2.5">
+											<h3 className="text-base sm:text-lg font-bold text-white">Education</h3>
+											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+												{outlineEntries.filter((e) => e.category === "education").length}
+											</span>
+										</div>
+
+										<button
+											type="button"
+											onClick={() => {
+												setQuickAddCategory("education");
+												setQuickAddSectionModalOpen(true);
+											}}
+											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+										>
+											<Plus className="size-3.5" />
+											<span>Add</span>
+										</button>
+									</div>
+
+									{outlineEntries.filter((e) => e.category === "education").length > 0 ? (
+										<div className="space-y-4">
+											{outlineEntries.filter((e) => e.category === "education").map((edu) => {
+												const points = edu.points || [];
+												return (
+													<div
+														key={edu.id}
+														className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
+													>
+														<div className="flex items-start justify-between gap-4">
+															<div>
+																<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
+																	EDUCATION
+																</span>
+																<h4 className="text-lg font-bold text-white tracking-tight">
+																	{edu.title}
+																</h4>
+																<p className="text-xs text-slate-400 mt-0.5">
+																	{edu.organization || "University / College"} {edu.dates ? `· ${edu.dates}` : ""}
+																</p>
+															</div>
+
+															<div className="flex items-center gap-2">
+																<button
+																	type="button"
+																	onClick={() => {
+																		setOutlineEntries((prev) => prev.filter((e) => e.id !== edu.id));
+																		toast.success("Education entry removed");
+																	}}
+																	className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
+																	title="Remove education"
+																>
+																	<Trash2 className="size-4" />
+																</button>
+															</div>
+														</div>
+
+														{/* Generated bullets with Edit annotations */}
+														<div className="space-y-4 pt-1">
+															{points.length > 0 ? (
+																points.map((pt, pIdx) => (
+																	<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
+																		<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+																			{pt}
+																		</p>
+																		<div className="flex items-center gap-2 text-[11px]">
+																			<button
+																				type="button"
+																				onClick={() => {
+																					setEditingPointKey(`${edu.id}_${pIdx}`);
+																					setEditingPointText(pt);
+																					setShowFinalSummaryModal(true);
+																				}}
+																				className="text-slate-400 hover:text-white font-medium cursor-pointer"
+																			>
+																				Edit
+																			</button>
+																			<span className="text-slate-400">
+																				{pIdx === 0 && "Core coursework, honors, or capstone"}
+																				{pIdx >= 1 && "Academic achievement or awards"}
+																			</span>
+																		</div>
+																	</div>
+																))
+															) : (
+																<p className="text-xs text-slate-400 italic">
+																	{edu.description || "Academic highlights, major projects, certifications, or notable awards."}
+																</p>
+															)}
+														</div>
+
+														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+															<span className="text-[11px] font-mono text-slate-400">
+																BULLETS {points.length} of up to 3
+															</span>
+															<div className="flex items-center gap-2">
+																<button
+																	type="button"
+																	onClick={() => {
+																		setInterviewActiveEntryId(edu.id);
+																		setStoriesViewMode("interview");
+																	}}
+																	className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+																>
+																	<Mic className="size-3.5" />
+																	<span>Add a story</span>
+																</button>
+															</div>
+														</div>
+													</div>
+												);
+											})}
+										</div>
+									) : (
+										<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+											Qualifications, training, coursework, and learning achievements. Stories are optional.
+										</div>
+									)}
+								</div>
+
+								{/* Bottom Navigation Buttons matching screenshot 3 */}
+								<div className="flex items-center gap-4 pt-4 border-t border-slate-800/80">
 									<button
-									type="button"
-									onClick={() => {
-										setInterviewActiveEntryId(entry.id);
-										setStoriesViewMode("interview");
-									}}
-									className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+										type="button"
+										onClick={() => setActiveTab("plan")}
+										className="text-xs text-slate-400 hover:text-white font-semibold transition-colors cursor-pointer"
 									>
-										<Mic className="size-3.5" />
-										<span>Talk with Zoe</span>
+										View my plan
+									</button>
+
+									<button
+										type="button"
+										onClick={() => setActiveTab("details")}
+										className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors cursor-pointer"
+									>
+										<span>Continue to details</span>
+										<ArrowRight className="size-3.5" />
 									</button>
 								</div>
 							</div>
-						);
-					})}
-				</div>
-			) : (
-				<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
-					A class project, personal project, or something you built.
-				</div>
-			)}
-		</div>
-
-		{/* SECTION 3: Volunteering & activities */}
-		<div className="space-y-3.5">
-			<div className="flex items-center justify-between pb-1">
-				<div className="flex items-center gap-2.5">
-					<h3 className="text-base sm:text-lg font-bold text-white">Volunteering & activities</h3>
-					<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-						{outlineEntries.filter((e) => e.category === "volunteer").length}
-					</span>
-				</div>
-
-				<button
-					type="button"
-					onClick={() => {
-						setIsAddingManual(true);
-						setNewManualCategory("volunteer");
-					}}
-					className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-				>
-					<Plus className="size-3.5" />
-					<span>Add</span>
-				</button>
-			</div>
-
-			{outlineEntries.filter((e) => e.category === "volunteer").length > 0 ? (
-				<div className="space-y-4">
-					{outlineEntries.filter((e) => e.category === "volunteer").map((entry) => {
-						const points = entry.points || [];
-						return (
-							<div
-								key={entry.id}
-								className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
-							>
-								<div className="flex items-start justify-between gap-4">
-								<div>
-									<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
-										ACTIVITY
-									</span>
-									<h4 className="text-lg font-bold text-white tracking-tight">
-										{entry.title}
-									</h4>
-									<p className="text-xs text-slate-400 mt-0.5">
-										{entry.organization || "XL Bootcamp"} {entry.dates ? `· ${entry.dates}` : ""}
-									</p>
-								</div>
-
-								<div className="flex items-center gap-2">
-									<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
-										Ready to explore
-									</span>
-									<button
-									onClick={() => {
-										setInterviewActiveEntryId(entry.id);
-										setStoriesViewMode("interview");
-									}}
-									className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
-									title="Edit activity"
-									>
-										<Edit3 className="size-4" />
-									</button>
-								</div>
-							</div>
-
-							<div className="pt-2">
-								<span className="text-[11px] font-mono text-slate-400">
-									BULLETS {points.length} of up to 3
-								</span>
-							</div>
-
-							<div className="pt-2 flex items-center gap-3">
-								<button
-									type="button"
-									onClick={() => {
-										setInterviewActiveEntryId(entry.id);
-										setStoriesViewMode("interview");
-									}}
-									className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold cursor-pointer"
-								>
-									<Mic className="size-3.5 text-emerald-400" />
-									<span>Talk with Zoe</span>
-								</button>
-
-								<button
-									type="button"
-									onClick={() => {
-										setShowFinalSummaryModal(true);
-									}}
-									className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold cursor-pointer"
-								>
-									Write directly
-								</button>
-							</div>
-						</div>
-					);
-				})}
-			</div>
-		) : (
-			<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
-				Mentoring, volunteering, leadership, or community activities.
-			</div>
-		)}
-	</div>
-
-	{/* SECTION 4: Education */}
-	<div className="space-y-3.5">
-		<div className="flex items-center justify-between pb-1">
-			<div className="flex items-center gap-2.5">
-				<h3 className="text-base sm:text-lg font-bold text-white">Education</h3>
-				<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-					{outlineEntries.filter((e) => e.category === "education").length}
-				</span>
-			</div>
-
-			<button
-				type="button"
-				onClick={() => {
-					setIsAddingManual(true);
-					setNewManualCategory("education");
-				}}
-				className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-			>
-				<Plus className="size-3.5" />
-				<span>Add</span>
-			</button>
-		</div>
-
-		{outlineEntries.filter((e) => e.category === "education").length > 0 ? (
-			<div className="space-y-3">
-				{outlineEntries.filter((e) => e.category === "education").map((edu) => (
-					<div
-						key={edu.id}
-						className="flex items-center justify-between p-4 rounded-xl border border-slate-800 bg-[#070e19]"
-					>
-						<div className="space-y-0.5">
-							<div className="text-sm font-semibold text-white">{edu.title}</div>
-							<div className="text-xs text-slate-400">
-								{edu.organization || "Institution"} {edu.dates ? `· ${edu.dates}` : ""}
-							</div>
-						</div>
-						<button
-							type="button"
-							onClick={() => {
-								setOutlineEntries((prev) => prev.filter((e) => e.id !== edu.id));
-								toast.success("Education entry removed");
-							}}
-							className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
-						>
-							<Trash2 className="size-4" />
-						</button>
-					</div>
-				))}
-			</div>
-		) : (
-			<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
-				Qualifications, training, coursework, and learning achievements. Stories are optional.
-			</div>
-		)}
-	</div>
-
-	{/* Bottom Navigation Buttons matching screenshot 3 */}
-	<div className="flex items-center gap-4 pt-4 border-t border-slate-800/80">
-		<button
-			type="button"
-			onClick={() => setActiveTab("plan")}
-			className="text-xs text-slate-400 hover:text-white font-semibold transition-colors cursor-pointer"
-		>
-			View my plan
-		</button>
-
-		<button
-			type="button"
-			onClick={() => setActiveTab("details")}
-			className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors cursor-pointer"
-		>
-			<span>Continue to details</span>
-			<ArrowRight className="size-3.5" />
-		</button>
-	</div>
-</div>
 						)}
 					</div>
 				)}
@@ -3588,42 +4041,42 @@ export function GuidedStoryRoute() {
 						{/* Sub-tab pills: Contact, Skills, Summary */}
 						<div className="flex items-center justify-between gap-2 pt-1">
 							<div className="flex items-center gap-2">
-							<button
-								type="button"
-								onClick={() => setDetailsSubTab("contact")}
-								className={cn(
-									"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-									detailsSubTab === "contact"
-										? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
-										: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
-								)}
-							>
-								Contact
-							</button>
-							<button
-								type="button"
-								onClick={() => setDetailsSubTab("skills")}
-								className={cn(
-									"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-									detailsSubTab === "skills"
-										? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
-										: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
-								)}
-							>
-								Skills
-							</button>
-							<button
-								type="button"
-								onClick={() => setDetailsSubTab("summary")}
-								className={cn(
-									"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-									detailsSubTab === "summary"
-										? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
-										: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
-								)}
-							>
-								Summary
-							</button>
+								<button
+									type="button"
+									onClick={() => setDetailsSubTab("contact")}
+									className={cn(
+										"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+										detailsSubTab === "contact"
+											? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+											: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+									)}
+								>
+									Contact
+								</button>
+								<button
+									type="button"
+									onClick={() => setDetailsSubTab("skills")}
+									className={cn(
+										"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+										detailsSubTab === "skills"
+											? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+											: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+									)}
+								>
+									Skills
+								</button>
+								<button
+									type="button"
+									onClick={() => setDetailsSubTab("summary")}
+									className={cn(
+										"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+										detailsSubTab === "summary"
+											? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+											: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+									)}
+								>
+									Summary
+								</button>
 							</div>
 
 							<button
@@ -5288,7 +5741,7 @@ export function GuidedStoryRoute() {
 					</div>
 				</div>
 			)}
-		
+
 			{/* Template Gallery Modal */}
 			{showTemplateModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -5412,6 +5865,130 @@ export function GuidedStoryRoute() {
 				</div>
 			)}
 
+			{/* Quick Add Project / Activity / Education Modal */}
+			{quickAddSectionModalOpen && (
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+					onClick={() => setQuickAddSectionModalOpen(false)}
+				>
+					<div
+						className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-[#09121f] text-slate-100 shadow-2xl p-6 sm:p-7 space-y-5"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<div className="flex items-center justify-between pb-2 border-b border-slate-800">
+							<div>
+								<span className="text-[10px] font-mono tracking-wider uppercase text-emerald-400 font-bold block">
+									ADD TO YOUR RESUME
+								</span>
+								<h3 className="text-lg font-bold text-white">
+									{quickAddCategory === "projects" && "Add a project"}
+									{quickAddCategory === "education" && "Add education / degree"}
+									{quickAddCategory === "volunteer" && "Add volunteering & activity"}
+								</h3>
+							</div>
+							<button
+								type="button"
+								onClick={() => setQuickAddSectionModalOpen(false)}
+								className="text-slate-400 hover:text-white p-1"
+							>
+								✕
+							</button>
+						</div>
+
+						<div className="space-y-4 text-xs">
+							<div className="space-y-1.5">
+								<label className="font-semibold text-slate-300">
+									{quickAddCategory === "projects" && "Project title"}
+									{quickAddCategory === "education" && "Degree / Qualification"}
+									{quickAddCategory === "volunteer" && "Role / Activity"}
+								</label>
+								<input
+									type="text"
+									value={quickAddTitle}
+									onChange={(e) => setQuickAddTitle(e.target.value)}
+									placeholder={
+										quickAddCategory === "projects"
+											? "e.g. AI Resume Builder, E-commerce App"
+											: quickAddCategory === "education"
+											? "e.g. B.Tech Computer Science, Web Development Certificate"
+											: "e.g. Open Source Contributor, Mentor"
+									}
+									autoFocus
+									className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+								/>
+							</div>
+
+							<div className="grid grid-cols-2 gap-3">
+								<div className="space-y-1.5">
+									<label className="font-semibold text-slate-300">
+										{quickAddCategory === "projects" && "Tech stack / tools"}
+										{quickAddCategory === "education" && "School / University"}
+										{quickAddCategory === "volunteer" && "Organization / Community"}
+									</label>
+									<input
+										type="text"
+										value={quickAddOrg}
+										onChange={(e) => setQuickAddOrg(e.target.value)}
+										placeholder="e.g. React, Next.js, Node.js"
+										className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+									/>
+								</div>
+
+								<div className="space-y-1.5">
+									<label className="font-semibold text-slate-300">Dates (Optional)</label>
+									<input
+										type="text"
+										value={quickAddDates}
+										onChange={(e) => setQuickAddDates(e.target.value)}
+										placeholder="e.g. 2023 – 2024"
+										className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+									/>
+								</div>
+							</div>
+
+							<div className="space-y-1.5">
+								<label className="font-semibold text-slate-300">Quick description / key note (Optional)</label>
+								<textarea
+									rows={2}
+									value={quickAddDescription}
+									onChange={(e) => setQuickAddDescription(e.target.value)}
+									placeholder="Brief summary of what you did or built..."
+									className="w-full rounded-xl border border-slate-700 bg-[#0b1424] p-3 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none resize-none"
+								/>
+							</div>
+						</div>
+
+						<div className="flex items-center justify-between pt-2 border-t border-slate-800">
+							<button
+								type="button"
+								onClick={() => setQuickAddSectionModalOpen(false)}
+								className="text-xs text-slate-400 hover:text-white"
+							>
+								Cancel
+							</button>
+
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={() => handleSaveQuickAddSection(false)}
+									className="px-3.5 py-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 cursor-pointer"
+								>
+									Add to outline
+								</button>
+								<button
+									type="button"
+									onClick={() => handleSaveQuickAddSection(true)}
+									className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer shadow-md"
+								>
+									<Mic className="size-3.5" />
+									<span>Start story with Zoe →</span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+			</div>
 		</div>
 	);
 }

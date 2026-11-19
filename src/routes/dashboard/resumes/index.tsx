@@ -89,7 +89,7 @@ export function DashboardResumesRoute() {
 				setActiveStoryDraft(savedDraft ? JSON.parse(savedDraft) : null);
 				const savedEntries = localStorage.getItem("resume_buddy_outline_entries");
 				setOutlineEntries(savedEntries ? JSON.parse(savedEntries) : []);
-			} catch {}
+			} catch { }
 		};
 		refresh();
 		window.addEventListener("focus", refresh);
@@ -103,10 +103,7 @@ export function DashboardResumesRoute() {
 	// Determine if user has created or started a resume and is authenticated
 	const hasActiveResume = Boolean(
 		isAuthenticated &&
-		(activeStoryDraft ||
-			outlineEntries.length > 0 ||
-			localResumes.length > 0 ||
-			apiResumes.length > 0)
+		(localResumes.length > 0 || apiResumes.length > 0)
 	);
 
 	const activeRoleTitle =
@@ -171,13 +168,13 @@ export function DashboardResumesRoute() {
 		// Delete from local store if exists
 		try {
 			localResumeStore.delete(resumeId);
-		} catch {}
+		} catch { }
 
 		// Delete from API if applicable
 		try {
 			await api.deleteResume(resumeId);
 			await queryClient.invalidateQueries({ queryKey: ["resumes"] });
-		} catch {}
+		} catch { }
 
 		// If this is the active story draft or the only remaining draft
 		if (
@@ -191,7 +188,7 @@ export function DashboardResumesRoute() {
 				localStorage.removeItem("resume_buddy_last_worked");
 				localStorage.removeItem("resume_buddy_manual_draft");
 				localStorage.removeItem("resume_buddy_checklist");
-			} catch {}
+			} catch { }
 			setActiveStoryDraft(null);
 			setOutlineEntries([]);
 		}
@@ -254,7 +251,7 @@ export function DashboardResumesRoute() {
 							YOUR DASHBOARD
 						</span>
 						<h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-							Welcome back, {candidateName}.
+							Where would you like to start?
 						</h1>
 						<p className="text-sm sm:text-base text-slate-400">
 							Pick up where you left off, or start something new.
@@ -541,303 +538,128 @@ export function DashboardResumesRoute() {
 				</>
 			) : (
 				/* ============================================================== */
-				/* STATE B: FIRST-TIME VISITOR / NEW USER DASHBOARD (Exact Screenshot Match) */
+				/* STATE B: NEW USER / DASHBOARD (Exact Screenshot media_1795103776049_0700d4fa.jpg Match) */
 				/* ============================================================== */
-				<div className="space-y-16">
-					{/* TOP HERO SECTION: Left text + Right Interactive Zoe Mockup Card */}
-					<div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-2">
-						{/* Left Column (7 cols): Hero Headline & CTA */}
-						<div className="lg:col-span-7 space-y-6">
-							<div className="flex items-center gap-2 text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold">
-								<span className="size-1.5 rounded-full bg-emerald-400" />
-								<span>A LITTLE VOICE. A CLEARER STORY.</span>
-							</div>
+				<div className="space-y-10 pt-4 max-w-5xl">
+					{/* Header matching screenshot */}
+					<div className="space-y-3">
+						<span className="text-[11px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
+							WELCOME, {candidateName.toUpperCase()}
+						</span>
+						<h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+							Where would you like to<br />start?
+						</h1>
+						<p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+							Pick the one closest to where you are now. You can do the others later, and come back to your dashboard any time.
+						</p>
+					</div>
 
-							<div className="space-y-1">
-								<h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.08]">
-									Your <br />
-									experience. <br />
-									<span className="text-[#ccf873]">Turned up.</span>
-								</h1>
-							</div>
-
-							<p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-lg">
-								You've done more than you think. Talk it through with Zoe and turn the useful details into a resume that sounds like you.
-							</p>
-
-							<div className="pt-2 space-y-3">
-								<button
-									type="button"
-									onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
-									className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-sm shadow-lg shadow-lime-500/10 transition-all cursor-pointer active:scale-95"
-								>
-									<Mic className="size-4 text-slate-950" />
-									<span>Start a new resume</span>
-									<ArrowRight className="size-4 text-slate-950" />
-								</button>
-
-								<p className="text-xs text-slate-400">
-									Speak or type. Go at your pace.
-								</p>
-
-								<div className="pt-1">
-									<button
-										type="button"
-										onClick={() => requireAuthAction("/dashboard/resumes/manual-builder")}
-										className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white font-semibold transition-colors cursor-pointer"
-									>
-										<span>Explore a sample workspace</span>
-										<ArrowRight className="size-3" />
-									</button>
-								</div>
-							</div>
-						</div>
-
-						{/* Right Column (5 cols): Interactive Zoe Prompt Device Mockup */}
-						<div className="lg:col-span-5 relative">
-							{/* Device Mockup Shell */}
-							<div className="rounded-3xl border border-slate-700/60 bg-[#07130e] p-6 sm:p-7 shadow-2xl relative space-y-6">
-								{/* Top Device Bar */}
-								<div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-500">
-									<span>YOUR NEXT CHAPTER</span>
-									<div className="flex items-center gap-1.5">
-										<span className="size-1.5 rounded-full bg-slate-600" />
-										<span className="size-1.5 rounded-full bg-slate-600" />
+					{/* 3 Starting Choice Cards matching screenshot */}
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+						{/* Card 01: Start from your story */}
+						<div
+							onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
+							className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[220px]"
+						>
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+										<Mic className="size-4" />
 									</div>
+									<span className="text-xs font-mono text-slate-600 font-bold">01</span>
 								</div>
 
-								{/* Zoe Question Box */}
-								<div className="rounded-2xl border border-emerald-500/30 bg-[#091d14] p-5 sm:p-6 space-y-5">
-									<div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-emerald-400">
-										<div className="flex items-center gap-1.5">
-											<span className="size-1.5 rounded-full bg-emerald-400" />
-											<span>ZOE / LET'S FIND YOUR STORY</span>
-										</div>
-										<ArrowRight className="size-3 text-emerald-400/80 -rotate-45" />
-									</div>
-
-									<h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
-										What's one thing you worked on that you're proud of?
+								<div className="space-y-1.5">
+									<h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
+										Start from your story
 									</h3>
-
-									{/* User In Your Words Simulation */}
-									<div className="rounded-xl border border-emerald-500/20 bg-[#05140d] p-3.5 space-y-1">
-										<span className="text-[9px] font-mono tracking-widest uppercase text-emerald-400 block font-bold">
-											IN YOUR WORDS
-										</span>
-										<p className="text-xs text-slate-300 italic">
-											"I noticed people kept getting stuck, so I redesigned the first few steps..."
-										</p>
-									</div>
-
-									{/* Audio Waveform Row */}
-									<div className="flex items-center gap-3 pt-1">
-										<div className="size-9 rounded-full bg-[#ccf873] flex items-center justify-center text-slate-950 shrink-0 shadow-sm">
-											<Mic className="size-4" />
-										</div>
-										<div className="flex items-center gap-1 text-emerald-400/80">
-											<span className="h-3 w-0.5 rounded-full bg-emerald-400 animate-pulse" />
-											<span className="h-5 w-0.5 rounded-full bg-emerald-400" />
-											<span className="h-2 w-0.5 rounded-full bg-emerald-400" />
-											<span className="h-6 w-0.5 rounded-full bg-emerald-400 animate-pulse" />
-											<span className="h-4 w-0.5 rounded-full bg-emerald-400" />
-											<span className="h-2.5 w-0.5 rounded-full bg-emerald-400" />
-										</div>
-										<span className="text-[11px] text-slate-400 font-medium">
-											Your story starts here.
-										</span>
-									</div>
-								</div>
-
-								{/* Bottom Floating Note: TAKING SHAPE */}
-								<div className="absolute -bottom-5 -right-2 sm:-right-4 rounded-xl border border-slate-300 bg-[#faf8f5] text-slate-900 p-3.5 shadow-2xl max-w-[260px] space-y-1 z-10">
-									<div className="flex items-center justify-between text-[9px] font-mono tracking-widest uppercase text-slate-500">
-										<span className="font-bold">TAKING SHAPE</span>
-										<FileText className="size-3 text-slate-400" />
-									</div>
-									<p className="text-[11px] text-slate-800 font-medium leading-relaxed">
-										Redesigned the onboarding flow to help new users get started.
+									<p className="text-xs text-slate-400 leading-relaxed">
+										No polished answers needed. Build an outline and find the details together.
 									</p>
 								</div>
 							</div>
-						</div>
-					</div>
 
-					{/* PICK YOUR STARTING POINT SECTION */}
-					<div className="space-y-4 pt-4">
-						<div className="flex items-center justify-between">
-							<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block">
-								PICK YOUR STARTING POINT
-							</span>
-							<span className="text-xs text-slate-500 font-mono">
-								Same companion. Your own route.
-							</span>
+							<div className="pt-6">
+								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
+									<span>Start a new resume</span>
+									<ArrowRight className="size-3" />
+								</div>
+							</div>
 						</div>
 
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-							{/* Card 01: Start from your story */}
-							<div
-								onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
-								className="rounded-2xl border border-slate-800/90 bg-[#070e19] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1527] transition-all cursor-pointer shadow-sm group"
-							>
-								<div className="space-y-4">
-									<div className="flex items-center justify-between">
-										<div className="size-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-											<Mic className="size-4" />
-										</div>
-										<span className="text-xs font-mono text-slate-600 font-bold">01</span>
+						{/* Card 02: Bring your resume */}
+						<div
+							onClick={() => requireAuthAction("/dashboard/resumes/upload")}
+							className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[220px]"
+						>
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+										<Upload className="size-4" />
 									</div>
-
-									<div className="space-y-1.5">
-										<h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
-											Start from your story
-										</h3>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											No polished answers needed. Build an outline and find the details together.
-										</p>
-									</div>
+									<span className="text-xs font-mono text-slate-600 font-bold">02</span>
 								</div>
 
-								<div className="pt-6">
-									<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
-										<span>Start a new resume</span>
-										<ArrowRight className="size-3" />
-									</div>
+								<div className="space-y-1.5">
+									<h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
+										Bring your resume
+									</h3>
+									<p className="text-xs text-slate-400 leading-relaxed">
+										Import a PDF, Word document, or text. Keep what works and strengthen the rest.
+									</p>
 								</div>
 							</div>
 
-							{/* Card 02: Bring your resume */}
-							<div
-								onClick={() => requireAuthAction("/dashboard/resumes/upload")}
-								className="rounded-2xl border border-slate-800/90 bg-[#070e19] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1527] transition-all cursor-pointer shadow-sm group"
-							>
-								<div className="space-y-4">
-									<div className="flex items-center justify-between">
-										<div className="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-											<Upload className="size-4" />
-										</div>
-										<span className="text-xs font-mono text-slate-600 font-bold">02</span>
-									</div>
+							<div className="pt-6">
+								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
+									<span>Import a resume</span>
+									<ArrowRight className="size-3" />
+								</div>
+							</div>
+						</div>
 
-									<div className="space-y-1.5">
-										<h3 className="text-base font-bold text-white group-hover:text-white transition-colors">
-											Bring your resume
-										</h3>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											Import a PDF, Word document, or text. Keep what works and strengthen the rest.
-										</p>
+						{/* Card 03: Make it fit the job (Highlighted border in screenshot) */}
+						<div
+							onClick={() => requireAuthAction("/dashboard/resumes/match")}
+							className="rounded-2xl border-2 border-emerald-500/50 bg-[#0c1e15] p-6 flex flex-col justify-between hover:border-emerald-400 transition-all cursor-pointer shadow-lg shadow-emerald-500/10 group min-h-[220px]"
+						>
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="size-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+										<Target className="size-4" />
 									</div>
+									<span className="text-xs font-mono text-emerald-400/80 font-bold">03</span>
 								</div>
 
-								<div className="pt-6">
-									<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
-										<span>Import a resume</span>
-										<ArrowRight className="size-3" />
-									</div>
+								<div className="space-y-1.5">
+									<h3 className="text-base font-bold text-white group-hover:text-emerald-200 transition-colors">
+										Make it fit the job
+									</h3>
+									<p className="text-xs text-slate-300 leading-relaxed">
+										Bring your resume first, then shape a separate version for a job you've found.
+									</p>
 								</div>
 							</div>
 
-							{/* Card 03: Make it fit the job */}
-							<div
-								onClick={() => requireAuthAction("/dashboard/resumes/match")}
-								className="rounded-2xl border border-slate-800/90 bg-[#070e19] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1527] transition-all cursor-pointer shadow-sm group"
-							>
-								<div className="space-y-4">
-									<div className="flex items-center justify-between">
-										<div className="size-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
-											<Target className="size-4" />
-										</div>
-										<span className="text-xs font-mono text-slate-600 font-bold">03</span>
-									</div>
-
-									<div className="space-y-1.5">
-										<h3 className="text-base font-bold text-white group-hover:text-white transition-colors">
-											Make it fit the job
-										</h3>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											Work from a saved resume and shape a separate version for an opportunity.
-										</p>
-									</div>
-								</div>
-
-								<div className="pt-6">
-									<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
-										<span>Prepare for a job</span>
-										<ArrowRight className="size-3" />
-									</div>
+							<div className="pt-6">
+								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">
+									<span>Prepare for a job</span>
+									<ArrowRight className="size-3" />
 								</div>
 							</div>
 						</div>
 					</div>
 
-					{/* YOUR RESUMES SECTION (Saved on this device) */}
-					<div className="space-y-4 pt-4">
-						<div className="flex items-center justify-between">
-							<h2 className="text-xl font-bold text-white tracking-tight">Your resumes</h2>
-							<span className="text-xs text-slate-400 font-mono">
-								Saved on this device
-							</span>
-						</div>
-
-						{/* Grid of Resumes */}
-						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-							{/* New Resume Card placeholder / action */}
-							<div
-								onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
-								className="h-[170px] rounded-2xl border-2 border-dashed border-slate-800/80 hover:border-emerald-500/50 bg-[#070e19]/60 hover:bg-[#0c1527] p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all group"
-							>
-								<div className="size-10 rounded-full bg-slate-800/80 group-hover:bg-emerald-500/20 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 mb-2.5 transition-colors">
-									<Plus className="size-4" />
-								</div>
-								<h4 className="text-sm font-bold text-white mb-0.5">Start a new resume</h4>
-								<p className="text-xs text-slate-500">Create with Zoe or build manually</p>
-							</div>
-
-							{/* Any existing local cards */}
-							{localResumes.map((res: any) => (
-								<div
-									key={res.id}
-									className="rounded-2xl border border-slate-800/90 bg-[#070e19] p-5 flex flex-col justify-between hover:border-slate-700 transition-all shadow-sm"
-								>
-									<div className="space-y-3">
-										<div className="flex items-center justify-between">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
-												In progress
-											</span>
-										</div>
-
-										<div>
-											<h4 className="text-base font-bold text-white tracking-tight truncate">
-												{res.name || "Untitled resume"}
-											</h4>
-											<p className="text-[11px] text-slate-500 font-mono mt-0.5">
-												Choose a direction · {res.updatedAt ? new Date(res.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Recent"}
-											</p>
-										</div>
-									</div>
-
-									<div className="flex items-center justify-between pt-4 border-t border-slate-800/80 mt-4">
-										<button
-											type="button"
-											onClick={() => navigate({ to: `/builder/${res.id}` as any })}
-											className="inline-flex items-center gap-1 text-xs font-bold text-white hover:text-emerald-400 transition-colors cursor-pointer"
-										>
-											<span>Continue</span>
-											<ArrowRight className="size-3" />
-										</button>
-
-										<button
-											type="button"
-											onClick={(e) => handleDeleteResume(res.id, e)}
-											className="text-slate-500 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
-											title="Delete"
-										>
-											<X className="size-3.5" />
-										</button>
-									</div>
-								</div>
-							))}
-						</div>
+					{/* Sample workspace link matching screenshot */}
+					<div className="pt-2">
+						<button
+							type="button"
+							onClick={() => requireAuthAction("/dashboard/resumes/manual-builder")}
+							className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
+						>
+							<span>Not sure yet? Look around a sample resume</span>
+							<span>→</span>
+						</button>
 					</div>
 				</div>
 			)}

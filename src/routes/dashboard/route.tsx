@@ -665,6 +665,8 @@ function RouteComponent() {
 		location.pathname.includes("/manual-builder") ||
 		location.pathname.includes("/guided-story");
 
+	const hideDashboardHeader = location.pathname.includes("/guided-story");
+
 	const getBackgroundStyle = () => {
 		if (theme === "light") return { background: "var(--color-background)" };
 		if (backgroundTheme === "navy") return { background: "linear-gradient(145deg, #050b14 0%, #0f172a 100%)" };
@@ -678,7 +680,7 @@ function RouteComponent() {
 			className="flex min-h-screen flex-col bg-background text-foreground"
 			style={getBackgroundStyle()}
 		>
-			<DashboardHeader isFullWidth={isFullWidthRoute} />
+			{!hideDashboardHeader && <DashboardHeader isFullWidth={isFullWidthRoute} />}
 
 			{/* Main content — full-width bleed for builder/guided-story, contained for dashboard lists */}
 			<main

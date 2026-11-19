@@ -133,3 +133,84 @@ Rules:
 	return [bullet];
 }
 
+/**
+ * Extract distinct items/topics mentioned in user's story to display in "Here's what I heard" checklist
+ */
+export async function extractTopicsFromStory(
+	experienceTitle: string,
+	organization: string | undefined,
+	storyAnswer: string
+): Promise<string[]> {
+	const apiKey = getDeepSeekApiKey();
+
+	if (apiKey) {
+		try {
+			const prompt = `The user described their experience as "${experienceTitle}"${organization ? ` at "${organization}"` : ""}:
+"${storyAnswer}"
+
+Extract 2 to 4 distinct key projects, responsibilities, features, or work items mentioned in their response.
+Each item should be a short phrase (2 to 5 words, e.g. "AI resume builder", "English app placement feature", "Mentoring juniors").
+Output ONLY the short items, one per line, with no bullets, numbering, or conversational filler.`;
+
+			const raw = await callDeepSeekChat(prompt, {
+				temperature: 0.3,
+				maxTokens: 200,
+			});
+
+			const items = raw
+				.split("\n")
+				.map((line) => line.replace(/^[•\-\*\d\.\s]+/, "").trim())
+				.filter((line) => line.length > 2 && line.length < 60);
+
+			if (items.length > 0) {
+				return items;
+			}
+		} catch (err) {
+			console.warn("DeepSeek topic extraction error:", err);
+		}
+	}
+
+	// Heuristic extraction fallback
+	const parts = storyAnswer
+		.split(/(?:\r?\n)+|(?<=[.!?])\s+|;\s*|(?:\s+and\s+(?:also|additionally)?\s+)|,\s*(?:and\s+)?/i)
+		.map((p) => p.trim())
+		.filter((p) => p.length > 4 && !/^(i|we|my|the|in|at|on|for|with)$/i.test(p))
+		.map((p) => {
+			const clean = p.replace(/^(i\s+(?:worked\s+on|built|created|developed|helped\s+with|led|handled|managed)\s+)/i, "").trim();
+			return clean.charAt(0).toUpperCase() + clean.slice(1);
+		});
+
+	return parts.length > 0 ? parts.slice(0, 4) : [experienceTitle];
+}
+
+/**
+ * Generate a follow-up probe question for a specific extracted topic
+ */
+export async function generateFollowUpQuestionForTopic(
+	topic: string,
+	experienceTitle: string,
+	organization?: string
+): Promise<string> {
+	const apiKey = getDeepSeekApiKey();
+	if (apiKey) {
+		try {
+			const prompt = `You are Zoe, an expert interview coach for resumes.
+For a role as "${experienceTitle}"${organization ? ` at "${organization}"` : ""}, the candidate mentioned working on: "${topic}".
+Generate ONE concise, conversational question asking about their specific technical role, challenge solved, or measurable outcome regarding "${topic}".
+Keep it friendly and under 25 words. Return ONLY the question.`;
+			const raw = await callDeepSeekChat(prompt, {
+				temperature: 0.4,
+				maxTokens: 100,
+			});
+			if (raw.trim()) {
+				return raw.trim();
+			}
+		} catch (err) {
+			console.warn("Failed to generate follow-up question with AI:", err);
+		}
+	}
+
+	return `What was your specific role and key contribution in "${topic}"?`;
+}
+
+
