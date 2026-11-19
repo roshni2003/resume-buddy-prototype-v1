@@ -78,12 +78,20 @@ export const useAuth = () => {
 
 	const logout = () => {
 		clearAuthToken();
+		// Also clean up session drafts from local storage on logout
+		try {
+			localStorage.removeItem("resume_buddy_guided_story_draft");
+			localStorage.removeItem("resume_buddy_outline_entries");
+			localStorage.removeItem("resume_buddy_last_worked");
+			localStorage.removeItem("resume_buddy_manual_draft");
+			localStorage.removeItem("resume_buddy_checklist");
+		} catch {}
 		setUser(null);
 		setToken(null);
 		window.dispatchEvent(new Event("storage"));
 		window.dispatchEvent(new Event("auth_changed"));
 		if (typeof window !== "undefined") {
-			window.location.href = "/";
+			window.location.href = "/dashboard/resumes";
 		}
 	};
 

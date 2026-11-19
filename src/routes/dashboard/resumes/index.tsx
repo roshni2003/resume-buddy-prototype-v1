@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { api } from "@/utils/api";
 import { isStandaloneMode, localResumeStore } from "@/utils/local-resumes";
 import { cn } from "@/utils/style";
+import { getStoredUserProfile } from "@/utils/auth-token";
 import { useAuth } from "@/hooks/useAuth";
 
 const searchSchema = z.object({
@@ -99,12 +100,13 @@ export function DashboardResumesRoute() {
 		};
 	}, []);
 
-	// Determine if user has created or started a resume
+	// Determine if user has created or started a resume and is authenticated
 	const hasActiveResume = Boolean(
-		activeStoryDraft ||
-		outlineEntries.length > 0 ||
-		localResumes.length > 0 ||
-		apiResumes.length > 0
+		isAuthenticated &&
+		(activeStoryDraft ||
+			outlineEntries.length > 0 ||
+			localResumes.length > 0 ||
+			apiResumes.length > 0)
 	);
 
 	const activeRoleTitle =
@@ -199,8 +201,45 @@ export function DashboardResumesRoute() {
 		toast.success("Resume deleted");
 	};
 
-	// Candidate name for header
-	const candidateName = user?.name || activeStoryDraft?.fullName?.split(" ")[0] || "Narendra";
+	// Candidate name for header: prioritize logged-in user name, email prefix, or user profile
+	const storedProfile = typeof window !== "undefined" ? getStoredUserProfile() : null;
+	const candidateName = (() => {
+		// 1. Logged in user name or email ID prefix
+		if (user?.name && user.name.trim() && user.name.trim().toLowerCase() !== "user") {
+			return user.name.trim().split(" ")[0];
+		}
+		if (user?.email && user.email.includes("@")) {
+			return user.email.split("@")[0];
+		}
+		// 2. Stored user profile name or email prefix
+		if (storedProfile?.name && storedProfile.name.trim()) {
+			return storedProfile.name.trim().split(" ")[0];
+		}
+		if (storedProfile?.email && storedProfile.email.includes("@")) {
+			return storedProfile.email.split("@")[0];
+		}
+		// 3. Active story draft contact email prefix or full name (excluding filename patterns)
+		if (activeStoryDraft?.contactEmail && activeStoryDraft.contactEmail.includes("@")) {
+			return activeStoryDraft.contactEmail.split("@")[0];
+		}
+		if (activeStoryDraft?.fullName && !/^resume[-_\s0-9a-z]*$/i.test(activeStoryDraft.fullName.trim())) {
+			return activeStoryDraft.fullName.trim().split(" ")[0];
+		}
+		return "Narendra";
+	})();
+
+	// Action router: Requires login before starting a resume
+	const requireAuthAction = (destinationUrl: string, searchParams?: Record<string, any>) => {
+		if (!isAuthenticated) {
+			toast.info("Please sign in or create an account to start your resume.");
+			navigate({
+				to: "/auth/login" as any,
+				search: { redirect: destinationUrl } as any,
+			});
+			return;
+		}
+		navigate({ to: destinationUrl as any, search: searchParams as any });
+	};
 
 	return (
 		<div className="space-y-12 pb-16 font-sans max-w-7xl mx-auto">
@@ -529,7 +568,7 @@ export function DashboardResumesRoute() {
 							<div className="pt-2 space-y-3">
 								<button
 									type="button"
-									onClick={() => navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "direction" } as any })}
+									onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
 									className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-sm shadow-lg shadow-lime-500/10 transition-all cursor-pointer active:scale-95"
 								>
 									<Mic className="size-4 text-slate-950" />
@@ -544,7 +583,7 @@ export function DashboardResumesRoute() {
 								<div className="pt-1">
 									<button
 										type="button"
-										onClick={() => navigate({ to: "/dashboard/resumes/manual-builder" as any })}
+										onClick={() => requireAuthAction("/dashboard/resumes/manual-builder")}
 										className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white font-semibold transition-colors cursor-pointer"
 									>
 										<span>Explore a sample workspace</span>
@@ -638,7 +677,7 @@ export function DashboardResumesRoute() {
 						<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 							{/* Card 01: Start from your story */}
 							<div
-								onClick={() => navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "direction" } as any })}
+								onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
 								className="rounded-2xl border border-slate-800/90 bg-[#070e19] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1527] transition-all cursor-pointer shadow-sm group"
 							>
 								<div className="space-y-4">
@@ -669,7 +708,7 @@ export function DashboardResumesRoute() {
 
 							{/* Card 02: Bring your resume */}
 							<div
-								onClick={() => navigate({ to: "/dashboard/resumes/upload" as any })}
+								onClick={() => requireAuthAction("/dashboard/resumes/upload")}
 								className="rounded-2xl border border-slate-800/90 bg-[#070e19] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1527] transition-all cursor-pointer shadow-sm group"
 							>
 								<div className="space-y-4">
@@ -700,7 +739,7 @@ export function DashboardResumesRoute() {
 
 							{/* Card 03: Make it fit the job */}
 							<div
-								onClick={() => navigate({ to: "/dashboard/resumes/match" as any })}
+								onClick={() => requireAuthAction("/dashboard/resumes/match")}
 								className="rounded-2xl border border-slate-800/90 bg-[#070e19] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1527] transition-all cursor-pointer shadow-sm group"
 							>
 								<div className="space-y-4">
@@ -744,7 +783,7 @@ export function DashboardResumesRoute() {
 						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
 							{/* New Resume Card placeholder / action */}
 							<div
-								onClick={() => navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "direction" } as any })}
+								onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
 								className="h-[170px] rounded-2xl border-2 border-dashed border-slate-800/80 hover:border-emerald-500/50 bg-[#070e19]/60 hover:bg-[#0c1527] p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all group"
 							>
 								<div className="size-10 rounded-full bg-slate-800/80 group-hover:bg-emerald-500/20 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 mb-2.5 transition-colors">

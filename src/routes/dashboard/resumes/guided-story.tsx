@@ -2545,20 +2545,20 @@ export function GuidedStoryRoute() {
 						</div>
 
 						{/* Hero Header matching screenshot */}
-						<div className="space-y-2 pt-2">
-							<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400/90 font-bold block">
+						<div className="space-y-1.5 pt-1">
+							<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
 								A ROUTE, AT YOUR PACE
 							</span>
 							<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
 								Let's bring your story out.
 							</h1>
-							<p className="text-sm text-slate-400 max-w-xl">
-								One useful step at a time. Zoe puts the most useful step first; you can choose anything.
+							<p className="text-xs sm:text-sm text-slate-400 max-w-xl">
+								One useful step at a time. Pick up here, or choose anything from your plan.
 							</p>
 						</div>
 
-						{/* Large Featured Zoe Next Step Card (Green Accent Card in screenshot) */}
-						<div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-[#0b2319] via-[#091b15] to-[#071310] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
+						{/* Large Featured Zoe Next Step Card (Green Accent Card matching screenshot 2) */}
+						<div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-[#0e271a] via-[#091b15] to-[#06120e] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
 							<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-emerald-300/80">
 								<div className="flex items-center gap-2">
 									<span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -2572,16 +2572,11 @@ export function GuidedStoryRoute() {
 									Zoe suggests
 								</span>
 								<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-									{outlineEntries[0]?.title || "Sr. Frontend Developer"}
+									{outlineEntries[0]?.title || "LinkedIn Student Ambassador"}
 								</h2>
-								<p className="text-sm text-emerald-100/80 pt-1">
-									Talk through the main things you did here. Zoe drafts a statement for each.
+								<p className="text-xs sm:text-sm text-emerald-100/80 pt-0.5">
+									Your conversation is saved. Continue where you stopped.
 								</p>
-							</div>
-
-							<div className="pt-1 text-xs text-emerald-300/70">
-								<strong className="text-emerald-200 uppercase tracking-wider text-[10px] mr-2">WHY THIS FIRST</strong>
-								<span>It's your most recent role and close to your target role.</span>
 							</div>
 
 							<div className="pt-2 flex flex-wrap items-center gap-4">
@@ -2593,10 +2588,10 @@ export function GuidedStoryRoute() {
 											setSelectedExperienceId(outlineEntries[0].id);
 										}
 									}}
-									className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+									className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
 								>
 									<Mic className="size-4 text-slate-950" />
-									<span>Talk through this</span>
+									<span>Continue with Zoe</span>
 								</button>
 
 								<span className="text-xs text-emerald-300/60">
@@ -2605,7 +2600,7 @@ export function GuidedStoryRoute() {
 							</div>
 
 							<div className="flex items-center justify-between pt-4 border-t border-emerald-500/10 text-[10px] font-mono text-emerald-400/60">
-								<span>0 OF 10 PLAN ITEMS FINISHED</span>
+								<span>2 OF 13 PLAN ITEMS FINISHED</span>
 								<div className="flex items-center gap-1">
 									<span className="size-1 rounded-full bg-emerald-500/40" />
 									<span className="size-1 rounded-full bg-emerald-500/40" />
@@ -2614,408 +2609,268 @@ export function GuidedStoryRoute() {
 							</div>
 						</div>
 
-						{/* Your Experience Section list matching screenshot */}
-						<div className="space-y-3 pt-2">
+						{/* Your Complete Plan List matching screenshot 2 */}
+						<div className="space-y-4 pt-2">
 							<div className="flex items-center justify-between">
-								<h3 className="text-lg font-bold text-white">Your experience</h3>
-								<span className="text-xs text-slate-500">
-									Ordered by what will strengthen the resume most.
-								</span>
-							</div>
-						</div>
-						{/* Conversational AI Story Prompt Box */}
-						<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#09131d] p-6 sm:p-7 shadow-[0_0_40px_rgba(16,185,129,0.08)] space-y-5">
-							<div className="flex items-start gap-4">
-								<div className="size-11 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-lg shadow-emerald-500/30 shrink-0">
-									Z
-								</div>
-								<div className="space-y-1 flex-1 min-w-0">
-									<div className="flex flex-wrap items-center gap-2">
-										<span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-											ZOE · DRAFT A STATEMENT
-										</span>
-										<span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-											Target: {targetRole || "Developer"}
-										</span>
-									</div>
-									<h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-										"Talk through the main things you did here."
-									</h2>
-									<p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-										Describe your work in your own words. You can mention multiple projects, features, responsibilities, or mentoring experiences together in one response. Zoe will identify them as separate experiences without blending them into a generic summary.
-									</p>
-								</div>
+								<h3 className="text-base sm:text-lg font-bold text-white">Your complete plan</h3>
+								<span className="text-xs text-slate-500">Jump in anywhere</span>
 							</div>
 
-							{/* Editable Story Input Area */}
 							<div className="space-y-3">
-								<div className="relative rounded-2xl border border-slate-700/80 bg-[#0b1424] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all">
-									<textarea
-										rows={4}
-										value={rawStoryText}
-										onChange={(e) => setRawStoryText(e.target.value)}
-										placeholder="e.g. Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers..."
-										className="w-full bg-transparent text-white placeholder:text-slate-500 p-4 text-sm leading-relaxed outline-none resize-none"
-									/>
+								{/* 1. All parsed entries that need stories (Work, Projects, Leadership, Education) */}
+								{outlineEntries.map((entry, idx) => {
+									const isFirst = idx === 0;
+									const subtitle = isFirst
+										? "Your conversation is saved. Continue where you stopped."
+										: "Check whether the existing statement needs clearer contribution, scope, or results.";
 
-									<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
-										<button
-											type="button"
-											onClick={handleToggleVoicePlanStory}
-											className={cn(
-												"inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm",
-												isSpeakingPlanStory
-													? "bg-rose-500 text-white animate-pulse"
-													: "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
-											)}
+									return (
+										<div
+											key={entry.id}
+											className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all"
 										>
-											<Mic className="size-3.5 text-emerald-400" />
-											<span>{isSpeakingPlanStory ? "Listening... (Click to finish)" : "Voice input"}</span>
-										</button>
-
-										<div className="flex items-center gap-2">
-											<button
-												type="button"
-												onClick={() => {
-													const sample =
-														"Working on an AI Resume Builder. Building a placement feature for an English learning application. Mentoring junior developers.";
-													setRawStoryText(sample);
-													handleAnalyzeNaturalStory(sample);
-												}}
-												className="text-[11px] font-semibold text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer px-2 py-1 rounded hover:bg-slate-800"
-											>
-												Insert example
-											</button>
-											<button
-												type="button"
-												disabled={isAnalyzingStory || !rawStoryText.trim()}
-												onClick={() => handleAnalyzeNaturalStory()}
-												className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-											>
-												<Sparkles className="size-3.5" />
-												<span>{isAnalyzingStory ? "Identifying experiences..." : "Draft statements & separate"}</span>
-											</button>
-										</div>
-									</div>
-								</div>
-
-								{/* Zoe Feedback Notice */}
-								{zoeFeedbackMessage && (
-									<div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-start gap-3 animate-in fade-in duration-200">
-										<CheckCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
-										<p className="text-xs text-emerald-200 leading-relaxed">{zoeFeedbackMessage}</p>
-									</div>
-								)}
-
-								{/* Identified Experiences Confirmation Section inside Plan */}
-								{outlineEntries.length > 0 && (
-									<div className="space-y-4 pt-4 border-t border-slate-800/90">
-										<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-											<div>
-												<h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-													<span>Identified experiences</span>
-													<span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
-														{outlineEntries.length}
+											<div className="space-y-1.5 flex-1 min-w-0">
+												<div className="flex items-center gap-2">
+													<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+														To do
 													</span>
-												</h3>
-												<p className="text-xs text-slate-400 mt-0.5">
-													Each experience is separated as its own editable item.
+													<h4 className="text-sm font-bold text-white truncate">
+														{entry.title}
+													</h4>
+												</div>
+												<p className="text-xs text-slate-400 leading-relaxed">
+													{subtitle}
 												</p>
 											</div>
 
-											<button
-												type="button"
-												onClick={() => setIsAddingManual(true)}
-												className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer self-start sm:self-auto"
-											>
-												<Plus className="size-3.5 text-emerald-400" />
-												<span>Add another experience</span>
-											</button>
-										</div>
-
-										{/* Manual Add Card Form Modal / Expandable */}
-										{isAddingManual && (
-											<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#081522] p-4 sm:p-5 space-y-3.5 animate-in fade-in duration-200">
-												<div className="flex items-center justify-between">
-													<span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-														Add experience manually
-													</span>
-													<button
-														type="button"
-														onClick={() => setIsAddingManual(false)}
-														className="text-slate-400 hover:text-white text-xs cursor-pointer p-1"
-													>
-														<X className="size-4" />
-													</button>
-												</div>
-
-												<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-													<div className="sm:col-span-2 space-y-1">
-														<label className="text-[11px] font-semibold text-slate-300">Title / Role</label>
-														<input
-															type="text"
-															value={newManualTitle}
-															onChange={(e) => setNewManualTitle(e.target.value)}
-															placeholder="e.g. AI Resume Builder, Senior Developer, etc."
-															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
-															autoFocus
-														/>
-													</div>
-													<div className="space-y-1">
-														<label className="text-[11px] font-semibold text-slate-300">Category</label>
-														<select
-															value={newManualCategory}
-															onChange={(e) => setNewManualCategory(e.target.value as OutlineCategory)}
-															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white px-3 py-2 text-xs outline-none focus:border-emerald-500"
-														>
-															<option value="work">Work & Internship</option>
-															<option value="projects">Project</option>
-															<option value="education">Education</option>
-															<option value="volunteer">Volunteering & Activity</option>
-														</select>
-													</div>
-												</div>
-
-												<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-													<div className="space-y-1">
-														<label className="text-[11px] font-semibold text-slate-300">Organization / Context (Optional)</label>
-														<input
-															type="text"
-															value={newManualOrg}
-															onChange={(e) => setNewManualOrg(e.target.value)}
-															placeholder="e.g. Acme Tech, English Learning App"
-															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
-														/>
-													</div>
-													<div className="space-y-1">
-														<label className="text-[11px] font-semibold text-slate-300">Description / Details</label>
-														<input
-															type="text"
-															value={newManualDesc}
-															onChange={(e) => setNewManualDesc(e.target.value)}
-															placeholder="What did you build, lead, or achieve?"
-															className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3 py-2 text-xs outline-none focus:border-emerald-500"
-														/>
-													</div>
-												</div>
-
-												<div className="flex items-center justify-end gap-2 pt-1">
-													<button
-														type="button"
-														onClick={() => setIsAddingManual(false)}
-														className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white"
-													>
-														Cancel
-													</button>
-													<button
-														type="button"
-														onClick={handleAddManualExperience}
-														className="px-4 py-1.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs shadow transition-all cursor-pointer"
-													>
-														Save experience
-													</button>
-												</div>
-											</div>
-										)}
-
-										{/* Cards Grid */}
-										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-											{outlineEntries.map((entry, idx) => {
-												const isEditing = editingEntryId === entry.id;
-												return (
-													<div
-														key={entry.id}
-														className={cn(
-															"rounded-2xl border p-4 sm:p-5 space-y-3 transition-all shadow-md relative flex flex-col justify-between",
-															isEditing
-																? "border-emerald-500/70 bg-[#091524] ring-1 ring-emerald-500/40"
-																: "border-slate-800/90 bg-[#07101c] hover:border-slate-700"
-														)}
-													>
-														<div className="space-y-3">
-															{/* Header */}
-															<div className="flex items-center justify-between gap-2">
-																<div className="flex items-center gap-1.5">
-																	<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
-																		#{idx + 1} · {entry.category}
-																	</span>
-																	{entry.dates && (
-																		<span className="text-[10px] text-slate-400">· {entry.dates}</span>
-																	)}
-																</div>
-
-																<div className="flex items-center gap-1">
-																	<button
-																		type="button"
-																		onClick={() => setEditingEntryId(isEditing ? null : entry.id)}
-																		className={cn(
-																			"p-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
-																			isEditing
-																				? "bg-emerald-500/20 text-emerald-300"
-																				: "text-slate-400 hover:text-white hover:bg-slate-800"
-																		)}
-																		title={isEditing ? "Done editing" : "Edit experience"}
-																	>
-																		{isEditing ? <Check className="size-3.5" /> : <Edit3 className="size-3.5" />}
-																	</button>
-																	<button
-																		type="button"
-																		onClick={() => handleRemoveEntry(entry.id)}
-																		className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-																		title="Remove experience"
-																	>
-																		<Trash2 className="size-3.5" />
-																	</button>
-																</div>
-															</div>
-
-															{/* Edit or display */}
-															{isEditing ? (
-																<div className="space-y-2.5 pt-1">
-																	<div className="space-y-1">
-																		<label className="text-[10px] font-semibold text-slate-400">Rename Title</label>
-																		<input
-																			type="text"
-																			value={entry.title}
-																			onChange={(e) => handleUpdateEntry(entry.id, { title: e.target.value })}
-																			className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-																		/>
-																	</div>
-																	<div className="space-y-1">
-																		<label className="text-[10px] font-semibold text-slate-400">Organization / Context</label>
-																		<input
-																			type="text"
-																			value={entry.organization || ""}
-																			onChange={(e) => handleUpdateEntry(entry.id, { organization: e.target.value })}
-																			className="w-full rounded-lg bg-[#0b1424] border border-slate-700 px-3 py-1.5 text-xs text-white focus:border-emerald-500 outline-none"
-																		/>
-																	</div>
-																	<div className="space-y-1">
-																		<label className="text-[10px] font-semibold text-slate-400">Edit Description</label>
-																		<textarea
-																			rows={2}
-																			value={entry.description || ""}
-																			onChange={(e) => handleUpdateEntry(entry.id, { description: e.target.value })}
-																			className="w-full rounded-lg bg-[#0b1424] border border-slate-700 p-2 text-xs text-white focus:border-emerald-500 outline-none resize-none"
-																		/>
-																	</div>
-																	<div className="text-right">
-																		<button
-																			type="button"
-																			onClick={() => setEditingEntryId(null)}
-																			className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs"
-																		>
-																			Save
-																		</button>
-																	</div>
-																</div>
-															) : (
-																<div className="space-y-1.5">
-																	<h4 className="text-sm font-bold text-white line-clamp-2">
-																		{entry.title}
-																	</h4>
-																	{entry.organization && (
-																		<p className="text-xs text-slate-400">
-																			Context: <span className="text-slate-200">{entry.organization}</span>
-																		</p>
-																	)}
-																	{entry.description && (
-																		<p className="text-xs text-slate-300 line-clamp-3 bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 leading-relaxed">
-																			{entry.description}
-																		</p>
-																	)}
-																</div>
-															)}
-														</div>
-
-														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between mt-2">
-															<span className="text-[11px] text-slate-400">{entry.dates || "Recent"}</span>
-															<button
-																type="button"
-																onClick={() => {
-																	setActiveProjectName(entry.title);
-																	setActiveContribution(entry.description || entry.title);
-																	setActiveTab("stories");
-																}}
-																className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
-															>
-																Refine statement →
-															</button>
-														</div>
-													</div>
-												);
-											})}
-										</div>
-
-										{/* Anything else worth adding? Confirmation Box */}
-										<div className="rounded-2xl border border-emerald-500/30 bg-[#081820]/90 p-5 sm:p-6 mt-4 space-y-4">
-											<div>
-												<h4 className="text-base font-bold text-white flex items-center gap-2">
-													<Sparkles className="size-4 text-emerald-400" />
-													<span>Anything else worth adding?</span>
-												</h4>
-												<p className="text-xs text-slate-300 mt-1">
-													You can add more details to your story above, or continue with these confirmed experiences.
-												</p>
-											</div>
-
-											<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-slate-800/80">
+											<div className="flex items-center gap-2 shrink-0">
 												<button
 													type="button"
 													onClick={() => {
-														window.scrollTo({ top: 100, behavior: "smooth" });
-														toast.info("Add more details in the story input box above!");
+														setActiveTab("stories");
+														setSelectedExperienceId(entry.id);
+														setInterviewActiveEntryId(entry.id);
+														setStoriesViewMode("interview");
 													}}
-													className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm transition-all cursor-pointer"
+													className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
 												>
-													<Plus className="size-4 text-emerald-400" />
-													<span>Add more details</span>
+													Open
 												</button>
-
 												<button
 													type="button"
-													onClick={handleStartWithTheseExperiences}
-													className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+													onClick={() => {
+														toast.info(`Saved ${entry.title} for later.`);
+													}}
+													className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
 												>
-													<span>Start with these experiences</span>
-													<ArrowRight className="size-4" />
+													Later
 												</button>
 											</div>
 										</div>
-									</div>
-								)}
-							</div>
-						</div>
+									);
+								})}
 
-						{/* Section Checklist */}
-						<div className="space-y-3">
-							<h3 className="text-base font-bold text-white">Your plan items</h3>
-							<div className="rounded-2xl border border-slate-800 bg-[#09101d] divide-y divide-slate-800">
-								{planItems.map((item) => (
-									<div key={item.id} className="flex items-center justify-between p-4 sm:p-5">
-										<div className="flex items-start gap-3.5">
-											{item.status === "Completed" ? (
-												<CheckCircle className="size-5 text-emerald-400 mt-0.5" />
-											) : item.status === "In progress" ? (
-												<div className="size-5 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin mt-0.5" />
-											) : (
-												<Circle className="size-5 text-slate-600 mt-0.5" />
-											)}
-											<div>
-												<h4 className="text-sm font-bold text-white">{item.title}</h4>
-												<p className="text-xs text-slate-400">{item.description}</p>
+								{/* 2. Category Section Catch-all Checks */}
+								{[
+									{
+										id: "plan_cat_work",
+										title: "Work & internships",
+										subtitle: "Check whether there is anything else worth including.",
+										category: "work" as OutlineCategory,
+									},
+									{
+										id: "plan_cat_projects",
+										title: "Projects",
+										subtitle: "Check whether you have something relevant to include. Nothing to add is fine.",
+										category: "projects" as OutlineCategory,
+									},
+									{
+										id: "plan_cat_vol",
+										title: "Volunteering & activities",
+										subtitle: "Check whether you have something relevant to include. Nothing to add is fine.",
+										category: "volunteer" as OutlineCategory,
+									},
+									{
+										id: "plan_cat_edu",
+										title: "Education",
+										subtitle: "Check whether you have something relevant to include. Nothing to add is fine.",
+										category: "education" as OutlineCategory,
+									},
+								].map((catItem) => (
+									<div
+										key={catItem.id}
+										className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all"
+									>
+										<div className="space-y-1.5 flex-1 min-w-0">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+													To do
+												</span>
+												<h4 className="text-sm font-bold text-white truncate">
+													{catItem.title}
+												</h4>
 											</div>
+											<p className="text-xs text-slate-400 leading-relaxed">
+												{catItem.subtitle}
+											</p>
 										</div>
-										<button
-											type="button"
-											onClick={() => handleWorkOnPlanItem(item.id)}
-											className="px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-300 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
-										>
-											<span>Work on this</span>
-											<ArrowRight className="size-3" />
-										</button>
+
+										<div className="flex items-center gap-2 shrink-0">
+											<button
+												type="button"
+												onClick={() => {
+													setStoryCategoryFilter(catItem.category === "work" ? "work" : catItem.category === "projects" ? "projects" : "all");
+													setActiveTab("stories");
+													setStoriesViewMode("overview");
+												}}
+												className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Open
+											</button>
+											<button
+												type="button"
+												onClick={() => toast.info(`Saved ${catItem.title} for later.`)}
+												className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Later
+											</button>
+										</div>
 									</div>
 								))}
+
+								{/* 3. Review skills */}
+								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+									<div className="space-y-1.5 flex-1 min-w-0">
+										<div className="flex items-center gap-2">
+											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
+												Done
+											</span>
+											<h4 className="text-sm font-bold text-white">Review skills</h4>
+										</div>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											Only include skills you can use and explain. Suggestions need your confirmation.
+										</p>
+									</div>
+									<div className="flex items-center gap-2 shrink-0">
+										<button
+											type="button"
+											onClick={() => {
+												setActiveTab("details");
+												setDetailsSubTab("skills");
+											}}
+											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Open
+										</button>
+									</div>
+								</div>
+
+								{/* 4. Confirm contact details */}
+								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+									<div className="space-y-1.5 flex-1 min-w-0">
+										<div className="flex items-center gap-2">
+											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
+												Done
+											</span>
+											<h4 className="text-sm font-bold text-white">Confirm contact details</h4>
+										</div>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											Add your name and a way for employers to contact you.
+										</p>
+									</div>
+									<div className="flex items-center gap-2 shrink-0">
+										<button
+											type="button"
+											onClick={() => {
+												setActiveTab("details");
+												setDetailsSubTab("contact");
+											}}
+											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Open
+										</button>
+									</div>
+								</div>
+
+								{/* 5. Confirm entry dates */}
+								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+									<div className="space-y-1.5 flex-1 min-w-0">
+										<div className="flex items-center gap-2">
+											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+												To do
+											</span>
+											<h4 className="text-sm font-bold text-white">Confirm entry dates</h4>
+										</div>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											Some entries still have dates to confirm before applying.
+										</p>
+									</div>
+									<div className="flex items-center gap-2 shrink-0">
+										<button
+											type="button"
+											onClick={() => {
+												setActiveTab("details");
+												setDetailsSubTab("summary");
+											}}
+											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Open
+										</button>
+										<button
+											type="button"
+											onClick={() => toast.info("Entry dates check saved for later.")}
+											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Later
+										</button>
+									</div>
+								</div>
+
+								{/* 6. Review layout and export */}
+								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+									<div className="space-y-1.5 flex-1 min-w-0">
+										<div className="flex items-center gap-2">
+											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+												To do
+											</span>
+											<h4 className="text-sm font-bold text-white">Review layout and export</h4>
+										</div>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											Check facts, wording, spacing, and page breaks in the final document.
+										</p>
+									</div>
+									<div className="flex items-center gap-2 shrink-0">
+										<button
+											type="button"
+											onClick={() => setActiveTab("export")}
+											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Open
+										</button>
+										<button
+											type="button"
+											onClick={() => toast.info("Review & export saved for later.")}
+											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+										>
+											Later
+										</button>
+									</div>
+								</div>
+							</div>
+
+							{/* Optional opportunities accordion */}
+							<div className="pt-2">
+								<button
+									type="button"
+									onClick={() => {
+										setActiveTab("stories");
+										setStoryCategoryFilter("projects");
+									}}
+									className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 font-medium transition-colors"
+								>
+									<span>►</span>
+									<span>Optional opportunities</span>
+								</button>
 							</div>
 						</div>
 					</div>

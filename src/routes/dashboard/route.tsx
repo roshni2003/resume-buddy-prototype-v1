@@ -382,23 +382,6 @@ function DashboardHeader({ isFullWidth }: { isFullWidth?: boolean }) {
 						)} />
 					</button>
 
-					{/* Template Gallery Button */}
-					<button
-						type="button"
-						onClick={() => setTemplateGalleryOpen(true)}
-						className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs sm:text-sm font-semibold text-emerald-300 transition-all cursor-pointer shadow-sm active:scale-95"
-					>
-						<svg className="size-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-							<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-							<line x1="3" y1="9" x2="21" y2="9" />
-							<line x1="9" y1="21" x2="9" y2="9" />
-						</svg>
-						<span>Templates</span>
-						<span className="hidden sm:inline-block text-[11px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-200 capitalize">
-							{activeTemplate}
-						</span>
-					</button>
-
 					{/* Save and Continue Later (only in editor/builder) */}
 					{isFullWidth && (
 						<button
