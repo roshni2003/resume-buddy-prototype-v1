@@ -35,6 +35,7 @@ import {
 	ExternalLink,
 	LogOut,
 	Volume2,
+	VolumeX,
 	Key,
 } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -51,9 +52,11 @@ import {
 	generateFollowUpQuestionForTopic,
 	getDeepSeekApiKey,
 } from "@/utils/deepseek-client";
+import { getStoredUserProfile } from "@/utils/auth-token";
 
 const searchSchema = z.object({
 	step: z.enum(["direction", "outline", "plan"]).optional(),
+	resumeId: z.string().optional(),
 });
 
 export const Route = createFileRoute("/dashboard/resumes/guided-story")({
@@ -113,6 +116,99 @@ export function GuidedStoryRoute() {
 		}
 	}, [search?.step]);
 
+	// Load specific resume when resumeId search parameter is provided
+	useEffect(() => {
+		if (search?.resumeId) {
+			const targetId = search.resumeId;
+			setCreatedResumeId(targetId);
+
+			try {
+				const resumeItem = localResumeStore.get(targetId);
+				if (resumeItem && resumeItem.data) {
+					const data = resumeItem.data;
+					if (data.basics?.name) setFullName(data.basics.name);
+					if (data.basics?.headline) setTargetRole(data.basics.headline);
+					if (data.metadata?.template) setSelectedTemplate(data.metadata.template);
+
+					// Parse sections into outline entries
+					const loadedEntries: OutlineEntry[] = [];
+
+					// 1. Experience (Work)
+					if (data.sections?.experience?.items) {
+						data.sections.experience.items.forEach((exp: any, idx: number) => {
+							const bullets: string[] = [];
+							if (exp.description) {
+								const clean = exp.description.replace(/<[^>]*>/g, "\n");
+								clean.split("\n").map((b: string) => b.trim()).filter(Boolean).forEach((b: string) => bullets.push(b));
+							}
+							loadedEntries.push({
+								id: exp.id || `work_${idx}`,
+								category: "work",
+								title: exp.position || "Role",
+								organization: exp.company || "",
+								dates: exp.period || "",
+								points: bullets,
+							});
+						});
+					}
+
+					// 2. Projects
+					if (data.sections?.projects?.items) {
+						data.sections.projects.items.forEach((proj: any, idx: number) => {
+							const bullets: string[] = [];
+							if (proj.description) {
+								const clean = proj.description.replace(/<[^>]*>/g, "\n");
+								clean.split("\n").map((b: string) => b.trim()).filter(Boolean).forEach((b: string) => bullets.push(b));
+							}
+							loadedEntries.push({
+								id: proj.id || `proj_${idx}`,
+								category: "projects",
+								title: proj.name || "Project",
+								organization: "",
+								dates: proj.period || "",
+								points: bullets,
+							});
+						});
+					}
+
+					// 3. Education
+					if (data.sections?.education?.items) {
+						data.sections.education.items.forEach((edu: any, idx: number) => {
+							loadedEntries.push({
+								id: edu.id || `edu_${idx}`,
+								category: "education",
+								title: edu.degree || edu.area || "Degree",
+								organization: edu.school || "",
+								dates: edu.period || "",
+								points: [],
+							});
+						});
+					}
+
+					// 4. Volunteer
+					if (data.sections?.volunteer?.items) {
+						data.sections.volunteer.items.forEach((vol: any, idx: number) => {
+							loadedEntries.push({
+								id: vol.id || `vol_${idx}`,
+								category: "volunteer",
+								title: vol.position || "Volunteer",
+								organization: vol.organization || "",
+								dates: vol.period || "",
+								points: [],
+							});
+						});
+					}
+
+					if (loadedEntries.length > 0) {
+						setOutlineEntries(loadedEntries);
+					}
+				}
+			} catch (err) {
+				console.warn("Failed to load specific resume by ID:", err);
+			}
+		}
+	}, [search?.resumeId]);
+
 	// Navigation Tabs inside Workspace (Step 3)
 	const [activeTab, setActiveTab] = useState<WorkspaceTab>("plan");
 
@@ -130,10 +226,11 @@ export function GuidedStoryRoute() {
 	});
 	const [jobDescription, setJobDescription] = useState("");
 	const [showJobDescription, setShowJobDescription] = useState(false);
+	const [isAudioMuted, setIsAudioMuted] = useState(false);
 
 	// Global Text-to-Speech voice synthesis helper
 	const speakText = (text: string) => {
-		if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+		if (isAudioMuted || typeof window === "undefined" || !("speechSynthesis" in window)) return;
 		try {
 			window.speechSynthesis.cancel();
 			const utterance = new SpeechSynthesisUtterance(text);
@@ -189,17 +286,12 @@ export function GuidedStoryRoute() {
 		if (typeof window === "undefined") return [];
 		try {
 			const saved = localStorage.getItem("resume_buddy_outline_entries");
-			if (saved) return JSON.parse(saved);
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				if (Array.isArray(parsed)) return parsed;
+			}
 		} catch { }
-		return [
-			{
-				id: "sample-work-1",
-				category: "work",
-				title: "Frontend Developer",
-				organization: "Acme Tech",
-				dates: "Jul 2023 – Present",
-			},
-		];
+		return [];
 	});
 
 	const [showVoiceOption, setShowVoiceOption] = useState(false);
@@ -215,15 +307,17 @@ export function GuidedStoryRoute() {
 
 	// Resume editor states
 	const [fullName, setFullName] = useState(() => {
-		if (typeof window === "undefined") return "Priya Sharma";
+		if (typeof window === "undefined") return "Your Name";
 		try {
-			const savedProfile = localStorage.getItem("resume_buddy_user_profile");
-			if (savedProfile) {
-				const p = JSON.parse(savedProfile);
+			const savedProfile = getStoredUserProfile();
+			if (savedProfile?.name) return savedProfile.name;
+			const localRaw = localStorage.getItem("resume_buddy_user_profile");
+			if (localRaw) {
+				const p = JSON.parse(localRaw);
 				if (p.name) return p.name;
 			}
 		} catch { }
-		return "Priya Sharma";
+		return "Your Name";
 	});
 	const [createdResumeId, setCreatedResumeId] = useState<string | null>(null);
 	const [pictureUrl, setPictureUrl] = useState("");
@@ -262,7 +356,6 @@ export function GuidedStoryRoute() {
 	const [hideResumePreview, setHideResumePreview] = useState(false);
 	const [storyCategoryFilter, setStoryCategoryFilter] = useState<"all" | "work" | "projects">("all");
 	const [activeExplorationQuestionIndex, setActiveExplorationQuestionIndex] = useState<Record<string, number>>({});
-	const [isAudioMuted, setIsAudioMuted] = useState(false);
 	const [editingDetailEntryId, setEditingDetailEntryId] = useState<string | null>(null);
 	const [showHowZoeHelpsModal, setShowHowZoeHelpsModal] = useState(false);
 	const [professionalSummary, setProfessionalSummary] = useState("");
@@ -305,6 +398,7 @@ export function GuidedStoryRoute() {
 	}, [activeTab, storiesViewMode, interviewActiveEntryId]);
 	const [showZoeSectionPrompt, setShowZoeSectionPrompt] = useState(true);
 	const [activeSectionPromptType, setActiveSectionPromptType] = useState<"projects" | "education" | "volunteer">("projects");
+	const [dismissedPlanSectionPrompt, setDismissedPlanSectionPrompt] = useState(false);
 	// Tab 03: Supporting Details state (matching screenshot media_1795019454591_659f3f35.jpg)
 	const [detailsSubTab, setDetailsSubTab] = useState<"contact" | "skills" | "summary">("contact");
 	const [contactEmail, setContactEmail] = useState("you@example.com");
@@ -545,19 +639,23 @@ export function GuidedStoryRoute() {
 	};
 
 	const generateProfessionalSummary = (entries: OutlineEntry[], roleName: string) => {
-		const role = roleName || "Frontend Developer";
 		const topExperiences = entries.filter((e) => e.category === "work" || e.category === "projects");
 		const expTitles = topExperiences.slice(0, 3).map((e) => e.title);
-		const bulletSample = topExperiences.flatMap((e) => e.points || []).slice(0, 2);
+		const bulletSample = topExperiences.flatMap((e) => e.points || []).filter(Boolean);
 
+		// The summary must remain strictly EMPTY until the user has filled in their details and completed actual story points/bullets
+		if (entries.length === 0 || topExperiences.length === 0 || bulletSample.length === 0) {
+			return "";
+		}
+
+		const role = roleName || "Professional";
 		let autoSummary = `${role} with demonstrated experience in modern software engineering`;
 		if (expTitles.length > 0) {
-			autoSummary += `, having contributed to ${expTitles.join(", ")}`;
+			autoSummary += `, having contributed across ${expTitles.join(", ")}`;
 		}
-		if (bulletSample.length > 0) {
-			autoSummary += `. Proven ability to ${bulletSample[0].charAt(0).toLowerCase() + bulletSample[0].slice(1).replace(/\.$/, "")}`;
-		} else {
-			autoSummary += `. Committed to engineering reliable user interfaces, driving cross-team collaboration, and delivering scalable outcomes`;
+		autoSummary += `. Proven track record in ${bulletSample[0].charAt(0).toLowerCase() + bulletSample[0].slice(1).replace(/\.$/, "")}`;
+		if (bulletSample[1]) {
+			autoSummary += `, while actively ${bulletSample[1].charAt(0).toLowerCase() + bulletSample[1].slice(1).replace(/\.$/, "")}`;
 		}
 		autoSummary += ".";
 		return autoSummary;
@@ -659,8 +757,8 @@ export function GuidedStoryRoute() {
 			},
 			summary: {
 				...defaultResumeData.summary,
-				hidden: false,
-				content: `<p>Targeting ${targetRole || "Frontend Developer"}. Experienced professional dedicated to building modern, user-focused solutions and collaborating effectively to deliver measurable results.</p>`,
+				hidden: !professionalSummary,
+				content: professionalSummary ? `<p>${professionalSummary}</p>` : "",
 			},
 			sections: {
 				...defaultResumeData.sections,
@@ -1739,14 +1837,48 @@ export function GuidedStoryRoute() {
 							<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
 								START WITH A DIRECTION
 							</span>
-							<button
-								type="button"
-								onClick={() => speakText("What role are you targeting? Tell Zoe the role you're aiming for.")}
-								className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer px-2.5 py-1 rounded-lg bg-slate-800/60 border border-slate-700/60"
-							>
-								<Volume2 className="size-3.5 text-emerald-400" />
-								<span>Hear again</span>
-							</button>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={() => speakText("What role are you targeting? Tell Zoe the role you're aiming for.")}
+									className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer px-2.5 py-1 rounded-lg bg-slate-800/60 border border-slate-700/60"
+								>
+									<Volume2 className="size-3.5 text-emerald-400" />
+									<span>Hear again</span>
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsAudioMuted((prev) => {
+											const next = !prev;
+											if (next && typeof window !== "undefined" && "speechSynthesis" in window) {
+												window.speechSynthesis.cancel();
+											}
+											toast.info(next ? "Zoe muted" : "Zoe unmuted");
+											return next;
+										});
+									}}
+									className={cn(
+										"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border transition-colors cursor-pointer",
+										isAudioMuted
+											? "bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20"
+											: "bg-slate-800/60 border-slate-700/60 text-slate-300 hover:text-white"
+									)}
+									title={isAudioMuted ? "Unmute Zoe" : "Mute Zoe"}
+								>
+									{isAudioMuted ? (
+										<>
+											<VolumeX className="size-3.5 text-rose-400" />
+											<span>Unmute</span>
+										</>
+									) : (
+										<>
+											<Volume2 className="size-3.5 text-emerald-400" />
+											<span>Mute</span>
+										</>
+									)}
+								</button>
+							</div>
 						</div>
 						<h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
 							What role are you targeting?
@@ -1907,14 +2039,48 @@ export function GuidedStoryRoute() {
 							<span className="text-xs font-bold uppercase tracking-widest text-emerald-400 block">
 								A BRIEF OUTLINE
 							</span>
-							<button
-								type="button"
-								onClick={() => speakText("What can we draw from? Add a role, project, activity, or qualification.")}
-								className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer px-2.5 py-1 rounded-lg bg-slate-800/60 border border-slate-700/60"
-							>
-								<Volume2 className="size-3.5 text-emerald-400" />
-								<span>Hear again</span>
-							</button>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={() => speakText("What can we draw from? Add a role, project, activity, or qualification.")}
+									className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer px-2.5 py-1 rounded-lg bg-slate-800/60 border border-slate-700/60"
+								>
+									<Volume2 className="size-3.5 text-emerald-400" />
+									<span>Hear again</span>
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsAudioMuted((prev) => {
+											const next = !prev;
+											if (next && typeof window !== "undefined" && "speechSynthesis" in window) {
+												window.speechSynthesis.cancel();
+											}
+											toast.info(next ? "Zoe muted" : "Zoe unmuted");
+											return next;
+										});
+									}}
+									className={cn(
+										"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border transition-colors cursor-pointer",
+										isAudioMuted
+											? "bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20"
+											: "bg-slate-800/60 border-slate-700/60 text-slate-300 hover:text-white"
+									)}
+									title={isAudioMuted ? "Unmute Zoe" : "Mute Zoe"}
+								>
+									{isAudioMuted ? (
+										<>
+											<VolumeX className="size-3.5 text-rose-400" />
+											<span>Unmute</span>
+										</>
+									) : (
+										<>
+											<Volume2 className="size-3.5 text-emerald-400" />
+											<span>Mute</span>
+										</>
+									)}
+								</button>
+							</div>
 						</div>
 						<h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
 							What can we draw from?
@@ -1927,330 +2093,330 @@ export function GuidedStoryRoute() {
 					{/* ── STRUCTURED OUTLINE (IMAGE 2) ── */}
 					<div className="rounded-2xl border border-slate-800/80 bg-[#09101d] p-6 sm:p-8 shadow-2xl space-y-6">
 						{/* Tabs Row */}
-							<div className="flex flex-wrap items-center gap-2 pb-2">
-								<button
-									type="button"
-									onClick={() => setOutlineCategory("work")}
-									className={cn(
-										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-										outlineCategory === "work"
-											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-									)}
-								>
-									Work & internships
-								</button>
+						<div className="flex flex-wrap items-center gap-2 pb-2">
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("work")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "work"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Work & internships
+							</button>
 
-								<button
-									type="button"
-									onClick={() => setOutlineCategory("projects")}
-									className={cn(
-										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-										outlineCategory === "projects"
-											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-									)}
-								>
-									Projects
-								</button>
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("projects")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "projects"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Projects
+							</button>
 
-								<button
-									type="button"
-									onClick={() => setOutlineCategory("education")}
-									className={cn(
-										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-										outlineCategory === "education"
-											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-									)}
-								>
-									Education
-								</button>
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("education")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "education"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Education
+							</button>
 
-								<button
-									type="button"
-									onClick={() => setOutlineCategory("volunteer")}
-									className={cn(
-										"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
-										outlineCategory === "volunteer"
-											? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
-											: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
-									)}
-								>
-									Volunteering & activities
-								</button>
-							</div>
-
-							{/* Form Fields: Work & Internships */}
-							{outlineCategory === "work" && (
-								<div className="space-y-4 pt-1">
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												Job title
-											</label>
-											<input
-												type="text"
-												value={workTitle}
-												onChange={(e) => setWorkTitle(e.target.value)}
-												placeholder="e.g. Frontend Developer"
-												autoFocus
-												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												Company or organization · Optional
-											</label>
-											<input
-												type="text"
-												value={workCompany}
-												onChange={(e) => setWorkCompany(e.target.value)}
-												placeholder="Organization or context"
-												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-									</div>
-
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Dates · Can confirm later
-										</label>
-										<input
-											type="text"
-											value={workDates}
-											onChange={(e) => setWorkDates(e.target.value)}
-											placeholder="e.g. Jul 2023 – Present"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-
-									<div className="flex items-center justify-between pt-2">
-										<span className="text-xs text-slate-400">
-											We'll develop the description together.
-										</span>
-										<button
-											type="button"
-											onClick={handleAddWorkEntry}
-											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5 text-emerald-400" />
-											<span>Add work experience</span>
-										</button>
-									</div>
-								</div>
-							)}
-
-							{/* Form Fields: Projects */}
-							{outlineCategory === "projects" && (
-								<div className="space-y-4 pt-1">
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												Project title
-											</label>
-											<input
-												type="text"
-												value={projectTitle}
-												onChange={(e) => setProjectTitle(e.target.value)}
-												placeholder="e.g. E-Commerce Dashboard"
-												autoFocus
-												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												Technologies or role · Optional
-											</label>
-											<input
-												type="text"
-												value={projectTech}
-												onChange={(e) => setProjectTech(e.target.value)}
-												placeholder="e.g. React, Next.js, Stripe"
-												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-									</div>
-
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Dates · Can confirm later
-										</label>
-										<input
-											type="text"
-											value={projectDates}
-											onChange={(e) => setProjectDates(e.target.value)}
-											placeholder="e.g. Jan 2024 – May 2024"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-
-									<div className="flex items-center justify-between pt-2">
-										<span className="text-xs text-slate-400">
-											We'll develop the description together.
-										</span>
-										<button
-											type="button"
-											onClick={handleAddProjectEntry}
-											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5 text-emerald-400" />
-											<span>Add project</span>
-										</button>
-									</div>
-								</div>
-							)}
-
-							{/* Form Fields: Education */}
-							{outlineCategory === "education" && (
-								<div className="space-y-4 pt-1">
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												Degree or qualification
-											</label>
-											<input
-												type="text"
-												value={eduDegree}
-												onChange={(e) => setEduDegree(e.target.value)}
-												placeholder="e.g. B.Tech Computer Science"
-												autoFocus
-												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												School or university
-											</label>
-											<input
-												type="text"
-												value={eduSchool}
-												onChange={(e) => setEduSchool(e.target.value)}
-												placeholder="e.g. State University"
-												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-									</div>
-
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Dates · Can confirm later
-										</label>
-										<input
-											type="text"
-											value={eduDates}
-											onChange={(e) => setEduDates(e.target.value)}
-											placeholder="e.g. 2020 – 2024"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-
-									<div className="flex items-center justify-between pt-2">
-										<span className="text-xs text-slate-400">
-											Academic details and certifications.
-										</span>
-										<button
-											type="button"
-											onClick={handleAddEducationEntry}
-											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5 text-emerald-400" />
-											<span>Add education</span>
-										</button>
-									</div>
-								</div>
-							)}
-
-							{/* Form Fields: Volunteering */}
-							{outlineCategory === "volunteer" && (
-								<div className="space-y-4 pt-1">
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												Role or activity
-											</label>
-											<input
-												type="text"
-												value={volRole}
-												onChange={(e) => setVolRole(e.target.value)}
-												placeholder="e.g. Open Source Contributor"
-												autoFocus
-												className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-										<div>
-											<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-												Organization · Optional
-											</label>
-											<input
-												type="text"
-												value={volOrg}
-												onChange={(e) => setVolOrg(e.target.value)}
-												placeholder="Organization or community"
-												className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-											/>
-										</div>
-									</div>
-
-									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Dates · Can confirm later
-										</label>
-										<input
-											type="text"
-											value={volDates}
-											onChange={(e) => setVolDates(e.target.value)}
-											placeholder="e.g. 2023"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
-										/>
-									</div>
-
-									<div className="flex items-center justify-between pt-2">
-										<span className="text-xs text-slate-400">
-											Extracurriculars, leadership, and community roles.
-										</span>
-										<button
-											type="button"
-											onClick={handleAddVolunteerEntry}
-											className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5 text-emerald-400" />
-											<span>Add activity</span>
-										</button>
-									</div>
-								</div>
-							)}
-
-							{/* List of Captured Outline Entries */}
-							{outlineEntries.length > 0 && (
-								<div className="pt-4 border-t border-slate-800/80 space-y-2">
-									<span className="text-xs font-semibold text-slate-300 block">
-										Captured in your outline ({outlineEntries.length})
-									</span>
-									<div className="flex flex-wrap gap-2">
-										{outlineEntries.map((entry) => (
-											<div
-												key={entry.id}
-												className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900/80 text-xs text-slate-200 shadow-sm"
-											>
-												<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase">
-													{entry.category}
-												</span>
-												<span className="font-semibold text-white">{entry.title}</span>
-												{entry.organization && <span className="text-slate-400">· {entry.organization}</span>}
-												<button
-													type="button"
-													onClick={() => handleRemoveEntry(entry.id)}
-													className="text-slate-500 hover:text-rose-400 transition-colors cursor-pointer ml-1"
-												>
-													<X className="size-3.5" />
-												</button>
-											</div>
-										))}
-									</div>
-								</div>
-							)}
+							<button
+								type="button"
+								onClick={() => setOutlineCategory("volunteer")}
+								className={cn(
+									"px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border",
+									outlineCategory === "volunteer"
+										? "bg-[#0b1f1a] text-emerald-300 border-emerald-500/40 shadow-sm"
+										: "bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-white"
+								)}
+							>
+								Volunteering & activities
+							</button>
 						</div>
+
+						{/* Form Fields: Work & Internships */}
+						{outlineCategory === "work" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Job title
+										</label>
+										<input
+											type="text"
+											value={workTitle}
+											onChange={(e) => setWorkTitle(e.target.value)}
+											placeholder="e.g. Frontend Developer"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Company or organization · Optional
+										</label>
+										<input
+											type="text"
+											value={workCompany}
+											onChange={(e) => setWorkCompany(e.target.value)}
+											placeholder="Organization or context"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={workDates}
+										onChange={(e) => setWorkDates(e.target.value)}
+										placeholder="e.g. Jul 2023 – Present"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										We'll develop the description together.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddWorkEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add work experience</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Form Fields: Projects */}
+						{outlineCategory === "projects" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Project title
+										</label>
+										<input
+											type="text"
+											value={projectTitle}
+											onChange={(e) => setProjectTitle(e.target.value)}
+											placeholder="e.g. E-Commerce Dashboard"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Technologies or role · Optional
+										</label>
+										<input
+											type="text"
+											value={projectTech}
+											onChange={(e) => setProjectTech(e.target.value)}
+											placeholder="e.g. React, Next.js, Stripe"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={projectDates}
+										onChange={(e) => setProjectDates(e.target.value)}
+										placeholder="e.g. Jan 2024 – May 2024"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										We'll develop the description together.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddProjectEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add project</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Form Fields: Education */}
+						{outlineCategory === "education" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Degree or qualification
+										</label>
+										<input
+											type="text"
+											value={eduDegree}
+											onChange={(e) => setEduDegree(e.target.value)}
+											placeholder="e.g. B.Tech Computer Science"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											School or university
+										</label>
+										<input
+											type="text"
+											value={eduSchool}
+											onChange={(e) => setEduSchool(e.target.value)}
+											placeholder="e.g. State University"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={eduDates}
+										onChange={(e) => setEduDates(e.target.value)}
+										placeholder="e.g. 2020 – 2024"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										Academic details and certifications.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddEducationEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add education</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* Form Fields: Volunteering */}
+						{outlineCategory === "volunteer" && (
+							<div className="space-y-4 pt-1">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Role or activity
+										</label>
+										<input
+											type="text"
+											value={volRole}
+											onChange={(e) => setVolRole(e.target.value)}
+											placeholder="e.g. Open Source Contributor"
+											autoFocus
+											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Organization · Optional
+										</label>
+										<input
+											type="text"
+											value={volOrg}
+											onChange={(e) => setVolOrg(e.target.value)}
+											placeholder="Organization or community"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+										Dates · Can confirm later
+									</label>
+									<input
+										type="text"
+										value={volDates}
+										onChange={(e) => setVolDates(e.target.value)}
+										placeholder="e.g. 2023"
+										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between pt-2">
+									<span className="text-xs text-slate-400">
+										Extracurriculars, leadership, and community roles.
+									</span>
+									<button
+										type="button"
+										onClick={handleAddVolunteerEntry}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+									>
+										<Plus className="size-3.5 text-emerald-400" />
+										<span>Add activity</span>
+									</button>
+								</div>
+							</div>
+						)}
+
+						{/* List of Captured Outline Entries */}
+						{outlineEntries.length > 0 && (
+							<div className="pt-4 border-t border-slate-800/80 space-y-2">
+								<span className="text-xs font-semibold text-slate-300 block">
+									Captured in your outline ({outlineEntries.length})
+								</span>
+								<div className="flex flex-wrap gap-2">
+									{outlineEntries.map((entry) => (
+										<div
+											key={entry.id}
+											className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900/80 text-xs text-slate-200 shadow-sm"
+										>
+											<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase">
+												{entry.category}
+											</span>
+											<span className="font-semibold text-white">{entry.title}</span>
+											{entry.organization && <span className="text-slate-400">· {entry.organization}</span>}
+											<button
+												type="button"
+												onClick={() => handleRemoveEntry(entry.id)}
+												className="text-slate-500 hover:text-rose-400 transition-colors cursor-pointer ml-1"
+											>
+												<X className="size-3.5" />
+											</button>
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+					</div>
 
 					{/* Voice Recording Accordion */}
 					<div className="space-y-3">
@@ -2333,22 +2499,62 @@ export function GuidedStoryRoute() {
 		<div className="flex flex-col min-h-screen w-full flex-1 text-slate-100 font-sans bg-[#060b11]">
 			{/* Brand Header matching media_1795108245275_5bc0accd.png */}
 			<div className="w-full border-b border-slate-800/90 bg-[#040810] px-6 sm:px-8 py-3 flex items-center justify-between gap-4">
-				{/* Left: Zoe Green circle icon + Resume Buddy + Prototype v1 - simulated AI badge */}
+				{/* Left: Zoe Green circle icon + Resume Buddy + Prototype v1 - simulated AI badge (Clickable to go to dashboard) */}
 				<div className="flex items-center gap-3">
-					<div className="size-8 rounded-full bg-[#00d084] flex items-center justify-center text-slate-950 font-black text-sm tracking-tighter shadow-sm">
-						Z
-					</div>
-					<span className="font-extrabold text-white text-base sm:text-lg tracking-tight">
-						Resume Buddy
-					</span>
+					<button
+						type="button"
+						onClick={() => navigate({ to: "/dashboard/resumes" as any })}
+						className="flex items-center gap-2.5 hover:opacity-90 active:scale-98 transition-all cursor-pointer group"
+						title="Go to dashboard"
+					>
+						<div className="size-8 rounded-full bg-[#00d084] flex items-center justify-center text-slate-950 font-black text-sm tracking-tighter shadow-sm group-hover:ring-2 group-hover:ring-emerald-400/50 transition-all">
+							Z
+						</div>
+						<span className="font-extrabold text-white text-base sm:text-lg tracking-tight group-hover:text-emerald-300 transition-colors">
+							Resume Buddy
+						</span>
+					</button>
 					<span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#201805] border border-[#f59e0b]/40 text-[#f59e0b] text-[11px] font-semibold">
 						<span className="size-1.5 rounded-full bg-[#f59e0b]" />
 						<span>Prototype v1 - simulated AI</span>
 					</span>
 				</div>
 
-				{/* Right: DeepSeek API status pill + User pill + Logout button */}
+				{/* Right: Mute toggle + DeepSeek API status pill + User pill + Logout button */}
 				<div className="flex items-center gap-3">
+					<button
+						type="button"
+						onClick={() => {
+							setIsAudioMuted((prev) => {
+								const next = !prev;
+								if (next && typeof window !== "undefined" && "speechSynthesis" in window) {
+									window.speechSynthesis.cancel();
+								}
+								toast.info(next ? "Zoe voice muted" : "Zoe voice unmuted");
+								return next;
+							});
+						}}
+						className={cn(
+							"inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium transition-all cursor-pointer",
+							isAudioMuted
+								? "border-rose-500/40 bg-rose-950/50 text-rose-300 hover:bg-rose-900/60"
+								: "border-emerald-500/40 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/60"
+						)}
+						title={isAudioMuted ? "Click to unmute Zoe voice" : "Click to mute Zoe voice"}
+					>
+						{isAudioMuted ? (
+							<>
+								<VolumeX className="size-3.5 text-rose-400" />
+								<span>Zoe Muted</span>
+							</>
+						) : (
+							<>
+								<Volume2 className="size-3.5 text-emerald-400" />
+								<span>Voice On</span>
+							</>
+						)}
+					</button>
+
 					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 text-emerald-300 text-xs font-medium">
 						<Key className="size-3 text-emerald-400" />
 						<span>DeepSeek API</span>
@@ -2357,7 +2563,7 @@ export function GuidedStoryRoute() {
 
 					<div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-700/80 bg-slate-900/90 text-slate-200 text-xs font-semibold">
 						<span className="size-2 rounded-full bg-emerald-400" />
-						<span>{fullName || "Roshni Jha"}</span>
+						<span>{fullName || "User"}</span>
 					</div>
 
 					<button
@@ -2479,365 +2685,10 @@ export function GuidedStoryRoute() {
 				{/* Left Column: Interactive Plan & Editor Tools */}
 				<main className="flex-1 min-w-0 p-6 sm:p-8 lg:p-10 overflow-y-auto">
 
-				{/* TAB 1: PLAN VIEW */}
-				{activeTab === "plan" && (
-					<div className="space-y-6">
-						{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle */}
-						<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-							<span className="font-semibold text-slate-300">
-								{targetRole || "Frontend Developer"}
-							</span>
-
-							<div className="flex items-center gap-4">
-								<span className="flex items-center gap-1.5 text-[11px] text-slate-400">
-									<span className="size-1.5 rounded-full bg-emerald-400" />
-									<span>Saved on this device</span>
-								</span>
-
-								<button
-									type="button"
-									onClick={() => setHideResumePreview(!hideResumePreview)}
-									className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
-								>
-									<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
-								</button>
-							</div>
-						</div>
-
-						{/* Hero Header matching screenshot */}
-						<div className="space-y-1.5 pt-1">
-							<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
-								A ROUTE, AT YOUR PACE
-							</span>
-							<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-								Let's bring your story out.
-							</h1>
-							<p className="text-xs sm:text-sm text-slate-400 max-w-xl">
-								One useful step at a time. Zoe puts the most useful step first; you can choose anything.
-							</p>
-						</div>
-
-						{/* ZOE / YOUR NEXT SECTION - What about projects / other categories */}
-						<div className="rounded-2xl border border-indigo-500/30 bg-[#0e1124] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
-							<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-indigo-300">
-								<div className="flex items-center gap-2">
-									<span className="size-2 rounded-full bg-indigo-400" />
-									<span>ZOE / YOUR NEXT SECTION</span>
-								</div>
-								<ExternalLink className="size-3.5 text-indigo-400/60" />
-							</div>
-
-							<div className="space-y-1">
-								<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-									What about projects?
-								</h2>
-								<p className="text-xs sm:text-sm text-slate-300 pt-0.5">
-									Have you built something through coursework, personal practice, freelance work, or volunteering that you would like to include?
-								</p>
-							</div>
-
-							<div className="pt-2 flex flex-wrap items-center gap-3">
-								<button
-									type="button"
-									onClick={() => {
-										setQuickAddCategory("projects");
-										setQuickAddSectionModalOpen(true);
-									}}
-									className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
-								>
-									<span>+ Add a project</span>
-								</button>
-								<button
-									type="button"
-									onClick={() => toast.info("Noted! We'll proceed without projects for now.")}
-									className="px-5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs sm:text-sm transition-all cursor-pointer"
-								>
-									Nothing to add here
-								</button>
-								<button
-									type="button"
-									onClick={() => toast.info("You can return to add projects whenever you're ready.")}
-									className="text-xs text-slate-400 hover:text-slate-200 font-semibold px-2 py-1 transition-colors cursor-pointer"
-								>
-									Decide later
-								</button>
-							</div>
-						</div>
-
-						{/* SECTION 1: Your experience (Ordered by what will strengthen the resume most) */}
-						<div className="space-y-4 pt-3">
-							<div className="flex items-center justify-between">
-								<h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-									Your experience
-								</h3>
-								<span className="text-xs text-slate-400">
-									Ordered by what will strengthen the resume most.
-								</span>
-							</div>
-
-							<div className="space-y-3">
-								{sortEntriesByPriority(outlineEntries).map((entry) => {
-									const isFinished = (entry.points && entry.points.length > 0);
-									const subtitle = isFinished
-										? "You're finished with this entry for now. Reopen it whenever you like."
-										: "Talk through the main things you did here. Zoe drafts a statement for each.";
-
-									return (
-										<div
-											key={entry.id}
-											className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all"
-										>
-											<div className="space-y-1.5 flex-1 min-w-0">
-												<div className="flex items-center gap-2">
-													{isFinished ? (
-														<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
-															Done
-														</span>
-													) : (
-														<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-															To do
-														</span>
-													)}
-													<h4 className="text-sm font-bold text-white truncate">
-														{entry.title}
-													</h4>
-												</div>
-												<p className="text-xs text-slate-400 leading-relaxed">
-													{subtitle}
-												</p>
-											</div>
-
-											<div className="flex items-center gap-2 shrink-0">
-												<button
-													type="button"
-													onClick={() => {
-														setActiveTab("stories");
-														setSelectedExperienceId(entry.id);
-														setInterviewActiveEntryId(entry.id);
-														if (isFinished) {
-															setStoriesViewMode("overview");
-														} else {
-															setStoriesViewMode("interview");
-														}
-													}}
-													className="px-4 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-												>
-													Open
-												</button>
-												{!isFinished && (
-													<button
-														type="button"
-														onClick={() => {
-															toast.info(`Saved ${entry.title} for later.`);
-														}}
-														className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-													>
-														Later
-													</button>
-												)}
-											</div>
-										</div>
-									);
-								})}
-							</div>
-						</div>
-
-						{/* SECTION 2: Final checks (Quick steps before you export) */}
-						<div className="space-y-4 pt-6">
-							<div className="flex items-center justify-between">
-								<h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-									Final checks
-								</h3>
-								<span className="text-xs text-slate-400">
-									Quick steps before you export.
-								</span>
-							</div>
-
-							<div className="space-y-3">
-								{/* Card 1: Anything else to include? */}
-								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 space-y-3 hover:border-slate-700 transition-all">
-									<div className="space-y-1">
-										<div className="flex items-center gap-2">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-												1 of 4 checked
-											</span>
-										</div>
-										<h4 className="text-sm font-bold text-white">Anything else to include?</h4>
-										<p className="text-xs text-slate-400">
-											Still to check: Projects, Volunteering & activities, Education. Nothing to add is fine.
-										</p>
-									</div>
-									<div className="pt-1">
-										<button
-											type="button"
-											onClick={() => {
-												setActiveTab("stories");
-												setStoriesViewMode("overview");
-											}}
-											className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
-										>
-											<span>► Check each section</span>
-										</button>
-									</div>
-								</div>
-
-								{/* Card 2: Confirm contact details */}
-								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
-									<div className="space-y-1.5 flex-1 min-w-0">
-										<div className="flex items-center gap-2">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-												To do
-											</span>
-											<h4 className="text-sm font-bold text-white">Confirm contact details</h4>
-										</div>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											Add your name and a way for employers to contact you.
-										</p>
-									</div>
-									<div className="flex items-center gap-2 shrink-0">
-										<button
-											type="button"
-											onClick={() => {
-												setActiveTab("details");
-												setDetailsSubTab("contact");
-											}}
-											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Open
-										</button>
-										<button
-											type="button"
-											onClick={() => toast.info("Contact details check saved for later.")}
-											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Later
-										</button>
-									</div>
-								</div>
-
-								{/* Card 3: Confirm entry dates */}
-								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
-									<div className="space-y-1.5 flex-1 min-w-0">
-										<div className="flex items-center gap-2">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-												To do
-											</span>
-											<h4 className="text-sm font-bold text-white">Confirm entry dates</h4>
-										</div>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											Some entries still have dates to confirm before applying.
-										</p>
-									</div>
-									<div className="flex items-center gap-2 shrink-0">
-										<button
-											type="button"
-											onClick={() => {
-												setActiveTab("details");
-												setDetailsSubTab("summary");
-											}}
-											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Open
-										</button>
-										<button
-											type="button"
-											onClick={() => toast.info("Entry dates check saved for later.")}
-											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Later
-										</button>
-									</div>
-								</div>
-
-								{/* Card 4: Review skills */}
-								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
-									<div className="space-y-1.5 flex-1 min-w-0">
-										<div className="flex items-center gap-2">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-												To do
-											</span>
-											<h4 className="text-sm font-bold text-white">Review skills</h4>
-										</div>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											Only include skills you can use and explain. Suggestions need your confirmation.
-										</p>
-									</div>
-									<div className="flex items-center gap-2 shrink-0">
-										<button
-											type="button"
-											onClick={() => {
-												setActiveTab("details");
-												setDetailsSubTab("skills");
-											}}
-											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Open
-										</button>
-										<button
-											type="button"
-											onClick={() => toast.info("Skills review saved for later.")}
-											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Later
-										</button>
-									</div>
-								</div>
-
-								{/* Card 5: Review layout and export */}
-								<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
-									<div className="space-y-1.5 flex-1 min-w-0">
-										<div className="flex items-center gap-2">
-											<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-												To do
-											</span>
-											<h4 className="text-sm font-bold text-white">Review layout and export</h4>
-										</div>
-										<p className="text-xs text-slate-400 leading-relaxed">
-											Check facts, wording, spacing, and page breaks in the final document.
-										</p>
-									</div>
-									<div className="flex items-center gap-2 shrink-0">
-										<button
-											type="button"
-											onClick={() => setActiveTab("export")}
-											className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Open
-										</button>
-										<button
-											type="button"
-											onClick={() => toast.info("Review & export saved for later.")}
-											className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-										>
-											Later
-										</button>
-									</div>
-								</div>
-							</div>
-
-							{/* Optional opportunities accordion */}
-							<div className="pt-2">
-								<button
-									type="button"
-									onClick={() => {
-										setActiveTab("stories");
-										setStoryCategoryFilter("projects");
-									}}
-									className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 font-medium transition-colors"
-								>
-									<span>►</span>
-									<span>Optional opportunities</span>
-								</button>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* TAB 2: STORIES (YOUR STORIES SECTION OVERVIEW & EXPLORATION) */}
-				{activeTab === "stories" && (
-					<div className="space-y-6">
-						{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle (ONLY in overview mode) */}
-						{storiesViewMode === "overview" && (
+					{/* TAB 1: PLAN VIEW */}
+					{activeTab === "plan" && (
+						<div className="space-y-6">
+							{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle */}
 							<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
 								<span className="font-semibold text-slate-300">
 									{targetRole || "Frontend Developer"}
@@ -2858,279 +2709,623 @@ export function GuidedStoryRoute() {
 									</button>
 								</div>
 							</div>
-						)}
 
-						{/* Hero Header: ONLY in overview mode, NOT when telling story or in checklist/drilldown */}
-						{storiesViewMode === "overview" && (
-							<div className="space-y-2 pt-1">
+							{/* Hero Header matching screenshot */}
+							<div className="space-y-1.5 pt-1">
 								<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
-									YOUR STORIES
+									A ROUTE, AT YOUR PACE
 								</span>
-								<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-									Your experience.<br />All the useful parts.
+								<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+									Let's bring your story out.
 								</h1>
-								<p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-									Work, projects, activities, and education. Open any entry, add something new, or return to your plan. Zoe asks about a few pieces of work in each entry, then drafts a statement for each.
+								<p className="text-xs sm:text-sm text-slate-400 max-w-xl">
+									One useful step at a time. Zoe puts the most useful step first; you can choose anything.
 								</p>
 							</div>
-						)}
 
-						{/* If user clicked to interview an entry directly, show the Interview Studio mode */}
-						{storiesViewMode === "interview" && interviewActiveEntryId ? (
-							<div className="space-y-4">
-								<div className="flex items-center justify-between">
-									<button
-										type="button"
-										onClick={() => setStoriesViewMode("overview")}
-										className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
-									>
-										<ArrowLeft className="size-3.5" />
-										<span>Back to all stories overview</span>
-									</button>
+							{/* DYNAMIC TOP CARD:
+						    - If the user has completed at least 1 story (e.g. work experience has bullets),
+						      or all stories are finished, show the next section prompt (Image 1: "ZOE / YOUR NEXT SECTION - What about projects?")
+						      unless dismissed.
+						    - When an entry is pending and no story is completed yet:
+						      Show Image 2: "ZOE / YOUR NEXT STEP - Zoe suggests <Role> - Talk through this"
+						*/}
+							{(() => {
+								const sorted = sortEntriesByPriority(outlineEntries);
+								const pendingEntry = sorted.find((e) => !e.points || e.points.length === 0);
+								const hasCompletedStory = sorted.some((e) => e.points && e.points.length > 0);
 
-									<button
-										type="button"
-										onClick={() => setHideResumePreview(!hideResumePreview)}
-										className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
-									>
-										<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
-									</button>
-								</div>
+								// Determine which section to suggest next based on what's in the outline
+								const hasProjects = outlineEntries.some((e) => e.category === "projects");
+								const hasEducation = outlineEntries.some((e) => e.category === "education");
+								const nextSuggestedCategory: "projects" | "education" | "volunteer" = !hasProjects
+									? "projects"
+									: !hasEducation
+										? "education"
+										: "volunteer";
 
-								{(() => {
-									const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
-									if (!activeEntry) return null;
-									const focusedQ = getFocusedQuestionForExperience(activeEntry);
-
+								// If user has completed a story, promote the next section prompt (matching user request and screenshot 1)
+								if (hasCompletedStory && !dismissedPlanSectionPrompt) {
 									return (
-										<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#091524] p-6 sm:p-7 shadow-2xl space-y-5">
-											{/* Header Controls: Zoe pill, Hear again, Choose voice */}
-											<div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
-												<div className="flex items-center gap-3">
-													<span className="text-xs font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
-														Zoe
-													</span>
-													<button
-														type="button"
-														onClick={() => {
-															if ("speechSynthesis" in window) {
-																window.speechSynthesis.cancel();
-																const utterance = new SpeechSynthesisUtterance(focusedQ.question);
-																utterance.rate = 1.0;
-																window.speechSynthesis.speak(utterance);
-															}
-														}}
-														className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
-													>
-														<Volume2 className="size-3.5 text-emerald-400" />
-														<span>Hear again</span>
-													</button>
-												</div>
-
+										<div className="rounded-2xl border border-indigo-500/30 bg-[#0e1124] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
+											<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-indigo-300">
 												<div className="flex items-center gap-2">
-													<span className="text-xs text-slate-400 font-medium">Choose voice</span>
-													<span className="text-[10px] text-emerald-400 font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-														Kokoro AI
-													</span>
+													<span className="size-2 rounded-full bg-indigo-400" />
+													<span>ZOE / YOUR NEXT SECTION</span>
 												</div>
+												<ExternalLink className="size-3.5 text-indigo-400/60" />
 											</div>
 
-											{/* About Tag */}
-											<div>
-												<span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-													About: {activeEntry.title}
-												</span>
-											</div>
-
-											{/* Targeted Question */}
-											<div className="space-y-1.5">
-												<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-													{focusedQ.question}
-												</h3>
-												<p className="text-xs text-slate-400">
-													You can describe it in your own words. Zoe will help with the wording.
+											<div className="space-y-1">
+												<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+													{nextSuggestedCategory === "projects" && "What about projects?"}
+													{nextSuggestedCategory === "education" && "What about education?"}
+													{nextSuggestedCategory === "volunteer" && "What about volunteering & activities?"}
+												</h2>
+												<p className="text-xs sm:text-sm text-slate-300 pt-0.5">
+													{nextSuggestedCategory === "projects" && "Have you built something through coursework, personal practice, freelance work, or volunteering that you would like to include?"}
+													{nextSuggestedCategory === "education" && "Degrees, bootcamps, certifications, or coursework you'd like highlighted on your resume."}
+													{nextSuggestedCategory === "volunteer" && "Community leadership, mentoring, clubs, or extracurricular initiatives."}
 												</p>
 											</div>
 
-											{/* Voice recording button */}
-											<div className="flex items-center gap-3">
+											<div className="pt-2 flex flex-wrap items-center gap-3">
 												<button
 													type="button"
 													onClick={() => {
-														if (isSpeakingAnswer) {
-															setIsSpeakingAnswer(false);
-															voiceAssistant.stop();
-														} else {
-															const baseText = experienceInputText ? experienceInputText.trim() : "";
-															setIsSpeakingAnswer(true);
-															const started = voiceAssistant.start(
-																(transcript) => {
-																	const combined = baseText ? `${baseText} ${transcript}` : transcript;
-																	setExperienceInputText(combined);
-																},
-																(err) => {
-																	console.warn("Speech error:", err);
-																	setIsSpeakingAnswer(false);
-																},
-																() => {
-																	setIsSpeakingAnswer(false);
-																}
-															);
-															if (!started) {
-																setIsSpeakingAnswer(false);
-															}
-														}
+														setQuickAddCategory(nextSuggestedCategory);
+														setQuickAddSectionModalOpen(true);
 													}}
-													className={cn(
-														"px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer",
-														isSpeakingAnswer
-															? "bg-rose-500/20 border-2 border-rose-500 text-rose-300 animate-pulse"
-															: "bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
-													)}
+													className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
 												>
-													<Mic className="size-4 text-emerald-400" />
-													<span>{isSpeakingAnswer ? "Stop recording..." : "Speak your answer"}</span>
+													<span>+ Add a {nextSuggestedCategory === "projects" ? "project" : nextSuggestedCategory === "education" ? "degree" : "activity"}</span>
 												</button>
-												<span className="text-[11px] text-slate-500">
-													{isSpeakingAnswer ? "Listening... Speak naturally" : "Your voice, in your words. Review before sending."}
+												<button
+													type="button"
+													onClick={() => {
+														toast.info(`Noted! We'll proceed without ${nextSuggestedCategory} for now.`);
+														setDismissedPlanSectionPrompt(true);
+													}}
+													className="px-5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs sm:text-sm transition-all cursor-pointer"
+												>
+													Nothing to add here
+												</button>
+												<button
+													type="button"
+													onClick={() => {
+														toast.info(`You can return to add ${nextSuggestedCategory} whenever you're ready.`);
+														setDismissedPlanSectionPrompt(true);
+													}}
+													className="text-xs text-slate-400 hover:text-slate-200 font-semibold px-2 py-1 transition-colors cursor-pointer"
+												>
+													Decide later
+												</button>
+											</div>
+										</div>
+									);
+								}
+
+								// If there is an unfinished entry, show IMAGE 2 (Featured Next Step)
+								if (pendingEntry) {
+									return (
+										<div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-[#0c2217] via-[#081912] to-[#050f0b] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-5">
+											<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-emerald-300">
+												<div className="flex items-center gap-2">
+													<span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+													<span>ZOE / YOUR NEXT STEP</span>
+												</div>
+												<ExternalLink className="size-3.5 text-emerald-400/60" />
+											</div>
+
+											<div className="space-y-1.5">
+												<span className="text-xs text-emerald-400/90 font-medium block">
+													Zoe suggests
+												</span>
+												<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+													{pendingEntry.title}
+												</h2>
+												<p className="text-xs sm:text-sm text-slate-300">
+													Talk through the main things you did here. Zoe drafts a statement for each.
+												</p>
+												<div className="text-xs text-slate-400 pt-1 flex items-center gap-1.5">
+													<span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">WHY THIS FIRST</span>
+													<span>It's your most recent role and close to your target role.</span>
+												</div>
+											</div>
+
+											<div className="pt-2 flex flex-wrap items-center gap-4">
+												<button
+													type="button"
+													onClick={() => {
+														setActiveTab("stories");
+														setSelectedExperienceId(pendingEntry.id);
+														setInterviewActiveEntryId(pendingEntry.id);
+														setStoriesViewMode("interview");
+													}}
+													className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+												>
+													<Mic className="size-4 text-slate-950" />
+													<span>Talk through this</span>
+												</button>
+
+												<span className="text-xs text-emerald-300/60">
+													You can choose a different step below.
 												</span>
 											</div>
 
-											{/* Direct Answer Textarea */}
-											<div className="space-y-3">
-												<textarea
-													rows={4}
-													value={experienceInputText}
-													onChange={(e) => setExperienceInputText(e.target.value)}
-													placeholder="Your words go here. Speak or type..."
-													className="w-full rounded-2xl border border-slate-700 bg-[#060c14] p-4 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none transition-colors"
-												/>
-
-												<div className="flex items-center justify-between pt-1">
-													<button
-														type="button"
-														onClick={() => setStoriesViewMode("overview")}
-														className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
-													>
-														Skip question
-													</button>
-
-													<button
-														type="button"
-														disabled={isExtractingTopics || !experienceInputText.trim()}
-														onClick={() => handleInitialStorySubmit(activeEntry.id, experienceInputText)}
-														className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
-													>
-														<span>{isExtractingTopics ? "Listening & analyzing..." : "Send answer"}</span>
-														<ArrowRight className="size-4" />
-													</button>
+											<div className="flex items-center justify-between pt-4 border-t border-emerald-500/10 text-[10px] font-mono text-emerald-400/60">
+												<span>{hasCompletedStory ? "2 OF 10 PLAN ITEMS FINISHED" : "0 OF 10 PLAN ITEMS FINISHED"}</span>
+												<div className="flex items-center gap-1">
+													<span className="size-1 rounded-full bg-emerald-500/40" />
+													<span className="size-1 rounded-full bg-emerald-500/40" />
+													<span className="size-1 rounded-full bg-emerald-500/40" />
 												</div>
 											</div>
 										</div>
 									);
-								})()}
-							</div>
-						) : storiesViewMode === "checklist" ? (
-							/* ── CHECKLIST MODE: "Here's what I heard" matching user screenshots 1 & 2 ── */
-							(() => {
-								const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
-								const orgName = activeEntry?.organization || activeEntry?.title || "your experience";
-								const selectedCount = extractedTopics.filter((t) => t.selected).length;
+								}
 
+								// If all current experiences have statements and section prompt was dismissed, show standard next section:
 								return (
-									<div className="space-y-4">
-										{/* Breadcrumb Top Bar */}
-										<div className="flex items-center justify-between text-xs text-slate-400">
-											<div>
-												<span className="text-[10px] font-mono tracking-wider uppercase text-emerald-400 font-bold block">
-													Check the list
-												</span>
-												<div className="mt-1">
-													<span className="text-[10px] font-mono uppercase text-slate-400 tracking-wider">
-														{activeEntry?.category === "work" ? "WORK EXPERIENCE" : activeEntry?.category.toUpperCase()}
-													</span>
-													<h2 className="text-xl font-extrabold text-white">
-														{activeEntry?.title}
-													</h2>
-													<p className="text-xs text-slate-400">
-														{activeEntry?.organization} {activeEntry?.dates ? `· ${activeEntry.dates}` : ""}
-													</p>
-												</div>
+									<div className="rounded-2xl border border-indigo-500/30 bg-[#0e1124] p-6 sm:p-7 shadow-xl relative overflow-hidden space-y-4">
+										<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-indigo-300">
+											<div className="flex items-center gap-2">
+												<span className="size-2 rounded-full bg-indigo-400" />
+												<span>ZOE / YOUR NEXT SECTION</span>
 											</div>
-
-											<div className="text-right">
-												<span className="text-[11px] text-slate-400 block">
-													One conversation · a statement for each piece of work
-												</span>
-												<button
-													type="button"
-													onClick={() => setStoriesViewMode("overview")}
-													className="text-xs text-slate-400 hover:text-white mt-2 cursor-pointer font-semibold"
-												>
-													Pause
-												</button>
-											</div>
+											<ExternalLink className="size-3.5 text-indigo-400/60" />
 										</div>
 
-										{/* Main Card */}
-										<div className="rounded-2xl border border-slate-800 bg-[#070e17] p-6 sm:p-8 shadow-2xl space-y-6">
-											{/* "Here's what I heard" Badge */}
-											<div className="inline-flex items-center px-2.5 py-1 rounded bg-[#102219] border border-emerald-500/40 text-[11px] font-mono font-bold text-emerald-300">
-												Here's what I heard
-											</div>
+										<div className="space-y-1">
+											<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+												{nextSuggestedCategory === "projects" && "What about projects?"}
+												{nextSuggestedCategory === "education" && "What about education?"}
+												{nextSuggestedCategory === "volunteer" && "What about volunteering & activities?"}
+											</h2>
+											<p className="text-xs sm:text-sm text-slate-300 pt-0.5">
+												{nextSuggestedCategory === "projects" && "Have you built something through coursework, personal practice, freelance work, or volunteering that you would like to include?"}
+												{nextSuggestedCategory === "education" && "Degrees, bootcamps, certifications, or coursework you'd like highlighted on your resume."}
+												{nextSuggestedCategory === "volunteer" && "Community leadership, mentoring, clubs, or extracurricular initiatives."}
+											</p>
+										</div>
 
-											<div className="space-y-1">
-												<h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-													{extractedTopics.length} things from {orgName}.
-												</h3>
-												<p className="text-xs sm:text-sm text-slate-400">
-													Each one can become a bullet. Rename, set aside, or add anything that's missing.
-												</p>
-											</div>
+										<div className="pt-2 flex flex-wrap items-center gap-3">
+											<button
+												type="button"
+												onClick={() => {
+													setQuickAddCategory(nextSuggestedCategory);
+													setQuickAddSectionModalOpen(true);
+												}}
+												className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+											>
+												<span>+ Add a {nextSuggestedCategory === "projects" ? "project" : nextSuggestedCategory === "education" ? "degree" : "activity"}</span>
+											</button>
+											<button
+												type="button"
+												onClick={() => toast.info(`Noted! We'll proceed without ${nextSuggestedCategory} for now.`)}
+												className="px-5 py-2.5 rounded-xl border border-slate-700/80 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs sm:text-sm transition-all cursor-pointer"
+											>
+												Nothing to add here
+											</button>
+											<button
+												type="button"
+												onClick={() => toast.info(`You can return to add ${nextSuggestedCategory} whenever you're ready.`)}
+												className="text-xs text-slate-400 hover:text-slate-200 font-semibold px-2 py-1 transition-colors cursor-pointer"
+											>
+												Decide later
+											</button>
+										</div>
+									</div>
+								);
+							})()}
 
-											{/* Checkbox Items List */}
-											<div className="space-y-2.5">
-												{extractedTopics.map((topic, idx) => (
-													<div
-														key={topic.id}
-														onClick={() => {
-															setExtractedTopics((prev) =>
-																prev.map((t) =>
-																	t.id === topic.id ? { ...t, selected: !t.selected } : t
-																)
-															);
-														}}
-														className={cn(
-															"flex items-center gap-3.5 p-3.5 rounded-xl border transition-all cursor-pointer",
-															topic.selected
-																? "border-emerald-500/50 bg-[#09181d] text-white"
-																: "border-slate-800 bg-slate-900/40 text-slate-400 hover:border-slate-700"
+							{/* SECTION 1: Your experience (Ordered by what will strengthen the resume most) */}
+							<div className="space-y-4 pt-3">
+								<div className="flex items-center justify-between">
+									<h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+										Your experience
+									</h3>
+									<span className="text-xs text-slate-400">
+										Ordered by what will strengthen the resume most.
+									</span>
+								</div>
+
+								<div className="space-y-3">
+									{sortEntriesByPriority(outlineEntries).map((entry) => {
+										const isFinished = (entry.points && entry.points.length > 0);
+										const subtitle = isFinished
+											? "You're finished with this entry for now. Reopen it whenever you like."
+											: "Talk through the main things you did here. Zoe drafts a statement for each.";
+
+										return (
+											<div
+												key={entry.id}
+												className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all"
+											>
+												<div className="space-y-1.5 flex-1 min-w-0">
+													<div className="flex items-center gap-2">
+														{isFinished ? (
+															<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
+																Done
+															</span>
+														) : (
+															<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+																To do
+															</span>
 														)}
+														<h4 className="text-sm font-bold text-white truncate">
+															{entry.title}
+														</h4>
+													</div>
+													<p className="text-xs text-slate-400 leading-relaxed">
+														{subtitle}
+													</p>
+												</div>
+
+												<div className="flex items-center gap-2 shrink-0">
+													<button
+														type="button"
+														onClick={() => {
+															setActiveTab("stories");
+															setSelectedExperienceId(entry.id);
+															setInterviewActiveEntryId(entry.id);
+															if (isFinished) {
+																setStoriesViewMode("overview");
+															} else {
+																setStoriesViewMode("interview");
+															}
+														}}
+														className="px-4 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
 													>
-														<div
-															className={cn(
-																"size-5 rounded flex items-center justify-center transition-colors shrink-0",
-																topic.selected
-																	? "bg-emerald-500 text-slate-950 font-bold"
-																	: "border border-slate-600 bg-slate-800"
-															)}
+														Open
+													</button>
+													{!isFinished && (
+														<button
+															type="button"
+															onClick={() => {
+																toast.info(`Saved ${entry.title} for later.`);
+															}}
+															className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
 														>
-															{topic.selected && <Check className="size-3.5 stroke-[3]" />}
-														</div>
-														<span className="text-sm font-semibold flex-1">
-															{topic.text}
+															Later
+														</button>
+													)}
+												</div>
+											</div>
+										);
+									})}
+								</div>
+							</div>
+
+							{/* SECTION 2: Final checks (Quick steps before you export) */}
+							<div className="space-y-4 pt-6">
+								<div className="flex items-center justify-between">
+									<h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+										Final checks
+									</h3>
+									<span className="text-xs text-slate-400">
+										Quick steps before you export.
+									</span>
+								</div>
+
+								<div className="space-y-3">
+									{/* Card 1: Anything else to include? */}
+									<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 space-y-3 hover:border-slate-700 transition-all">
+										<div className="space-y-1">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+													1 of 4 checked
+												</span>
+											</div>
+											<h4 className="text-sm font-bold text-white">Anything else to include?</h4>
+											<p className="text-xs text-slate-400">
+												Still to check: Projects, Volunteering & activities, Education. Nothing to add is fine.
+											</p>
+										</div>
+										<div className="pt-1">
+											<button
+												type="button"
+												onClick={() => {
+													setActiveTab("stories");
+													setStoriesViewMode("overview");
+												}}
+												className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+											>
+												<span>► Check each section</span>
+											</button>
+										</div>
+									</div>
+
+									{/* Card 2: Confirm contact details */}
+									<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+										<div className="space-y-1.5 flex-1 min-w-0">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+													To do
+												</span>
+												<h4 className="text-sm font-bold text-white">Confirm contact details</h4>
+											</div>
+											<p className="text-xs text-slate-400 leading-relaxed">
+												Add your name and a way for employers to contact you.
+											</p>
+										</div>
+										<div className="flex items-center gap-2 shrink-0">
+											<button
+												type="button"
+												onClick={() => {
+													setActiveTab("details");
+													setDetailsSubTab("contact");
+												}}
+												className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Open
+											</button>
+											<button
+												type="button"
+												onClick={() => toast.info("Contact details check saved for later.")}
+												className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Later
+											</button>
+										</div>
+									</div>
+
+									{/* Card 3: Confirm entry dates */}
+									<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+										<div className="space-y-1.5 flex-1 min-w-0">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+													To do
+												</span>
+												<h4 className="text-sm font-bold text-white">Confirm entry dates</h4>
+											</div>
+											<p className="text-xs text-slate-400 leading-relaxed">
+												Some entries still have dates to confirm before applying.
+											</p>
+										</div>
+										<div className="flex items-center gap-2 shrink-0">
+											<button
+												type="button"
+												onClick={() => {
+													setActiveTab("details");
+													setDetailsSubTab("summary");
+												}}
+												className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Open
+											</button>
+											<button
+												type="button"
+												onClick={() => toast.info("Entry dates check saved for later.")}
+												className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Later
+											</button>
+										</div>
+									</div>
+
+									{/* Card 4: Review skills */}
+									<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+										<div className="space-y-1.5 flex-1 min-w-0">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+													To do
+												</span>
+												<h4 className="text-sm font-bold text-white">Review skills</h4>
+											</div>
+											<p className="text-xs text-slate-400 leading-relaxed">
+												Only include skills you can use and explain. Suggestions need your confirmation.
+											</p>
+										</div>
+										<div className="flex items-center gap-2 shrink-0">
+											<button
+												type="button"
+												onClick={() => {
+													setActiveTab("details");
+													setDetailsSubTab("skills");
+												}}
+												className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Open
+											</button>
+											<button
+												type="button"
+												onClick={() => toast.info("Skills review saved for later.")}
+												className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Later
+											</button>
+										</div>
+									</div>
+
+									{/* Card 5: Review layout and export */}
+									<div className="rounded-xl border border-slate-800/90 bg-[#070e18] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+										<div className="space-y-1.5 flex-1 min-w-0">
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+													To do
+												</span>
+												<h4 className="text-sm font-bold text-white">Review layout and export</h4>
+											</div>
+											<p className="text-xs text-slate-400 leading-relaxed">
+												Check facts, wording, spacing, and page breaks in the final document.
+											</p>
+										</div>
+										<div className="flex items-center gap-2 shrink-0">
+											<button
+												type="button"
+												onClick={() => setActiveTab("export")}
+												className="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Open
+											</button>
+											<button
+												type="button"
+												onClick={() => toast.info("Review & export saved for later.")}
+												className="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+											>
+												Later
+											</button>
+										</div>
+									</div>
+								</div>
+
+								{/* Optional opportunities accordion */}
+								<div className="pt-2">
+									<button
+										type="button"
+										onClick={() => {
+											setActiveTab("stories");
+											setStoryCategoryFilter("projects");
+										}}
+										className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 font-medium transition-colors"
+									>
+										<span>►</span>
+										<span>Optional opportunities</span>
+									</button>
+								</div>
+							</div>
+						</div>
+					)}
+
+					{/* TAB 2: STORIES (YOUR STORIES SECTION OVERVIEW & EXPLORATION) */}
+					{activeTab === "stories" && (
+						<div className="space-y-6">
+							{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle (ONLY in overview mode) */}
+							{storiesViewMode === "overview" && (
+								<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+									<span className="font-semibold text-slate-300">
+										{targetRole || "Frontend Developer"}
+									</span>
+
+									<div className="flex items-center gap-4">
+										<span className="flex items-center gap-1.5 text-[11px] text-slate-400">
+											<span className="size-1.5 rounded-full bg-emerald-400" />
+											<span>Saved on this device</span>
+										</span>
+
+										<button
+											type="button"
+											onClick={() => setHideResumePreview(!hideResumePreview)}
+											className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+										>
+											<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
+										</button>
+									</div>
+								</div>
+							)}
+
+							{/* Hero Header: ONLY in overview mode, NOT when telling story or in checklist/drilldown */}
+							{storiesViewMode === "overview" && (
+								<div className="space-y-2 pt-1">
+									<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
+										YOUR STORIES
+									</span>
+									<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+										Your experience.<br />All the useful parts.
+									</h1>
+									<p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+										Work, projects, activities, and education. Open any entry, add something new, or return to your plan. Zoe asks about a few pieces of work in each entry, then drafts a statement for each.
+									</p>
+								</div>
+							)}
+
+							{/* If user clicked to interview an entry directly, show the Interview Studio mode */}
+							{storiesViewMode === "interview" && interviewActiveEntryId ? (
+								<div className="space-y-4">
+									<div className="flex items-center justify-between">
+										<button
+											type="button"
+											onClick={() => setStoriesViewMode("overview")}
+											className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
+										>
+											<ArrowLeft className="size-3.5" />
+											<span>Back to all stories overview</span>
+										</button>
+
+										<button
+											type="button"
+											onClick={() => setHideResumePreview(!hideResumePreview)}
+											className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+										>
+											<span>{hideResumePreview ? "👁 Show resume" : "👁 Hide resume"}</span>
+										</button>
+									</div>
+
+									{(() => {
+										const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+										if (!activeEntry) return null;
+										const focusedQ = getFocusedQuestionForExperience(activeEntry);
+
+										return (
+											<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#091524] p-6 sm:p-7 shadow-2xl space-y-5">
+												{/* Header Controls: Zoe pill, Hear again, Choose voice */}
+												<div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
+													<div className="flex items-center gap-3">
+														<span className="text-xs font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+															Zoe
+														</span>
+														<button
+															type="button"
+															onClick={() => {
+																speakText(focusedQ.question);
+															}}
+															className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+														>
+															<Volume2 className="size-3.5 text-emerald-400" />
+															<span>Hear again</span>
+														</button>
+														<button
+															type="button"
+															onClick={() => {
+																setIsAudioMuted((prev) => {
+																	const next = !prev;
+																	if (next && typeof window !== "undefined" && "speechSynthesis" in window) {
+																		window.speechSynthesis.cancel();
+																	}
+																	toast.info(next ? "Zoe voice muted" : "Zoe voice unmuted");
+																	return next;
+																});
+															}}
+															className={cn(
+																"inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border transition-colors cursor-pointer",
+																isAudioMuted
+																	? "border-rose-500/40 bg-rose-950/40 text-rose-300"
+																	: "border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+															)}
+															title={isAudioMuted ? "Unmute Zoe voice" : "Mute Zoe voice"}
+														>
+															{isAudioMuted ? <VolumeX className="size-3 text-rose-400" /> : <Volume2 className="size-3 text-emerald-400" />}
+															<span>{isAudioMuted ? "Muted" : "Mute voice"}</span>
+														</button>
+													</div>
+
+													<div className="flex items-center gap-2">
+														<span className="text-xs text-slate-400 font-medium">Choose voice</span>
+														<span className="text-[10px] text-emerald-400 font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+															Kokoro AI
 														</span>
 													</div>
-												))}
-											</div>
+												</div>
 
-											{/* "Anything else from ... worth adding?" */}
-											<div className="pt-2 space-y-3">
-												<h4 className="text-sm font-bold text-white">
-													Anything else from {orgName} worth adding?
-												</h4>
+												{/* About Tag */}
+												<div>
+													<span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+														About: {activeEntry.title}
+													</span>
+												</div>
 
-												{/* Speak your answer button */}
+												{/* Targeted Question */}
+												<div className="space-y-1.5">
+													<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+														{focusedQ.question}
+													</h3>
+													<p className="text-xs text-slate-400">
+														You can describe it in your own words. Zoe will help with the wording.
+													</p>
+												</div>
+
+												{/* Voice recording button */}
 												<div className="flex items-center gap-3">
 													<button
 														type="button"
@@ -3139,12 +3334,12 @@ export function GuidedStoryRoute() {
 																setIsSpeakingAnswer(false);
 																voiceAssistant.stop();
 															} else {
-																const baseText = customTopicInput ? customTopicInput.trim() : "";
+																const baseText = experienceInputText ? experienceInputText.trim() : "";
 																setIsSpeakingAnswer(true);
 																const started = voiceAssistant.start(
 																	(transcript) => {
 																		const combined = baseText ? `${baseText} ${transcript}` : transcript;
-																		setCustomTopicInput(combined);
+																		setExperienceInputText(combined);
 																	},
 																	(err) => {
 																		console.warn("Speech error:", err);
@@ -3160,10 +3355,10 @@ export function GuidedStoryRoute() {
 															}
 														}}
 														className={cn(
-															"px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-bold transition-all cursor-pointer border",
+															"px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer",
 															isSpeakingAnswer
-																? "bg-rose-500/20 border-rose-500 text-rose-300 animate-pulse"
-																: "bg-[#112419] border-emerald-500/40 text-emerald-300 hover:bg-[#152e20]"
+																? "bg-rose-500/20 border-2 border-rose-500 text-rose-300 animate-pulse"
+																: "bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
 														)}
 													>
 														<Mic className="size-4 text-emerald-400" />
@@ -3174,481 +3369,532 @@ export function GuidedStoryRoute() {
 													</span>
 												</div>
 
-												{/* Optional add input */}
-												<div className="space-y-2">
+												{/* Direct Answer Textarea */}
+												<div className="space-y-3">
 													<textarea
-														rows={2}
-														value={customTopicInput}
-														onChange={(e) => setCustomTopicInput(e.target.value)}
-														placeholder="Optional. Speak or type anything else from this role."
-														className="w-full rounded-xl border border-slate-800 bg-[#060b13] p-3 text-xs text-white placeholder-slate-600 focus:border-emerald-500 outline-none resize-none"
+														rows={4}
+														value={experienceInputText}
+														onChange={(e) => setExperienceInputText(e.target.value)}
+														placeholder="Your words go here. Speak or type..."
+														className="w-full rounded-2xl border border-slate-700 bg-[#060c14] p-4 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none transition-colors"
 													/>
 
-													{customTopicInput.trim() && (
+													<div className="flex items-center justify-between pt-1">
+														<button
+															type="button"
+															onClick={() => setStoriesViewMode("overview")}
+															className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+														>
+															Skip question
+														</button>
+
+														<button
+															type="button"
+															disabled={isExtractingTopics || !experienceInputText.trim()}
+															onClick={() => handleInitialStorySubmit(activeEntry.id, experienceInputText)}
+															className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+														>
+															<span>{isExtractingTopics ? "Listening & analyzing..." : "Send answer"}</span>
+															<ArrowRight className="size-4" />
+														</button>
+													</div>
+												</div>
+											</div>
+										);
+									})()}
+								</div>
+							) : storiesViewMode === "checklist" ? (
+								/* ── CHECKLIST MODE: "Here's what I heard" matching user screenshots 1 & 2 ── */
+								(() => {
+									const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+									const orgName = activeEntry?.organization || activeEntry?.title || "your experience";
+									const selectedCount = extractedTopics.filter((t) => t.selected).length;
+
+									return (
+										<div className="space-y-4">
+											{/* Breadcrumb Top Bar */}
+											<div className="flex items-center justify-between text-xs text-slate-400">
+												<div>
+													<span className="text-[10px] font-mono tracking-wider uppercase text-emerald-400 font-bold block">
+														Check the list
+													</span>
+													<div className="mt-1">
+														<span className="text-[10px] font-mono uppercase text-slate-400 tracking-wider">
+															{activeEntry?.category === "work" ? "WORK EXPERIENCE" : activeEntry?.category.toUpperCase()}
+														</span>
+														<h2 className="text-xl font-extrabold text-white">
+															{activeEntry?.title}
+														</h2>
+														<p className="text-xs text-slate-400">
+															{activeEntry?.organization} {activeEntry?.dates ? `· ${activeEntry.dates}` : ""}
+														</p>
+													</div>
+												</div>
+
+												<div className="text-right">
+													<span className="text-[11px] text-slate-400 block">
+														One conversation · a statement for each piece of work
+													</span>
+													<button
+														type="button"
+														onClick={() => setStoriesViewMode("overview")}
+														className="text-xs text-slate-400 hover:text-white mt-2 cursor-pointer font-semibold"
+													>
+														Pause
+													</button>
+												</div>
+											</div>
+
+											{/* Main Card */}
+											<div className="rounded-2xl border border-slate-800 bg-[#070e17] p-6 sm:p-8 shadow-2xl space-y-6">
+												{/* "Here's what I heard" Badge */}
+												<div className="inline-flex items-center px-2.5 py-1 rounded bg-[#102219] border border-emerald-500/40 text-[11px] font-mono font-bold text-emerald-300">
+													Here's what I heard
+												</div>
+
+												<div className="space-y-1">
+													<h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+														{extractedTopics.length} things from {orgName}.
+													</h3>
+													<p className="text-xs sm:text-sm text-slate-400">
+														Each one can become a bullet. Rename, set aside, or add anything that's missing.
+													</p>
+												</div>
+
+												{/* Checkbox Items List */}
+												<div className="space-y-2.5">
+													{extractedTopics.map((topic, idx) => (
+														<div
+															key={topic.id}
+															onClick={() => {
+																setExtractedTopics((prev) =>
+																	prev.map((t) =>
+																		t.id === topic.id ? { ...t, selected: !t.selected } : t
+																	)
+																);
+															}}
+															className={cn(
+																"flex items-center gap-3.5 p-3.5 rounded-xl border transition-all cursor-pointer",
+																topic.selected
+																	? "border-emerald-500/50 bg-[#09181d] text-white"
+																	: "border-slate-800 bg-slate-900/40 text-slate-400 hover:border-slate-700"
+															)}
+														>
+															<div
+																className={cn(
+																	"size-5 rounded flex items-center justify-center transition-colors shrink-0",
+																	topic.selected
+																		? "bg-emerald-500 text-slate-950 font-bold"
+																		: "border border-slate-600 bg-slate-800"
+																)}
+															>
+																{topic.selected && <Check className="size-3.5 stroke-[3]" />}
+															</div>
+															<span className="text-sm font-semibold flex-1">
+																{topic.text}
+															</span>
+														</div>
+													))}
+												</div>
+
+												{/* "Anything else from ... worth adding?" */}
+												<div className="pt-2 space-y-3">
+													<h4 className="text-sm font-bold text-white">
+														Anything else from {orgName} worth adding?
+													</h4>
+
+													{/* Speak your answer button */}
+													<div className="flex items-center gap-3">
 														<button
 															type="button"
 															onClick={() => {
-																if (!customTopicInput.trim()) return;
-																setExtractedTopics((prev) => [
-																	...prev,
-																	{ id: `custom_${Date.now()}`, text: customTopicInput.trim(), selected: true },
-																]);
-																setCustomTopicInput("");
-																toast.success("Added to checklist!");
+																if (isSpeakingAnswer) {
+																	setIsSpeakingAnswer(false);
+																	voiceAssistant.stop();
+																} else {
+																	const baseText = customTopicInput ? customTopicInput.trim() : "";
+																	setIsSpeakingAnswer(true);
+																	const started = voiceAssistant.start(
+																		(transcript) => {
+																			const combined = baseText ? `${baseText} ${transcript}` : transcript;
+																			setCustomTopicInput(combined);
+																		},
+																		(err) => {
+																			console.warn("Speech error:", err);
+																			setIsSpeakingAnswer(false);
+																		},
+																		() => {
+																			setIsSpeakingAnswer(false);
+																		}
+																	);
+																	if (!started) {
+																		setIsSpeakingAnswer(false);
+																	}
+																}
 															}}
-															className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 cursor-pointer"
+															className={cn(
+																"px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-bold transition-all cursor-pointer border",
+																isSpeakingAnswer
+																	? "bg-rose-500/20 border-rose-500 text-rose-300 animate-pulse"
+																	: "bg-[#112419] border-emerald-500/40 text-emerald-300 hover:bg-[#152e20]"
+															)}
 														>
-															+ Add to the list
+															<Mic className="size-4 text-emerald-400" />
+															<span>{isSpeakingAnswer ? "Stop recording..." : "Speak your answer"}</span>
 														</button>
-													)}
+														<span className="text-[11px] text-slate-500">
+															{isSpeakingAnswer ? "Listening... Speak naturally" : "Your voice, in your words. Review before sending."}
+														</span>
+													</div>
+
+													{/* Optional add input */}
+													<div className="space-y-2">
+														<textarea
+															rows={2}
+															value={customTopicInput}
+															onChange={(e) => setCustomTopicInput(e.target.value)}
+															placeholder="Optional. Speak or type anything else from this role."
+															className="w-full rounded-xl border border-slate-800 bg-[#060b13] p-3 text-xs text-white placeholder-slate-600 focus:border-emerald-500 outline-none resize-none"
+														/>
+
+														{customTopicInput.trim() && (
+															<button
+																type="button"
+																onClick={() => {
+																	if (!customTopicInput.trim()) return;
+																	setExtractedTopics((prev) => [
+																		...prev,
+																		{ id: `custom_${Date.now()}`, text: customTopicInput.trim(), selected: true },
+																	]);
+																	setCustomTopicInput("");
+																	toast.success("Added to checklist!");
+																}}
+																className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 cursor-pointer"
+															>
+																+ Add to the list
+															</button>
+														)}
+													</div>
+												</div>
+
+												{/* Bottom Action: Start with these N -> */}
+												<div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+													<button
+														type="button"
+														onClick={() => setStoriesViewMode("overview")}
+														className="text-xs text-slate-400 hover:text-white cursor-pointer font-semibold"
+													>
+														Decide later
+													</button>
+
+													<button
+														type="button"
+														onClick={handleStartWithSelectedTopics}
+														className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+													>
+														<span>Start with these {selectedCount} →</span>
+													</button>
 												</div>
 											</div>
-
-											{/* Bottom Action: Start with these N -> */}
-											<div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
-												<button
-													type="button"
-													onClick={() => setStoriesViewMode("overview")}
-													className="text-xs text-slate-400 hover:text-white cursor-pointer font-semibold"
-												>
-													Decide later
-												</button>
-
-												<button
-													type="button"
-													onClick={handleStartWithSelectedTopics}
-													className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-												>
-													<span>Start with these {selectedCount} →</span>
-												</button>
-											</div>
 										</div>
-									</div>
-								);
-							})()
-						) : storiesViewMode === "topic_drilldown" ? (
-							/* ── TOPIC DRILLDOWN MODE: Asking questions for extracted points one by one ── */
-							(() => {
-								const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
-								const selected = extractedTopics.filter((t) => t.selected);
-								const currentTopic = selected[drilldownTopicIndex];
-								const totalTopics = selected.length;
+									);
+								})()
+							) : storiesViewMode === "topic_drilldown" ? (
+								/* ── TOPIC DRILLDOWN MODE: Asking questions for extracted points one by one ── */
+								(() => {
+									const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+									const selected = extractedTopics.filter((t) => t.selected);
+									const currentTopic = selected[drilldownTopicIndex];
+									const totalTopics = selected.length;
 
-								return (
-									<div className="space-y-4">
-										{/* Top breadcrumb */}
-										<div className="flex items-center justify-between text-xs text-slate-400">
-											<div className="flex items-center gap-2">
-												<button
-													type="button"
-													onClick={() => setStoriesViewMode("checklist")}
-													className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer font-semibold"
-												>
-													<ArrowLeft className="size-3.5" />
-													<span>Back to list</span>
-												</button>
-												<span className="text-slate-600">/</span>
-												<span className="text-emerald-400 font-mono font-bold">
-													Point {drilldownTopicIndex + 1} of {totalTopics}
+									return (
+										<div className="space-y-4">
+											{/* Top breadcrumb */}
+											<div className="flex items-center justify-between text-xs text-slate-400">
+												<div className="flex items-center gap-2">
+													<button
+														type="button"
+														onClick={() => setStoriesViewMode("checklist")}
+														className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer font-semibold"
+													>
+														<ArrowLeft className="size-3.5" />
+														<span>Back to list</span>
+													</button>
+													<span className="text-slate-600">/</span>
+													<span className="text-emerald-400 font-mono font-bold">
+														Point {drilldownTopicIndex + 1} of {totalTopics}
+													</span>
+												</div>
+
+												<span className="text-[11px] text-slate-500 font-mono">
+													{activeEntry.title}
 												</span>
 											</div>
 
-											<span className="text-[11px] text-slate-500 font-mono">
-												{activeEntry.title}
-											</span>
-										</div>
+											<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#091524] p-6 sm:p-7 shadow-2xl space-y-5">
+												{/* Zoe badge & audio controls */}
+												<div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
+													<div className="flex items-center gap-3">
+														<span className="text-xs font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+															Zoe
+														</span>
+														<button
+															type="button"
+															onClick={() => {
+																if (currentTopicQuestion) speakText(currentTopicQuestion);
+															}}
+															className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+														>
+															<Volume2 className="size-3.5 text-emerald-400" />
+															<span>Hear again</span>
+														</button>
+														<button
+															type="button"
+															onClick={() => {
+																setIsAudioMuted((prev) => {
+																	const next = !prev;
+																	if (next && typeof window !== "undefined" && "speechSynthesis" in window) {
+																		window.speechSynthesis.cancel();
+																	}
+																	toast.info(next ? "Zoe voice muted" : "Zoe voice unmuted");
+																	return next;
+																});
+															}}
+															className={cn(
+																"inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border transition-colors cursor-pointer",
+																isAudioMuted
+																	? "border-rose-500/40 bg-rose-950/40 text-rose-300"
+																	: "border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+															)}
+															title={isAudioMuted ? "Unmute Zoe voice" : "Mute Zoe voice"}
+														>
+															{isAudioMuted ? <VolumeX className="size-3 text-rose-400" /> : <Volume2 className="size-3 text-emerald-400" />}
+															<span>{isAudioMuted ? "Muted" : "Mute voice"}</span>
+														</button>
+													</div>
 
-										<div className="rounded-2xl border-2 border-emerald-500/40 bg-[#091524] p-6 sm:p-7 shadow-2xl space-y-5">
-											{/* Zoe badge & audio controls */}
-											<div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
+													<div className="flex items-center gap-2">
+														<span className="text-xs text-slate-400 font-medium">Topic:</span>
+														<span className="text-xs font-bold text-white px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700">
+															{currentTopic ? currentTopic.text : "Role contribution"}
+														</span>
+													</div>
+												</div>
+
+												{/* Focused Question for this specific extracted point */}
+												<div className="space-y-1.5">
+													<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+														{isLoadingTopicQuestion ? "Zoe is crafting a question..." : currentTopicQuestion}
+													</h3>
+													<p className="text-xs text-slate-400">
+														Focus on your specific role, challenge, tools used, or outcome. Zoe will draft the resume bullet.
+													</p>
+												</div>
+
+												{/* Speak voice recorder */}
 												<div className="flex items-center gap-3">
-													<span className="text-xs font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
-														Zoe
-													</span>
 													<button
 														type="button"
 														onClick={() => {
-															if (currentTopicQuestion) speakText(currentTopicQuestion);
+															if (isSpeakingAnswer) {
+																setIsSpeakingAnswer(false);
+																voiceAssistant.stop();
+															} else {
+																const baseText = experienceInputText ? experienceInputText.trim() : "";
+																setIsSpeakingAnswer(true);
+																const started = voiceAssistant.start(
+																	(transcript) => {
+																		const combined = baseText ? `${baseText} ${transcript}` : transcript;
+																		setExperienceInputText(combined);
+																	},
+																	(err) => {
+																		console.warn("Speech error:", err);
+																		setIsSpeakingAnswer(false);
+																	},
+																	() => {
+																		setIsSpeakingAnswer(false);
+																	}
+																);
+																if (!started) {
+																	setIsSpeakingAnswer(false);
+																}
+															}
 														}}
-														className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+														className={cn(
+															"px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer",
+															isSpeakingAnswer
+																? "bg-rose-500/20 border-2 border-rose-500 text-rose-300 animate-pulse"
+																: "bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
+														)}
 													>
-														<Volume2 className="size-3.5 text-emerald-400" />
-														<span>Hear again</span>
+														<Mic className="size-4 text-emerald-400" />
+														<span>{isSpeakingAnswer ? "Stop recording..." : "Speak your answer"}</span>
 													</button>
-												</div>
-
-												<div className="flex items-center gap-2">
-													<span className="text-xs text-slate-400 font-medium">Topic:</span>
-													<span className="text-xs font-bold text-white px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700">
-														{currentTopic ? currentTopic.text : "Role contribution"}
+													<span className="text-[11px] text-slate-500">
+														{isSpeakingAnswer ? "Listening... Speak naturally" : "Your voice, in your words."}
 													</span>
 												</div>
+
+												{/* Direct Answer Textarea */}
+												<div className="space-y-3">
+													<textarea
+														rows={4}
+														value={experienceInputText}
+														onChange={(e) => setExperienceInputText(e.target.value)}
+														placeholder={`e.g. For ${currentTopic?.text || "this item"}, I designed the frontend architecture and...`}
+														className="w-full rounded-2xl border border-slate-700 bg-[#060c14] p-4 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none transition-colors"
+													/>
+
+													<div className="flex items-center justify-between pt-1">
+														<button
+															type="button"
+															onClick={() => {
+																// Skip to next topic
+																const nextIdx = drilldownTopicIndex + 1;
+																if (nextIdx < selected.length) {
+																	setDrilldownTopicIndex(nextIdx);
+																	handleStartWithSelectedTopics();
+																} else {
+																	setStoriesViewMode("overview");
+																}
+															}}
+															className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+														>
+															Skip this point
+														</button>
+
+														<button
+															type="button"
+															disabled={isSubmittingAnswer || !experienceInputText.trim()}
+															onClick={() => handleSaveTopicDrilldownAnswer(experienceInputText)}
+															className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+														>
+															<span>{isSubmittingAnswer ? "Drafting bullet..." : "Send answer"}</span>
+															<ArrowRight className="size-4" />
+														</button>
+													</div>
+												</div>
+											</div>
+										</div>
+									);
+								})()
+							) : (
+								/* Overview Mode: Exactly matching screenshots 1, 2, and 3 */
+								<div className="space-y-7">
+									{/* Zoe / Your Next Section Card (Purple/Navy gradient callout box) */}
+									{showZoeSectionPrompt && (
+										<div className="rounded-2xl border border-indigo-900/60 bg-gradient-to-b from-[#131226] via-[#0f0e20] to-[#0a0917] p-6 sm:p-7 shadow-xl relative space-y-4">
+											<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-indigo-300/80">
+												<div className="flex items-center gap-2">
+													<span className="size-2 rounded-full bg-indigo-400 animate-pulse" />
+													<span>ZOE / YOUR NEXT SECTION</span>
+												</div>
+												<ExternalLink className="size-3.5 text-indigo-400/60" />
 											</div>
 
-											{/* Focused Question for this specific extracted point */}
 											<div className="space-y-1.5">
-												<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-													{isLoadingTopicQuestion ? "Zoe is crafting a question..." : currentTopicQuestion}
+												<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+													{activeSectionPromptType === "projects" && "What about projects?"}
+													{activeSectionPromptType === "education" && "What about education?"}
+													{activeSectionPromptType === "volunteer" && "What about volunteering & activities?"}
 												</h3>
-												<p className="text-xs text-slate-400">
-													Focus on your specific role, challenge, tools used, or outcome. Zoe will draft the resume bullet.
+												<p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+													{activeSectionPromptType === "projects" && "Have you built something through coursework, personal practice, freelance work, or volunteering that you would like to include?"}
+													{activeSectionPromptType === "education" && "Degrees, bootcamps, certifications, or coursework you'd like highlighted on your resume."}
+													{activeSectionPromptType === "volunteer" && "Community leadership, mentoring, clubs, or extracurricular initiatives."}
 												</p>
 											</div>
 
-											{/* Speak voice recorder */}
-											<div className="flex items-center gap-3">
+											<div className="flex flex-wrap items-center gap-3 pt-2">
 												<button
 													type="button"
 													onClick={() => {
-														if (isSpeakingAnswer) {
-															setIsSpeakingAnswer(false);
-															voiceAssistant.stop();
+														const category = activeSectionPromptType === "projects" ? "projects" : activeSectionPromptType === "education" ? "education" : "volunteer";
+														setQuickAddCategory(category);
+														setQuickAddSectionModalOpen(true);
+													}}
+													className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+												>
+													<Plus className="size-4" />
+													<span>Add a {activeSectionPromptType === "projects" ? "project" : activeSectionPromptType === "education" ? "degree" : "activity"}</span>
+												</button>
+
+												<button
+													type="button"
+													onClick={() => {
+														if (activeSectionPromptType === "projects") {
+															setActiveSectionPromptType("education");
+														} else if (activeSectionPromptType === "education") {
+															setActiveSectionPromptType("volunteer");
 														} else {
-															const baseText = experienceInputText ? experienceInputText.trim() : "";
-															setIsSpeakingAnswer(true);
-															const started = voiceAssistant.start(
-																(transcript) => {
-																	const combined = baseText ? `${baseText} ${transcript}` : transcript;
-																	setExperienceInputText(combined);
-																},
-																(err) => {
-																	console.warn("Speech error:", err);
-																	setIsSpeakingAnswer(false);
-																},
-																() => {
-																	setIsSpeakingAnswer(false);
-																}
-															);
-															if (!started) {
-																setIsSpeakingAnswer(false);
-															}
+															setShowZoeSectionPrompt(false);
 														}
 													}}
-													className={cn(
-														"px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer",
-														isSpeakingAnswer
-															? "bg-rose-500/20 border-2 border-rose-500 text-rose-300 animate-pulse"
-															: "bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
-													)}
+													className="px-4 py-2.5 rounded-xl border border-slate-800 bg-[#0b0a1a] hover:bg-[#121028] text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
 												>
-													<Mic className="size-4 text-emerald-400" />
-													<span>{isSpeakingAnswer ? "Stop recording..." : "Speak your answer"}</span>
+													Nothing to add here
 												</button>
-												<span className="text-[11px] text-slate-500">
-													{isSpeakingAnswer ? "Listening... Speak naturally" : "Your voice, in your words."}
+
+												<button
+													type="button"
+													onClick={() => setShowZoeSectionPrompt(false)}
+													className="px-4 py-2.5 rounded-xl text-slate-400 hover:text-white font-medium text-xs transition-colors cursor-pointer"
+												>
+													Decide later
+												</button>
+											</div>
+										</div>
+									)}
+
+									{/* SECTION 1: Work & internships */}
+									<div className="space-y-3.5">
+										<div className="flex items-center justify-between pb-1">
+											<div className="flex items-center gap-2.5">
+												<h3 className="text-base sm:text-lg font-bold text-white">Work & internships</h3>
+												<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+													{outlineEntries.filter((e) => e.category === "work").length}
 												</span>
 											</div>
 
-											{/* Direct Answer Textarea */}
-											<div className="space-y-3">
-												<textarea
-													rows={4}
-													value={experienceInputText}
-													onChange={(e) => setExperienceInputText(e.target.value)}
-													placeholder={`e.g. For ${currentTopic?.text || "this item"}, I designed the frontend architecture and...`}
-													className="w-full rounded-2xl border border-slate-700 bg-[#060c14] p-4 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none transition-colors"
-												/>
-
-												<div className="flex items-center justify-between pt-1">
-													<button
-														type="button"
-														onClick={() => {
-															// Skip to next topic
-															const nextIdx = drilldownTopicIndex + 1;
-															if (nextIdx < selected.length) {
-																setDrilldownTopicIndex(nextIdx);
-																handleStartWithSelectedTopics();
-															} else {
-																setStoriesViewMode("overview");
-															}
-														}}
-														className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
-													>
-														Skip this point
-													</button>
-
-													<button
-														type="button"
-														disabled={isSubmittingAnswer || !experienceInputText.trim()}
-														onClick={() => handleSaveTopicDrilldownAnswer(experienceInputText)}
-														className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
-													>
-														<span>{isSubmittingAnswer ? "Drafting bullet..." : "Send answer"}</span>
-														<ArrowRight className="size-4" />
-													</button>
-												</div>
-											</div>
-										</div>
-									</div>
-								);
-							})()
-						) : (
-							/* Overview Mode: Exactly matching screenshots 1, 2, and 3 */
-							<div className="space-y-7">
-								{/* Zoe / Your Next Section Card (Purple/Navy gradient callout box) */}
-								{showZoeSectionPrompt && (
-									<div className="rounded-2xl border border-indigo-900/60 bg-gradient-to-b from-[#131226] via-[#0f0e20] to-[#0a0917] p-6 sm:p-7 shadow-xl relative space-y-4">
-										<div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-indigo-300/80">
-											<div className="flex items-center gap-2">
-												<span className="size-2 rounded-full bg-indigo-400 animate-pulse" />
-												<span>ZOE / YOUR NEXT SECTION</span>
-											</div>
-											<ExternalLink className="size-3.5 text-indigo-400/60" />
-										</div>
-
-										<div className="space-y-1.5">
-											<h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-												{activeSectionPromptType === "projects" && "What about projects?"}
-												{activeSectionPromptType === "education" && "What about education?"}
-												{activeSectionPromptType === "volunteer" && "What about volunteering & activities?"}
-											</h3>
-											<p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-												{activeSectionPromptType === "projects" && "Have you built something through coursework, personal practice, freelance work, or volunteering that you would like to include?"}
-												{activeSectionPromptType === "education" && "Degrees, bootcamps, certifications, or coursework you'd like highlighted on your resume."}
-												{activeSectionPromptType === "volunteer" && "Community leadership, mentoring, clubs, or extracurricular initiatives."}
-											</p>
-										</div>
-
-										<div className="flex flex-wrap items-center gap-3 pt-2">
 											<button
 												type="button"
 												onClick={() => {
-													const category = activeSectionPromptType === "projects" ? "projects" : activeSectionPromptType === "education" ? "education" : "volunteer";
-													setQuickAddCategory(category);
-													setQuickAddSectionModalOpen(true);
+													setIsAddingManual(true);
+													setNewManualCategory("work");
 												}}
-												className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+												className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
 											>
-												<Plus className="size-4" />
-												<span>Add a {activeSectionPromptType === "projects" ? "project" : activeSectionPromptType === "education" ? "degree" : "activity"}</span>
-											</button>
-
-											<button
-												type="button"
-												onClick={() => {
-													if (activeSectionPromptType === "projects") {
-														setActiveSectionPromptType("education");
-													} else if (activeSectionPromptType === "education") {
-														setActiveSectionPromptType("volunteer");
-													} else {
-														setShowZoeSectionPrompt(false);
-													}
-												}}
-												className="px-4 py-2.5 rounded-xl border border-slate-800 bg-[#0b0a1a] hover:bg-[#121028] text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
-											>
-												Nothing to add here
-											</button>
-
-											<button
-												type="button"
-												onClick={() => setShowZoeSectionPrompt(false)}
-												className="px-4 py-2.5 rounded-xl text-slate-400 hover:text-white font-medium text-xs transition-colors cursor-pointer"
-											>
-												Decide later
+												<Plus className="size-3.5" />
+												<span>Add</span>
 											</button>
 										</div>
-									</div>
-								)}
 
-								{/* SECTION 1: Work & internships */}
-								<div className="space-y-3.5">
-									<div className="flex items-center justify-between pb-1">
-										<div className="flex items-center gap-2.5">
-											<h3 className="text-base sm:text-lg font-bold text-white">Work & internships</h3>
-											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-												{outlineEntries.filter((e) => e.category === "work").length}
-											</span>
-										</div>
-
-										<button
-											type="button"
-											onClick={() => {
-												setIsAddingManual(true);
-												setNewManualCategory("work");
-											}}
-											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5" />
-											<span>Add</span>
-										</button>
-									</div>
-
-									{/* Work Entry Cards */}
-									<div className="space-y-4">
-										{outlineEntries.filter((e) => e.category === "work").map((entry) => {
-											const points = entry.points || [];
-											return (
-												<div
-													key={entry.id}
-													className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-5 shadow-lg relative"
-												>
-													<div className="flex items-start justify-between gap-4">
-														<div>
-															<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block mb-1">
-																WORK EXPERIENCE
-															</span>
-															<h4 className="text-lg font-bold text-white tracking-tight">
-																{entry.title}
-															</h4>
-															<p className="text-xs text-slate-400 mt-0.5">
-																{entry.organization || "NavGurukul"} · {entry.dates || "Jul 2023 – Present"}
-															</p>
-														</div>
-
-														<div className="flex items-center gap-2">
-															<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
-																Finished for now
-															</span>
-															<button
-																type="button"
-																onClick={() => {
-																	setInterviewActiveEntryId(entry.id);
-																	setStoriesViewMode("interview");
-																}}
-																className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
-																title="Edit experience"
-															>
-																<Edit3 className="size-4" />
-															</button>
-														</div>
-													</div>
-
-													{/* Generated bullets with Edit annotations matching user's exact design */}
-													<div className="space-y-4 pt-1">
-														{points.length > 0 ? (
-															points.map((pt, pIdx) => (
-																<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
-																	<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-																		{pt}
-																	</p>
-																	<div className="flex items-center gap-2 text-[11px]">
-																		<button
-																			type="button"
-																			onClick={() => {
-																				setEditingPointKey(`${entry.id}_${pIdx}`);
-																				setEditingPointText(pt);
-																				setShowFinalSummaryModal(true);
-																			}}
-																			className="text-slate-400 hover:text-white font-medium cursor-pointer"
-																		>
-																			Edit
-																		</button>
-																		<span className="text-slate-400">
-																			{pIdx === 0 && "Feedback or usage once testing is done"}
-																			{pIdx === 1 && "Whether accuracy issues were fixed or improved"}
-																			{pIdx >= 2 && "Exact tools or outcome (transcription was unclear)"}
-																		</span>
-																	</div>
-																</div>
-															))
-														) : (
-															<div className="space-y-1">
-																<p className="text-xs text-slate-400 italic">
-																	{entry.description || "Talk with Zoe or write directly to draft resume points."}
-																</p>
-															</div>
-														)}
-													</div>
-
-													{/* Card Footer: Bullets count and actions */}
-													<div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-														<span className="text-[11px] font-mono text-slate-400">
-															BULLETS {points.length} of up to 5
-														</span>
-
-														<div className="flex items-center gap-2">
-															<button
-																type="button"
-																onClick={() => {
-																	setInterviewActiveEntryId(entry.id);
-																	setStoriesViewMode("interview");
-																}}
-																className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
-															>
-																Reopen entry
-															</button>
-
-															<button
-																type="button"
-																onClick={() => {
-																	setInterviewActiveEntryId(entry.id);
-																	setStoriesViewMode("interview");
-																}}
-																className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-colors cursor-pointer"
-															>
-																<Mic className="size-3.5" />
-																<span>Add another story</span>
-															</button>
-
-															<button
-																type="button"
-																onClick={() => {
-																	setShowFinalSummaryModal(true);
-																}}
-																className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
-															>
-																Write directly
-															</button>
-														</div>
-													</div>
-												</div>
-											);
-										})}
-
-										{outlineEntries.filter((e) => e.category === "work").length === 0 && (
-											<div className="p-5 rounded-2xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
-												No work experiences added yet. Click "+ Add" above to add your employment.
-											</div>
-										)}
-									</div>
-								</div>
-
-								{/* SECTION 2: Projects */}
-								<div className="space-y-3.5">
-									<div className="flex items-center justify-between pb-1">
-										<div className="flex items-center gap-2.5">
-											<h3 className="text-base sm:text-lg font-bold text-white">Projects</h3>
-											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-												{outlineEntries.filter((e) => e.category === "projects").length}
-											</span>
-										</div>
-
-										<button
-											type="button"
-											onClick={() => {
-												setIsAddingManual(true);
-												setNewManualCategory("projects");
-											}}
-											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5" />
-											<span>Add</span>
-										</button>
-									</div>
-
-									{outlineEntries.filter((e) => e.category === "projects").length > 0 ? (
+										{/* Work Entry Cards */}
 										<div className="space-y-4">
-											{outlineEntries.filter((e) => e.category === "projects").map((entry) => {
+											{outlineEntries.filter((e) => e.category === "work").map((entry) => {
 												const points = entry.points || [];
 												return (
 													<div
 														key={entry.id}
-														className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-4 shadow-lg"
+														className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-5 shadow-lg relative"
 													>
 														<div className="flex items-start justify-between gap-4">
 															<div>
 																<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block mb-1">
-																	PROJECT
+																	WORK EXPERIENCE
 																</span>
 																<h4 className="text-lg font-bold text-white tracking-tight">
 																	{entry.title}
 																</h4>
 																<p className="text-xs text-slate-400 mt-0.5">
-																	{entry.organization || "Independent Project"} {entry.dates ? `· ${entry.dates}` : ""}
+																	{entry.organization || "NavGurukul"} · {entry.dates || "Jul 2023 – Present"}
 																</p>
 															</div>
 
 															<div className="flex items-center gap-2">
+																<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
+																	Finished for now
+																</span>
 																<button
 																	type="button"
 																	onClick={() => {
@@ -3656,14 +3902,14 @@ export function GuidedStoryRoute() {
 																		setStoriesViewMode("interview");
 																	}}
 																	className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
-																	title="Edit project"
+																	title="Edit experience"
 																>
 																	<Edit3 className="size-4" />
 																</button>
 															</div>
 														</div>
 
-														{/* Generated bullets with Edit annotations */}
+														{/* Generated bullets with Edit annotations matching user's exact design */}
 														<div className="space-y-4 pt-1">
 															{points.length > 0 ? (
 																points.map((pt, pIdx) => (
@@ -3684,9 +3930,9 @@ export function GuidedStoryRoute() {
 																				Edit
 																			</button>
 																			<span className="text-slate-400">
-																				{pIdx === 0 && "Key technical contribution and outcome"}
-																				{pIdx === 1 && "Feedback or usage once testing is done"}
-																				{pIdx >= 2 && "Exact tools or outcome"}
+																				{pIdx === 0 && "Feedback or usage once testing is done"}
+																				{pIdx === 1 && "Whether accuracy issues were fixed or improved"}
+																				{pIdx >= 2 && "Exact tools or outcome (transcription was unclear)"}
 																			</span>
 																		</div>
 																	</div>
@@ -3694,16 +3940,18 @@ export function GuidedStoryRoute() {
 															) : (
 																<div className="space-y-1">
 																	<p className="text-xs text-slate-400 italic">
-																		{entry.description || "A class project, personal project, or something you built."}
+																		{entry.description || "Talk with Zoe or write directly to draft resume points."}
 																	</p>
 																</div>
 															)}
 														</div>
 
-														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+														{/* Card Footer: Bullets count and actions */}
+														<div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
 															<span className="text-[11px] font-mono text-slate-400">
-																BULLETS {points.length} of up to 3
+																BULLETS {points.length} of up to 5
 															</span>
+
 															<div className="flex items-center gap-2">
 																<button
 																	type="button"
@@ -3715,617 +3963,634 @@ export function GuidedStoryRoute() {
 																>
 																	Reopen entry
 																</button>
+
 																<button
 																	type="button"
 																	onClick={() => {
 																		setInterviewActiveEntryId(entry.id);
 																		setStoriesViewMode("interview");
 																	}}
-																	className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+																	className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-colors cursor-pointer"
 																>
 																	<Mic className="size-3.5" />
 																	<span>Add another story</span>
 																</button>
-															</div>
-														</div>
-													</div>
-												);
-											})}
-										</div>
-									) : (
-										<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
-											A class project, personal project, or something you built.
-										</div>
-									)}
-								</div>
 
-								{/* SECTION 3: Volunteering & activities */}
-								<div className="space-y-3.5">
-									<div className="flex items-center justify-between pb-1">
-										<div className="flex items-center gap-2.5">
-											<h3 className="text-base sm:text-lg font-bold text-white">Volunteering & activities</h3>
-											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-												{outlineEntries.filter((e) => e.category === "volunteer").length}
-											</span>
-										</div>
-
-										<button
-											type="button"
-											onClick={() => {
-												setIsAddingManual(true);
-												setNewManualCategory("volunteer");
-											}}
-											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5" />
-											<span>Add</span>
-										</button>
-									</div>
-
-									{outlineEntries.filter((e) => e.category === "volunteer").length > 0 ? (
-										<div className="space-y-4">
-											{outlineEntries.filter((e) => e.category === "volunteer").map((entry) => {
-												const points = entry.points || [];
-												return (
-													<div
-														key={entry.id}
-														className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
-													>
-														<div className="flex items-start justify-between gap-4">
-															<div>
-																<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
-																	ACTIVITY
-																</span>
-																<h4 className="text-lg font-bold text-white tracking-tight">
-																	{entry.title}
-																</h4>
-																<p className="text-xs text-slate-400 mt-0.5">
-																	{entry.organization || "XL Bootcamp"} {entry.dates ? `· ${entry.dates}` : ""}
-																</p>
-															</div>
-
-															<div className="flex items-center gap-2">
-																<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
-																	Ready to explore
-																</span>
-																<button
-																	onClick={() => {
-																		setInterviewActiveEntryId(entry.id);
-																		setStoriesViewMode("interview");
-																	}}
-																	className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
-																	title="Edit activity"
-																>
-																	<Edit3 className="size-4" />
-																</button>
-															</div>
-														</div>
-
-														{/* Generated bullets with Edit annotations matching exact format */}
-														<div className="space-y-4 pt-1">
-															{points.length > 0 ? (
-																points.map((pt, pIdx) => (
-																	<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
-																		<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-																			{pt}
-																		</p>
-																		<div className="flex items-center gap-2 text-[11px]">
-																			<button
-																				type="button"
-																				onClick={() => {
-																					setEditingPointKey(`${entry.id}_${pIdx}`);
-																					setEditingPointText(pt);
-																					setShowFinalSummaryModal(true);
-																				}}
-																				className="text-slate-400 hover:text-white font-medium cursor-pointer"
-																			>
-																				Edit
-																			</button>
-																			<span className="text-slate-400">
-																				{pIdx === 0 && "Key contribution and community outcome"}
-																				{pIdx === 1 && "Feedback or participant growth"}
-																				{pIdx >= 2 && "Exact tools or outcome"}
-																			</span>
-																		</div>
-																	</div>
-																))
-															) : (
-																<p className="text-xs text-slate-400 italic">
-																	{entry.description || "Mentoring, volunteering, leadership, or community activities."}
-																</p>
-															)}
-														</div>
-
-														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-															<span className="text-[11px] font-mono text-slate-400">
-																BULLETS {points.length} of up to 3
-															</span>
-															<div className="flex items-center gap-2">
 																<button
 																	type="button"
 																	onClick={() => {
-																		setInterviewActiveEntryId(entry.id);
-																		setStoriesViewMode("interview");
+																		setShowFinalSummaryModal(true);
 																	}}
 																	className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
 																>
-																	Reopen entry
-																</button>
-																<button
-																	type="button"
-																	onClick={() => {
-																		setInterviewActiveEntryId(entry.id);
-																		setStoriesViewMode("interview");
-																	}}
-																	className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
-																>
-																	<Mic className="size-3.5" />
-																	<span>Add another story</span>
+																	Write directly
 																</button>
 															</div>
 														</div>
 													</div>
 												);
 											})}
+
+											{outlineEntries.filter((e) => e.category === "work").length === 0 && (
+												<div className="p-5 rounded-2xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
+													No work experiences added yet. Click "+ Add" above to add your employment.
+												</div>
+											)}
 										</div>
-									) : (
-										<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
-											Mentoring, volunteering, leadership, or community activities.
-										</div>
-									)}
-								</div>
-
-								{/* SECTION 4: Education */}
-								<div className="space-y-3.5">
-									<div className="flex items-center justify-between pb-1">
-										<div className="flex items-center gap-2.5">
-											<h3 className="text-base sm:text-lg font-bold text-white">Education</h3>
-											<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-												{outlineEntries.filter((e) => e.category === "education").length}
-											</span>
-										</div>
-
-										<button
-											type="button"
-											onClick={() => {
-												setQuickAddCategory("education");
-												setQuickAddSectionModalOpen(true);
-											}}
-											className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-										>
-											<Plus className="size-3.5" />
-											<span>Add</span>
-										</button>
 									</div>
 
-									{outlineEntries.filter((e) => e.category === "education").length > 0 ? (
-										<div className="space-y-4">
-											{outlineEntries.filter((e) => e.category === "education").map((edu) => {
-												const points = edu.points || [];
-												return (
-													<div
-														key={edu.id}
-														className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
-													>
-														<div className="flex items-start justify-between gap-4">
-															<div>
-																<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
-																	EDUCATION
-																</span>
-																<h4 className="text-lg font-bold text-white tracking-tight">
-																	{edu.title}
-																</h4>
-																<p className="text-xs text-slate-400 mt-0.5">
-																	{edu.organization || "University / College"} {edu.dates ? `· ${edu.dates}` : ""}
-																</p>
-															</div>
+									{/* SECTION 2: Projects */}
+									<div className="space-y-3.5">
+										<div className="flex items-center justify-between pb-1">
+											<div className="flex items-center gap-2.5">
+												<h3 className="text-base sm:text-lg font-bold text-white">Projects</h3>
+												<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+													{outlineEntries.filter((e) => e.category === "projects").length}
+												</span>
+											</div>
 
-															<div className="flex items-center gap-2">
-																<button
-																	type="button"
-																	onClick={() => {
-																		setOutlineEntries((prev) => prev.filter((e) => e.id !== edu.id));
-																		toast.success("Education entry removed");
-																	}}
-																	className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
-																	title="Remove education"
-																>
-																	<Trash2 className="size-4" />
-																</button>
-															</div>
-														</div>
-
-														{/* Generated bullets with Edit annotations */}
-														<div className="space-y-4 pt-1">
-															{points.length > 0 ? (
-																points.map((pt, pIdx) => (
-																	<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
-																		<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-																			{pt}
-																		</p>
-																		<div className="flex items-center gap-2 text-[11px]">
-																			<button
-																				type="button"
-																				onClick={() => {
-																					setEditingPointKey(`${edu.id}_${pIdx}`);
-																					setEditingPointText(pt);
-																					setShowFinalSummaryModal(true);
-																				}}
-																				className="text-slate-400 hover:text-white font-medium cursor-pointer"
-																			>
-																				Edit
-																			</button>
-																			<span className="text-slate-400">
-																				{pIdx === 0 && "Core coursework, honors, or capstone"}
-																				{pIdx >= 1 && "Academic achievement or awards"}
-																			</span>
-																		</div>
-																	</div>
-																))
-															) : (
-																<p className="text-xs text-slate-400 italic">
-																	{edu.description || "Academic highlights, major projects, certifications, or notable awards."}
-																</p>
-															)}
-														</div>
-
-														<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-															<span className="text-[11px] font-mono text-slate-400">
-																BULLETS {points.length} of up to 3
-															</span>
-															<div className="flex items-center gap-2">
-																<button
-																	type="button"
-																	onClick={() => {
-																		setInterviewActiveEntryId(edu.id);
-																		setStoriesViewMode("interview");
-																	}}
-																	className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
-																>
-																	<Mic className="size-3.5" />
-																	<span>Add a story</span>
-																</button>
-															</div>
-														</div>
-													</div>
-												);
-											})}
-										</div>
-									) : (
-										<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
-											Qualifications, training, coursework, and learning achievements. Stories are optional.
-										</div>
-									)}
-								</div>
-
-								{/* Bottom Navigation Buttons matching screenshot 3 */}
-								<div className="flex items-center gap-4 pt-4 border-t border-slate-800/80">
-									<button
-										type="button"
-										onClick={() => setActiveTab("plan")}
-										className="text-xs text-slate-400 hover:text-white font-semibold transition-colors cursor-pointer"
-									>
-										View my plan
-									</button>
-
-									<button
-										type="button"
-										onClick={() => setActiveTab("details")}
-										className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors cursor-pointer"
-									>
-										<span>Continue to details</span>
-										<ArrowRight className="size-3.5" />
-									</button>
-								</div>
-							</div>
-						)}
-					</div>
-				)}
-
-				{/* TAB 3: DETAILS EDIT (Matching exact layout from user screenshot) */}
-				{activeTab === "details" && (
-					<div className="space-y-6">
-						{/* Supporting Details Header */}
-						<div>
-							<div className="text-[11px] font-mono font-bold uppercase tracking-widest text-emerald-400 mb-1.5">
-								SUPPORTING DETAILS
-							</div>
-							<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
-								Make the draft yours.
-							</h1>
-							<p className="text-sm text-slate-400">
-								Add exact details and confirm what belongs in your resume.
-							</p>
-						</div>
-
-						{/* Sub-tab pills: Contact, Skills, Summary */}
-						<div className="flex items-center justify-between gap-2 pt-1">
-							<div className="flex items-center gap-2">
-								<button
-									type="button"
-									onClick={() => setDetailsSubTab("contact")}
-									className={cn(
-										"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-										detailsSubTab === "contact"
-											? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
-											: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
-									)}
-								>
-									Contact
-								</button>
-								<button
-									type="button"
-									onClick={() => setDetailsSubTab("skills")}
-									className={cn(
-										"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-										detailsSubTab === "skills"
-											? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
-											: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
-									)}
-								>
-									Skills
-								</button>
-								<button
-									type="button"
-									onClick={() => setDetailsSubTab("summary")}
-									className={cn(
-										"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-										detailsSubTab === "summary"
-											? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
-											: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
-									)}
-								>
-									Summary
-								</button>
-							</div>
-
-							<button
-								type="button"
-								onClick={() => setShowTemplateModal(true)}
-								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
-							>
-								<Palette className="size-3.5 text-emerald-400" />
-								<span>Change Template</span>
-							</button>
-						</div>
-
-						{/* Sub-tab 1: Contact & professional links card (Exact replica of screenshot) */}
-						{detailsSubTab === "contact" && (
-							<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
-								<div className="space-y-1">
-									<h2 className="text-base sm:text-lg font-bold text-white">
-										Contact & professional links
-									</h2>
-									<p className="text-xs text-slate-400">
-										Typing is best for names, addresses, and exact URLs.
-									</p>
-								</div>
-
-								{/* 2-column input fields */}
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-									{/* Full name */}
-									<div className="space-y-1.5">
-										<label className="block text-xs font-medium text-slate-300">
-											Full name
-										</label>
-										<input
-											type="text"
-											value={fullName}
-											onChange={(e) => setFullName(e.target.value)}
-											placeholder="Your name"
-											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
-										/>
-									</div>
-
-									{/* Professional headline Optional */}
-									<div className="space-y-1.5">
-										<label className="block text-xs font-medium text-slate-300">
-											Professional headline <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
-										</label>
-										<input
-											type="text"
-											value={targetRole}
-											onChange={(e) => setTargetRole(e.target.value)}
-											placeholder="Frontend Developer"
-											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
-										/>
-									</div>
-
-									{/* Email */}
-									<div className="space-y-1.5">
-										<label className="block text-xs font-medium text-slate-300">
-											Email
-										</label>
-										<input
-											type="email"
-											value={contactEmail}
-											onChange={(e) => setContactEmail(e.target.value)}
-											placeholder="you@example.com"
-											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
-										/>
-									</div>
-
-									{/* Phone Optional */}
-									<div className="space-y-1.5">
-										<label className="block text-xs font-medium text-slate-300">
-											Phone <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
-										</label>
-										<input
-											type="tel"
-											value={contactPhone}
-											onChange={(e) => setContactPhone(e.target.value)}
-											placeholder="Your phone number"
-											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
-										/>
-									</div>
-
-									{/* Location Optional */}
-									<div className="space-y-1.5">
-										<label className="block text-xs font-medium text-slate-300">
-											Location <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
-										</label>
-										<input
-											type="text"
-											value={contactLocation}
-											onChange={(e) => setContactLocation(e.target.value)}
-											placeholder="City, country"
-											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
-										/>
-									</div>
-
-									{/* Professional links Optional */}
-									<div className="space-y-1.5">
-										<label className="block text-xs font-medium text-slate-300">
-											Professional links <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
-										</label>
-										<input
-											type="text"
-											value={contactLinks}
-											onChange={(e) => setContactLinks(e.target.value)}
-											placeholder="Portfolio, LinkedIn, GitHub"
-											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
-										/>
-									</div>
-								</div>
-
-								{/* Primary Action Button (Light Lime/Emerald rounded pill button as in screenshot) */}
-								<div className="pt-2">
-									<button
-										type="button"
-										onClick={() => {
-											handleSaveProgress();
-											toast.success("Contact details saved!");
-										}}
-										className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
-									>
-										Save details
-									</button>
-								</div>
-							</div>
-						)}
-
-						{/* Sub-tab 2: Skills */}
-						{detailsSubTab === "skills" && (
-							<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
-								<div className="space-y-1">
-									<h2 className="text-base sm:text-lg font-bold text-white">
-										Technical & Professional Skills
-									</h2>
-									<p className="text-xs text-slate-400">
-										Highlight the core technologies, tools, and methodologies you use.
-									</p>
-								</div>
-
-								{/* Skills Pills */}
-								<div className="flex flex-wrap gap-2 pt-1">
-									{skillsList.map((skill) => (
-										<span
-											key={skill}
-											className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-emerald-300 font-medium"
-										>
-											<span>{skill}</span>
 											<button
 												type="button"
-												onClick={() => setSkillsList((prev) => prev.filter((s) => s !== skill))}
-												className="text-slate-500 hover:text-rose-400 transition-colors p-0.5"
-												title={`Remove ${skill}`}
+												onClick={() => {
+													setIsAddingManual(true);
+													setNewManualCategory("projects");
+												}}
+												className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
 											>
-												<X className="size-3" />
+												<Plus className="size-3.5" />
+												<span>Add</span>
 											</button>
-										</span>
-									))}
-								</div>
+										</div>
 
-								{/* Add new skill inline input */}
-								<div className="flex items-center gap-3 pt-2 max-w-md">
-									<input
-										type="text"
-										value={newSkillInput}
-										onChange={(e) => setNewSkillInput(e.target.value)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter" && newSkillInput.trim()) {
-												e.preventDefault();
-												if (!skillsList.includes(newSkillInput.trim())) {
-													setSkillsList((prev) => [...prev, newSkillInput.trim()]);
-												}
-												setNewSkillInput("");
-											}
-										}}
-										placeholder="Add a skill (e.g. Next.js, Redux, Docker)"
-										className="flex-1 rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
-									/>
-									<button
-										type="button"
-										onClick={() => {
-											if (newSkillInput.trim()) {
-												if (!skillsList.includes(newSkillInput.trim())) {
-													setSkillsList((prev) => [...prev, newSkillInput.trim()]);
-												}
-												setNewSkillInput("");
-											}
-										}}
-										className="px-4 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer"
-									>
-										Add
-									</button>
-								</div>
+										{outlineEntries.filter((e) => e.category === "projects").length > 0 ? (
+											<div className="space-y-4">
+												{outlineEntries.filter((e) => e.category === "projects").map((entry) => {
+													const points = entry.points || [];
+													return (
+														<div
+															key={entry.id}
+															className="rounded-2xl border border-emerald-500/20 bg-[#07110c] p-6 space-y-4 shadow-lg"
+														>
+															<div className="flex items-start justify-between gap-4">
+																<div>
+																	<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block mb-1">
+																		PROJECT
+																	</span>
+																	<h4 className="text-lg font-bold text-white tracking-tight">
+																		{entry.title}
+																	</h4>
+																	<p className="text-xs text-slate-400 mt-0.5">
+																		{entry.organization || "Independent Project"} {entry.dates ? `· ${entry.dates}` : ""}
+																	</p>
+																</div>
 
-								{/* Save button */}
-								<div className="pt-2">
-									<button
-										type="button"
-										onClick={() => {
-											handleSaveProgress();
-											toast.success("Skills saved!");
-										}}
-										className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
-									>
-										Save details
-									</button>
-								</div>
-							</div>
-						)}
+																<div className="flex items-center gap-2">
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setInterviewActiveEntryId(entry.id);
+																			setStoriesViewMode("interview");
+																		}}
+																		className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+																		title="Edit project"
+																	>
+																		<Edit3 className="size-4" />
+																	</button>
+																</div>
+															</div>
 
-						{/* Sub-tab 3: Summary */}
-						{detailsSubTab === "summary" && (
-							<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
-								<div className="space-y-1">
-									<h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-										<Sparkles className="size-4 text-emerald-400" />
-										<span>Professional Summary</span>
-									</h2>
-									<p className="text-xs text-slate-400">
-										Zoe automatically generates this summary from your verified experiences. Edit it freely anytime.
-									</p>
-								</div>
+															{/* Generated bullets with Edit annotations */}
+															<div className="space-y-4 pt-1">
+																{points.length > 0 ? (
+																	points.map((pt, pIdx) => (
+																		<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
+																			<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+																				{pt}
+																			</p>
+																			<div className="flex items-center gap-2 text-[11px]">
+																				<button
+																					type="button"
+																					onClick={() => {
+																						setEditingPointKey(`${entry.id}_${pIdx}`);
+																						setEditingPointText(pt);
+																						setShowFinalSummaryModal(true);
+																					}}
+																					className="text-slate-400 hover:text-white font-medium cursor-pointer"
+																				>
+																					Edit
+																				</button>
+																				<span className="text-slate-400">
+																					{pIdx === 0 && "Key technical contribution and outcome"}
+																					{pIdx === 1 && "Feedback or usage once testing is done"}
+																					{pIdx >= 2 && "Exact tools or outcome"}
+																				</span>
+																			</div>
+																		</div>
+																	))
+																) : (
+																	<div className="space-y-1">
+																		<p className="text-xs text-slate-400 italic">
+																			{entry.description || "A class project, personal project, or something you built."}
+																		</p>
+																	</div>
+																)}
+															</div>
 
-								<div className="space-y-3">
-									<textarea
-										rows={5}
-										value={professionalSummary}
-										onChange={(e) => setProfessionalSummary(e.target.value)}
-										placeholder="A brief 2–3 sentence overview highlighting your core strengths and domain experience..."
-										className="w-full rounded-xl border border-slate-800/90 bg-[#040810] p-4 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none leading-relaxed"
-									/>
-									<div className="flex items-center justify-between">
+															<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+																<span className="text-[11px] font-mono text-slate-400">
+																	BULLETS {points.length} of up to 3
+																</span>
+																<div className="flex items-center gap-2">
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setInterviewActiveEntryId(entry.id);
+																			setStoriesViewMode("interview");
+																		}}
+																		className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+																	>
+																		Reopen entry
+																	</button>
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setInterviewActiveEntryId(entry.id);
+																			setStoriesViewMode("interview");
+																		}}
+																		className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+																	>
+																		<Mic className="size-3.5" />
+																		<span>Add another story</span>
+																	</button>
+																</div>
+															</div>
+														</div>
+													);
+												})}
+											</div>
+										) : (
+											<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+												A class project, personal project, or something you built.
+											</div>
+										)}
+									</div>
+
+									{/* SECTION 3: Volunteering & activities */}
+									<div className="space-y-3.5">
+										<div className="flex items-center justify-between pb-1">
+											<div className="flex items-center gap-2.5">
+												<h3 className="text-base sm:text-lg font-bold text-white">Volunteering & activities</h3>
+												<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+													{outlineEntries.filter((e) => e.category === "volunteer").length}
+												</span>
+											</div>
+
+											<button
+												type="button"
+												onClick={() => {
+													setIsAddingManual(true);
+													setNewManualCategory("volunteer");
+												}}
+												className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+											>
+												<Plus className="size-3.5" />
+												<span>Add</span>
+											</button>
+										</div>
+
+										{outlineEntries.filter((e) => e.category === "volunteer").length > 0 ? (
+											<div className="space-y-4">
+												{outlineEntries.filter((e) => e.category === "volunteer").map((entry) => {
+													const points = entry.points || [];
+													return (
+														<div
+															key={entry.id}
+															className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
+														>
+															<div className="flex items-start justify-between gap-4">
+																<div>
+																	<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
+																		ACTIVITY
+																	</span>
+																	<h4 className="text-lg font-bold text-white tracking-tight">
+																		{entry.title}
+																	</h4>
+																	<p className="text-xs text-slate-400 mt-0.5">
+																		{entry.organization || "XL Bootcamp"} {entry.dates ? `· ${entry.dates}` : ""}
+																	</p>
+																</div>
+
+																<div className="flex items-center gap-2">
+																	<span className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
+																		Ready to explore
+																	</span>
+																	<button
+																		onClick={() => {
+																			setInterviewActiveEntryId(entry.id);
+																			setStoriesViewMode("interview");
+																		}}
+																		className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+																		title="Edit activity"
+																	>
+																		<Edit3 className="size-4" />
+																	</button>
+																</div>
+															</div>
+
+															{/* Generated bullets with Edit annotations matching exact format */}
+															<div className="space-y-4 pt-1">
+																{points.length > 0 ? (
+																	points.map((pt, pIdx) => (
+																		<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
+																			<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+																				{pt}
+																			</p>
+																			<div className="flex items-center gap-2 text-[11px]">
+																				<button
+																					type="button"
+																					onClick={() => {
+																						setEditingPointKey(`${entry.id}_${pIdx}`);
+																						setEditingPointText(pt);
+																						setShowFinalSummaryModal(true);
+																					}}
+																					className="text-slate-400 hover:text-white font-medium cursor-pointer"
+																				>
+																					Edit
+																				</button>
+																				<span className="text-slate-400">
+																					{pIdx === 0 && "Key contribution and community outcome"}
+																					{pIdx === 1 && "Feedback or participant growth"}
+																					{pIdx >= 2 && "Exact tools or outcome"}
+																				</span>
+																			</div>
+																		</div>
+																	))
+																) : (
+																	<p className="text-xs text-slate-400 italic">
+																		{entry.description || "Mentoring, volunteering, leadership, or community activities."}
+																	</p>
+																)}
+															</div>
+
+															<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+																<span className="text-[11px] font-mono text-slate-400">
+																	BULLETS {points.length} of up to 3
+																</span>
+																<div className="flex items-center gap-2">
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setInterviewActiveEntryId(entry.id);
+																			setStoriesViewMode("interview");
+																		}}
+																		className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors cursor-pointer"
+																	>
+																		Reopen entry
+																	</button>
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setInterviewActiveEntryId(entry.id);
+																			setStoriesViewMode("interview");
+																		}}
+																		className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+																	>
+																		<Mic className="size-3.5" />
+																		<span>Add another story</span>
+																	</button>
+																</div>
+															</div>
+														</div>
+													);
+												})}
+											</div>
+										) : (
+											<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+												Mentoring, volunteering, leadership, or community activities.
+											</div>
+										)}
+									</div>
+
+									{/* SECTION 4: Education */}
+									<div className="space-y-3.5">
+										<div className="flex items-center justify-between pb-1">
+											<div className="flex items-center gap-2.5">
+												<h3 className="text-base sm:text-lg font-bold text-white">Education</h3>
+												<span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+													{outlineEntries.filter((e) => e.category === "education").length}
+												</span>
+											</div>
+
+											<button
+												type="button"
+												onClick={() => {
+													setQuickAddCategory("education");
+													setQuickAddSectionModalOpen(true);
+												}}
+												className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+											>
+												<Plus className="size-3.5" />
+												<span>Add</span>
+											</button>
+										</div>
+
+										{outlineEntries.filter((e) => e.category === "education").length > 0 ? (
+											<div className="space-y-4">
+												{outlineEntries.filter((e) => e.category === "education").map((edu) => {
+													const points = edu.points || [];
+													return (
+														<div
+															key={edu.id}
+															className="rounded-2xl border border-slate-800 bg-[#070e19] p-6 space-y-4 shadow-lg relative"
+														>
+															<div className="flex items-start justify-between gap-4">
+																<div>
+																	<span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 font-bold block mb-1">
+																		EDUCATION
+																	</span>
+																	<h4 className="text-lg font-bold text-white tracking-tight">
+																		{edu.title}
+																	</h4>
+																	<p className="text-xs text-slate-400 mt-0.5">
+																		{edu.organization || "University / College"} {edu.dates ? `· ${edu.dates}` : ""}
+																	</p>
+																</div>
+
+																<div className="flex items-center gap-2">
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setOutlineEntries((prev) => prev.filter((e) => e.id !== edu.id));
+																			toast.success("Education entry removed");
+																		}}
+																		className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
+																		title="Remove education"
+																	>
+																		<Trash2 className="size-4" />
+																	</button>
+																</div>
+															</div>
+
+															{/* Generated bullets with Edit annotations */}
+															<div className="space-y-4 pt-1">
+																{points.length > 0 ? (
+																	points.map((pt, pIdx) => (
+																		<div key={pIdx} className="space-y-1.5 pb-3 border-b border-slate-800/60 last:border-0 last:pb-0">
+																			<p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+																				{pt}
+																			</p>
+																			<div className="flex items-center gap-2 text-[11px]">
+																				<button
+																					type="button"
+																					onClick={() => {
+																						setEditingPointKey(`${edu.id}_${pIdx}`);
+																						setEditingPointText(pt);
+																						setShowFinalSummaryModal(true);
+																					}}
+																					className="text-slate-400 hover:text-white font-medium cursor-pointer"
+																				>
+																					Edit
+																				</button>
+																				<span className="text-slate-400">
+																					{pIdx === 0 && "Core coursework, honors, or capstone"}
+																					{pIdx >= 1 && "Academic achievement or awards"}
+																				</span>
+																			</div>
+																		</div>
+																	))
+																) : (
+																	<p className="text-xs text-slate-400 italic">
+																		{edu.description || "Academic highlights, major projects, certifications, or notable awards."}
+																	</p>
+																)}
+															</div>
+
+															<div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+																<span className="text-[11px] font-mono text-slate-400">
+																	BULLETS {points.length} of up to 3
+																</span>
+																<div className="flex items-center gap-2">
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setInterviewActiveEntryId(edu.id);
+																			setStoriesViewMode("interview");
+																		}}
+																		className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs cursor-pointer"
+																	>
+																		<Mic className="size-3.5" />
+																		<span>Add a story</span>
+																	</button>
+																</div>
+															</div>
+														</div>
+													);
+												})}
+											</div>
+										) : (
+											<div className="p-4 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+												Qualifications, training, coursework, and learning achievements. Stories are optional.
+											</div>
+										)}
+									</div>
+
+									{/* Bottom Navigation Buttons matching screenshot 3 */}
+									<div className="flex items-center gap-4 pt-4 border-t border-slate-800/80">
 										<button
 											type="button"
-											onClick={() => {
-												// Trigger re-generation
-												const generated = generateProfessionalSummary(outlineEntries, targetRole);
-												setProfessionalSummary(generated);
-												toast.success("Summary regenerated from experiences!");
-											}}
-											className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+											onClick={() => setActiveTab("plan")}
+											className="text-xs text-slate-400 hover:text-white font-semibold transition-colors cursor-pointer"
 										>
-											<Sparkles className="size-3.5" />
-											<span>Regenerate with Zoe</span>
+											View my plan
 										</button>
+
+										<button
+											type="button"
+											onClick={() => setActiveTab("details")}
+											className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors cursor-pointer"
+										>
+											<span>Continue to details</span>
+											<ArrowRight className="size-3.5" />
+										</button>
+									</div>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* TAB 3: DETAILS EDIT (Matching exact layout from user screenshot) */}
+					{activeTab === "details" && (
+						<div className="space-y-6">
+							{/* Supporting Details Header */}
+							<div>
+								<div className="text-[11px] font-mono font-bold uppercase tracking-widest text-emerald-400 mb-1.5">
+									SUPPORTING DETAILS
+								</div>
+								<h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
+									Make the draft yours.
+								</h1>
+								<p className="text-sm text-slate-400">
+									Add exact details and confirm what belongs in your resume.
+								</p>
+							</div>
+
+							{/* Sub-tab pills: Contact, Skills, Summary */}
+							<div className="flex items-center justify-between gap-2 pt-1">
+								<div className="flex items-center gap-2">
+									<button
+										type="button"
+										onClick={() => setDetailsSubTab("contact")}
+										className={cn(
+											"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+											detailsSubTab === "contact"
+												? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+												: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+										)}
+									>
+										Contact
+									</button>
+									<button
+										type="button"
+										onClick={() => setDetailsSubTab("skills")}
+										className={cn(
+											"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+											detailsSubTab === "skills"
+												? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+												: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+										)}
+									>
+										Skills
+									</button>
+									<button
+										type="button"
+										onClick={() => setDetailsSubTab("summary")}
+										className={cn(
+											"px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+											detailsSubTab === "summary"
+												? "border border-emerald-500/80 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-950"
+												: "border border-slate-800 bg-[#070e19] text-slate-400 hover:text-white hover:border-slate-700"
+										)}
+									>
+										Summary
+									</button>
+								</div>
+
+								<button
+									type="button"
+									onClick={() => setShowTemplateModal(true)}
+									className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#070e19] hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+								>
+									<Palette className="size-3.5 text-emerald-400" />
+									<span>Change Template</span>
+								</button>
+							</div>
+
+							{/* Sub-tab 1: Contact & professional links card (Exact replica of screenshot) */}
+							{detailsSubTab === "contact" && (
+								<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
+									<div className="space-y-1">
+										<h2 className="text-base sm:text-lg font-bold text-white">
+											Contact & professional links
+										</h2>
+										<p className="text-xs text-slate-400">
+											Typing is best for names, addresses, and exact URLs.
+										</p>
+									</div>
+
+									{/* 2-column input fields */}
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+										{/* Full name */}
+										<div className="space-y-1.5">
+											<label className="block text-xs font-medium text-slate-300">
+												Full name
+											</label>
+											<input
+												type="text"
+												value={fullName}
+												onChange={(e) => setFullName(e.target.value)}
+												placeholder="Your name"
+												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+											/>
+										</div>
+
+										{/* Professional headline Optional */}
+										<div className="space-y-1.5">
+											<label className="block text-xs font-medium text-slate-300">
+												Professional headline <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+											</label>
+											<input
+												type="text"
+												value={targetRole}
+												onChange={(e) => setTargetRole(e.target.value)}
+												placeholder="Frontend Developer"
+												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+											/>
+										</div>
+
+										{/* Email */}
+										<div className="space-y-1.5">
+											<label className="block text-xs font-medium text-slate-300">
+												Email
+											</label>
+											<input
+												type="email"
+												value={contactEmail}
+												onChange={(e) => setContactEmail(e.target.value)}
+												placeholder="you@example.com"
+												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+											/>
+										</div>
+
+										{/* Phone Optional */}
+										<div className="space-y-1.5">
+											<label className="block text-xs font-medium text-slate-300">
+												Phone <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+											</label>
+											<input
+												type="tel"
+												value={contactPhone}
+												onChange={(e) => setContactPhone(e.target.value)}
+												placeholder="Your phone number"
+												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+											/>
+										</div>
+
+										{/* Location Optional */}
+										<div className="space-y-1.5">
+											<label className="block text-xs font-medium text-slate-300">
+												Location <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+											</label>
+											<input
+												type="text"
+												value={contactLocation}
+												onChange={(e) => setContactLocation(e.target.value)}
+												placeholder="City, country"
+												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+											/>
+										</div>
+
+										{/* Professional links Optional */}
+										<div className="space-y-1.5">
+											<label className="block text-xs font-medium text-slate-300">
+												Professional links <span className="text-slate-500 text-[11px] font-normal">· Optional</span>
+											</label>
+											<input
+												type="text"
+												value={contactLinks}
+												onChange={(e) => setContactLinks(e.target.value)}
+												placeholder="Portfolio, LinkedIn, GitHub"
+												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+											/>
+										</div>
+									</div>
+
+									{/* Primary Action Button (Light Lime/Emerald rounded pill button as in screenshot) */}
+									<div className="pt-2">
 										<button
 											type="button"
 											onClick={() => {
 												handleSaveProgress();
-												toast.success("Professional summary saved!");
+												toast.success("Contact details saved!");
 											}}
 											className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
 										>
@@ -4333,882 +4598,891 @@ export function GuidedStoryRoute() {
 										</button>
 									</div>
 								</div>
-							</div>
-						)}
+							)}
 
-						{/* Education & Qualifications Section (Retained underneath for complete profile editing) */}
-						<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-5">
-							<div className="flex items-center justify-between">
-								<div>
-									<h3 className="text-base font-bold text-white flex items-center gap-2">
-										<GraduationCap className="size-4 text-emerald-400" />
-										<span>Education & Qualifications</span>
-									</h3>
-									<p className="text-xs text-slate-400 mt-0.5">
-										Add degrees, certifications, and academic background.
-									</p>
-								</div>
-								<span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-									{outlineEntries.filter((e) => e.category === "education").length} entries
-								</span>
-							</div>
+							{/* Sub-tab 2: Skills */}
+							{detailsSubTab === "skills" && (
+								<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
+									<div className="space-y-1">
+										<h2 className="text-base sm:text-lg font-bold text-white">
+											Technical & Professional Skills
+										</h2>
+										<p className="text-xs text-slate-400">
+											Highlight the core technologies, tools, and methodologies you use.
+										</p>
+									</div>
 
-							{/* Existing Education List */}
-							<div className="space-y-2.5">
-								{outlineEntries.filter((e) => e.category === "education").length > 0 ? (
-									outlineEntries
-										.filter((e) => e.category === "education")
-										.map((edu) => (
-											<div
-												key={edu.id}
-												className="flex items-center justify-between p-3.5 rounded-xl border border-slate-800 bg-[#040810]"
+									{/* Skills Pills */}
+									<div className="flex flex-wrap gap-2 pt-1">
+										{skillsList.map((skill) => (
+											<span
+												key={skill}
+												className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-emerald-300 font-medium"
 											>
-												<div className="space-y-0.5">
-													<div className="text-sm font-semibold text-white">{edu.title}</div>
-													<div className="text-xs text-slate-400">
-														{edu.organization || "Institution"} {edu.dates ? `· ${edu.dates}` : ""}
-													</div>
-												</div>
+												<span>{skill}</span>
 												<button
 													type="button"
-													onClick={() => {
-														setOutlineEntries((prev) => prev.filter((e) => e.id !== edu.id));
-														toast.success("Education entry removed");
-													}}
-													className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
-													title="Remove education"
+													onClick={() => setSkillsList((prev) => prev.filter((s) => s !== skill))}
+													className="text-slate-500 hover:text-rose-400 transition-colors p-0.5"
+													title={`Remove ${skill}`}
 												>
-													<Trash2 className="size-4" />
+													<X className="size-3" />
 												</button>
-											</div>
-										))
-								) : (
-									<div className="p-4 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
-										No education entries added yet. Use the quick form below to add one.
+											</span>
+										))}
 									</div>
-								)}
-							</div>
 
-							{/* Add Education Form */}
-							<div className="p-4 rounded-xl border border-slate-800/80 bg-[#040810] space-y-3">
-								<h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-									Add Degree or Qualification
-								</h4>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-									<div>
-										<label className="block text-[11px] font-semibold text-slate-400 mb-1">
-											Degree / Certificate
-										</label>
+									{/* Add new skill inline input */}
+									<div className="flex items-center gap-3 pt-2 max-w-md">
 										<input
 											type="text"
-											value={eduDegree}
-											onChange={(e) => setEduDegree(e.target.value)}
-											placeholder="e.g. B.Tech Computer Science"
-											className="w-full rounded-lg border border-slate-800 bg-[#070e19] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+											value={newSkillInput}
+											onChange={(e) => setNewSkillInput(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" && newSkillInput.trim()) {
+													e.preventDefault();
+													if (!skillsList.includes(newSkillInput.trim())) {
+														setSkillsList((prev) => [...prev, newSkillInput.trim()]);
+													}
+													setNewSkillInput("");
+												}
+											}}
+											placeholder="Add a skill (e.g. Next.js, Redux, Docker)"
+											className="flex-1 rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
 										/>
+										<button
+											type="button"
+											onClick={() => {
+												if (newSkillInput.trim()) {
+													if (!skillsList.includes(newSkillInput.trim())) {
+														setSkillsList((prev) => [...prev, newSkillInput.trim()]);
+													}
+													setNewSkillInput("");
+												}
+											}}
+											className="px-4 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer"
+										>
+											Add
+										</button>
 									</div>
-									<div>
-										<label className="block text-[11px] font-semibold text-slate-400 mb-1">
-											School / College
-										</label>
-										<input
-											type="text"
-											value={eduSchool}
-											onChange={(e) => setEduSchool(e.target.value)}
-											placeholder="e.g. University of Technology"
-											className="w-full rounded-lg border border-slate-800 bg-[#070e19] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
-										/>
-									</div>
-									<div>
-										<label className="block text-[11px] font-semibold text-slate-400 mb-1">
-											Dates / Year
-										</label>
-										<input
-											type="text"
-											value={eduDates}
-											onChange={(e) => setEduDates(e.target.value)}
-											placeholder="e.g. 2020 – 2024"
-											className="w-full rounded-lg border border-slate-800 bg-[#070e19] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
-										/>
+
+									{/* Save button */}
+									<div className="pt-2">
+										<button
+											type="button"
+											onClick={() => {
+												handleSaveProgress();
+												toast.success("Skills saved!");
+											}}
+											className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
+										>
+											Save details
+										</button>
 									</div>
 								</div>
-								<div className="flex justify-end pt-1">
-									<button
-										type="button"
-										onClick={handleAddEducationEntry}
-										className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 text-xs font-bold transition-colors cursor-pointer"
-									>
-										<Plus className="size-3.5" />
-										<span>Add Education Entry</span>
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
+							)}
 
-				{/* TAB 4: REVIEW & EXPORT */}
-				{activeTab === "export" && (
-					<div className="space-y-6">
-						<div>
-							<div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">
-								REVIEW & EXPORT
-							</div>
-							<h2 className="text-2xl font-bold text-white mb-1">Finalize and Download</h2>
-							<p className="text-sm text-slate-400">Review your full prioritized resume, choose styling, and export as PDF or JSON.</p>
-						</div>
+							{/* Sub-tab 3: Summary */}
+							{detailsSubTab === "summary" && (
+								<div className="rounded-2xl border border-slate-800/80 bg-[#070e19] p-6 sm:p-7 space-y-6">
+									<div className="space-y-1">
+										<h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+											<Sparkles className="size-4 text-emerald-400" />
+											<span>Professional Summary</span>
+										</h2>
+										<p className="text-xs text-slate-400">
+											Zoe automatically generates this summary from your verified experiences. Edit it freely anytime.
+										</p>
+									</div>
 
-						{/* Full Resume Complete Review Card */}
-						<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-6 space-y-5">
-							<div className="flex items-center justify-between border-b border-slate-800 pb-4">
-								<div>
-									<h3 className="text-base font-bold text-white">Full Resume Overview</h3>
-									<p className="text-xs text-slate-400 mt-0.5">
-										Arranged in priority order based on strength and target role relevance.
-									</p>
-								</div>
-								<button
-									type="button"
-									onClick={() => setShowFinalSummaryModal(true)}
-									className="px-3.5 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-bold text-emerald-300 transition-colors cursor-pointer flex items-center gap-1.5"
-								>
-									<Edit3 className="size-3.5" />
-									<span>Edit All Bullet Points</span>
-								</button>
-							</div>
-
-							{/* Summary of Prioritized Experiences */}
-							<div className="space-y-4">
-								{outlineEntries.map((entry, idx) => (
-									<div key={entry.id} className="p-4 rounded-xl border border-slate-800/80 bg-[#070e1a] space-y-2">
+									<div className="space-y-3">
+										<textarea
+											rows={5}
+											value={professionalSummary}
+											onChange={(e) => setProfessionalSummary(e.target.value)}
+											placeholder="A brief 2–3 sentence overview highlighting your core strengths and domain experience..."
+											className="w-full rounded-xl border border-slate-800/90 bg-[#040810] p-4 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none resize-none leading-relaxed"
+										/>
 										<div className="flex items-center justify-between">
-											<div className="flex items-center gap-2">
-												<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
-													Priority #{idx + 1} · {entry.category}
-												</span>
-												<span className="text-sm font-bold text-white">{entry.title}</span>
-											</div>
-											<span className="text-xs text-slate-400">
-												{entry.organization ? `${entry.organization} · ` : ""}{entry.dates || "Recent"}
+											<button
+												type="button"
+												onClick={() => {
+													// Trigger re-generation
+													const generated = generateProfessionalSummary(outlineEntries, targetRole);
+													setProfessionalSummary(generated);
+													toast.success("Summary regenerated from experiences!");
+												}}
+												className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+											>
+												<Sparkles className="size-3.5" />
+												<span>Regenerate with Zoe</span>
+											</button>
+											<button
+												type="button"
+												onClick={() => {
+													handleSaveProgress();
+													toast.success("Professional summary saved!");
+												}}
+												className="px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs tracking-tight shadow-md transition-all cursor-pointer"
+											>
+												Save details
+											</button>
+										</div>
+									</div>
+								</div>
+							)}
+
+							{/* Education & Qualifications Section (Retained underneath for complete profile editing) */}
+
+						</div>
+					)}
+
+					{/* TAB 4: REVIEW & EXPORT */}
+					{activeTab === "export" && (
+						<div className="space-y-6">
+							<div>
+								<div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">
+									REVIEW & EXPORT
+								</div>
+								<h2 className="text-2xl font-bold text-white mb-1">Finalize and Download</h2>
+								<p className="text-sm text-slate-400">Review your full prioritized resume, choose styling, and export as PDF or JSON.</p>
+							</div>
+
+							{/* Full Resume Complete Review Card */}
+							<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-6 space-y-5">
+								<div className="flex items-center justify-between border-b border-slate-800 pb-4">
+									<div>
+										<h3 className="text-base font-bold text-white">Full Resume Overview</h3>
+										<p className="text-xs text-slate-400 mt-0.5">
+											Arranged in priority order based on strength and target role relevance.
+										</p>
+									</div>
+									<button
+										type="button"
+										onClick={() => setShowFinalSummaryModal(true)}
+										className="px-3.5 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-bold text-emerald-300 transition-colors cursor-pointer flex items-center gap-1.5"
+									>
+										<Edit3 className="size-3.5" />
+										<span>Edit All Bullet Points</span>
+									</button>
+								</div>
+
+								{/* Professional Summary Section at the End / Review */}
+								<div className="p-4 rounded-xl border border-emerald-500/30 bg-[#071616] space-y-2">
+									<div className="flex items-center justify-between">
+										<div className="flex items-center gap-2">
+											<Sparkles className="size-4 text-emerald-400" />
+											<span className="text-xs font-bold text-white uppercase tracking-wider">
+												Professional Summary (Synthesized from All Resume Data)
 											</span>
 										</div>
-
-										{entry.points && entry.points.length > 0 ? (
-											<ul className="space-y-1.5 pt-1 pl-1">
-												{entry.points.map((pt, pIdx) => (
-													<li key={pIdx} className="text-xs text-slate-300 flex items-start gap-2 leading-relaxed">
-														<span className="text-emerald-400 font-bold">•</span>
-														<span>{pt}</span>
-													</li>
-												))}
-											</ul>
-										) : (
-											<p className="text-xs text-slate-400 italic">
-												{entry.description || "No specific bullet points generated yet."}
-											</p>
-										)}
+										<button
+											type="button"
+											onClick={() => {
+												const freshSummary = generateProfessionalSummary(outlineEntries, targetRole);
+												setProfessionalSummary(freshSummary);
+												handleSaveProgress();
+												toast.success("Summary generated from all resume details!");
+											}}
+											className="inline-flex items-center gap-1.5 text-xs text-emerald-300 hover:text-white font-semibold cursor-pointer"
+										>
+											<Sparkles className="size-3" />
+											<span>Regenerate Summary</span>
+										</button>
 									</div>
-								))}
-							</div>
-						</div>
-
-						{/* Template Choice */}
-						<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
-							<span className="text-xs font-bold text-slate-300">Choose Template</span>
-							<div className="flex flex-wrap gap-2">
-								{["Azurill", "Bronzor", "Chikorita", "Gengar"].map((tmpl) => (
-									<button
-										key={tmpl}
-										type="button"
-										onClick={() => handleSelectTemplate(tmpl)}
-										className={cn(
-											"px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border",
-											selectedTemplate === tmpl
-												? "bg-emerald-500 text-slate-950 border-emerald-500 font-bold"
-												: "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
-										)}
-									>
-										{tmpl}
-									</button>
-								))}
-							</div>
-						</div>
-
-						{/* Photo upload */}
-						<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
-							<span className="text-xs font-bold text-slate-300">Profile Photo</span>
-							<div className="flex items-center gap-4">
-								<input
-									type="file"
-									accept="image/*"
-									onChange={handlePhotoUpload}
-									className="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
-								/>
-							</div>
-						</div>
-
-						{/* Job-Specific Tailoring Banner / Option (Requirement 17) */}
-						<div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-r from-[#091b24] to-[#0d2830] p-6 space-y-4">
-							<div className="flex items-start justify-between">
-								<div className="space-y-1">
-									<div className="flex items-center gap-2">
-										<Target className="size-4 text-emerald-400" />
-										<span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-											JOB-SPECIFIC TAILORING
-										</span>
-									</div>
-									<h3 className="text-lg font-bold text-white">
-										Tailor this resume for a specific job opening
-									</h3>
-									<p className="text-xs text-slate-300 leading-relaxed max-w-xl">
-										Connect this completed resume to a specific job description. Zoe will match required skills, analyze keyword gaps, and shape a targeted version for the opportunity.
+									<p className="text-xs text-slate-200 leading-relaxed italic">
+										{professionalSummary
+											? `"${professionalSummary}"`
+											: "Summary will be generated once you have detailed your stories & experiences."}
 									</p>
 								</div>
-								<span className="hidden sm:inline-flex text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-									Recommended Next
-								</span>
-							</div>
 
-							<div className="flex items-center gap-3 pt-1">
-								<button
-									type="button"
-									onClick={() => {
-										// Save current state and redirect to job match flow
-										if (createdResumeId) {
-											navigate({
-												to: "/dashboard/resumes/match" as any,
-												search: { resumeId: createdResumeId } as any,
-											});
-										} else {
-											handleSeeMyPlan();
-											navigate({ to: "/dashboard/resumes/match" as any });
-										}
-										toast.success("Opening Job Match & Tailoring!");
-									}}
-									className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-								>
-									<Sparkles className="size-4" />
-									<span>Tailor for a Specific Job</span>
-									<ArrowRight className="size-4" />
-								</button>
-							</div>
-						</div>
-
-						{/* Export Actions */}
-						<div className="p-5 rounded-2xl border border-emerald-500/30 bg-[#081820]/90 flex flex-wrap items-center justify-between gap-4">
-							<div className="space-y-0.5">
-								<h4 className="text-sm font-bold text-white">Download & Share</h4>
-								<p className="text-xs text-slate-400">Export high-resolution PDF print or raw JSON data.</p>
-							</div>
-
-							<div className="flex items-center gap-3">
-								<button
-									type="button"
-									onClick={() => {
-										const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(outlineEntries, null, 2));
-										const downloadAnchor = document.createElement("a");
-										downloadAnchor.setAttribute("href", dataStr);
-										downloadAnchor.setAttribute("download", `${fullName || "resume"}_data.json`);
-										document.body.appendChild(downloadAnchor);
-										downloadAnchor.click();
-										downloadAnchor.remove();
-										toast.success("Resume JSON exported!");
-									}}
-									className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-all cursor-pointer"
-								>
-									<FileText className="size-4 text-emerald-400" />
-									<span>Export JSON</span>
-								</button>
-
-								<button
-									type="button"
-									onClick={() => window.print()}
-									className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
-								>
-									<Download className="size-4" />
-									<span>Download / Print PDF</span>
-								</button>
-							</div>
-						</div>
-					</div>
-				)}
-			</main>
-
-			{/* Right Column: Live Resume Document Preview (matches screenshot) */}
-			{!hideResumePreview && (
-				<aside className="w-full lg:w-[460px] xl:w-[500px] border-t lg:border-t-0 lg:border-l border-slate-900 bg-[#070d14] p-6 shrink-0 flex flex-col justify-between overflow-y-auto relative">
-					<div className="space-y-4 w-full">
-						{/* Header row in screenshot: THE OUTPUT & Live draft badge */}
-						<div className="flex items-center justify-between">
-							<div>
-								<span className="text-[10px] font-mono tracking-widest uppercase text-slate-500 font-bold block">
-									THE OUTPUT
-								</span>
-								<h3 className="text-base font-bold text-white mt-0.5">Your resume</h3>
-							</div>
-
-							<div className="flex items-center gap-2">
-								<button
-									type="button"
-									onClick={() => setShowTemplateModal(true)}
-									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-									title="Choose template"
-								>
-									<Palette className="size-3 text-emerald-400" />
-									<span>{selectedTemplate}</span>
-								</button>
-
-								<span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-emerald-500/30">
-									Live draft
-								</span>
-							</div>
-						</div>
-
-						{/* Document Sheet Canvas with Dynamic Template Styles (Azurill, Bronzor, Chikorita, Gengar, Lapras, Onyx, Pikachu, Leafish, etc.) */}
-						{(() => {
-							const tmplKey = (selectedTemplate || "azurill").toLowerCase();
-							const isLeftSidebar = ["azurill", "ditgar", "ditto"].includes(tmplKey);
-							const isRightSidebar = ["chikorita", "leafish", "pikachu"].includes(tmplKey);
-							const isBannerHeader = ["lapras", "glalie"].includes(tmplKey);
-							const isHighContrast = ["gengar", "kakuna"].includes(tmplKey);
-							const isMinimalist = ["bronzor", "onyx", "rhyhorn"].includes(tmplKey);
-
-							// Template Accent Palette Configuration
-							const palette = (() => {
-								switch (tmplKey) {
-									case "azurill":
-										return {
-											borderTop: "border-t-[6px] border-t-blue-600",
-											primaryText: "text-blue-600",
-											primaryBg: "bg-blue-600",
-											badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
-											sidebarBg: "bg-blue-50/50",
-											sidebarBorder: "border-r border-blue-100",
-											headerFont: "font-serif",
-											sectionHeader: "text-blue-700 tracking-wider font-bold",
-											bulletDot: "text-blue-500",
-										};
-									case "bronzor":
-										return {
-											borderTop: "border-t-[6px] border-t-slate-700",
-											primaryText: "text-slate-800",
-											primaryBg: "bg-slate-700",
-											badgeBg: "bg-slate-100 text-slate-800 border-slate-300",
-											sidebarBg: "bg-slate-50/60",
-											sidebarBorder: "border-slate-200",
-											headerFont: "font-serif",
-											sectionHeader: "text-slate-800 tracking-wider font-bold",
-											bulletDot: "text-slate-600",
-										};
-									case "chikorita":
-										return {
-											borderTop: "border-t-[6px] border-t-emerald-600",
-											primaryText: "text-emerald-700",
-											primaryBg: "bg-emerald-600",
-											badgeBg: "bg-emerald-50 text-emerald-800 border-emerald-200",
-											sidebarBg: "bg-emerald-50/40",
-											sidebarBorder: "border-l border-emerald-100",
-											headerFont: "font-sans",
-											sectionHeader: "text-emerald-700 tracking-wider font-bold",
-											bulletDot: "text-emerald-600",
-										};
-									case "gengar":
-										return {
-											borderTop: "border-t-[6px] border-t-purple-700",
-											primaryText: "text-purple-700",
-											primaryBg: "bg-purple-700",
-											badgeBg: "bg-purple-50 text-purple-800 border-purple-200",
-											sidebarBg: "bg-purple-50/50",
-											sidebarBorder: "border-r border-purple-200",
-											headerFont: "font-mono",
-											sectionHeader: "text-purple-800 tracking-widest font-black",
-											bulletDot: "text-purple-600",
-										};
-									case "lapras":
-										return {
-											borderTop: "border-t-[6px] border-t-indigo-800",
-											primaryText: "text-indigo-800",
-											primaryBg: "bg-indigo-900",
-											badgeBg: "bg-indigo-50 text-indigo-800 border-indigo-200",
-											sidebarBg: "bg-indigo-50/30",
-											sidebarBorder: "border-indigo-100",
-											headerFont: "font-serif",
-											sectionHeader: "text-indigo-900 tracking-widest font-bold",
-											bulletDot: "text-indigo-700",
-										};
-									case "onyx":
-										return {
-											borderTop: "border-t-[6px] border-t-rose-600",
-											primaryText: "text-rose-700",
-											primaryBg: "bg-rose-600",
-											badgeBg: "bg-rose-50 text-rose-800 border-rose-200",
-											sidebarBg: "bg-stone-50",
-											sidebarBorder: "border-stone-200",
-											headerFont: "font-serif",
-											sectionHeader: "text-rose-700 tracking-wider font-bold",
-											bulletDot: "text-rose-600",
-										};
-									case "pikachu":
-										return {
-											borderTop: "border-t-[6px] border-t-amber-500",
-											primaryText: "text-amber-700",
-											primaryBg: "bg-amber-500",
-											badgeBg: "bg-amber-50 text-amber-800 border-amber-200",
-											sidebarBg: "bg-amber-50/40",
-											sidebarBorder: "border-l border-amber-200",
-											headerFont: "font-sans",
-											sectionHeader: "text-amber-700 tracking-wider font-bold",
-											bulletDot: "text-amber-500",
-										};
-									case "leafish":
-										return {
-											borderTop: "border-t-[6px] border-t-lime-600",
-											primaryText: "text-lime-700",
-											primaryBg: "bg-lime-600",
-											badgeBg: "bg-lime-50 text-lime-800 border-lime-200",
-											sidebarBg: "bg-lime-50/30",
-											sidebarBorder: "border-l border-lime-200",
-											headerFont: "font-serif",
-											sectionHeader: "text-lime-700 tracking-wider font-bold",
-											bulletDot: "text-lime-600",
-										};
-									case "ditgar":
-										return {
-											borderTop: "border-t-[6px] border-t-sky-600",
-											primaryText: "text-sky-700",
-											primaryBg: "bg-sky-600",
-											badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
-											sidebarBg: "bg-sky-50/50",
-											sidebarBorder: "border-r border-sky-200",
-											headerFont: "font-sans",
-											sectionHeader: "text-sky-700 tracking-wider font-bold",
-											bulletDot: "text-sky-500",
-										};
-									case "ditto":
-										return {
-											borderTop: "border-t-[6px] border-t-pink-600",
-											primaryText: "text-pink-700",
-											primaryBg: "bg-pink-600",
-											badgeBg: "bg-pink-50 text-pink-800 border-pink-200",
-											sidebarBg: "bg-pink-50/40",
-											sidebarBorder: "border-r border-pink-200",
-											headerFont: "font-serif",
-											sectionHeader: "text-pink-700 tracking-wider font-bold",
-											bulletDot: "text-pink-500",
-										};
-									case "glalie":
-										return {
-											borderTop: "border-t-[6px] border-t-slate-600",
-											primaryText: "text-slate-700",
-											primaryBg: "bg-slate-800",
-											badgeBg: "bg-slate-100 text-slate-800 border-slate-300",
-											sidebarBg: "bg-slate-50",
-											sidebarBorder: "border-slate-200",
-											headerFont: "font-sans",
-											sectionHeader: "text-slate-700 tracking-wider font-bold",
-											bulletDot: "text-slate-500",
-										};
-									case "kakuna":
-										return {
-											borderTop: "border-t-[6px] border-t-yellow-600",
-											primaryText: "text-yellow-700",
-											primaryBg: "bg-yellow-600",
-											badgeBg: "bg-yellow-50 text-yellow-800 border-yellow-200",
-											sidebarBg: "bg-yellow-50/40",
-											sidebarBorder: "border-yellow-200",
-											headerFont: "font-sans",
-											sectionHeader: "text-yellow-700 tracking-wider font-bold",
-											bulletDot: "text-yellow-600",
-										};
-									default:
-										return {
-											borderTop: "border-t-[6px] border-t-blue-500",
-											primaryText: "text-blue-600",
-											primaryBg: "bg-blue-600",
-											badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
-											sidebarBg: "bg-slate-50",
-											sidebarBorder: "border-slate-200",
-											headerFont: "font-sans",
-											sectionHeader: "text-slate-700 tracking-wider font-bold",
-											bulletDot: "text-blue-500",
-										};
-								}
-							})();
-
-							// Shared Sub-renderers
-							const renderExperienceBlock = () => (
-								<div className="space-y-2.5">
-									<div className="flex items-center justify-between border-b border-slate-200 pb-1">
-										<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
-											EXPERIENCE
-										</span>
-									</div>
-									{outlineEntries.filter((e) => e.category === "work").length > 0 ? (
-										outlineEntries
-											.filter((e) => e.category === "work")
-											.map((w) => (
-												<div key={w.id} className="space-y-1">
-													<div className="flex items-baseline justify-between gap-2">
-														<div className="text-xs font-bold text-slate-950">
-															{w.title}
-														</div>
-														<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
-															{w.dates || "Jul 2023 – Present"}
-														</div>
-													</div>
-													<div className={cn("text-[11px] font-semibold", palette.primaryText)}>
-														{w.organization || "Company"}
-													</div>
-													{w.points && w.points.length > 0 ? (
-														<ul className="space-y-1 pt-0.5">
-															{w.points.map((pt, pIdx) => (
-																<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
-																	<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
-																	<span>{pt}</span>
-																</li>
-															))}
-														</ul>
-													) : (
-														<p className="text-[11px] text-slate-400 italic">
-															Your contribution will appear here
-														</p>
-													)}
-												</div>
-											))
-									) : (
-										<div className="space-y-1">
-											<div className="text-xs font-bold text-slate-950">
-												Sr. Frontend Developer
-											</div>
-											<div className="text-[10px] text-slate-500 font-medium">
-												NavGurukul · Jul 2023 – Present
-											</div>
-											<p className="text-[11px] text-slate-400 italic">
-												Your contribution will appear here
-											</p>
-										</div>
-									)}
-								</div>
-							);
-
-							const renderProjectsBlock = () => (
-								<div className="space-y-2.5">
-									<div className="flex items-center justify-between border-b border-slate-200 pb-1">
-										<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
-											PROJECTS & ACTIVITIES
-										</span>
-									</div>
-									{outlineEntries.filter((e) => e.category === "projects" || e.category === "volunteer").length > 0 ? (
-										outlineEntries
-											.filter((e) => e.category === "projects" || e.category === "volunteer")
-											.map((p) => (
-												<div key={p.id} className="space-y-1">
-													<div className="flex items-baseline justify-between gap-2">
-														<div className="text-xs font-bold text-slate-950">
-															{p.title}
-														</div>
-														{p.dates && (
-															<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
-																{p.dates}
-															</div>
-														)}
-													</div>
-													<div className="text-[10px] text-slate-500 font-medium">
-														{p.organization || "Independent Project"}
-													</div>
-													{p.points && p.points.length > 0 ? (
-														<ul className="space-y-1 pt-0.5">
-															{p.points.map((pt, pIdx) => (
-																<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
-																	<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
-																	<span>{pt}</span>
-																</li>
-															))}
-														</ul>
-													) : (
-														<p className="text-[11px] text-slate-400 italic">
-															Your contribution will appear here
-														</p>
-													)}
-												</div>
-											))
-									) : (
-										<div className="space-y-1">
-											<div className="text-xs font-bold text-slate-950">
-												Mentor
-											</div>
-											<div className="text-[10px] text-slate-500 font-medium">
-												XL Bootcamp
-											</div>
-											<p className="text-[11px] text-slate-400 italic">
-												Your contribution will appear here
-											</p>
-										</div>
-									)}
-								</div>
-							);
-
-							const renderEducationBlock = () => {
-								const edus = outlineEntries.filter((e) => e.category === "education");
-								if (edus.length === 0) return null;
-								return (
-									<div className="space-y-2">
-										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
-											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
-												EDUCATION
-											</span>
-										</div>
-										<div className="space-y-2">
-											{edus.map((edu) => (
-												<div key={edu.id} className="space-y-0.5">
-													<div className="text-xs font-bold text-slate-950">
-														{edu.title}
-													</div>
-													<div className="text-[10px] text-slate-500 font-medium">
-														{edu.organization || "University"} {edu.dates ? `· ${edu.dates}` : ""}
-													</div>
-												</div>
-											))}
-										</div>
-									</div>
-								);
-							};
-
-							const renderSkillsBlock = () => {
-								if (!skillsList || skillsList.length === 0) return null;
-								return (
-									<div className="space-y-2">
-										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
-											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
-												SKILLS
-											</span>
-										</div>
-										<div className="flex flex-wrap gap-1.5 pt-0.5">
-											{skillsList.map((skill, sIdx) => (
-												<span
-													key={sIdx}
-													className={cn("px-2 py-0.5 rounded text-[10px] font-medium border", palette.badgeBg)}
-												>
-													{skill}
-												</span>
-											))}
-										</div>
-									</div>
-								);
-							};
-
-							const renderContactItems = () => {
-								if (!contactEmail && !contactPhone && !contactLocation && !contactLinks) {
-									return <p className="text-[11px] text-slate-400 italic">Contact details will go here</p>;
-								}
-								return (
-									<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-600 font-medium pt-0.5">
-										{contactEmail && <span>{contactEmail}</span>}
-										{contactPhone && (
-											<>
-												<span className="text-slate-300">·</span>
-												<span>{contactPhone}</span>
-											</>
-										)}
-										{contactLocation && (
-											<>
-												<span className="text-slate-300">·</span>
-												<span>{contactLocation}</span>
-											</>
-										)}
-										{contactLinks && (
-											<>
-												<span className="text-slate-300">·</span>
-												<span>{contactLinks}</span>
-											</>
-										)}
-									</div>
-								);
-							};
-
-							return (
-								<div
-									className={cn(
-										"rounded-xl border border-slate-300 bg-[#faf8f5] text-slate-900 shadow-2xl min-h-[560px] text-xs w-full relative transition-all overflow-hidden",
-										palette.borderTop
-									)}
-								>
-									{/* Next button circular floating pill (as seen in screenshot right edge) */}
-									<button
-										type="button"
-										onClick={() => setActiveTab("stories")}
-										className="absolute -right-3.5 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white border border-slate-300 shadow-xl flex items-center justify-center text-slate-900 hover:scale-105 transition-transform cursor-pointer z-10"
-										title="Next: Your stories"
-									>
-										<ArrowRight className="size-4" />
-									</button>
-
-									{/* 1. BANNER HEADER LAYOUT (Lapras / Glalie) */}
-									{isBannerHeader && (
-										<div className="space-y-4">
-											<div className={cn("p-6 text-white", palette.primaryBg)}>
-												<div className="flex items-start justify-between gap-4">
-													<div className="space-y-1">
-														<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", palette.headerFont)}>
-															{fullName || "Your name"}
-														</h2>
-														<p className="text-xs font-semibold text-white/90">
-															{targetRole || "Frontend Developer"}
-														</p>
-														<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-white/80 pt-1">
-															{contactEmail && <span>{contactEmail}</span>}
-															{contactPhone && (
-																<>
-																	<span className="text-white/40">·</span>
-																	<span>{contactPhone}</span>
-																</>
-															)}
-															{contactLocation && (
-																<>
-																	<span className="text-white/40">·</span>
-																	<span>{contactLocation}</span>
-																</>
-															)}
-															{contactLinks && (
-																<>
-																	<span className="text-white/40">·</span>
-																	<span>{contactLinks}</span>
-																</>
-															)}
-														</div>
-													</div>
-													{showPicture && pictureUrl && (
-														<img
-															src={pictureUrl}
-															alt="Profile"
-															className={cn(
-																"size-14 object-cover border-2 border-white/40 shrink-0",
-																pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
-															)}
-														/>
-													)}
-												</div>
-											</div>
-											<div className="p-6 pt-0 space-y-4">
-												{professionalSummary && (
-													<p className="text-[11px] text-slate-700 leading-relaxed italic border-l-2 border-slate-300 pl-3">
-														"{professionalSummary}"
-													</p>
-												)}
-												{renderExperienceBlock()}
-												{renderProjectsBlock()}
-												{renderEducationBlock()}
-												{renderSkillsBlock()}
-											</div>
-										</div>
-									)}
-
-									{/* 2. TWO-COLUMN LEFT SIDEBAR LAYOUT (Azurill / Ditgar / Ditto) */}
-									{isLeftSidebar && (
-										<div className="flex flex-col sm:flex-row min-h-[560px]">
-											{/* Left Sidebar */}
-											<div className={cn("sm:w-[36%] p-5 space-y-4", palette.sidebarBg, palette.sidebarBorder)}>
-												{showPicture && pictureUrl && (
-													<div className="flex justify-center pb-1">
-														<img
-															src={pictureUrl}
-															alt="Profile"
-															className={cn(
-																"size-16 object-cover border-2 border-slate-300 shadow-sm",
-																pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
-															)}
-														/>
-													</div>
-												)}
-												<div className="space-y-1">
-													<span className={cn("text-[10px] font-mono tracking-widest uppercase block", palette.sectionHeader)}>
-														CONTACT
+								{/* Summary of Prioritized Experiences */}
+								<div className="space-y-4">
+									{outlineEntries.map((entry, idx) => (
+										<div key={entry.id} className="p-4 rounded-xl border border-slate-800/80 bg-[#070e1a] space-y-2">
+											<div className="flex items-center justify-between">
+												<div className="flex items-center gap-2">
+													<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+														Priority #{idx + 1} · {entry.category}
 													</span>
-													<div className="space-y-1 text-[11px] text-slate-700">
-														{contactEmail && <div className="break-all">{contactEmail}</div>}
-														{contactPhone && <div>{contactPhone}</div>}
-														{contactLocation && <div>{contactLocation}</div>}
-														{contactLinks && <div className="break-all">{contactLinks}</div>}
-														{!contactEmail && !contactPhone && !contactLocation && !contactLinks && (
-															<p className="text-[11px] text-slate-400 italic">No contact details yet</p>
-														)}
-													</div>
+													<span className="text-sm font-bold text-white">{entry.title}</span>
 												</div>
-												{renderSkillsBlock()}
-												{renderEducationBlock()}
+												<span className="text-xs text-slate-400">
+													{entry.organization ? `${entry.organization} · ` : ""}{entry.dates || "Recent"}
+												</span>
 											</div>
 
-											{/* Main Body */}
-											<div className="sm:w-[64%] p-5 sm:p-6 space-y-4">
-												<div className="space-y-1 pb-2 border-b border-slate-200">
-													<h2 className={cn("text-2xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
-														{fullName || "Your name"}
-													</h2>
-													<p className={cn("text-xs font-semibold", palette.primaryText)}>
-														{targetRole || "Frontend Developer"}
-													</p>
-													{professionalSummary && (
-														<p className="text-[11px] text-slate-700 pt-1.5 leading-relaxed">
-															{professionalSummary}
-														</p>
-													)}
-												</div>
-												{renderExperienceBlock()}
-												{renderProjectsBlock()}
-											</div>
-										</div>
-									)}
-
-									{/* 3. TWO-COLUMN RIGHT SIDEBAR LAYOUT (Chikorita / Leafish / Pikachu) */}
-									{isRightSidebar && (
-										<div className="p-5 sm:p-6 space-y-4">
-											<div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-200">
-												<div className="space-y-1">
-													<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
-														{fullName || "Your name"}
-													</h2>
-													<p className={cn("text-xs font-bold", palette.primaryText)}>
-														{targetRole || "Frontend Developer"}
-													</p>
-													{renderContactItems()}
-												</div>
-												{showPicture && pictureUrl && (
-													<img
-														src={pictureUrl}
-														alt="Profile"
-														className={cn(
-															"size-14 object-cover border-2 border-slate-300 shadow-sm shrink-0",
-															pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
-														)}
-													/>
-												)}
-											</div>
-
-											{professionalSummary && (
-												<p className="text-[11px] text-slate-700 leading-relaxed italic">
-													{professionalSummary}
+											{entry.points && entry.points.length > 0 ? (
+												<ul className="space-y-1.5 pt-1 pl-1">
+													{entry.points.map((pt, pIdx) => (
+														<li key={pIdx} className="text-xs text-slate-300 flex items-start gap-2 leading-relaxed">
+															<span className="text-emerald-400 font-bold">•</span>
+															<span>{pt}</span>
+														</li>
+													))}
+												</ul>
+											) : (
+												<p className="text-xs text-slate-400 italic">
+													{entry.description || "No specific bullet points generated yet."}
 												</p>
 											)}
+										</div>
+									))}
+								</div>
+							</div>
 
-											<div className="grid grid-cols-1 sm:grid-cols-12 gap-5">
-												<div className="sm:col-span-8 space-y-4">
+							{/* Template Choice */}
+							<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
+								<span className="text-xs font-bold text-slate-300">Choose Template</span>
+								<div className="flex flex-wrap gap-2">
+									{["Azurill", "Bronzor", "Chikorita", "Gengar"].map((tmpl) => (
+										<button
+											key={tmpl}
+											type="button"
+											onClick={() => handleSelectTemplate(tmpl)}
+											className={cn(
+												"px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border",
+												selectedTemplate === tmpl
+													? "bg-emerald-500 text-slate-950 border-emerald-500 font-bold"
+													: "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+											)}
+										>
+											{tmpl}
+										</button>
+									))}
+								</div>
+							</div>
+
+							{/* Photo upload */}
+							<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
+								<span className="text-xs font-bold text-slate-300">Profile Photo</span>
+								<div className="flex items-center gap-4">
+									<input
+										type="file"
+										accept="image/*"
+										onChange={handlePhotoUpload}
+										className="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
+									/>
+								</div>
+							</div>
+
+							{/* Job-Specific Tailoring Banner / Option (Requirement 17) */}
+							<div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-r from-[#091b24] to-[#0d2830] p-6 space-y-4">
+								<div className="flex items-start justify-between">
+									<div className="space-y-1">
+										<div className="flex items-center gap-2">
+											<Target className="size-4 text-emerald-400" />
+											<span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+												JOB-SPECIFIC TAILORING
+											</span>
+										</div>
+										<h3 className="text-lg font-bold text-white">
+											Tailor this resume for a specific job opening
+										</h3>
+										<p className="text-xs text-slate-300 leading-relaxed max-w-xl">
+											Connect this completed resume to a specific job description. Zoe will match required skills, analyze keyword gaps, and shape a targeted version for the opportunity.
+										</p>
+									</div>
+									<span className="hidden sm:inline-flex text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+										Recommended Next
+									</span>
+								</div>
+
+								<div className="flex items-center gap-3 pt-1">
+									<button
+										type="button"
+										onClick={() => {
+											// Save current state and redirect to job match flow
+											if (createdResumeId) {
+												navigate({
+													to: "/dashboard/resumes/match" as any,
+													search: { resumeId: createdResumeId } as any,
+												});
+											} else {
+												handleSeeMyPlan();
+												navigate({ to: "/dashboard/resumes/match" as any });
+											}
+											toast.success("Opening Job Match & Tailoring!");
+										}}
+										className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+									>
+										<Sparkles className="size-4" />
+										<span>Tailor for a Specific Job</span>
+										<ArrowRight className="size-4" />
+									</button>
+								</div>
+							</div>
+
+							{/* Export Actions */}
+							<div className="p-5 rounded-2xl border border-emerald-500/30 bg-[#081820]/90 flex flex-wrap items-center justify-between gap-4">
+								<div className="space-y-0.5">
+									<h4 className="text-sm font-bold text-white">Download & Share</h4>
+									<p className="text-xs text-slate-400">Export high-resolution PDF print or raw JSON data.</p>
+								</div>
+
+								<div className="flex items-center gap-3">
+									<button
+										type="button"
+										onClick={() => {
+											const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(outlineEntries, null, 2));
+											const downloadAnchor = document.createElement("a");
+											downloadAnchor.setAttribute("href", dataStr);
+											downloadAnchor.setAttribute("download", `${fullName || "resume"}_data.json`);
+											document.body.appendChild(downloadAnchor);
+											downloadAnchor.click();
+											downloadAnchor.remove();
+											toast.success("Resume JSON exported!");
+										}}
+										className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-all cursor-pointer"
+									>
+										<FileText className="size-4 text-emerald-400" />
+										<span>Export JSON</span>
+									</button>
+
+									<button
+										type="button"
+										onClick={() => window.print()}
+										className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+									>
+										<Download className="size-4" />
+										<span>Download / Print PDF</span>
+									</button>
+								</div>
+							</div>
+						</div>
+					)}
+				</main>
+
+				{/* Right Column: Live Resume Document Preview (matches screenshot) */}
+				{!hideResumePreview && (
+					<aside className="w-full lg:w-[460px] xl:w-[500px] border-t lg:border-t-0 lg:border-l border-slate-900 bg-[#070d14] p-6 shrink-0 flex flex-col justify-between overflow-y-auto relative">
+						<div className="space-y-4 w-full">
+							{/* Header row in screenshot: THE OUTPUT & Live draft badge */}
+							<div className="flex items-center justify-between">
+								<div>
+									<span className="text-[10px] font-mono tracking-widest uppercase text-slate-500 font-bold block">
+										THE OUTPUT
+									</span>
+									<h3 className="text-base font-bold text-white mt-0.5">Your resume</h3>
+								</div>
+
+								<div className="flex items-center gap-2">
+									<button
+										type="button"
+										onClick={() => setShowTemplateModal(true)}
+										className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+										title="Choose template"
+									>
+										<Palette className="size-3 text-emerald-400" />
+										<span>{selectedTemplate}</span>
+									</button>
+
+									<span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-emerald-500/30">
+										Live draft
+									</span>
+								</div>
+							</div>
+
+							{/* Document Sheet Canvas with Dynamic Template Styles (Azurill, Bronzor, Chikorita, Gengar, Lapras, Onyx, Pikachu, Leafish, etc.) */}
+							{(() => {
+								const tmplKey = (selectedTemplate || "azurill").toLowerCase();
+								const isLeftSidebar = ["azurill", "ditgar", "ditto"].includes(tmplKey);
+								const isRightSidebar = ["chikorita", "leafish", "pikachu"].includes(tmplKey);
+								const isBannerHeader = ["lapras", "glalie"].includes(tmplKey);
+								const isHighContrast = ["gengar", "kakuna"].includes(tmplKey);
+								const isMinimalist = ["bronzor", "onyx", "rhyhorn"].includes(tmplKey);
+
+								// Template Accent Palette Configuration
+								const palette = (() => {
+									switch (tmplKey) {
+										case "azurill":
+											return {
+												borderTop: "border-t-[6px] border-t-blue-600",
+												primaryText: "text-blue-600",
+												primaryBg: "bg-blue-600",
+												badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
+												sidebarBg: "bg-blue-50/50",
+												sidebarBorder: "border-r border-blue-100",
+												headerFont: "font-serif",
+												sectionHeader: "text-blue-700 tracking-wider font-bold",
+												bulletDot: "text-blue-500",
+											};
+										case "bronzor":
+											return {
+												borderTop: "border-t-[6px] border-t-slate-700",
+												primaryText: "text-slate-800",
+												primaryBg: "bg-slate-700",
+												badgeBg: "bg-slate-100 text-slate-800 border-slate-300",
+												sidebarBg: "bg-slate-50/60",
+												sidebarBorder: "border-slate-200",
+												headerFont: "font-serif",
+												sectionHeader: "text-slate-800 tracking-wider font-bold",
+												bulletDot: "text-slate-600",
+											};
+										case "chikorita":
+											return {
+												borderTop: "border-t-[6px] border-t-emerald-600",
+												primaryText: "text-emerald-700",
+												primaryBg: "bg-emerald-600",
+												badgeBg: "bg-emerald-50 text-emerald-800 border-emerald-200",
+												sidebarBg: "bg-emerald-50/40",
+												sidebarBorder: "border-l border-emerald-100",
+												headerFont: "font-sans",
+												sectionHeader: "text-emerald-700 tracking-wider font-bold",
+												bulletDot: "text-emerald-600",
+											};
+										case "gengar":
+											return {
+												borderTop: "border-t-[6px] border-t-purple-700",
+												primaryText: "text-purple-700",
+												primaryBg: "bg-purple-700",
+												badgeBg: "bg-purple-50 text-purple-800 border-purple-200",
+												sidebarBg: "bg-purple-50/50",
+												sidebarBorder: "border-r border-purple-200",
+												headerFont: "font-mono",
+												sectionHeader: "text-purple-800 tracking-widest font-black",
+												bulletDot: "text-purple-600",
+											};
+										case "lapras":
+											return {
+												borderTop: "border-t-[6px] border-t-indigo-800",
+												primaryText: "text-indigo-800",
+												primaryBg: "bg-indigo-900",
+												badgeBg: "bg-indigo-50 text-indigo-800 border-indigo-200",
+												sidebarBg: "bg-indigo-50/30",
+												sidebarBorder: "border-indigo-100",
+												headerFont: "font-serif",
+												sectionHeader: "text-indigo-900 tracking-widest font-bold",
+												bulletDot: "text-indigo-700",
+											};
+										case "onyx":
+											return {
+												borderTop: "border-t-[6px] border-t-rose-600",
+												primaryText: "text-rose-700",
+												primaryBg: "bg-rose-600",
+												badgeBg: "bg-rose-50 text-rose-800 border-rose-200",
+												sidebarBg: "bg-stone-50",
+												sidebarBorder: "border-stone-200",
+												headerFont: "font-serif",
+												sectionHeader: "text-rose-700 tracking-wider font-bold",
+												bulletDot: "text-rose-600",
+											};
+										case "pikachu":
+											return {
+												borderTop: "border-t-[6px] border-t-amber-500",
+												primaryText: "text-amber-700",
+												primaryBg: "bg-amber-500",
+												badgeBg: "bg-amber-50 text-amber-800 border-amber-200",
+												sidebarBg: "bg-amber-50/40",
+												sidebarBorder: "border-l border-amber-200",
+												headerFont: "font-sans",
+												sectionHeader: "text-amber-700 tracking-wider font-bold",
+												bulletDot: "text-amber-500",
+											};
+										case "leafish":
+											return {
+												borderTop: "border-t-[6px] border-t-lime-600",
+												primaryText: "text-lime-700",
+												primaryBg: "bg-lime-600",
+												badgeBg: "bg-lime-50 text-lime-800 border-lime-200",
+												sidebarBg: "bg-lime-50/30",
+												sidebarBorder: "border-l border-lime-200",
+												headerFont: "font-serif",
+												sectionHeader: "text-lime-700 tracking-wider font-bold",
+												bulletDot: "text-lime-600",
+											};
+										case "ditgar":
+											return {
+												borderTop: "border-t-[6px] border-t-sky-600",
+												primaryText: "text-sky-700",
+												primaryBg: "bg-sky-600",
+												badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+												sidebarBg: "bg-sky-50/50",
+												sidebarBorder: "border-r border-sky-200",
+												headerFont: "font-sans",
+												sectionHeader: "text-sky-700 tracking-wider font-bold",
+												bulletDot: "text-sky-500",
+											};
+										case "ditto":
+											return {
+												borderTop: "border-t-[6px] border-t-pink-600",
+												primaryText: "text-pink-700",
+												primaryBg: "bg-pink-600",
+												badgeBg: "bg-pink-50 text-pink-800 border-pink-200",
+												sidebarBg: "bg-pink-50/40",
+												sidebarBorder: "border-r border-pink-200",
+												headerFont: "font-serif",
+												sectionHeader: "text-pink-700 tracking-wider font-bold",
+												bulletDot: "text-pink-500",
+											};
+										case "glalie":
+											return {
+												borderTop: "border-t-[6px] border-t-slate-600",
+												primaryText: "text-slate-700",
+												primaryBg: "bg-slate-800",
+												badgeBg: "bg-slate-100 text-slate-800 border-slate-300",
+												sidebarBg: "bg-slate-50",
+												sidebarBorder: "border-slate-200",
+												headerFont: "font-sans",
+												sectionHeader: "text-slate-700 tracking-wider font-bold",
+												bulletDot: "text-slate-500",
+											};
+										case "kakuna":
+											return {
+												borderTop: "border-t-[6px] border-t-yellow-600",
+												primaryText: "text-yellow-700",
+												primaryBg: "bg-yellow-600",
+												badgeBg: "bg-yellow-50 text-yellow-800 border-yellow-200",
+												sidebarBg: "bg-yellow-50/40",
+												sidebarBorder: "border-yellow-200",
+												headerFont: "font-sans",
+												sectionHeader: "text-yellow-700 tracking-wider font-bold",
+												bulletDot: "text-yellow-600",
+											};
+										default:
+											return {
+												borderTop: "border-t-[6px] border-t-blue-500",
+												primaryText: "text-blue-600",
+												primaryBg: "bg-blue-600",
+												badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
+												sidebarBg: "bg-slate-50",
+												sidebarBorder: "border-slate-200",
+												headerFont: "font-sans",
+												sectionHeader: "text-slate-700 tracking-wider font-bold",
+												bulletDot: "text-blue-500",
+											};
+									}
+								})();
+
+								// Shared Sub-renderers
+								const renderExperienceBlock = () => (
+									<div className="space-y-2.5">
+										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+												EXPERIENCE
+											</span>
+										</div>
+										{outlineEntries.filter((e) => e.category === "work").length > 0 ? (
+											outlineEntries
+												.filter((e) => e.category === "work")
+												.map((w) => (
+													<div key={w.id} className="space-y-1">
+														<div className="flex items-baseline justify-between gap-2">
+															<div className="text-xs font-bold text-slate-950">
+																{w.title}
+															</div>
+															<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+																{w.dates || "Jul 2023 – Present"}
+															</div>
+														</div>
+														<div className={cn("text-[11px] font-semibold", palette.primaryText)}>
+															{w.organization || "Company"}
+														</div>
+														{w.points && w.points.length > 0 ? (
+															<ul className="space-y-1 pt-0.5">
+																{w.points.map((pt, pIdx) => (
+																	<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+																		<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
+																		<span>{pt}</span>
+																	</li>
+																))}
+															</ul>
+														) : (
+															<p className="text-[11px] text-slate-400 italic">
+																Your contribution will appear here
+															</p>
+														)}
+													</div>
+												))
+										) : (
+											<div className="space-y-1">
+												<div className="text-xs font-bold text-slate-950">
+													Sr. Frontend Developer
+												</div>
+												<div className="text-[10px] text-slate-500 font-medium">
+													NavGurukul · Jul 2023 – Present
+												</div>
+												<p className="text-[11px] text-slate-400 italic">
+													Your contribution will appear here
+												</p>
+											</div>
+										)}
+									</div>
+								);
+
+								const renderProjectsBlock = () => (
+									<div className="space-y-2.5">
+										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+												PROJECTS & ACTIVITIES
+											</span>
+										</div>
+										{outlineEntries.filter((e) => e.category === "projects" || e.category === "volunteer").length > 0 ? (
+											outlineEntries
+												.filter((e) => e.category === "projects" || e.category === "volunteer")
+												.map((p) => (
+													<div key={p.id} className="space-y-1">
+														<div className="flex items-baseline justify-between gap-2">
+															<div className="text-xs font-bold text-slate-950">
+																{p.title}
+															</div>
+															{p.dates && (
+																<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+																	{p.dates}
+																</div>
+															)}
+														</div>
+														<div className="text-[10px] text-slate-500 font-medium">
+															{p.organization || "Independent Project"}
+														</div>
+														{p.points && p.points.length > 0 ? (
+															<ul className="space-y-1 pt-0.5">
+																{p.points.map((pt, pIdx) => (
+																	<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+																		<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
+																		<span>{pt}</span>
+																	</li>
+																))}
+															</ul>
+														) : (
+															<p className="text-[11px] text-slate-400 italic">
+																Your contribution will appear here
+															</p>
+														)}
+													</div>
+												))
+										) : (
+											<div className="space-y-1">
+												<div className="text-xs font-bold text-slate-950">
+													Mentor
+												</div>
+												<div className="text-[10px] text-slate-500 font-medium">
+													XL Bootcamp
+												</div>
+												<p className="text-[11px] text-slate-400 italic">
+													Your contribution will appear here
+												</p>
+											</div>
+										)}
+									</div>
+								);
+
+								const renderEducationBlock = () => {
+									const edus = outlineEntries.filter((e) => e.category === "education");
+									if (edus.length === 0) return null;
+									return (
+										<div className="space-y-2">
+											<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+												<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+													EDUCATION
+												</span>
+											</div>
+											<div className="space-y-2">
+												{edus.map((edu) => (
+													<div key={edu.id} className="space-y-0.5">
+														<div className="text-xs font-bold text-slate-950">
+															{edu.title}
+														</div>
+														<div className="text-[10px] text-slate-500 font-medium">
+															{edu.organization || "University"} {edu.dates ? `· ${edu.dates}` : ""}
+														</div>
+													</div>
+												))}
+											</div>
+										</div>
+									);
+								};
+
+								const renderSkillsBlock = () => {
+									if (!skillsList || skillsList.length === 0) return null;
+									return (
+										<div className="space-y-2">
+											<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+												<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+													SKILLS
+												</span>
+											</div>
+											<div className="flex flex-wrap gap-1.5 pt-0.5">
+												{skillsList.map((skill, sIdx) => (
+													<span
+														key={sIdx}
+														className={cn("px-2 py-0.5 rounded text-[10px] font-medium border", palette.badgeBg)}
+													>
+														{skill}
+													</span>
+												))}
+											</div>
+										</div>
+									);
+								};
+
+								const renderContactItems = () => {
+									if (!contactEmail && !contactPhone && !contactLocation && !contactLinks) {
+										return <p className="text-[11px] text-slate-400 italic">Contact details will go here</p>;
+									}
+									return (
+										<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-600 font-medium pt-0.5">
+											{contactEmail && <span>{contactEmail}</span>}
+											{contactPhone && (
+												<>
+													<span className="text-slate-300">·</span>
+													<span>{contactPhone}</span>
+												</>
+											)}
+											{contactLocation && (
+												<>
+													<span className="text-slate-300">·</span>
+													<span>{contactLocation}</span>
+												</>
+											)}
+											{contactLinks && (
+												<>
+													<span className="text-slate-300">·</span>
+													<span>{contactLinks}</span>
+												</>
+											)}
+										</div>
+									);
+								};
+
+								return (
+									<div
+										className={cn(
+											"rounded-xl border border-slate-300 bg-[#faf8f5] text-slate-900 shadow-2xl min-h-[560px] text-xs w-full relative transition-all overflow-hidden",
+											palette.borderTop
+										)}
+									>
+										{/* Next button circular floating pill (as seen in screenshot right edge) */}
+										<button
+											type="button"
+											onClick={() => setActiveTab("stories")}
+											className="absolute -right-3.5 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white border border-slate-300 shadow-xl flex items-center justify-center text-slate-900 hover:scale-105 transition-transform cursor-pointer z-10"
+											title="Next: Your stories"
+										>
+											<ArrowRight className="size-4" />
+										</button>
+
+										{/* 1. BANNER HEADER LAYOUT (Lapras / Glalie) */}
+										{isBannerHeader && (
+											<div className="space-y-4">
+												<div className={cn("p-6 text-white", palette.primaryBg)}>
+													<div className="flex items-start justify-between gap-4">
+														<div className="space-y-1">
+															<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", palette.headerFont)}>
+																{fullName || "Your name"}
+															</h2>
+															<p className="text-xs font-semibold text-white/90">
+																{targetRole || "Frontend Developer"}
+															</p>
+															<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-white/80 pt-1">
+																{contactEmail && <span>{contactEmail}</span>}
+																{contactPhone && (
+																	<>
+																		<span className="text-white/40">·</span>
+																		<span>{contactPhone}</span>
+																	</>
+																)}
+																{contactLocation && (
+																	<>
+																		<span className="text-white/40">·</span>
+																		<span>{contactLocation}</span>
+																	</>
+																)}
+																{contactLinks && (
+																	<>
+																		<span className="text-white/40">·</span>
+																		<span>{contactLinks}</span>
+																	</>
+																)}
+															</div>
+														</div>
+														{showPicture && pictureUrl && (
+															<img
+																src={pictureUrl}
+																alt="Profile"
+																className={cn(
+																	"size-14 object-cover border-2 border-white/40 shrink-0",
+																	pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+																)}
+															/>
+														)}
+													</div>
+												</div>
+												<div className="p-6 pt-0 space-y-4">
+													{professionalSummary && (
+														<p className="text-[11px] text-slate-700 leading-relaxed italic border-l-2 border-slate-300 pl-3">
+															"{professionalSummary}"
+														</p>
+													)}
 													{renderExperienceBlock()}
 													{renderProjectsBlock()}
+													{renderEducationBlock()}
+													{renderSkillsBlock()}
 												</div>
-												<div className={cn("sm:col-span-4 p-4 rounded-lg space-y-4", palette.sidebarBg, palette.sidebarBorder)}>
+											</div>
+										)}
+
+										{/* 2. TWO-COLUMN LEFT SIDEBAR LAYOUT (Azurill / Ditgar / Ditto) */}
+										{isLeftSidebar && (
+											<div className="flex flex-col sm:flex-row min-h-[560px]">
+												{/* Left Sidebar */}
+												<div className={cn("sm:w-[36%] p-5 space-y-4", palette.sidebarBg, palette.sidebarBorder)}>
+													{showPicture && pictureUrl && (
+														<div className="flex justify-center pb-1">
+															<img
+																src={pictureUrl}
+																alt="Profile"
+																className={cn(
+																	"size-16 object-cover border-2 border-slate-300 shadow-sm",
+																	pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+																)}
+															/>
+														</div>
+													)}
+													<div className="space-y-1">
+														<span className={cn("text-[10px] font-mono tracking-widest uppercase block", palette.sectionHeader)}>
+															CONTACT
+														</span>
+														<div className="space-y-1 text-[11px] text-slate-700">
+															{contactEmail && <div className="break-all">{contactEmail}</div>}
+															{contactPhone && <div>{contactPhone}</div>}
+															{contactLocation && <div>{contactLocation}</div>}
+															{contactLinks && <div className="break-all">{contactLinks}</div>}
+															{!contactEmail && !contactPhone && !contactLocation && !contactLinks && (
+																<p className="text-[11px] text-slate-400 italic">No contact details yet</p>
+															)}
+														</div>
+													</div>
 													{renderSkillsBlock()}
 													{renderEducationBlock()}
 												</div>
-											</div>
-										</div>
-									)}
 
-									{/* 4. CLASSIC SINGLE COLUMN MINIMALIST (Bronzor / Onyx / Gengar / Rhyhorn / Kakuna) */}
-									{(isMinimalist || isHighContrast) && (
-										<div className="p-6 sm:p-7 space-y-5">
-											{/* Header */}
-											<div className={cn("space-y-1.5 pb-3 border-b-2", palette.sidebarBorder || "border-slate-300")}>
-												<div className="flex items-start justify-between gap-4">
+												{/* Main Body */}
+												<div className="sm:w-[64%] p-5 sm:p-6 space-y-4">
+													<div className="space-y-1 pb-2 border-b border-slate-200">
+														<h2 className={cn("text-2xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+															{fullName || "Your name"}
+														</h2>
+														<p className={cn("text-xs font-semibold", palette.primaryText)}>
+															{targetRole || "Frontend Developer"}
+														</p>
+														{professionalSummary && (
+															<p className="text-[11px] text-slate-700 pt-1.5 leading-relaxed">
+																{professionalSummary}
+															</p>
+														)}
+													</div>
+													{renderExperienceBlock()}
+													{renderProjectsBlock()}
+												</div>
+											</div>
+										)}
+
+										{/* 3. TWO-COLUMN RIGHT SIDEBAR LAYOUT (Chikorita / Leafish / Pikachu) */}
+										{isRightSidebar && (
+											<div className="p-5 sm:p-6 space-y-4">
+												<div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-200">
 													<div className="space-y-1">
 														<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
 															{fullName || "Your name"}
@@ -5216,778 +5490,824 @@ export function GuidedStoryRoute() {
 														<p className={cn("text-xs font-bold", palette.primaryText)}>
 															{targetRole || "Frontend Developer"}
 														</p>
+														{renderContactItems()}
 													</div>
 													{showPicture && pictureUrl && (
 														<img
 															src={pictureUrl}
 															alt="Profile"
 															className={cn(
-																"size-14 object-cover border border-slate-300 shadow-sm shrink-0",
+																"size-14 object-cover border-2 border-slate-300 shadow-sm shrink-0",
 																pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
 															)}
 														/>
 													)}
 												</div>
-												{renderContactItems()}
+
 												{professionalSummary && (
-													<p className="text-[11px] text-slate-700 pt-1 leading-relaxed border-t border-slate-100">
+													<p className="text-[11px] text-slate-700 leading-relaxed italic">
 														{professionalSummary}
 													</p>
 												)}
-											</div>
 
-											{renderExperienceBlock()}
-											{renderProjectsBlock()}
-											{renderSkillsBlock()}
-											{renderEducationBlock()}
-										</div>
-									)}
-								</div>
-							);
-						})()}
-
-						{/* Footer under live draft: Draft wording appears as you talk & Read full resume */}
-						<div className="space-y-2 pt-1 text-xs">
-							<div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-								<span className="size-1.5 rounded-full bg-emerald-400" />
-								<span>Draft wording appears as you talk. You choose what makes it into your resume.</span>
-							</div>
-
-							<button
-								type="button"
-								onClick={() => setActiveTab("export")}
-								className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs font-semibold"
-							>
-								<span>👁 Read full resume</span>
-							</button>
-						</div>
-
-						{/* WHAT ZOE IS EXPLORING Section directly below the live resume preview */}
-						{(() => {
-							const activeEntry = outlineEntries.find((e) => e.id === (selectedExperienceId || outlineEntries[0]?.id)) || outlineEntries[0];
-							const activeIdx = activeEntry ? outlineEntries.findIndex((e) => e.id === activeEntry.id) : 0;
-							const totalBullets = outlineEntries.reduce((sum, e) => sum + (e.points?.length || 0), 0);
-							const currentQIndex = activeEntry ? (activeExplorationQuestionIndex[activeEntry.id] || 0) : 0;
-
-							return (
-								<div className="pt-4 border-t border-slate-800/90 space-y-3.5">
-									<div className="flex items-center justify-between">
-										<div>
-											<h4 className="text-sm font-bold text-white tracking-tight">
-												What Zoe is exploring
-											</h4>
-											<p className="text-[11px] text-slate-400">
-												{activeEntry ? `${activeEntry.title} · ${Math.max(1, activeIdx + 1)} of up to 5 bullets` : "Role overview"}
-											</p>
-										</div>
-										<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
-											{Math.max(1, activeIdx + 1)}/{Math.max(1, outlineEntries.length)}
-										</span>
-									</div>
-
-									{/* List of identified experiences with statuses */}
-									<div className="rounded-xl border border-slate-800/80 bg-[#09121e] divide-y divide-slate-800/80 overflow-hidden text-xs">
-										{/* Role overview item */}
-										<div className="p-3 space-y-0.5 bg-slate-900/40">
-											<div className="text-xs font-semibold text-slate-200">Role overview</div>
-											<div className="text-[11px] text-slate-400">
-												{targetRole || "Frontend Developer"}{fullName ? ` · ${fullName}` : ""}
-											</div>
-										</div>
-
-										{/* Each experience row */}
-										{outlineEntries.map((entry) => {
-											const isCurrent = activeEntry?.id === entry.id;
-											const hasPoints = entry.points && entry.points.length > 0;
-
-											return (
-												<div
-													key={entry.id}
-													onClick={() => {
-														setSelectedExperienceId(entry.id);
-														setActiveTab("stories");
-													}}
-													className={cn(
-														"p-3 flex items-center justify-between cursor-pointer transition-colors",
-														isCurrent ? "bg-emerald-500/10" : "hover:bg-slate-800/40"
-													)}
-												>
-													<div className="space-y-0.5">
-														<div className={cn("text-xs font-semibold", isCurrent ? "text-emerald-300 font-bold" : "text-white")}>
-															{entry.title}
-														</div>
-														<div className="text-[11px] text-slate-400">
-															{isCurrent ? "Asking now" : hasPoints ? `${entry.points?.length} bullet(s) drafted` : "In progress"}
-														</div>
+												<div className="grid grid-cols-1 sm:grid-cols-12 gap-5">
+													<div className="sm:col-span-8 space-y-4">
+														{renderExperienceBlock()}
+														{renderProjectsBlock()}
 													</div>
-
-													<div className="flex items-center gap-1.5">
-														{isCurrent ? (
-															<span className="flex items-center gap-1">
-																<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-																<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse delay-75" />
-																<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse delay-150" />
-															</span>
-														) : hasPoints ? (
-															<CheckCircle className="size-3.5 text-emerald-400" />
-														) : (
-															<span className="text-slate-600 font-mono">···</span>
-														)}
+													<div className={cn("sm:col-span-4 p-4 rounded-lg space-y-4", palette.sidebarBg, palette.sidebarBorder)}>
+														{renderSkillsBlock()}
+														{renderEducationBlock()}
 													</div>
-												</div>
-											);
-										})}
-									</div>
-
-									{/* Current Topic Breakdown & Checklist matching screenshot */}
-									{activeEntry && (
-										<div className="rounded-xl border border-slate-800/90 bg-[#060c14] p-3.5 space-y-2.5 text-xs">
-											<div className="flex items-center justify-between border-b border-slate-800 pb-2">
-												<div>
-													<span className="text-xs font-bold text-white block">
-														{activeEntry.title}
-													</span>
-													<span className="text-[10px] text-slate-400">
-														Ready to draft · Zoe will ask about the result once
-													</span>
-												</div>
-											</div>
-
-											{/* Checklist items */}
-											<div className="space-y-2 pt-1 text-[11px]">
-												<div className="flex items-start gap-2 text-slate-200">
-													<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
-													<div>
-														<span className="font-semibold text-white">The work & challenge</span>
-														<span className="text-[10px] text-emerald-400/90 font-mono ml-2">REQUIRED</span>
-														<p className="text-slate-400 text-[10px] mt-0.5">
-															{activeEntry.description || "Identified from your story"}
-														</p>
-													</div>
-												</div>
-
-												<div className="flex items-start gap-2 text-slate-200">
-													<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
-													<div>
-														<span className="font-semibold text-white">Your contribution</span>
-														<span className="text-[10px] text-emerald-400/90 font-mono ml-2">REQUIRED</span>
-														<p className="text-slate-400 text-[10px] mt-0.5">
-															{activeEntry.points && activeEntry.points.length > 0
-																? activeEntry.points[0]
-																: "Specific modules, preview rendering, and UI engineered"}
-														</p>
-													</div>
-												</div>
-
-												<div className={cn(
-													"p-2 rounded-lg border flex items-start gap-2",
-													currentQIndex >= 1
-														? "border-emerald-500/30 bg-emerald-950/20 text-slate-200"
-														: "border-emerald-500/40 bg-emerald-950/30 text-white"
-												)}>
-													<span className="size-2 rounded-full bg-emerald-400 mt-1 shrink-0" />
-													<div>
-														<div className="flex items-center gap-2">
-															<span className="font-bold text-white">Results & evidence</span>
-															<span className="text-[9px] font-mono text-emerald-300 px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-500/30">
-																{currentQIndex >= 1 ? "CAPTURED" : "ZOE IS ASKING NOW"}
-															</span>
-														</div>
-														<p className="text-slate-300 text-[10px] mt-0.5">
-															{currentQIndex >= 1 && activeEntry.points && activeEntry.points.length > 1
-																? activeEntry.points[1]
-																: "Impact, latency, user feedback, or measured outcomes"}
-														</p>
-													</div>
-												</div>
-
-												<div className="flex items-start gap-2 text-slate-400">
-													<Check className="size-3 text-slate-500 shrink-0 mt-0.5" />
-													<div>
-														<span className="font-semibold text-slate-300">Scale & complexity</span>
-														<span className="text-[9px] text-slate-500 font-mono ml-2">OPTIONAL</span>
-														<p className="text-slate-500 text-[10px] mt-0.5">
-															{activeEntry.organization ? `${activeEntry.organization} · ` : ""}Frontend preview rendering
-														</p>
-													</div>
-												</div>
-											</div>
-										</div>
-									)}
-								</div>
-							);
-						})()}
-					</div>
-				</aside>
-			)}
-
-			{/* FINAL SUMMARY & CONFIRMATION MODAL (Sections 10, 11, 12) */}
-			{showFinalSummaryModal && (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
-					onClick={() => setShowFinalSummaryModal(false)}
-				>
-					<div
-						className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl border border-emerald-500/40 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden"
-						onClick={(e) => e.stopPropagation()}
-					>
-						{/* Header */}
-						<div className="flex items-start justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
-							<div className="space-y-1">
-								<div className="flex items-center gap-2">
-									<span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-										FINAL EXPERIENCE SUMMARY & CONFIRMATION
-									</span>
-									<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-										{outlineEntries.length} Experiences
-									</span>
-								</div>
-								<h2 className="text-xl font-bold text-white leading-snug">
-									"Here's what we can add from your experience{outlineEntries[0]?.organization ? ` at ${outlineEntries[0].organization}` : ""}."
-								</h2>
-								<p className="text-xs text-slate-300">
-									Review your collected points across all experiences. Edit points, remove incorrect items, or add missing details before finalizing.
-								</p>
-							</div>
-
-							<button
-								type="button"
-								onClick={() => setShowFinalSummaryModal(false)}
-								className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-							>
-								✕
-							</button>
-						</div>
-
-						{/* Scrollable Experiences Review List */}
-						<div className="flex-1 overflow-y-auto p-6 space-y-5">
-							{outlineEntries.map((entry, eIdx) => {
-								const bulletList = entry.points && entry.points.length > 0
-									? entry.points
-									: [entry.description || `Built responsive solutions and key features as ${entry.title}.`];
-
-								return (
-									<div
-										key={entry.id}
-										className="rounded-2xl border border-slate-800 bg-[#09111e] p-5 space-y-3.5 shadow-md"
-									>
-										{/* Experience Header */}
-										<div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
-											<div className="flex items-center gap-2">
-												<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
-													#{eIdx + 1} · {entry.category}
-												</span>
-												<h3 className="text-sm font-bold text-white">
-													{entry.title}
-												</h3>
-												{entry.organization && (
-													<span className="text-xs text-slate-400 font-medium">
-														at {entry.organization}
-													</span>
-												)}
-											</div>
-
-											<button
-												type="button"
-												onClick={() => {
-													setAddingPointEntryId(addingPointEntryId === entry.id ? null : entry.id);
-													setNewPointInputText("");
-												}}
-												className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-[11px] font-semibold text-slate-200 transition-colors cursor-pointer"
-											>
-												<Plus className="size-3 text-emerald-400" />
-												<span>Add bullet point</span>
-											</button>
-										</div>
-
-										{/* Inline New Point Input Form */}
-										{addingPointEntryId === entry.id && (
-											<div className="rounded-xl border border-emerald-500/40 bg-[#0b1728] p-3 space-y-2 animate-in fade-in duration-150">
-												<label className="text-[11px] font-semibold text-emerald-400">Add missing detail or point:</label>
-												<input
-													type="text"
-													value={newPointInputText}
-													onChange={(e) => setNewPointInputText(e.target.value)}
-													placeholder="e.g. Optimized real-time data sync reducing load times by 30%..."
-													className="w-full rounded-lg bg-[#07101c] border border-slate-700 px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none focus:border-emerald-500"
-													autoFocus
-												/>
-												<div className="flex items-center justify-end gap-2">
-													<button
-														type="button"
-														onClick={() => setAddingPointEntryId(null)}
-														className="text-xs text-slate-400 hover:text-white px-2 py-1"
-													>
-														Cancel
-													</button>
-													<button
-														type="button"
-														onClick={() => handleAddPointToEntry(entry.id, newPointInputText)}
-														className="px-3 py-1 rounded-lg bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs"
-													>
-														Add point
-													</button>
 												</div>
 											</div>
 										)}
 
-										{/* Bullet Points List */}
-										<div className="space-y-2">
-											{bulletList.map((bullet, bIdx) => {
-												const pointKey = `${entry.id}_${bIdx}`;
-												const isEditing = editingPointKey === pointKey;
+										{/* 4. CLASSIC SINGLE COLUMN MINIMALIST (Bronzor / Onyx / Gengar / Rhyhorn / Kakuna) */}
+										{(isMinimalist || isHighContrast) && (
+											<div className="p-6 sm:p-7 space-y-5">
+												{/* Header */}
+												<div className={cn("space-y-1.5 pb-3 border-b-2", palette.sidebarBorder || "border-slate-300")}>
+													<div className="flex items-start justify-between gap-4">
+														<div className="space-y-1">
+															<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+																{fullName || "Your name"}
+															</h2>
+															<p className={cn("text-xs font-bold", palette.primaryText)}>
+																{targetRole || "Frontend Developer"}
+															</p>
+														</div>
+														{showPicture && pictureUrl && (
+															<img
+																src={pictureUrl}
+																alt="Profile"
+																className={cn(
+																	"size-14 object-cover border border-slate-300 shadow-sm shrink-0",
+																	pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+																)}
+															/>
+														)}
+													</div>
+													{renderContactItems()}
+													{professionalSummary && (
+														<p className="text-[11px] text-slate-700 pt-1 leading-relaxed border-t border-slate-100">
+															{professionalSummary}
+														</p>
+													)}
+												</div>
+
+												{renderExperienceBlock()}
+												{renderProjectsBlock()}
+												{renderSkillsBlock()}
+												{renderEducationBlock()}
+											</div>
+										)}
+									</div>
+								);
+							})()}
+
+							{/* Footer under live draft: Draft wording appears as you talk & Read full resume */}
+							<div className="space-y-2 pt-1 text-xs">
+								<div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+									<span className="size-1.5 rounded-full bg-emerald-400" />
+									<span>Draft wording appears as you talk. You choose what makes it into your resume.</span>
+								</div>
+
+								<button
+									type="button"
+									onClick={() => setActiveTab("export")}
+									className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs font-semibold"
+								>
+									<span>👁 Read full resume</span>
+								</button>
+							</div>
+
+							{/* WHAT ZOE IS EXPLORING Section directly below the live resume preview */}
+							{(() => {
+								const activeEntry = outlineEntries.find((e) => e.id === (selectedExperienceId || outlineEntries[0]?.id)) || outlineEntries[0];
+								const activeIdx = activeEntry ? outlineEntries.findIndex((e) => e.id === activeEntry.id) : 0;
+								const totalBullets = outlineEntries.reduce((sum, e) => sum + (e.points?.length || 0), 0);
+								const currentQIndex = activeEntry ? (activeExplorationQuestionIndex[activeEntry.id] || 0) : 0;
+
+								return (
+									<div className="pt-4 border-t border-slate-800/90 space-y-3.5">
+										<div className="flex items-center justify-between">
+											<div>
+												<h4 className="text-sm font-bold text-white tracking-tight">
+													What Zoe is exploring
+												</h4>
+												<p className="text-[11px] text-slate-400">
+													{activeEntry ? `${activeEntry.title} · ${Math.max(1, activeIdx + 1)} of up to 5 bullets` : "Role overview"}
+												</p>
+											</div>
+											<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
+												{Math.max(1, activeIdx + 1)}/{Math.max(1, outlineEntries.length)}
+											</span>
+										</div>
+
+										{/* List of identified experiences with statuses */}
+										<div className="rounded-xl border border-slate-800/80 bg-[#09121e] divide-y divide-slate-800/80 overflow-hidden text-xs">
+											{/* Role overview item */}
+											<div className="p-3 space-y-0.5 bg-slate-900/40">
+												<div className="text-xs font-semibold text-slate-200">Role overview</div>
+												<div className="text-[11px] text-slate-400">
+													{targetRole || "Frontend Developer"}{fullName ? ` · ${fullName}` : ""}
+												</div>
+											</div>
+
+											{/* Each experience row */}
+											{outlineEntries.map((entry) => {
+												const isCurrent = activeEntry?.id === entry.id;
+												const hasPoints = entry.points && entry.points.length > 0;
 
 												return (
 													<div
-														key={pointKey}
-														className="rounded-xl border border-slate-800/90 bg-[#070e18] p-3 flex items-start justify-between gap-3 group hover:border-slate-700 transition-colors"
-													>
-														{isEditing ? (
-															<div className="flex-1 space-y-2">
-																<textarea
-																	rows={2}
-																	value={editingPointText}
-																	onChange={(e) => setEditingPointText(e.target.value)}
-																	className="w-full rounded-lg bg-[#0b1424] border border-emerald-500/60 p-2 text-xs text-white outline-none resize-none"
-																	autoFocus
-																/>
-																<div className="flex items-center justify-end gap-2">
-																	<button
-																		type="button"
-																		onClick={() => setEditingPointKey(null)}
-																		className="text-xs text-slate-400 hover:text-white px-2 py-1"
-																	>
-																		Cancel
-																	</button>
-																	<button
-																		type="button"
-																		onClick={() => handleEditPoint(entry.id, bIdx, editingPointText)}
-																		className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs"
-																	>
-																		Save
-																	</button>
-																</div>
-															</div>
-														) : (
-															<>
-																<div className="flex items-start gap-2 flex-1">
-																	<span className="text-emerald-400 font-bold text-sm leading-none mt-0.5">•</span>
-																	<p className="text-xs text-slate-200 leading-relaxed">
-																		{bullet}
-																	</p>
-																</div>
-																<div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
-																	<button
-																		type="button"
-																		onClick={() => {
-																			setEditingPointKey(pointKey);
-																			setEditingPointText(bullet);
-																		}}
-																		className="p-1 rounded text-slate-400 hover:text-emerald-300 hover:bg-slate-800 transition-colors"
-																		title="Edit point"
-																	>
-																		<Edit3 className="size-3.5" />
-																	</button>
-																	<button
-																		type="button"
-																		onClick={() => handleRemovePoint(entry.id, bIdx)}
-																		className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-																		title="Remove point"
-																	>
-																		<Trash2 className="size-3.5" />
-																	</button>
-																</div>
-															</>
+														key={entry.id}
+														onClick={() => {
+															setSelectedExperienceId(entry.id);
+															setActiveTab("stories");
+														}}
+														className={cn(
+															"p-3 flex items-center justify-between cursor-pointer transition-colors",
+															isCurrent ? "bg-emerald-500/10" : "hover:bg-slate-800/40"
 														)}
+													>
+														<div className="space-y-0.5">
+															<div className={cn("text-xs font-semibold", isCurrent ? "text-emerald-300 font-bold" : "text-white")}>
+																{entry.title}
+															</div>
+															<div className="text-[11px] text-slate-400">
+																{isCurrent ? "Asking now" : hasPoints ? `${entry.points?.length} bullet(s) drafted` : "In progress"}
+															</div>
+														</div>
+
+														<div className="flex items-center gap-1.5">
+															{isCurrent ? (
+																<span className="flex items-center gap-1">
+																	<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+																	<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse delay-75" />
+																	<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse delay-150" />
+																</span>
+															) : hasPoints ? (
+																<CheckCircle className="size-3.5 text-emerald-400" />
+															) : (
+																<span className="text-slate-600 font-mono">···</span>
+															)}
+														</div>
 													</div>
 												);
 											})}
 										</div>
+
+										{/* Current Topic Breakdown & Checklist matching screenshot */}
+										{activeEntry && (
+											<div className="rounded-xl border border-slate-800/90 bg-[#060c14] p-3.5 space-y-2.5 text-xs">
+												<div className="flex items-center justify-between border-b border-slate-800 pb-2">
+													<div>
+														<span className="text-xs font-bold text-white block">
+															{activeEntry.title}
+														</span>
+														<span className="text-[10px] text-slate-400">
+															Ready to draft · Zoe will ask about the result once
+														</span>
+													</div>
+												</div>
+
+												{/* Checklist items */}
+												<div className="space-y-2 pt-1 text-[11px]">
+													<div className="flex items-start gap-2 text-slate-200">
+														<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
+														<div>
+															<span className="font-semibold text-white">The work & challenge</span>
+															<span className="text-[10px] text-emerald-400/90 font-mono ml-2">REQUIRED</span>
+															<p className="text-slate-400 text-[10px] mt-0.5">
+																{activeEntry.description || "Identified from your story"}
+															</p>
+														</div>
+													</div>
+
+													<div className="flex items-start gap-2 text-slate-200">
+														<Check className="size-3.5 text-emerald-400 shrink-0 mt-0.5" />
+														<div>
+															<span className="font-semibold text-white">Your contribution</span>
+															<span className="text-[10px] text-emerald-400/90 font-mono ml-2">REQUIRED</span>
+															<p className="text-slate-400 text-[10px] mt-0.5">
+																{activeEntry.points && activeEntry.points.length > 0
+																	? activeEntry.points[0]
+																	: "Specific modules, preview rendering, and UI engineered"}
+															</p>
+														</div>
+													</div>
+
+													<div className={cn(
+														"p-2 rounded-lg border flex items-start gap-2",
+														currentQIndex >= 1
+															? "border-emerald-500/30 bg-emerald-950/20 text-slate-200"
+															: "border-emerald-500/40 bg-emerald-950/30 text-white"
+													)}>
+														<span className="size-2 rounded-full bg-emerald-400 mt-1 shrink-0" />
+														<div>
+															<div className="flex items-center gap-2">
+																<span className="font-bold text-white">Results & evidence</span>
+																<span className="text-[9px] font-mono text-emerald-300 px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-500/30">
+																	{currentQIndex >= 1 ? "CAPTURED" : "ZOE IS ASKING NOW"}
+																</span>
+															</div>
+															<p className="text-slate-300 text-[10px] mt-0.5">
+																{currentQIndex >= 1 && activeEntry.points && activeEntry.points.length > 1
+																	? activeEntry.points[1]
+																	: "Impact, latency, user feedback, or measured outcomes"}
+															</p>
+														</div>
+													</div>
+
+													<div className="flex items-start gap-2 text-slate-400">
+														<Check className="size-3 text-slate-500 shrink-0 mt-0.5" />
+														<div>
+															<span className="font-semibold text-slate-300">Scale & complexity</span>
+															<span className="text-[9px] text-slate-500 font-mono ml-2">OPTIONAL</span>
+															<p className="text-slate-500 text-[10px] mt-0.5">
+																{activeEntry.organization ? `${activeEntry.organization} · ` : ""}Frontend preview rendering
+															</p>
+														</div>
+													</div>
+												</div>
+											</div>
+										)}
 									</div>
 								);
-							})}
+							})()}
 						</div>
+					</aside>
+				)}
 
-						{/* Footer Actions: Ask for Final Confirmation */}
-						<div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800 px-6 py-4 bg-[#091526]">
-							<span className="text-xs text-slate-300">
-								Does anything else need to be changed or added?
-							</span>
+				{/* FINAL SUMMARY & CONFIRMATION MODAL (Sections 10, 11, 12) */}
+				{showFinalSummaryModal && (
+					<div
+						className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
+						onClick={() => setShowFinalSummaryModal(false)}
+					>
+						<div
+							className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl border border-emerald-500/40 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden"
+							onClick={(e) => e.stopPropagation()}
+						>
+							{/* Header */}
+							<div className="flex items-start justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
+								<div className="space-y-1">
+									<div className="flex items-center gap-2">
+										<span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+											FINAL EXPERIENCE SUMMARY & CONFIRMATION
+										</span>
+										<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+											{outlineEntries.length} Experiences
+										</span>
+									</div>
+									<h2 className="text-xl font-bold text-white leading-snug">
+										"Here's what we can add from your experience{outlineEntries[0]?.organization ? ` at ${outlineEntries[0].organization}` : ""}."
+									</h2>
+									<p className="text-xs text-slate-300">
+										Review your collected points across all experiences. Edit points, remove incorrect items, or add missing details before finalizing.
+									</p>
+								</div>
 
-							<div className="flex items-center gap-2.5 w-full sm:w-auto">
 								<button
 									type="button"
 									onClick={() => setShowFinalSummaryModal(false)}
-									className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors cursor-pointer"
+									className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
 								>
-									Continue editing
-								</button>
-								<button
-									type="button"
-									onClick={handleConfirmAndGenerateFinal}
-									className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-								>
-									<Check className="size-4" />
-									<span>Confirm & Save Experiences</span>
+									✕
 								</button>
 							</div>
-						</div>
-					</div>
-				</div>
-			)}
 
-			{/* HOW ZOE HELPS EXPLANATION MODAL (Requirement 19) */}
-			{showHowZoeHelpsModal && (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
-					onClick={() => setShowHowZoeHelpsModal(false)}
-				>
-					<div
-						className="relative w-full max-w-2xl max-h-[88vh] flex flex-col rounded-2xl border border-emerald-500/40 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden"
-						onClick={(e) => e.stopPropagation()}
-					>
-						{/* Header */}
-						<div className="flex items-start justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
-							<div className="space-y-1">
-								<div className="flex items-center gap-2">
-									<Sparkles className="size-4 text-emerald-400" />
-									<span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-										TRANSPARENCY & METHODOLOGY
-									</span>
-								</div>
-								<h2 className="text-xl font-bold text-white leading-snug">
-									How Zoe Helps You Craft Your Resume
-								</h2>
-								<p className="text-xs text-slate-300">
-									Understanding how Zoe analyzes your story, extracts verified experiences, and constructs achievement statements.
-								</p>
-							</div>
+							{/* Scrollable Experiences Review List */}
+							<div className="flex-1 overflow-y-auto p-6 space-y-5">
+								{outlineEntries.map((entry, eIdx) => {
+									const bulletList = entry.points && entry.points.length > 0
+										? entry.points
+										: [entry.description || `Built responsive solutions and key features as ${entry.title}.`];
 
-							<button
-								type="button"
-								onClick={() => setShowHowZoeHelpsModal(false)}
-								className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-							>
-								<X className="size-5" />
-							</button>
-						</div>
-
-						{/* Content Body */}
-						<div className="overflow-y-auto p-6 space-y-5 text-xs text-slate-300 leading-relaxed">
-							{/* Section 1 */}
-							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
-								<h3 className="text-sm font-bold text-white flex items-center gap-2">
-									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">1</span>
-									<span>Multi-Experience Identification</span>
-								</h3>
-								<p className="text-slate-300">
-									When you describe your work, Zoe parses your sentence structure, technologies, and achievements. Instead of blending everything into one generic summary, Zoe separates each project, feature, and mentoring contribution into standalone outline items.
-								</p>
-								<div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] font-mono text-emerald-300">
-									Prompt rule: Never invent technologies, statistics, or responsibilities not mentioned by the candidate.
-								</div>
-							</div>
-
-							{/* Section 2 */}
-							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
-								<h3 className="text-sm font-bold text-white flex items-center gap-2">
-									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">2</span>
-									<span>Single-Focus Contextual Exploration</span>
-								</h3>
-								<p className="text-slate-300">
-									Instead of bombarding you with 4–5 repetitive questions per item, Zoe synthesizes what you already said and poses <strong>one specific question</strong> targeting only missing information (such as personal architecture contribution or user outcomes).
-								</p>
-								<div className="space-y-1 pt-1 text-[11px]">
-									<div className="text-slate-400 font-semibold">Achievement Interview Template:</div>
-									<div className="p-2 rounded bg-slate-950 border border-slate-800 text-slate-300 italic">
-										"For [Experience Title], what parts did you personally build or lead, and what was the outcome once shipped?"
-									</div>
-								</div>
-							</div>
-
-							{/* Section 3 */}
-							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
-								<h3 className="text-sm font-bold text-white flex items-center gap-2">
-									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">3</span>
-									<span>Smart Priority Ordering</span>
-								</h3>
-								<p className="text-slate-300">
-									Zoe automatically calculates a strength and relevance score based on your target role (<strong className="text-white">{targetRole}</strong>). Leadership, mentoring, and technical architecture are prioritized at the top to give hiring managers maximum signal.
-								</p>
-							</div>
-
-							{/* Section 4 */}
-							<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
-								<h3 className="text-sm font-bold text-white flex items-center gap-2">
-									<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">4</span>
-									<span>Live Summary & Workspace Outline</span>
-								</h3>
-								<p className="text-slate-300">
-									Your professional summary updates automatically as new experiences are verified. You maintain 100% control to review, edit, or remove any wording at any time.
-								</p>
-							</div>
-						</div>
-
-						{/* Footer */}
-						<div className="flex items-center justify-end border-t border-slate-800 px-6 py-4 bg-[#091526]">
-							<button
-								type="button"
-								onClick={() => setShowHowZoeHelpsModal(false)}
-								className="px-5 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer"
-							>
-								Got it
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{/* Template Gallery Modal */}
-			{showTemplateModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-					<div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border border-slate-800 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden">
-						{/* Modal Header */}
-						<div className="flex items-center justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
-							<div className="flex items-center gap-3">
-								<div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-									<Palette className="size-4" />
-								</div>
-								<div>
-									<h2 className="text-lg font-bold text-white flex items-center gap-2">
-										<span>Choose a Template</span>
-										<span className="text-xs font-mono font-normal px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-											Current: {selectedTemplate}
-										</span>
-									</h2>
-									<p className="text-xs text-slate-400">
-										Select a visual layout for your resume. Changes reflect live on your resume sheet.
-									</p>
-								</div>
-							</div>
-
-							<button
-								type="button"
-								onClick={() => setShowTemplateModal(false)}
-								className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
-							>
-								<X className="size-5" />
-							</button>
-						</div>
-
-						{/* Template Grid Body */}
-						<div className="overflow-y-auto p-6">
-							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-								{[
-									{ id: "Azurill", name: "Azurill", desc: "Two-column with bold sidebar", color: "bg-blue-500", img: "/templates/jpg/azurill.jpg" },
-									{ id: "Bronzor", name: "Bronzor", desc: "Corporate & conservative header", color: "bg-slate-700", img: "/templates/jpg/bronzor.jpg" },
-									{ id: "Chikorita", name: "Chikorita", desc: "Modern fresh two-column", color: "bg-emerald-600", img: "/templates/jpg/chikorita.jpg" },
-									{ id: "Gengar", name: "Gengar", desc: "High-contrast technical layout", color: "bg-purple-600", img: "/templates/jpg/gengar.jpg" },
-									{ id: "Lapras", name: "Lapras", desc: "Deep blue professional header", color: "bg-indigo-700", img: "/templates/jpg/lapras.jpg" },
-									{ id: "Onyx", name: "Onyx", desc: "Sharp minimalist structure", color: "bg-rose-600", img: "/templates/jpg/onyx.jpg" },
-									{ id: "Pikachu", name: "Pikachu", desc: "Dynamic accented layout", color: "bg-amber-500", img: "/templates/jpg/pikachu.jpg" },
-									{ id: "Leafish", name: "Leafish", desc: "Clean nature-inspired green", color: "bg-lime-600", img: "/templates/jpg/leafish.jpg" },
-									{ id: "Ditgar", name: "Ditgar", desc: "Grid-based modular layout", color: "bg-sky-600", img: "/templates/jpg/ditgar.jpg" },
-									{ id: "Ditto", name: "Ditto", desc: "Compact single-page design", color: "bg-pink-600", img: "/templates/jpg/ditto.jpg" },
-									{ id: "Glalie", name: "Glalie", desc: "Clean executive layout", color: "bg-slate-600", img: "/templates/jpg/glalie.jpg" },
-									{ id: "Kakuna", name: "Kakuna", desc: "Warm contrast traditional", color: "bg-yellow-600", img: "/templates/jpg/kakuna.jpg" },
-									{ id: "Rhyhorn", name: "Rhyhorn", desc: "Robust structured engineer layout", color: "bg-cyan-600", img: "/templates/jpg/rhyhorn.jpg" },
-								].map((tmpl) => {
-									const isSelected = selectedTemplate.toLowerCase() === tmpl.id.toLowerCase();
 									return (
 										<div
-											key={tmpl.id}
-											onClick={() => {
-												handleSelectTemplate(tmpl.id);
-												toast.success(`Template switched to ${tmpl.name}!`);
-											}}
-											className={cn(
-												"group relative rounded-xl border p-3 flex flex-col justify-between cursor-pointer transition-all bg-[#091524]",
-												isSelected
-													? "border-emerald-500 ring-2 ring-emerald-500/40 bg-[#091c28]"
-													: "border-slate-800 hover:border-slate-700 hover:bg-[#0c1a2d]"
-											)}
+											key={entry.id}
+											className="rounded-2xl border border-slate-800 bg-[#09111e] p-5 space-y-3.5 shadow-md"
 										>
-											{/* Template Thumbnail Preview */}
-											<div className="relative aspect-[3/4] w-full rounded-lg bg-slate-900 overflow-hidden mb-2.5 border border-slate-800/80">
-												<img
-													src={tmpl.img}
-													alt={tmpl.name}
-													className="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
-													onError={(e) => {
-														// Fallback placeholder if image not rendered
-														(e.target as HTMLElement).style.display = "none";
-													}}
-												/>
-												<div className={cn("absolute top-2 left-2 size-3 rounded-full shadow-sm", tmpl.color)} />
-												{isSelected && (
-													<div className="absolute top-2 right-2 size-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-md">
-														<Check className="size-3 stroke-[3]" />
-													</div>
-												)}
-											</div>
-
-											{/* Info */}
-											<div className="space-y-0.5">
-												<div className="flex items-center justify-between">
-													<span className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
-														{tmpl.name}
+											{/* Experience Header */}
+											<div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
+												<div className="flex items-center gap-2">
+													<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase border border-emerald-500/30">
+														#{eIdx + 1} · {entry.category}
 													</span>
-													{isSelected && (
-														<span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
-															Active
+													<h3 className="text-sm font-bold text-white">
+														{entry.title}
+													</h3>
+													{entry.organization && (
+														<span className="text-xs text-slate-400 font-medium">
+															at {entry.organization}
 														</span>
 													)}
 												</div>
-												<p className="text-[11px] text-slate-400 line-clamp-1">
-													{tmpl.desc}
-												</p>
+
+												<button
+													type="button"
+													onClick={() => {
+														setAddingPointEntryId(addingPointEntryId === entry.id ? null : entry.id);
+														setNewPointInputText("");
+													}}
+													className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-[11px] font-semibold text-slate-200 transition-colors cursor-pointer"
+												>
+													<Plus className="size-3 text-emerald-400" />
+													<span>Add bullet point</span>
+												</button>
+											</div>
+
+											{/* Inline New Point Input Form */}
+											{addingPointEntryId === entry.id && (
+												<div className="rounded-xl border border-emerald-500/40 bg-[#0b1728] p-3 space-y-2 animate-in fade-in duration-150">
+													<label className="text-[11px] font-semibold text-emerald-400">Add missing detail or point:</label>
+													<input
+														type="text"
+														value={newPointInputText}
+														onChange={(e) => setNewPointInputText(e.target.value)}
+														placeholder="e.g. Optimized real-time data sync reducing load times by 30%..."
+														className="w-full rounded-lg bg-[#07101c] border border-slate-700 px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none focus:border-emerald-500"
+														autoFocus
+													/>
+													<div className="flex items-center justify-end gap-2">
+														<button
+															type="button"
+															onClick={() => setAddingPointEntryId(null)}
+															className="text-xs text-slate-400 hover:text-white px-2 py-1"
+														>
+															Cancel
+														</button>
+														<button
+															type="button"
+															onClick={() => handleAddPointToEntry(entry.id, newPointInputText)}
+															className="px-3 py-1 rounded-lg bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs"
+														>
+															Add point
+														</button>
+													</div>
+												</div>
+											)}
+
+											{/* Bullet Points List */}
+											<div className="space-y-2">
+												{bulletList.map((bullet, bIdx) => {
+													const pointKey = `${entry.id}_${bIdx}`;
+													const isEditing = editingPointKey === pointKey;
+
+													return (
+														<div
+															key={pointKey}
+															className="rounded-xl border border-slate-800/90 bg-[#070e18] p-3 flex items-start justify-between gap-3 group hover:border-slate-700 transition-colors"
+														>
+															{isEditing ? (
+																<div className="flex-1 space-y-2">
+																	<textarea
+																		rows={2}
+																		value={editingPointText}
+																		onChange={(e) => setEditingPointText(e.target.value)}
+																		className="w-full rounded-lg bg-[#0b1424] border border-emerald-500/60 p-2 text-xs text-white outline-none resize-none"
+																		autoFocus
+																	/>
+																	<div className="flex items-center justify-end gap-2">
+																		<button
+																			type="button"
+																			onClick={() => setEditingPointKey(null)}
+																			className="text-xs text-slate-400 hover:text-white px-2 py-1"
+																		>
+																			Cancel
+																		</button>
+																		<button
+																			type="button"
+																			onClick={() => handleEditPoint(entry.id, bIdx, editingPointText)}
+																			className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs"
+																		>
+																			Save
+																		</button>
+																	</div>
+																</div>
+															) : (
+																<>
+																	<div className="flex items-start gap-2 flex-1">
+																		<span className="text-emerald-400 font-bold text-sm leading-none mt-0.5">•</span>
+																		<p className="text-xs text-slate-200 leading-relaxed">
+																			{bullet}
+																		</p>
+																	</div>
+																	<div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
+																		<button
+																			type="button"
+																			onClick={() => {
+																				setEditingPointKey(pointKey);
+																				setEditingPointText(bullet);
+																			}}
+																			className="p-1 rounded text-slate-400 hover:text-emerald-300 hover:bg-slate-800 transition-colors"
+																			title="Edit point"
+																		>
+																			<Edit3 className="size-3.5" />
+																		</button>
+																		<button
+																			type="button"
+																			onClick={() => handleRemovePoint(entry.id, bIdx)}
+																			className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+																			title="Remove point"
+																		>
+																			<Trash2 className="size-3.5" />
+																		</button>
+																	</div>
+																</>
+															)}
+														</div>
+													);
+												})}
 											</div>
 										</div>
 									);
 								})}
 							</div>
-						</div>
 
-						{/* Footer */}
-						<div className="flex items-center justify-between border-t border-slate-800 px-6 py-4 bg-[#091526]">
-							<span className="text-xs text-slate-400">
-								Selected: <strong className="text-white">{selectedTemplate}</strong>
-							</span>
-							<button
-								type="button"
-								onClick={() => setShowTemplateModal(false)}
-								className="px-5 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer shadow-md"
-							>
-								Done
-							</button>
+							{/* Footer Actions: Ask for Final Confirmation */}
+							<div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800 px-6 py-4 bg-[#091526]">
+								<span className="text-xs text-slate-300">
+									Does anything else need to be changed or added?
+								</span>
+
+								<div className="flex items-center gap-2.5 w-full sm:w-auto">
+									<button
+										type="button"
+										onClick={() => setShowFinalSummaryModal(false)}
+										className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors cursor-pointer"
+									>
+										Continue editing
+									</button>
+									<button
+										type="button"
+										onClick={handleConfirmAndGenerateFinal}
+										className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+									>
+										<Check className="size-4" />
+										<span>Confirm & Save Experiences</span>
+									</button>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
-			)}
+				)}
 
-			{/* Quick Add Project / Activity / Education Modal */}
-			{quickAddSectionModalOpen && (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-					onClick={() => setQuickAddSectionModalOpen(false)}
-				>
+				{/* HOW ZOE HELPS EXPLANATION MODAL (Requirement 19) */}
+				{showHowZoeHelpsModal && (
 					<div
-						className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-[#09121f] text-slate-100 shadow-2xl p-6 sm:p-7 space-y-5"
-						onClick={(e) => e.stopPropagation()}
+						className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
+						onClick={() => setShowHowZoeHelpsModal(false)}
 					>
-						<div className="flex items-center justify-between pb-2 border-b border-slate-800">
-							<div>
-								<span className="text-[10px] font-mono tracking-wider uppercase text-emerald-400 font-bold block">
-									ADD TO YOUR RESUME
-								</span>
-								<h3 className="text-lg font-bold text-white">
-									{quickAddCategory === "projects" && "Add a project"}
-									{quickAddCategory === "education" && "Add education / degree"}
-									{quickAddCategory === "volunteer" && "Add volunteering & activity"}
-								</h3>
+						<div
+							className="relative w-full max-w-2xl max-h-[88vh] flex flex-col rounded-2xl border border-emerald-500/40 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden"
+							onClick={(e) => e.stopPropagation()}
+						>
+							{/* Header */}
+							<div className="flex items-start justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
+								<div className="space-y-1">
+									<div className="flex items-center gap-2">
+										<Sparkles className="size-4 text-emerald-400" />
+										<span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+											TRANSPARENCY & METHODOLOGY
+										</span>
+									</div>
+									<h2 className="text-xl font-bold text-white leading-snug">
+										How Zoe Helps You Craft Your Resume
+									</h2>
+									<p className="text-xs text-slate-300">
+										Understanding how Zoe analyzes your story, extracts verified experiences, and constructs achievement statements.
+									</p>
+								</div>
+
+								<button
+									type="button"
+									onClick={() => setShowHowZoeHelpsModal(false)}
+									className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+								>
+									<X className="size-5" />
+								</button>
 							</div>
-							<button
-								type="button"
-								onClick={() => setQuickAddSectionModalOpen(false)}
-								className="text-slate-400 hover:text-white p-1"
-							>
-								✕
-							</button>
+
+							{/* Content Body */}
+							<div className="overflow-y-auto p-6 space-y-5 text-xs text-slate-300 leading-relaxed">
+								{/* Section 1 */}
+								<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+									<h3 className="text-sm font-bold text-white flex items-center gap-2">
+										<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">1</span>
+										<span>Multi-Experience Identification</span>
+									</h3>
+									<p className="text-slate-300">
+										When you describe your work, Zoe parses your sentence structure, technologies, and achievements. Instead of blending everything into one generic summary, Zoe separates each project, feature, and mentoring contribution into standalone outline items.
+									</p>
+									<div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] font-mono text-emerald-300">
+										Prompt rule: Never invent technologies, statistics, or responsibilities not mentioned by the candidate.
+									</div>
+								</div>
+
+								{/* Section 2 */}
+								<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+									<h3 className="text-sm font-bold text-white flex items-center gap-2">
+										<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">2</span>
+										<span>Single-Focus Contextual Exploration</span>
+									</h3>
+									<p className="text-slate-300">
+										Instead of bombarding you with 4–5 repetitive questions per item, Zoe synthesizes what you already said and poses <strong>one specific question</strong> targeting only missing information (such as personal architecture contribution or user outcomes).
+									</p>
+									<div className="space-y-1 pt-1 text-[11px]">
+										<div className="text-slate-400 font-semibold">Achievement Interview Template:</div>
+										<div className="p-2 rounded bg-slate-950 border border-slate-800 text-slate-300 italic">
+											"For [Experience Title], what parts did you personally build or lead, and what was the outcome once shipped?"
+										</div>
+									</div>
+								</div>
+
+								{/* Section 3 */}
+								<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+									<h3 className="text-sm font-bold text-white flex items-center gap-2">
+										<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">3</span>
+										<span>Smart Priority Ordering</span>
+									</h3>
+									<p className="text-slate-300">
+										Zoe automatically calculates a strength and relevance score based on your target role (<strong className="text-white">{targetRole}</strong>). Leadership, mentoring, and technical architecture are prioritized at the top to give hiring managers maximum signal.
+									</p>
+								</div>
+
+								{/* Section 4 */}
+								<div className="p-4 rounded-xl border border-slate-800 bg-[#060c14] space-y-2">
+									<h3 className="text-sm font-bold text-white flex items-center gap-2">
+										<span className="size-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono">4</span>
+										<span>Live Summary & Workspace Outline</span>
+									</h3>
+									<p className="text-slate-300">
+										Your professional summary updates automatically as new experiences are verified. You maintain 100% control to review, edit, or remove any wording at any time.
+									</p>
+								</div>
+							</div>
+
+							{/* Footer */}
+							<div className="flex items-center justify-end border-t border-slate-800 px-6 py-4 bg-[#091526]">
+								<button
+									type="button"
+									onClick={() => setShowHowZoeHelpsModal(false)}
+									className="px-5 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer"
+								>
+									Got it
+								</button>
+							</div>
 						</div>
+					</div>
+				)}
 
-						<div className="space-y-4 text-xs">
-							<div className="space-y-1.5">
-								<label className="font-semibold text-slate-300">
-									{quickAddCategory === "projects" && "Project title"}
-									{quickAddCategory === "education" && "Degree / Qualification"}
-									{quickAddCategory === "volunteer" && "Role / Activity"}
-								</label>
-								<input
-									type="text"
-									value={quickAddTitle}
-									onChange={(e) => setQuickAddTitle(e.target.value)}
-									placeholder={
-										quickAddCategory === "projects"
-											? "e.g. AI Resume Builder, E-commerce App"
-											: quickAddCategory === "education"
-											? "e.g. B.Tech Computer Science, Web Development Certificate"
-											: "e.g. Open Source Contributor, Mentor"
-									}
-									autoFocus
-									className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
-								/>
+				{/* Template Gallery Modal */}
+				{showTemplateModal && (
+					<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+						<div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border border-slate-800 bg-[#08121f] text-slate-100 shadow-2xl overflow-hidden">
+							{/* Modal Header */}
+							<div className="flex items-center justify-between border-b border-slate-800 px-6 py-5 bg-[#091526]">
+								<div className="flex items-center gap-3">
+									<div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+										<Palette className="size-4" />
+									</div>
+									<div>
+										<h2 className="text-lg font-bold text-white flex items-center gap-2">
+											<span>Choose a Template</span>
+											<span className="text-xs font-mono font-normal px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+												Current: {selectedTemplate}
+											</span>
+										</h2>
+										<p className="text-xs text-slate-400">
+											Select a visual layout for your resume. Changes reflect live on your resume sheet.
+										</p>
+									</div>
+								</div>
+
+								<button
+									type="button"
+									onClick={() => setShowTemplateModal(false)}
+									className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+								>
+									<X className="size-5" />
+								</button>
 							</div>
 
-							<div className="grid grid-cols-2 gap-3">
+							{/* Template Grid Body */}
+							<div className="overflow-y-auto p-6">
+								<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+									{[
+										{ id: "Azurill", name: "Azurill", desc: "Two-column with bold sidebar", color: "bg-blue-500", img: "/templates/jpg/azurill.jpg" },
+										{ id: "Bronzor", name: "Bronzor", desc: "Corporate & conservative header", color: "bg-slate-700", img: "/templates/jpg/bronzor.jpg" },
+										{ id: "Chikorita", name: "Chikorita", desc: "Modern fresh two-column", color: "bg-emerald-600", img: "/templates/jpg/chikorita.jpg" },
+										{ id: "Gengar", name: "Gengar", desc: "High-contrast technical layout", color: "bg-purple-600", img: "/templates/jpg/gengar.jpg" },
+										{ id: "Lapras", name: "Lapras", desc: "Deep blue professional header", color: "bg-indigo-700", img: "/templates/jpg/lapras.jpg" },
+										{ id: "Onyx", name: "Onyx", desc: "Sharp minimalist structure", color: "bg-rose-600", img: "/templates/jpg/onyx.jpg" },
+										{ id: "Pikachu", name: "Pikachu", desc: "Dynamic accented layout", color: "bg-amber-500", img: "/templates/jpg/pikachu.jpg" },
+										{ id: "Leafish", name: "Leafish", desc: "Clean nature-inspired green", color: "bg-lime-600", img: "/templates/jpg/leafish.jpg" },
+										{ id: "Ditgar", name: "Ditgar", desc: "Grid-based modular layout", color: "bg-sky-600", img: "/templates/jpg/ditgar.jpg" },
+										{ id: "Ditto", name: "Ditto", desc: "Compact single-page design", color: "bg-pink-600", img: "/templates/jpg/ditto.jpg" },
+										{ id: "Glalie", name: "Glalie", desc: "Clean executive layout", color: "bg-slate-600", img: "/templates/jpg/glalie.jpg" },
+										{ id: "Kakuna", name: "Kakuna", desc: "Warm contrast traditional", color: "bg-yellow-600", img: "/templates/jpg/kakuna.jpg" },
+										{ id: "Rhyhorn", name: "Rhyhorn", desc: "Robust structured engineer layout", color: "bg-cyan-600", img: "/templates/jpg/rhyhorn.jpg" },
+									].map((tmpl) => {
+										const isSelected = selectedTemplate.toLowerCase() === tmpl.id.toLowerCase();
+										return (
+											<div
+												key={tmpl.id}
+												onClick={() => {
+													handleSelectTemplate(tmpl.id);
+													toast.success(`Template switched to ${tmpl.name}!`);
+												}}
+												className={cn(
+													"group relative rounded-xl border p-3 flex flex-col justify-between cursor-pointer transition-all bg-[#091524]",
+													isSelected
+														? "border-emerald-500 ring-2 ring-emerald-500/40 bg-[#091c28]"
+														: "border-slate-800 hover:border-slate-700 hover:bg-[#0c1a2d]"
+												)}
+											>
+												{/* Template Thumbnail Preview */}
+												<div className="relative aspect-[3/4] w-full rounded-lg bg-slate-900 overflow-hidden mb-2.5 border border-slate-800/80">
+													<img
+														src={tmpl.img}
+														alt={tmpl.name}
+														className="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
+														onError={(e) => {
+															// Fallback placeholder if image not rendered
+															(e.target as HTMLElement).style.display = "none";
+														}}
+													/>
+													<div className={cn("absolute top-2 left-2 size-3 rounded-full shadow-sm", tmpl.color)} />
+													{isSelected && (
+														<div className="absolute top-2 right-2 size-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-md">
+															<Check className="size-3 stroke-[3]" />
+														</div>
+													)}
+												</div>
+
+												{/* Info */}
+												<div className="space-y-0.5">
+													<div className="flex items-center justify-between">
+														<span className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
+															{tmpl.name}
+														</span>
+														{isSelected && (
+															<span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
+																Active
+															</span>
+														)}
+													</div>
+													<p className="text-[11px] text-slate-400 line-clamp-1">
+														{tmpl.desc}
+													</p>
+												</div>
+											</div>
+										);
+									})}
+								</div>
+							</div>
+
+							{/* Footer */}
+							<div className="flex items-center justify-between border-t border-slate-800 px-6 py-4 bg-[#091526]">
+								<span className="text-xs text-slate-400">
+									Selected: <strong className="text-white">{selectedTemplate}</strong>
+								</span>
+								<button
+									type="button"
+									onClick={() => setShowTemplateModal(false)}
+									className="px-5 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer shadow-md"
+								>
+									Done
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* Quick Add Project / Activity / Education Modal */}
+				{quickAddSectionModalOpen && (
+					<div
+						className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+						onClick={() => setQuickAddSectionModalOpen(false)}
+					>
+						<div
+							className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-[#09121f] text-slate-100 shadow-2xl p-6 sm:p-7 space-y-5"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<div className="flex items-center justify-between pb-2 border-b border-slate-800">
+								<div>
+									<span className="text-[10px] font-mono tracking-wider uppercase text-emerald-400 font-bold block">
+										ADD TO YOUR RESUME
+									</span>
+									<h3 className="text-lg font-bold text-white">
+										{quickAddCategory === "projects" && "Add a project"}
+										{quickAddCategory === "education" && "Add education / degree"}
+										{quickAddCategory === "volunteer" && "Add volunteering & activity"}
+									</h3>
+								</div>
+								<button
+									type="button"
+									onClick={() => setQuickAddSectionModalOpen(false)}
+									className="text-slate-400 hover:text-white p-1"
+								>
+									✕
+								</button>
+							</div>
+
+							<div className="space-y-4 text-xs">
 								<div className="space-y-1.5">
 									<label className="font-semibold text-slate-300">
-										{quickAddCategory === "projects" && "Tech stack / tools"}
-										{quickAddCategory === "education" && "School / University"}
-										{quickAddCategory === "volunteer" && "Organization / Community"}
+										{quickAddCategory === "projects" && "Project title"}
+										{quickAddCategory === "education" && "Degree / Qualification"}
+										{quickAddCategory === "volunteer" && "Role / Activity"}
 									</label>
 									<input
 										type="text"
-										value={quickAddOrg}
-										onChange={(e) => setQuickAddOrg(e.target.value)}
-										placeholder="e.g. React, Next.js, Node.js"
-										className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+										value={quickAddTitle}
+										onChange={(e) => setQuickAddTitle(e.target.value)}
+										placeholder={
+											quickAddCategory === "projects"
+												? "e.g. AI Resume Builder, E-commerce App"
+												: quickAddCategory === "education"
+													? "e.g. B.Tech Computer Science, Web Development Certificate"
+													: "e.g. Open Source Contributor, Mentor"
+										}
+										autoFocus
+										className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
 									/>
+								</div>
+
+								<div className="grid grid-cols-2 gap-3">
+									<div className="space-y-1.5">
+										<label className="font-semibold text-slate-300">
+											{quickAddCategory === "projects" && "Tech stack / tools"}
+											{quickAddCategory === "education" && "School / University"}
+											{quickAddCategory === "volunteer" && "Organization / Community"}
+										</label>
+										<input
+											type="text"
+											value={quickAddOrg}
+											onChange={(e) => setQuickAddOrg(e.target.value)}
+											placeholder="e.g. React, Next.js, Node.js"
+											className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+										/>
+									</div>
+
+									<div className="space-y-1.5">
+										<label className="font-semibold text-slate-300">Dates (Optional)</label>
+										<input
+											type="text"
+											value={quickAddDates}
+											onChange={(e) => setQuickAddDates(e.target.value)}
+											placeholder="e.g. 2023 – 2024"
+											className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+										/>
+									</div>
 								</div>
 
 								<div className="space-y-1.5">
-									<label className="font-semibold text-slate-300">Dates (Optional)</label>
-									<input
-										type="text"
-										value={quickAddDates}
-										onChange={(e) => setQuickAddDates(e.target.value)}
-										placeholder="e.g. 2023 – 2024"
-										className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+									<label className="font-semibold text-slate-300">Quick description / key note (Optional)</label>
+									<textarea
+										rows={2}
+										value={quickAddDescription}
+										onChange={(e) => setQuickAddDescription(e.target.value)}
+										placeholder="Brief summary of what you did or built..."
+										className="w-full rounded-xl border border-slate-700 bg-[#0b1424] p-3 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none resize-none"
 									/>
 								</div>
 							</div>
 
-							<div className="space-y-1.5">
-								<label className="font-semibold text-slate-300">Quick description / key note (Optional)</label>
-								<textarea
-									rows={2}
-									value={quickAddDescription}
-									onChange={(e) => setQuickAddDescription(e.target.value)}
-									placeholder="Brief summary of what you did or built..."
-									className="w-full rounded-xl border border-slate-700 bg-[#0b1424] p-3 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none resize-none"
-								/>
-							</div>
-						</div>
-
-						<div className="flex items-center justify-between pt-2 border-t border-slate-800">
-							<button
-								type="button"
-								onClick={() => setQuickAddSectionModalOpen(false)}
-								className="text-xs text-slate-400 hover:text-white"
-							>
-								Cancel
-							</button>
-
-							<div className="flex items-center gap-2">
+							<div className="flex items-center justify-between pt-2 border-t border-slate-800">
 								<button
 									type="button"
-									onClick={() => handleSaveQuickAddSection(false)}
-									className="px-3.5 py-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 cursor-pointer"
+									onClick={() => setQuickAddSectionModalOpen(false)}
+									className="text-xs text-slate-400 hover:text-white"
 								>
-									Add to outline
+									Cancel
 								</button>
-								<button
-									type="button"
-									onClick={() => handleSaveQuickAddSection(true)}
-									className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer shadow-md"
-								>
-									<Mic className="size-3.5" />
-									<span>Start story with Zoe →</span>
-								</button>
+
+								<div className="flex items-center gap-2">
+									<button
+										type="button"
+										onClick={() => handleSaveQuickAddSection(false)}
+										className="px-3.5 py-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 cursor-pointer"
+									>
+										Add to outline
+									</button>
+									<button
+										type="button"
+										onClick={() => handleSaveQuickAddSection(true)}
+										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs cursor-pointer shadow-md"
+									>
+										<Mic className="size-3.5" />
+										<span>Start story with Zoe →</span>
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			)}
+				)}
 			</div>
 		</div>
 	);

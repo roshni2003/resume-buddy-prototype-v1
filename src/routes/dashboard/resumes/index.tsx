@@ -225,7 +225,7 @@ export function DashboardResumesRoute() {
 		return "Narendra";
 	})();
 
-	// Action router: Requires login before starting a resume
+	// Action router: Requires login before starting or creating a resume
 	const requireAuthAction = (destinationUrl: string, searchParams?: Record<string, any>) => {
 		if (!isAuthenticated) {
 			toast.info("Please sign in or create an account to start your resume.");
@@ -235,20 +235,365 @@ export function DashboardResumesRoute() {
 			});
 			return;
 		}
+
+		// When starting a fresh guided story (from scratch), reset any residual uploaded draft or outline
+		if (destinationUrl.includes("guided-story") && searchParams?.step === "direction") {
+			try {
+				localStorage.removeItem("resume_buddy_outline_entries");
+				localStorage.removeItem("resume_buddy_guided_story_draft");
+			} catch { }
+		}
+
 		navigate({ to: destinationUrl as any, search: searchParams as any });
 	};
 
 	return (
 		<div className="space-y-12 pb-16 font-sans max-w-7xl mx-auto">
 			{/* ============================================================== */}
-			{/* STATE A: ACTIVE RESUME EXISTS -> SHOW ZOE CARD + YOUR RESUMES */}
+			{/* SITUATION 1: LOGGED OUT -> SHOW EXACT 1st IMAGE DESIGN         */}
+			{/* ("Your experience. Turned up." + Hero Card + Starting Point + Resumes) */}
 			{/* ============================================================== */}
-			{hasActiveResume ? (
+			{!isAuthenticated ? (
+				<div className="space-y-12">
+					{/* TOP HERO SECTION: Split Left Pitch & Right Interactive Story Card */}
+					<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+						{/* Left: Headline & Call-To-Action buttons */}
+						<div className="lg:col-span-6 space-y-6">
+							<div className="space-y-1">
+								<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold flex items-center gap-2">
+									<span className="size-1.5 rounded-full bg-emerald-400" />
+									<span>A LITTLE VOICE. A CLEARER STORY.</span>
+								</span>
+							</div>
+
+							<h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.08]">
+								Your experience.<br />
+								<span className="text-[#ccf873]">Turned up.</span>
+							</h1>
+
+							<p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-lg">
+								You've done more than you think. Talk it through with Zoe and turn the useful details into a resume that sounds like you.
+							</p>
+
+							<div className="space-y-3 pt-2">
+								<button
+									type="button"
+									onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
+									className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-extrabold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+								>
+									<Mic className="size-4 text-slate-950" />
+									<span>Start a new resume</span>
+									<ArrowRight className="size-4 text-slate-950" />
+								</button>
+								<div className="text-xs text-slate-400">
+									Speak or type. Go at your pace.
+								</div>
+								<div className="pt-2">
+									<button
+										type="button"
+										onClick={() => navigate({ to: "/dashboard/resumes/manual-builder" as any })}
+										className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+									>
+										<span>Explore a sample workspace</span>
+										<span>→</span>
+									</button>
+								</div>
+							</div>
+						</div>
+
+						{/* Right: Zoe Interactive Mockup Card matching 1st image */}
+						<div className="lg:col-span-6 flex justify-center lg:justify-end">
+							<div className="relative w-full max-w-md rounded-3xl border border-emerald-500/30 bg-gradient-to-b from-[#0c1f17] via-[#091712] to-[#060e0a] p-6 sm:p-7 shadow-2xl space-y-6">
+								<div className="flex items-center justify-between text-[10px] font-mono uppercase text-emerald-300/80">
+									<span>YOUR NEXT CHAPTER</span>
+									<div className="flex items-center gap-1.5">
+										<span className="size-1.5 rounded-full bg-emerald-400/40" />
+										<span className="size-1.5 rounded-full bg-emerald-400/40" />
+									</div>
+								</div>
+
+								<div className="space-y-2">
+									<div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400">
+										<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+										<span>ZOE / LET'S FIND YOUR STORY</span>
+									</div>
+									<h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
+										What's one thing you worked on that you're proud of?
+									</h2>
+								</div>
+
+								<div className="space-y-1">
+									<span className="text-[10px] font-mono uppercase text-emerald-300/60 block">IN YOUR WORDS</span>
+									<p className="text-xs italic text-slate-300 bg-slate-950/40 p-3 rounded-xl border border-emerald-500/10">
+										"I noticed people kept getting stuck, so I redesigned the first few steps..."
+									</p>
+								</div>
+
+								<div className="flex items-center gap-3 pt-1">
+									<div className="size-9 rounded-full bg-[#ccf873] flex items-center justify-center text-slate-950 shadow-md">
+										<Mic className="size-4" />
+									</div>
+									<div className="flex items-center gap-1 text-emerald-400">
+										<span className="h-4 w-1 bg-emerald-400 rounded-full animate-pulse" />
+										<span className="h-6 w-1 bg-emerald-400 rounded-full animate-pulse delay-75" />
+										<span className="h-3 w-1 bg-emerald-400 rounded-full animate-pulse delay-150" />
+										<span className="h-5 w-1 bg-emerald-400 rounded-full animate-pulse" />
+									</div>
+									<span className="text-xs text-slate-300 font-medium pl-1">Your story starts here.</span>
+								</div>
+
+								{/* Overlapping Taking Shape Note */}
+								<div className="rounded-2xl border border-slate-700/80 bg-[#f4f3ea] text-slate-900 p-4 shadow-xl space-y-1 transform sm:translate-x-4 sm:translate-y-2">
+									<div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold">
+										<span>TAKING SHAPE</span>
+										<FileText className="size-3 text-slate-600" />
+									</div>
+									<p className="text-xs text-slate-800 font-semibold leading-relaxed">
+										Redesigned the onboarding flow to help new users get started.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* PICK YOUR STARTING POINT SECTION */}
+					<div className="space-y-4 pt-4">
+						<div className="flex items-center justify-between">
+							<span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
+								PICK YOUR STARTING POINT
+							</span>
+							<span className="text-xs text-slate-500 font-medium">
+								Same companion. Your own route.
+							</span>
+						</div>
+
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+							{/* Card 01 */}
+							<div
+								onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
+								className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[200px]"
+							>
+								<div className="space-y-4">
+									<div className="flex items-center justify-between">
+										<div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+											<Mic className="size-4" />
+										</div>
+										<span className="text-xs font-mono text-slate-600 font-bold">01</span>
+									</div>
+									<div className="space-y-1.5">
+										<h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
+											Start from your story
+										</h3>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											No polished answers needed. Build an outline and find the details together.
+										</p>
+									</div>
+								</div>
+								<div className="pt-4">
+									<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
+										<span>Start a new resume</span>
+										<ArrowRight className="size-3" />
+									</div>
+								</div>
+							</div>
+
+							{/* Card 02 */}
+							<div
+								onClick={() => requireAuthAction("/dashboard/resumes/upload")}
+								className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[200px]"
+							>
+								<div className="space-y-4">
+									<div className="flex items-center justify-between">
+										<div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+											<Upload className="size-4" />
+										</div>
+										<span className="text-xs font-mono text-slate-600 font-bold">02</span>
+									</div>
+									<div className="space-y-1.5">
+										<h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
+											Bring your resume
+										</h3>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											Import a PDF, Word document, or text. Keep what works and strengthen the rest.
+										</p>
+									</div>
+								</div>
+								<div className="pt-4">
+									<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
+										<span>Import a resume</span>
+										<ArrowRight className="size-3" />
+									</div>
+								</div>
+							</div>
+
+							{/* Card 03 */}
+							<div
+								onClick={() => requireAuthAction("/dashboard/resumes/match")}
+								className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[200px]"
+							>
+								<div className="space-y-4">
+									<div className="flex items-center justify-between">
+										<div className="size-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+											<Target className="size-4" />
+										</div>
+										<span className="text-xs font-mono text-slate-600 font-bold">03</span>
+									</div>
+									<div className="space-y-1.5">
+										<h3 className="text-base font-bold text-white group-hover:text-rose-300 transition-colors">
+											Make it fit the job
+										</h3>
+										<p className="text-xs text-slate-400 leading-relaxed">
+											Work from a saved resume and shape a separate version for an opportunity.
+										</p>
+									</div>
+								</div>
+								<div className="pt-4">
+									<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
+										<span>Prepare for a job</span>
+										<ArrowRight className="size-3" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			) : resumesList.length === 0 ? (
+				/* ============================================================== */
+				/* SITUATION 2: LOGGED IN & NO RESUME YET -> SHOW 2nd IMAGE       */
+				/* ("WELCOME, <NAME> / Where would you like to start?" + 3 CARDS) */
+				/* ============================================================== */
+				<div className="space-y-10 pt-4 max-w-5xl">
+					{/* Header matching 2nd image */}
+					<div className="space-y-3">
+						<span className="text-[11px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
+							WELCOME, {candidateName.toUpperCase()}
+						</span>
+						<h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+							Where would you like to<br />start?
+						</h1>
+						<p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+							Pick the one closest to where you are now. You can do the others later, and come back to your dashboard any time.
+						</p>
+					</div>
+
+					{/* 3 Starting Choice Cards matching 2nd image */}
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+						{/* Card 01: Start from your story */}
+						<div
+							onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
+							className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[220px]"
+						>
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+										<Mic className="size-4" />
+									</div>
+									<span className="text-xs font-mono text-slate-600 font-bold">01</span>
+								</div>
+
+								<div className="space-y-1.5">
+									<h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
+										Start from your story
+									</h3>
+									<p className="text-xs text-slate-400 leading-relaxed">
+										No polished answers needed. Build an outline and find the details together.
+									</p>
+								</div>
+							</div>
+
+							<div className="pt-6">
+								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
+									<span>Start a new resume</span>
+									<ArrowRight className="size-3" />
+								</div>
+							</div>
+						</div>
+
+						{/* Card 02: Bring your resume */}
+						<div
+							onClick={() => navigate({ to: "/dashboard/resumes/upload" as any })}
+							className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[220px]"
+						>
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+										<Upload className="size-4" />
+									</div>
+									<span className="text-xs font-mono text-slate-600 font-bold">02</span>
+								</div>
+
+								<div className="space-y-1.5">
+									<h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
+										Bring your resume
+									</h3>
+									<p className="text-xs text-slate-400 leading-relaxed">
+										Import a PDF, Word document, or text. Keep what works and strengthen the rest.
+									</p>
+								</div>
+							</div>
+
+							<div className="pt-6">
+								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
+									<span>Import a resume</span>
+									<ArrowRight className="size-3" />
+								</div>
+							</div>
+						</div>
+
+						{/* Card 03: Make it fit the job (Highlighted border in 2nd image) */}
+						<div
+							onClick={() => navigate({ to: "/dashboard/resumes/match" as any })}
+							className="rounded-2xl border-2 border-emerald-500/50 bg-[#0c1e15] p-6 flex flex-col justify-between hover:border-emerald-400 transition-all cursor-pointer shadow-lg shadow-emerald-500/10 group min-h-[220px]"
+						>
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="size-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+										<Target className="size-4" />
+									</div>
+									<span className="text-xs font-mono text-emerald-400/80 font-bold">03</span>
+								</div>
+
+								<div className="space-y-1.5">
+									<h3 className="text-base font-bold text-white group-hover:text-emerald-200 transition-colors">
+										Make it fit the job
+									</h3>
+									<p className="text-xs text-slate-300 leading-relaxed">
+										Bring your resume first, then shape a separate version for a job you've found.
+									</p>
+								</div>
+							</div>
+
+							<div className="pt-6">
+								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">
+									<span>Prepare for a job</span>
+									<ArrowRight className="size-3" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Sample workspace link matching 2nd image */}
+					<div className="pt-2">
+						<button
+							type="button"
+							onClick={() => navigate({ to: "/dashboard/resumes/manual-builder" as any })}
+							className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
+						>
+							<span>Not sure yet? Look around a sample resume</span>
+							<span>→</span>
+						</button>
+					</div>
+				</div>
+			) : (
+				/* ============================================================== */
+				/* SITUATION 3: LOGGED IN & CREATED RESUME -> WELCOME BACK, <NAME>*/
+				/* (Pick up where you left off + Your resumes list)               */
+				/* ============================================================== */
 				<>
-					{/* DASHBOARD HEADER FOR RETURNING USERS */}
+					{/* DASHBOARD HEADER WITH WELCOME BACK & USER NAME */}
 					<div className="space-y-2 pt-2">
 						<span className="text-[10px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
-							YOUR DASHBOARD
+							WELCOME BACK, {candidateName.toUpperCase()}
 						</span>
 						<h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
 							Where would you like to start?
@@ -317,9 +662,10 @@ export function DashboardResumesRoute() {
 										<button
 											type="button"
 											onClick={() => {
+												const targetId = activeStoryDraft?.createdResumeId || localResumes[0]?.id || "active-story-draft";
 												navigate({
 													to: "/dashboard/resumes/guided-story" as any,
-													search: { step: "plan" } as any,
+													search: { step: "plan", resumeId: targetId } as any,
 												});
 											}}
 											className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer active:scale-95"
@@ -332,9 +678,10 @@ export function DashboardResumesRoute() {
 										<button
 											type="button"
 											onClick={() => {
+												const targetId = activeStoryDraft?.createdResumeId || localResumes[0]?.id || "active-story-draft";
 												navigate({
 													to: "/dashboard/resumes/guided-story" as any,
-													search: { step: "plan" } as any,
+													search: { step: "plan", resumeId: targetId } as any,
 												});
 											}}
 											className="text-xs text-slate-300 hover:text-white font-semibold transition-colors cursor-pointer"
@@ -441,7 +788,7 @@ export function DashboardResumesRoute() {
 											onClick={() => {
 												navigate({
 													to: "/dashboard/resumes/guided-story" as any,
-													search: { step: "plan" } as any,
+													search: { step: "plan", resumeId: res.id } as any,
 												});
 											}}
 											className="inline-flex items-center gap-1 text-xs font-bold text-white hover:text-emerald-400 transition-colors cursor-pointer"
@@ -485,7 +832,7 @@ export function DashboardResumesRoute() {
 						<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 							{/* Card 1: Start from your story */}
 							<div
-								onClick={() => navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "direction" } as any })}
+								onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
 								className="group rounded-2xl border border-slate-800/80 bg-[#070e19] p-5 flex items-center justify-between hover:border-slate-700 hover:bg-[#0c1527] transition-all cursor-pointer shadow-sm"
 							>
 								<div className="flex items-center gap-4">
@@ -536,132 +883,6 @@ export function DashboardResumesRoute() {
 						</div>
 					</section>
 				</>
-			) : (
-				/* ============================================================== */
-				/* STATE B: NEW USER / DASHBOARD (Exact Screenshot media_1795103776049_0700d4fa.jpg Match) */
-				/* ============================================================== */
-				<div className="space-y-10 pt-4 max-w-5xl">
-					{/* Header matching screenshot */}
-					<div className="space-y-3">
-						<span className="text-[11px] font-mono tracking-widest uppercase text-emerald-400 font-bold block">
-							WELCOME, {candidateName.toUpperCase()}
-						</span>
-						<h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-							Where would you like to<br />start?
-						</h1>
-						<p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
-							Pick the one closest to where you are now. You can do the others later, and come back to your dashboard any time.
-						</p>
-					</div>
-
-					{/* 3 Starting Choice Cards matching screenshot */}
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
-						{/* Card 01: Start from your story */}
-						<div
-							onClick={() => requireAuthAction("/dashboard/resumes/guided-story", { step: "direction" })}
-							className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[220px]"
-						>
-							<div className="space-y-4">
-								<div className="flex items-center justify-between">
-									<div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-										<Mic className="size-4" />
-									</div>
-									<span className="text-xs font-mono text-slate-600 font-bold">01</span>
-								</div>
-
-								<div className="space-y-1.5">
-									<h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
-										Start from your story
-									</h3>
-									<p className="text-xs text-slate-400 leading-relaxed">
-										No polished answers needed. Build an outline and find the details together.
-									</p>
-								</div>
-							</div>
-
-							<div className="pt-6">
-								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
-									<span>Start a new resume</span>
-									<ArrowRight className="size-3" />
-								</div>
-							</div>
-						</div>
-
-						{/* Card 02: Bring your resume */}
-						<div
-							onClick={() => requireAuthAction("/dashboard/resumes/upload")}
-							className="rounded-2xl border border-slate-800/90 bg-[#09131d] p-6 flex flex-col justify-between hover:border-slate-700 hover:bg-[#0c1827] transition-all cursor-pointer shadow-sm group min-h-[220px]"
-						>
-							<div className="space-y-4">
-								<div className="flex items-center justify-between">
-									<div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-										<Upload className="size-4" />
-									</div>
-									<span className="text-xs font-mono text-slate-600 font-bold">02</span>
-								</div>
-
-								<div className="space-y-1.5">
-									<h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
-										Bring your resume
-									</h3>
-									<p className="text-xs text-slate-400 leading-relaxed">
-										Import a PDF, Word document, or text. Keep what works and strengthen the rest.
-									</p>
-								</div>
-							</div>
-
-							<div className="pt-6">
-								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 group-hover:text-white transition-colors">
-									<span>Import a resume</span>
-									<ArrowRight className="size-3" />
-								</div>
-							</div>
-						</div>
-
-						{/* Card 03: Make it fit the job (Highlighted border in screenshot) */}
-						<div
-							onClick={() => requireAuthAction("/dashboard/resumes/match")}
-							className="rounded-2xl border-2 border-emerald-500/50 bg-[#0c1e15] p-6 flex flex-col justify-between hover:border-emerald-400 transition-all cursor-pointer shadow-lg shadow-emerald-500/10 group min-h-[220px]"
-						>
-							<div className="space-y-4">
-								<div className="flex items-center justify-between">
-									<div className="size-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
-										<Target className="size-4" />
-									</div>
-									<span className="text-xs font-mono text-emerald-400/80 font-bold">03</span>
-								</div>
-
-								<div className="space-y-1.5">
-									<h3 className="text-base font-bold text-white group-hover:text-emerald-200 transition-colors">
-										Make it fit the job
-									</h3>
-									<p className="text-xs text-slate-300 leading-relaxed">
-										Bring your resume first, then shape a separate version for a job you've found.
-									</p>
-								</div>
-							</div>
-
-							<div className="pt-6">
-								<div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">
-									<span>Prepare for a job</span>
-									<ArrowRight className="size-3" />
-								</div>
-							</div>
-						</div>
-					</div>
-
-					{/* Sample workspace link matching screenshot */}
-					<div className="pt-2">
-						<button
-							type="button"
-							onClick={() => requireAuthAction("/dashboard/resumes/manual-builder")}
-							className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
-						>
-							<span>Not sure yet? Look around a sample resume</span>
-							<span>→</span>
-						</button>
-					</div>
-				</div>
 			)}
 
 			{/* FOOTER */}

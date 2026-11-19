@@ -289,8 +289,8 @@ function UploadRouteComponent() {
 				: "";
 
 			const mappedData: ParsedResumeData = {
-				fullName: parsedFullName || "ANUJ KUMAR THAKUR",
-				professionalTitle: resumeData.basics?.headline || "New Delhi, India",
+				fullName: parsedFullName || "Candidate Name",
+				professionalTitle: resumeData.basics?.headline || "Software Engineer",
 				email: resumeData.basics?.email || "",
 				phone: resumeData.basics?.phone || "",
 				location: resumeData.basics?.location || "",
@@ -930,7 +930,7 @@ function UploadRouteComponent() {
 													type="text"
 													value={newEntryOrg}
 													onChange={(e) => setNewEntryOrg(e.target.value)}
-													placeholder="e.g. Acme Tech"
+													placeholder="e.g. Acme Corp"
 													className="w-full rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-white"
 												/>
 											</div>
@@ -1095,10 +1095,10 @@ function UploadRouteComponent() {
 								{/* Candidate Header */}
 								<div className="text-center space-y-1 border-b border-slate-200 pb-3">
 									<h2 className="text-xl font-bold tracking-tight text-slate-950">
-										{confirmName || "ANUJ KUMAR THAKUR"}
+										{confirmName || "Candidate Name"}
 									</h2>
 									<p className="text-[11px] text-slate-600 font-medium">
-										{confirmHeadline || "New Delhi, India"}
+										{confirmHeadline || "Professional Title"}
 									</p>
 									<div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-[10px] text-slate-600">
 										{confirmPhone && <span>{confirmPhone}</span>}

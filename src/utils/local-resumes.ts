@@ -66,6 +66,22 @@ export const localResumeStore = {
 		return null;
 	},
 
+	// Alias for getById to prevent undefined method errors
+	get(id: string): ResumeSummary | null {
+		return this.getById(id);
+	},
+
+	update(id: string, updates: Partial<ResumeSummary>): void {
+		const existing = this.getById(id);
+		if (existing) {
+			this.save({
+				...existing,
+				...updates,
+				data: updates.data ? { ...existing.data, ...updates.data } : existing.data,
+			});
+		}
+	},
+
 	save(resume: ResumeSummary): void {
 		if (typeof window === "undefined") return;
 		try {
