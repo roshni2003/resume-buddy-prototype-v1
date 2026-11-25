@@ -16,8 +16,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { useTheme } from "@/components/theme/provider";
 import { cn } from "@/utils/style";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, User as UserIcon, Key, Check } from "lucide-react";
-import { getDeepSeekApiKey, setDeepSeekApiKey } from "@/utils/deepseek-client";
+import { LogOut, User as UserIcon, Check } from "lucide-react";
 
 const AUTH_GATE_TIMEOUT_MS = 60_000;
 const AUTH_GATE_POLL_MS = 500;
@@ -146,24 +145,7 @@ function DashboardHeader({ isFullWidth }: { isFullWidth?: boolean }) {
 	const [savedRecently, setSavedRecently] = useState(false);
 	const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
 	const [activeTemplate, setActiveTemplate] = useState("azurill");
-	const [deepseekModalOpen, setDeepseekModalOpen] = useState(false);
-	const [apiKeyInput, setApiKeyInput] = useState("");
-	const [hasApiKey, setHasApiKey] = useState(false);
 
-	// Load DeepSeek API key status
-	useEffect(() => {
-		const key = getDeepSeekApiKey();
-		setHasApiKey(Boolean(key));
-		setApiKeyInput(key);
-
-		const handleKeyChange = (e: any) => {
-			const k = e.detail?.key || getDeepSeekApiKey();
-			setHasApiKey(Boolean(k));
-			setApiKeyInput(k);
-		};
-		window.addEventListener("deepseek_api_key_changed", handleKeyChange as any);
-		return () => window.removeEventListener("deepseek_api_key_changed", handleKeyChange as any);
-	}, []);
 
 	// Sync active template from localStorage or custom event
 	useEffect(() => {
@@ -360,27 +342,8 @@ function DashboardHeader({ isFullWidth }: { isFullWidth?: boolean }) {
 					)} */}
 				</div>
 
-				{/* Right: Actions (DeepSeek API + Template gallery button + Save and continue later) */}
+				{/* Right: Actions (Template gallery button + Save and continue later) */}
 				<div className="flex items-center gap-2.5">
-					{/* DeepSeek API Key Button */}
-					<button
-						type="button"
-						onClick={() => setDeepseekModalOpen(true)}
-						className={cn(
-							"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95",
-							hasApiKey
-								? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
-								: "border-slate-700/80 bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white"
-						)}
-						title="Configure DeepSeek API Key"
-					>
-						<Key className="size-3.5 text-emerald-400" />
-						<span className="hidden sm:inline">DeepSeek API</span>
-						<span className={cn(
-							"size-2 rounded-full",
-							hasApiKey ? "bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]" : "bg-amber-400"
-						)} />
-					</button>
 
 					{/* Save and Continue Later (only in editor/builder) */}
 					{isFullWidth && (
@@ -554,103 +517,7 @@ function DashboardHeader({ isFullWidth }: { isFullWidth?: boolean }) {
 				</div>
 			)}
 
-			{/* DeepSeek API Key Configuration Modal */}
-			{deepseekModalOpen && (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
-					onClick={() => setDeepseekModalOpen(false)}
-				>
-					<div
-						className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#09121f] text-slate-100 shadow-2xl overflow-hidden p-6 space-y-5"
-						onClick={(e) => e.stopPropagation()}
-					>
-						<div className="flex items-start justify-between gap-4">
-							<div className="flex items-center gap-3">
-								<div className="size-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-									<Key className="size-5" />
-								</div>
-								<div>
-									<h2 className="text-base font-bold text-white">DeepSeek API Key</h2>
-									<p className="text-xs text-slate-400">
-										Powers all AI question answering & resume bullet generation.
-									</p>
-								</div>
-							</div>
-							<button
-								type="button"
-								onClick={() => setDeepseekModalOpen(false)}
-								className="text-slate-400 hover:text-white p-1"
-							>
-								✕
-							</button>
-						</div>
 
-						<div className="space-y-2">
-							<label className="block text-xs font-semibold text-slate-300">
-								API Key
-							</label>
-							<input
-								type="password"
-								value={apiKeyInput}
-								onChange={(e) => setApiKeyInput(e.target.value)}
-								placeholder="sk-..."
-								className="w-full rounded-xl bg-[#0b1424] border border-slate-700 text-white placeholder:text-slate-500 px-3.5 py-2.5 text-xs outline-none focus:border-emerald-500 font-mono"
-								autoFocus
-							/>
-							<p className="text-[11px] text-slate-400 leading-relaxed">
-								Your key is stored securely in your browser's local storage and sent directly to DeepSeek's endpoints (<code className="text-slate-300">api.deepseek.com</code>).
-							</p>
-						</div>
-
-						<div className="flex items-center justify-between pt-2 border-t border-slate-800">
-							{hasApiKey ? (
-								<button
-									type="button"
-									onClick={() => {
-										setDeepSeekApiKey("");
-										setApiKeyInput("");
-										setHasApiKey(false);
-										toast.info("DeepSeek API Key cleared. Local fallback active.");
-									}}
-									className="text-xs font-semibold text-rose-400 hover:text-rose-300 cursor-pointer"
-								>
-									Clear Key
-								</button>
-							) : (
-								<span className="text-[11px] text-slate-500">
-									No key? Realistic local AI mode active.
-								</span>
-							)}
-
-							<div className="flex items-center gap-2">
-								<button
-									type="button"
-									onClick={() => setDeepseekModalOpen(false)}
-									className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white"
-								>
-									Cancel
-								</button>
-								<button
-									type="button"
-									onClick={() => {
-										setDeepSeekApiKey(apiKeyInput);
-										setHasApiKey(Boolean(apiKeyInput.trim()));
-										setDeepseekModalOpen(false);
-										toast.success(
-											apiKeyInput.trim()
-												? "DeepSeek API Key saved! AI responses will use DeepSeek."
-												: "API Key cleared."
-										);
-									}}
-									className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all cursor-pointer"
-								>
-									Save Key
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
 		</header>
 	);
 }

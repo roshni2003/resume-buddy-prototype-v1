@@ -353,33 +353,35 @@ export function ManualBuilderRoute() {
 					experience: {
 						title: "Experience",
 						columns: 1,
-						hidden: false,
-						items: [
-							{
-								id: "exp-1",
-								hidden: false,
-								company: project || "Project",
-								position: targetRole || "Developer",
-								period: "2023 - Present",
-								location: location || "Remote",
-								website: { url: "", label: "" },
-								description: `<p>• ${statement}</p>`,
-							},
-						],
+						hidden: !(project || statement),
+						items: (project || statement)
+							? [
+								{
+									id: "exp-1",
+									hidden: false,
+									company: project || "",
+									position: targetRole || "",
+									period: "",
+									location: location || "",
+									website: { url: "", label: "" },
+									description: statement ? `<p>• ${statement}</p>` : "",
+								},
+							]
+							: [],
 					},
 					education: {
 						title: "Education",
 						columns: 1,
-						hidden: false,
+						hidden: !school,
 						items: school
 							? [
 								{
 									id: "edu-1",
 									hidden: false,
 									institution: school,
-									degree: degree || "Bachelor of Technology",
-									area: "Computer Science",
-									period: eduYear || "2020 - 2024",
+									degree: degree || "",
+									area: "",
+									period: eduYear || "",
 									score: eduScore || "",
 									website: { url: "", label: "" },
 									description: "",
@@ -1102,19 +1104,23 @@ export function ManualBuilderRoute() {
 					>
 						<div className="border-b border-slate-200 pb-3 flex items-start justify-between gap-4">
 							<div className="space-y-0.5 flex-1 min-w-0">
-								<h3 className="text-xl font-bold font-serif text-slate-950">{fullName || "Your Name"}</h3>
-								<p
-									className={cn(
-										"font-semibold text-[11px]",
-										selectedTemplate === "Azurill" && "text-emerald-700",
-										selectedTemplate === "Bronzor" && "text-slate-700",
-										selectedTemplate === "Chikorita" && "text-teal-700",
-										selectedTemplate === "Gengar" && "text-purple-700"
-									)}
-								>
-									{targetRole || "Target Role"}
-								</p>
-								<p className="text-slate-500 text-[11px] mt-0.5">{email || (phone ? `${phone}` : "Contact details not added")}</p>
+								{fullName && <h3 className="text-xl font-bold font-serif text-slate-950">{fullName}</h3>}
+								{targetRole && (
+									<p
+										className={cn(
+											"font-semibold text-[11px]",
+											selectedTemplate === "Azurill" && "text-emerald-700",
+											selectedTemplate === "Bronzor" && "text-slate-700",
+											selectedTemplate === "Chikorita" && "text-teal-700",
+											selectedTemplate === "Gengar" && "text-purple-700"
+										)}
+									>
+										{targetRole}
+									</p>
+								)}
+								{(email || phone) && (
+									<p className="text-slate-500 text-[11px] mt-0.5">{[email, phone].filter(Boolean).join(" · ")}</p>
+								)}
 							</div>
 
 							{showPicture && pictureUrl && (
@@ -1136,48 +1142,48 @@ export function ManualBuilderRoute() {
 						</div>
 
 						{/* Experience */}
-						<div className="space-y-1">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								EXPERIENCE
-							</div>
-							{project || statement ? (
+						{(project || statement) && (
+							<div className="space-y-1">
+								<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+									EXPERIENCE
+								</div>
 								<div>
-									<div className="font-semibold text-slate-900">{project || "Project"}</div>
+									{project && <div className="font-semibold text-slate-900">{project}</div>}
 									{statement && (
 										<p className="text-[11px] text-slate-700 leading-relaxed">
 											• {statement}
 										</p>
 									)}
 								</div>
-							) : (
-								<p className="text-[11px] text-slate-500">Experience not added</p>
-							)}
-						</div>
+							</div>
+						)}
 
 						{/* Education */}
-						<div className="space-y-1">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								EDUCATION
-							</div>
-							{school ? (
+						{school && (
+							<div className="space-y-1">
+								<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+									EDUCATION
+								</div>
 								<div>
 									<div className="font-semibold text-slate-900">{school}</div>
-									<div className="text-slate-600 text-[11px]">{degree} • {eduYear}</div>
+									{(degree || eduYear) && (
+										<div className="text-slate-600 text-[11px]">{[degree, eduYear].filter(Boolean).join(" • ")}</div>
+									)}
 								</div>
-							) : (
-								<p className="text-[11px] text-slate-500">Education not added</p>
-							)}
-						</div>
+							</div>
+						)}
 
 						{/* Skills */}
-						<div className="space-y-1">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								SKILLS
+						{skills && (
+							<div className="space-y-1">
+								<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+									SKILLS
+								</div>
+								<p className="text-[11px] text-slate-700">
+									{skills}
+								</p>
 							</div>
-							<p className="text-[11px] text-slate-700">
-								{skills || "Skills not added"}
-							</p>
-						</div>
+						)}
 					</div>
 
 					<p className="text-xs text-slate-500">All updates reflect live right here.</p>
