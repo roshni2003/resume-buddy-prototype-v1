@@ -60,7 +60,7 @@ export function InlineEditableText({
 			}}
 			className={cn(
 				"break-anywhere inline-block min-w-[4ch] max-w-full cursor-text rounded-sm outline-none hover:ring-1 hover:ring-blue-300 focus:ring-2 focus:ring-blue-500",
-				isEmpty && "before:pointer-events-none before:text-muted-foreground before:content-[attr(data-placeholder)]",
+				isEmpty && "before:pointer-events-none before:text-muted-foreground before:content-[attr(data-placeholder)] print:before:content-none print:hidden",
 				className,
 			)}
 			{...props}

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { templates } from "@/dialogs/resume/template/data";
 import { pageDimensionsAsPixels } from "@/schema/page";
 import type { PageLayout } from "@/schema/resume/data";
 import { useResumeStore } from "../store/resume";
@@ -65,6 +66,12 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 			return [];
 		};
 
+		// Determine template sidebar configuration
+		const templateMeta = (templates as any)[metadata.template];
+		const isNoSidebarTemplate = templateMeta
+			? templateMeta.sidebarPosition === "none"
+			: (metadata.layout.pages[0]?.fullWidth ?? false);
+
 		const fillColumn = (
 			columnSections: string[],
 			pageIndexStart: number,
@@ -83,7 +90,7 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 				// Ensure page exists
 				if (!pages[currentPageIndex]) {
 					pages[currentPageIndex] = {
-						fullWidth: metadata.layout.pages[0]?.fullWidth ?? false,
+						fullWidth: isNoSidebarTemplate,
 						main: [],
 						sidebar: [],
 					};
@@ -111,7 +118,7 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 				// Add section to page
 				if (!pages[currentPageIndex]) {
 					pages[currentPageIndex] = {
-						fullWidth: metadata.layout.pages[0]?.fullWidth ?? false,
+						fullWidth: isNoSidebarTemplate,
 						main: [],
 						sidebar: [],
 					};
@@ -209,19 +216,51 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 			}
 		};
 
-		// Extract sections intended for Main and Sidebar
-		// We use the first page of metadata as the "template" for which sections go where,
-		// but we flatten all pages to get the full list of sections.
-		// Actually, simpler: just take all unique sections from metadata and put them in
-		// the column they first appear in.
+		// Define which sections typically belong in a sidebar
+		const standardSidebarSections = ["skills", "certifications", "awards", "languages", "interests", "publications"];
 
-		const mainSections = new Set<string>();
-		const sidebarSections = new Set<string>();
-
+		// Collect all unique section IDs present across pages
+		const allSections = new Set<string>();
 		metadata.layout.pages.forEach((p) => {
-			p.main.forEach((s) => mainSections.add(s));
-			p.sidebar.forEach((s) => sidebarSections.add(s));
+			p.main.forEach((s) => allSections.add(s));
+			p.sidebar.forEach((s) => allSections.add(s));
 		});
+
+		// Ensure any section with non-empty user content is included so switching templates never drops user data
+		if (summary && summary.content && summary.content.trim()) allSections.add("summary");
+		Object.entries(sections).forEach(([secKey, secVal]) => {
+			if (secVal && secVal.items && (secVal.items as any[]).some((i: any) => !i.hidden)) {
+				allSections.add(secKey);
+			}
+		});
+		customSections.forEach((c) => {
+			if (c.items && c.items.some((i) => !i.hidden)) {
+				allSections.add(c.id);
+			}
+		});
+
+		let resolvedMainSections: string[];
+		let resolvedSidebarSections: string[];
+
+		if (isNoSidebarTemplate) {
+			// Template has no sidebar: all sections MUST be placed in main
+			resolvedMainSections = Array.from(allSections);
+			resolvedSidebarSections = [];
+		} else {
+			// Template has a sidebar:
+			const currentSidebar = new Set<string>();
+			metadata.layout.pages.forEach((p) => p.sidebar.forEach((s) => currentSidebar.add(s)));
+
+			if (currentSidebar.size === 0) {
+				// Switched from a non-sidebar template: automatically route standard sidebar sections to sidebar
+				resolvedSidebarSections = Array.from(allSections).filter((s) => standardSidebarSections.includes(s));
+				resolvedMainSections = Array.from(allSections).filter((s) => !standardSidebarSections.includes(s));
+			} else {
+				// Keep current sidebar distribution, and place the rest in main
+				resolvedSidebarSections = Array.from(currentSidebar);
+				resolvedMainSections = Array.from(allSections).filter((s) => !currentSidebar.has(s));
+			}
+		}
 
 		const headerInMain = ["chikorita", "pikachu"].includes(metadata.template);
 		const headerInSidebar = ["ditgar", "gengar", "glalie", "ditto"].includes(metadata.template);
@@ -230,9 +269,9 @@ export const useResumePagination = (measurements: Record<string, number>): Pagin
 		const sidebarInitialHeight = headerInMain ? 0 : headerHeight;
 
 		// Pass initial height to the first page (index 0)
-		fillColumn(Array.from(mainSections), 0, mainInitialHeight, "main");
-		if (!metadata.layout.pages[0]?.fullWidth) {
-			fillColumn(Array.from(sidebarSections), 0, sidebarInitialHeight, "sidebar");
+		fillColumn(resolvedMainSections, 0, mainInitialHeight, "main");
+		if (!isNoSidebarTemplate && resolvedSidebarSections.length > 0) {
+			fillColumn(resolvedSidebarSections, 0, sidebarInitialHeight, "sidebar");
 		}
 
 		return {

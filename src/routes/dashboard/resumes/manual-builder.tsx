@@ -36,6 +36,38 @@ const searchSchema = z.object({
 	section: z.string().optional().default("contact"),
 });
 
+const TEMPLATE_STYLES: Record<string, { borderTop: string; roleColor: string; accentBg: string }> = {
+	azurill: { borderTop: "border-t-4 border-t-blue-500", roleColor: "text-blue-600", accentBg: "bg-blue-50" },
+	bronzor: { borderTop: "border-t-4 border-t-slate-700", roleColor: "text-slate-700", accentBg: "bg-slate-50" },
+	chikorita: { borderTop: "border-t-4 border-t-emerald-600", roleColor: "text-emerald-700", accentBg: "bg-emerald-50" },
+	ditgar: { borderTop: "border-t-4 border-t-sky-600", roleColor: "text-sky-700", accentBg: "bg-sky-50" },
+	ditto: { borderTop: "border-t-4 border-t-pink-500", roleColor: "text-pink-600", accentBg: "bg-pink-50" },
+	gengar: { borderTop: "border-t-4 border-t-purple-600", roleColor: "text-purple-700", accentBg: "bg-purple-50" },
+	glalie: { borderTop: "border-t-4 border-t-slate-600", roleColor: "text-slate-700", accentBg: "bg-slate-50" },
+	kakuna: { borderTop: "border-t-4 border-t-amber-500", roleColor: "text-amber-700", accentBg: "bg-amber-50" },
+	lapras: { borderTop: "border-t-4 border-t-indigo-700", roleColor: "text-indigo-800", accentBg: "bg-indigo-50" },
+	leafish: { borderTop: "border-t-4 border-t-lime-600", roleColor: "text-lime-700", accentBg: "bg-lime-50" },
+	onyx: { borderTop: "border-t-4 border-t-rose-600", roleColor: "text-rose-700", accentBg: "bg-rose-50" },
+	pikachu: { borderTop: "border-t-4 border-t-yellow-500", roleColor: "text-yellow-700", accentBg: "bg-yellow-50" },
+	rhyhorn: { borderTop: "border-t-4 border-t-stone-600", roleColor: "text-stone-700", accentBg: "bg-stone-50" },
+};
+
+const ALL_MANUAL_TEMPLATES = [
+	{ name: "Azurill", color: "bg-blue-500", desc: "Two-column · Creative" },
+	{ name: "Bronzor", color: "bg-slate-400", desc: "Classic corporate" },
+	{ name: "Chikorita", color: "bg-teal-500", desc: "Creative fresh" },
+	{ name: "Ditgar", color: "bg-sky-500", desc: "Modern developer" },
+	{ name: "Ditto", color: "bg-pink-500", desc: "ATS minimal" },
+	{ name: "Gengar", color: "bg-purple-600", desc: "Bold tech accent" },
+	{ name: "Glalie", color: "bg-slate-500", desc: "Clean executive" },
+	{ name: "Kakuna", color: "bg-amber-500", desc: "Single column modern" },
+	{ name: "Lapras", color: "bg-blue-600", desc: "Creative banner" },
+	{ name: "Leafish", color: "bg-lime-600", desc: "Fresh nature" },
+	{ name: "Onyx", color: "bg-zinc-700", desc: "Sharp minimalist" },
+	{ name: "Pikachu", color: "bg-yellow-500", desc: "Dynamic accented" },
+	{ name: "Rhyhorn", color: "bg-stone-600", desc: "Structured engineer" },
+];
+
 export const Route = createFileRoute("/dashboard/resumes/manual-builder")({
 	component: ManualBuilderRoute,
 	validateSearch: zodValidator(searchSchema),
@@ -353,33 +385,35 @@ export function ManualBuilderRoute() {
 					experience: {
 						title: "Experience",
 						columns: 1,
-						hidden: false,
-						items: [
-							{
-								id: "exp-1",
-								hidden: false,
-								company: project || "Project",
-								position: targetRole || "Developer",
-								period: "2023 - Present",
-								location: location || "Remote",
-								website: { url: "", label: "" },
-								description: `<p>• ${statement}</p>`,
-							},
-						],
+						hidden: !(project || statement),
+						items: (project || statement)
+							? [
+								{
+									id: "exp-1",
+									hidden: false,
+									company: project || "",
+									position: targetRole || "",
+									period: "",
+									location: location || "",
+									website: { url: "", label: "" },
+									description: statement ? `<p>• ${statement}</p>` : "",
+								},
+							]
+							: [],
 					},
 					education: {
 						title: "Education",
 						columns: 1,
-						hidden: false,
+						hidden: !school,
 						items: school
 							? [
 								{
 									id: "edu-1",
 									hidden: false,
 									institution: school,
-									degree: degree || "Bachelor of Technology",
-									area: "Computer Science",
-									period: eduYear || "2020 - 2024",
+									degree: degree || "",
+									area: "",
+									period: eduYear || "",
 									score: eduScore || "",
 									website: { url: "", label: "" },
 									description: "",
@@ -392,37 +426,35 @@ export function ManualBuilderRoute() {
 						columns: 1,
 						hidden: false,
 						items: skills
-							? skills.split(",").map((s, idx) => ({
+							? skills.split(",").map((s: string, idx: number) => ({
 								id: `skill-${idx}`,
 								hidden: false,
 								name: s.trim(),
 								icon: "",
 								proficiency: "",
 								level: 1,
-								keywords: [],
+								keywords: [] as string[],
 							}))
 							: [],
 					},
 				} as any,
 				metadata: {
-					template: "azurill",
+					...defaultResumeData.metadata,
+					template: (selectedTemplate.toLowerCase() || "azurill") as any,
 					layout: {
 						sidebarWidth: 30,
 						pages: [
 							{
-								fullWidth: false,
-								main: ["summary", "education", "experience"],
-								sidebar: ["profiles", "skills"],
+								fullWidth: ["bronzor", "kakuna", "lapras", "onyx", "rhyhorn"].includes(selectedTemplate.toLowerCase()),
+								main: ["bronzor", "kakuna", "lapras", "onyx", "rhyhorn"].includes(selectedTemplate.toLowerCase())
+									? ["summary", "education", "experience", "skills"]
+									: ["summary", "education", "experience"],
+								sidebar: ["bronzor", "kakuna", "lapras", "onyx", "rhyhorn"].includes(selectedTemplate.toLowerCase())
+									? []
+									: ["profiles", "skills"],
 							},
 						],
 					},
-					typography: {
-						font: { family: "IBM Plex Sans", subsets: ["latin"], variants: ["regular", "700"] },
-						lineHeight: 1.5,
-						size: 14,
-					},
-					theme: { background: "#ffffff", text: "#000000", primary: "#10b981" },
-					page: { format: "a4" },
 				},
 			},
 		});
@@ -606,31 +638,46 @@ export function ManualBuilderRoute() {
 									<span className="text-xs text-emerald-400 font-semibold">{selectedTemplate}</span>
 								</div>
 
-								<div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-									{[
-										{ name: "Azurill", color: "bg-emerald-500", desc: "Clean & modern" },
-										{ name: "Bronzor", color: "bg-slate-400", desc: "Classic corporate" },
-										{ name: "Chikorita", color: "bg-teal-500", desc: "Creative fresh" },
-										{ name: "Gengar", color: "bg-purple-500", desc: "Bold tech" },
-									].map((tmpl) => (
-										<button
-											key={tmpl.name}
-											type="button"
-											onClick={() => setSelectedTemplate(tmpl.name)}
-											className={cn(
-												"rounded-xl border p-3 bg-slate-900/60 cursor-pointer transition-all text-left",
-												selectedTemplate === tmpl.name
-													? "border-emerald-500 bg-[#071b17] ring-1 ring-emerald-500/40"
-													: "border-slate-800 hover:border-slate-700 hover:bg-slate-800/40"
-											)}
-										>
-											<div className="h-7 rounded-lg bg-slate-800/80 mb-2 flex items-center px-2">
-												<div className={cn("h-2.5 w-10 rounded-full", tmpl.color)} />
-											</div>
-											<div className="text-xs font-bold text-slate-200">{tmpl.name}</div>
-											<div className="text-[10px] text-slate-400">{tmpl.desc}</div>
-										</button>
-									))}
+								<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-1">
+									{ALL_MANUAL_TEMPLATES.map((tmpl) => {
+										const isSelected = selectedTemplate.toLowerCase() === tmpl.name.toLowerCase();
+										return (
+											<button
+												key={tmpl.name}
+												type="button"
+												onClick={() => {
+													setSelectedTemplate(tmpl.name);
+													try {
+														const manualDraft = localStorage.getItem("resume_buddy_manual_draft");
+														const manualParsed = manualDraft ? JSON.parse(manualDraft) : {};
+														manualParsed.selectedTemplate = tmpl.name;
+														localStorage.setItem("resume_buddy_manual_draft", JSON.stringify(manualParsed));
+
+														const storyDraft = localStorage.getItem("resume_buddy_guided_story_draft");
+														const storyParsed = storyDraft ? JSON.parse(storyDraft) : {};
+														storyParsed.selectedTemplate = tmpl.name;
+														localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(storyParsed));
+
+														window.dispatchEvent(new Event("resume_template_changed"));
+													} catch {
+														// ignore
+													}
+												}}
+												className={cn(
+													"rounded-xl border p-3 bg-slate-900/60 cursor-pointer transition-all text-left",
+													isSelected
+														? "border-emerald-500 bg-[#071b17] ring-1 ring-emerald-500/40"
+														: "border-slate-800 hover:border-slate-700 hover:bg-slate-800/40"
+												)}
+											>
+												<div className="h-7 rounded-lg bg-slate-800/80 mb-2 flex items-center px-2">
+													<div className={cn("h-2.5 w-10 rounded-full", tmpl.color)} />
+												</div>
+												<div className="text-xs font-bold text-slate-200">{tmpl.name}</div>
+												<div className="text-[10px] text-slate-400">{tmpl.desc}</div>
+											</button>
+										);
+									})}
 								</div>
 							</div>
 
@@ -1091,94 +1138,92 @@ export function ManualBuilderRoute() {
 					</div>
 
 					{/* Resume Card Preview Document with dynamic template styling */}
-					<div
-						className={cn(
-							"rounded-xl border border-slate-200 bg-white p-6 sm:p-8 text-slate-900 shadow-xl min-h-[440px] text-xs space-y-4 w-full transition-all relative overflow-hidden",
-							selectedTemplate === "Azurill" && "border-t-4 border-t-emerald-500",
-							selectedTemplate === "Bronzor" && "border-t-4 border-t-slate-700",
-							selectedTemplate === "Chikorita" && "border-t-4 border-t-teal-500",
-							selectedTemplate === "Gengar" && "border-t-4 border-t-purple-600"
-						)}
-					>
-						<div className="border-b border-slate-200 pb-3 flex items-start justify-between gap-4">
-							<div className="space-y-0.5 flex-1 min-w-0">
-								<h3 className="text-xl font-bold font-serif text-slate-950">{fullName || "Your Name"}</h3>
-								<p
-									className={cn(
-										"font-semibold text-[11px]",
-										selectedTemplate === "Azurill" && "text-emerald-700",
-										selectedTemplate === "Bronzor" && "text-slate-700",
-										selectedTemplate === "Chikorita" && "text-teal-700",
-										selectedTemplate === "Gengar" && "text-purple-700"
-									)}
-								>
-									{targetRole || "Target Role"}
-								</p>
-								<p className="text-slate-500 text-[11px] mt-0.5">{email || (phone ? `${phone}` : "Contact details not added")}</p>
-							</div>
+					{(() => {
+						const currentStyle = TEMPLATE_STYLES[selectedTemplate.toLowerCase()] || TEMPLATE_STYLES.azurill;
+						return (
+							<div
+								className={cn(
+									"rounded-xl border border-slate-200 bg-white p-6 sm:p-8 text-slate-900 shadow-xl min-h-[440px] text-xs space-y-4 w-full transition-all relative overflow-hidden",
+									currentStyle.borderTop
+								)}
+							>
+								<div className="border-b border-slate-200 pb-3 flex items-start justify-between gap-4">
+									<div className="space-y-0.5 flex-1 min-w-0">
+										{fullName && <h3 className="text-xl font-bold font-serif text-slate-950">{fullName}</h3>}
+										{targetRole && (
+											<p className={cn("font-semibold text-[11px]", currentStyle.roleColor)}>
+												{targetRole}
+											</p>
+										)}
+										{(email || phone) && (
+											<p className="text-slate-500 text-[11px] mt-0.5">{[email, phone].filter(Boolean).join(" · ")}</p>
+										)}
+									</div>
 
-							{showPicture && pictureUrl && (
-								<div
-									className={cn(
-										"size-14 overflow-hidden border border-slate-200 shadow-sm shrink-0",
-										pictureShape === "circle" && "rounded-full",
-										pictureShape === "rounded" && "rounded-xl",
-										pictureShape === "square" && "rounded-none"
+									{showPicture && pictureUrl && (
+										<div
+											className={cn(
+												"size-14 overflow-hidden border border-slate-200 shadow-sm shrink-0",
+												pictureShape === "circle" && "rounded-full",
+												pictureShape === "rounded" && "rounded-xl",
+												pictureShape === "square" && "rounded-none"
+											)}
+										>
+											<img
+												src={pictureUrl}
+												alt="Profile avatar"
+												className="size-full object-cover"
+											/>
+										</div>
 									)}
-								>
-									<img
-										src={pictureUrl}
-										alt="Profile avatar"
-										className="size-full object-cover"
-									/>
 								</div>
-							)}
-						</div>
 
-						{/* Experience */}
-						<div className="space-y-1">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								EXPERIENCE
-							</div>
-							{project || statement ? (
-								<div>
-									<div className="font-semibold text-slate-900">{project || "Project"}</div>
-									{statement && (
-										<p className="text-[11px] text-slate-700 leading-relaxed">
-											• {statement}
+								{/* Experience */}
+								{(project || statement) && (
+									<div className="space-y-1">
+										<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+											EXPERIENCE
+										</div>
+										<div>
+											{project && <div className="font-semibold text-slate-900">{project}</div>}
+											{statement && (
+												<p className="text-[11px] text-slate-700 leading-relaxed">
+													• {statement}
+												</p>
+											)}
+										</div>
+									</div>
+								)}
+
+								{/* Education */}
+								{school && (
+									<div className="space-y-1">
+										<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+											EDUCATION
+										</div>
+										<div>
+											<div className="font-semibold text-slate-900">{school}</div>
+											{(degree || eduYear) && (
+												<div className="text-slate-600 text-[11px]">{[degree, eduYear].filter(Boolean).join(" • ")}</div>
+											)}
+										</div>
+									</div>
+								)}
+
+								{/* Skills */}
+								{skills && (
+									<div className="space-y-1">
+										<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+											SKILLS
+										</div>
+										<p className="text-[11px] text-slate-700">
+											{skills}
 										</p>
-									)}
-								</div>
-							) : (
-								<p className="text-[11px] text-slate-500">Experience not added</p>
-							)}
-						</div>
-
-						{/* Education */}
-						<div className="space-y-1">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								EDUCATION
+									</div>
+								)}
 							</div>
-							{school ? (
-								<div>
-									<div className="font-semibold text-slate-900">{school}</div>
-									<div className="text-slate-600 text-[11px]">{degree} • {eduYear}</div>
-								</div>
-							) : (
-								<p className="text-[11px] text-slate-500">Education not added</p>
-							)}
-						</div>
-
-						{/* Skills */}
-						<div className="space-y-1">
-							<div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-								SKILLS
-							</div>
-							<p className="text-[11px] text-slate-700">
-								{skills || "Skills not added"}
-							</p>
-						</div>
-					</div>
+						);
+					})()}
 
 					<p className="text-xs text-slate-500">All updates reflect live right here.</p>
 					<button
