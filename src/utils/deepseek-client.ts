@@ -149,7 +149,7 @@ export async function extractTopicsFromStory(
 "${storyAnswer}"
 
 Extract 2 to 4 distinct key projects, responsibilities, features, or work items mentioned in their response.
-Each item should be a short phrase (2 to 5 words, e.g. "AI resume builder", "English app placement feature", "Mentoring juniors").
+Each item should be a short phrase (2 to 5 words, e.g. "Responsive dashboard UI", "Authentication flow", "API performance optimization").
 Output ONLY the short items, one per line, with no bullets, numbering, or conversational filler.`;
 
 			const raw = await callDeepSeekChat(prompt, {
@@ -183,33 +183,111 @@ Output ONLY the short items, one per line, with no bullets, numbering, or conver
 	return parts.length > 0 ? parts.slice(0, 4) : [experienceTitle];
 }
 
+export type ExperienceLevel = "junior" | "mid" | "senior" | "lead";
+
 /**
- * Generate a follow-up probe question for a specific extracted topic
+ * Detect experience level based on title, target role, and description
+ */
+export function detectExperienceLevel(
+	experienceTitle: string,
+	targetRole?: string,
+	description?: string
+): ExperienceLevel {
+	const tLower = (experienceTitle || "").toLowerCase();
+	const rLower = (targetRole || "").toLowerCase();
+	const dLower = (description || "").toLowerCase();
+
+	const hasJuniorKeyword =
+		/\b(junior|jr\.?|intern|internship|trainee|apprentice|entry[- ]level|fresher|graduate|student|beginner)\b/i.test(tLower) ||
+		(/\b(junior|jr\.?|intern|internship|trainee|fresher|entry[- ]level)\b/i.test(rLower) &&
+			!/\b(senior|lead|principal|staff|architect|manager)\b/i.test(tLower));
+
+	if (hasJuniorKeyword) {
+		return "junior";
+	}
+
+	if (
+		/\b(lead|principal|staff|architect|director|head of|manager|engineering manager|tech lead|vp)\b/i.test(tLower) ||
+		/\b(lead|principal|staff|architect|director|head of|manager|engineering manager|tech lead|vp)\b/i.test(rLower)
+	) {
+		return "lead";
+	}
+
+	if (/\b(senior|sr\.?|veteran|specialist)\b/i.test(tLower) || /\b(senior|sr\.?)\b/i.test(rLower)) {
+		return "senior";
+	}
+
+	return "mid";
+}
+
+/**
+ * Generate a follow-up probe question for a specific extracted topic,
+ * strictly calibrated to the candidate's actual role and experience level.
  */
 export async function generateFollowUpQuestionForTopic(
 	topic: string,
 	experienceTitle: string,
-	organization?: string
+	organization?: string,
+	targetRole?: string
 ): Promise<string> {
+	const level = detectExperienceLevel(experienceTitle, targetRole || "");
+	const orgContext = organization ? ` at "${organization}"` : "";
+
 	const apiKey = getDeepSeekApiKey();
 	if (apiKey) {
 		try {
-			const prompt = `You are Zoe, an expert interview coach for resumes.
-For a role as "${experienceTitle}"${organization ? ` at "${organization}"` : ""}, the candidate mentioned working on: "${topic}".
-Generate ONE concise, conversational question asking about their specific technical role, challenge solved, or measurable outcome regarding "${topic}".
-Keep it friendly and under 25 words. Return ONLY the question.`;
+			const prompt = `You are Zoe, an expert interview coach helping candidates craft high-impact resume bullet points.
+Candidate Context:
+- Target Role: "${targetRole || experienceTitle}"
+- Current Role / Project: "${experienceTitle}"${orgContext}
+- Experience Level: ${level.toUpperCase()}
+- Topic Candidate Worked On: "${topic}"
+
+Task:
+Generate ONE concise, conversational follow-up interview question about "${topic}".
+
+STRICT GUIDELINES:
+1. Relevance to Role & Experience Level:
+${
+	level === "junior"
+		? `- The candidate is JUNIOR / ENTRY-LEVEL. NEVER ask how they mentored juniors, guided teammates, managed people, or designed enterprise architecture. Ask about their specific hands-on tasks, tools used, components or code written, challenges they solved, or what they learned.`
+		: ""
+}
+${
+	level === "senior" || level === "lead"
+		? `- The candidate is SENIOR / LEAD. Ask about technical leadership, architecture choices, mentoring, code standards, or scaling challenges.`
+		: ""
+}
+${
+	level === "mid"
+		? `- The candidate is MID-LEVEL. Focus on feature ownership, technical complexity, performance optimization, and measurable results.`
+		: ""
+}
+2. Tone & Length: Friendly, conversational, professional. Under 25 words.
+3. Output format: Return ONLY the question text without quotes, explanation, or prefix.`;
+
 			const raw = await callDeepSeekChat(prompt, {
 				temperature: 0.4,
 				maxTokens: 100,
 			});
 			if (raw.trim()) {
-				return raw.trim();
+				return raw.trim().replace(/^["']|["']$/g, "");
 			}
 		} catch (err) {
 			console.warn("Failed to generate follow-up question with AI:", err);
 		}
 	}
 
+	// Smart fallback calibrated strictly to actual role and experience level
+	if (level === "junior") {
+		return `What specific tasks or components did you implement for "${topic}", and what technologies did you use?`;
+	}
+	if (level === "lead") {
+		return `How did you architect and lead the implementation of "${topic}"?`;
+	}
+	if (level === "senior") {
+		return `What key architectural decisions or scaling challenges did you tackle regarding "${topic}"?`;
+	}
 	return `What was your specific role and key contribution in "${topic}"?`;
 }
 
