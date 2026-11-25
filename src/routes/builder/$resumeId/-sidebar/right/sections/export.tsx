@@ -28,15 +28,20 @@ export function ExportSectionBuilder() {
 
 	const onDownloadPDF = useCallback(async () => {
 		const filename = generateFilename(resume.data.basics.name, "pdf");
-		const toastId = toast.loading(t`Please wait while your PDF is being generated...`, {
-			description: t`This may take a while depending on the server capacity. Please do not close the window or refresh the page.`,
-		});
+		const toastId = toast.loading(t`Preparing PDF export...`);
 
 		try {
 			const { url } = await exportResume({ id: resume.id, format: "pdf" });
 			downloadFromUrl(url, filename);
-		} catch {
-			toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
+		} catch (error) {
+			console.warn("[Sidebar Export PDF] Error, falling back to client-side print:", error);
+			try {
+				const { printResumeClientSide } = await import("@/utils/print-resume");
+				printResumeClientSide(resume.id);
+				toast.info(t`Opening print dialog to save as PDF...`);
+			} catch {
+				toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
+			}
 		} finally {
 			toast.dismiss(toastId);
 		}

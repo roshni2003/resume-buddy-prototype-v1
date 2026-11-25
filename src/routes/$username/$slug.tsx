@@ -49,8 +49,18 @@ function PublicResumePage() {
 
 	const handleDownload = useCallback(async () => {
 		if (!resume) return;
-		const { url } = await exportResume({ id: resume.id, format: "pdf" });
-		downloadFromUrl(url, `resume-${resume.name}.pdf`);
+		try {
+			const { url } = await exportResume({ id: resume.id, format: "pdf" });
+			downloadFromUrl(url, `resume-${resume.name}.pdf`);
+		} catch (err) {
+			console.warn("[Public Export] Falling back to print:", err);
+			try {
+				const { printResumeClientSide } = await import("@/utils/print-resume");
+				printResumeClientSide(resume.id);
+			} catch {
+				window.print();
+			}
+		}
 	}, [resume, exportResume]);
 
 	return (

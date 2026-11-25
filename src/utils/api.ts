@@ -757,10 +757,20 @@ export const api = {
 		}),
 
 	// 11. GET: /resumes/{id}/export
-	exportResume: (id: string, format: "pdf" | "docx", _data?: ResumeData) =>
-		request<{ url: string }>(`/resumes/${id}/export?format=${format}`, {
-			method: "GET",
-		}),
+	exportResume: async (id: string, format: "pdf" | "docx", _data?: ResumeData): Promise<{ url: string }> => {
+		if (isStandaloneMode() || !VITE_AI_BASE_URL_DEV) {
+			return { url: `/printer/${id}?token=print&print=1` };
+		}
+		try {
+			return await request<{ url: string }>(`/resumes/${id}/export?format=${format}`, {
+				method: "GET",
+			});
+		} catch (error) {
+			// Gracefully fallback to client-side printer route URL
+			console.warn("[Export] Server export failed or not supported, falling back to printer route:", error);
+			return { url: `/printer/${id}?token=print&print=1` };
+		}
+	},
 
 	// 12. POST: /ai/generate-summary
 	generateAIContent: (payload: {

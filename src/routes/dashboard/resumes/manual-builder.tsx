@@ -164,6 +164,7 @@ export function ManualBuilderRoute() {
 		initialDraft.selectedTemplate || "Azurill"
 	);
 	const [savedToLibrary, setSavedToLibrary] = useState(false);
+	const [savedResumeId, setSavedResumeId] = useState<string | null>(null);
 
 	// Sync template if changed via header gallery modal
 	useEffect(() => {
@@ -527,6 +528,7 @@ export function ManualBuilderRoute() {
 		});
 
 		setSavedToLibrary(true);
+		setSavedResumeId(newResume.id);
 		toast.success("Resume saved successfully! You can export or continue tweaking right here.");
 	};
 
@@ -958,7 +960,106 @@ export function ManualBuilderRoute() {
 									</button>
 									<button
 										type="button"
-										onClick={() => window.print()}
+										onClick={async () => {
+											const toastId = toast.loading("Preparing your resume PDF...");
+											try {
+												let resumeIdToPrint = savedResumeId;
+												if (!resumeIdToPrint) {
+													const newResume = localResumeStore.create({
+														name: `${fullName}'s Resume - ${targetRole || "Manual"}`,
+														data: {
+															basics: {
+																name: fullName,
+																headline: targetRole,
+																email: email,
+																phone: phone,
+																location: location,
+																website: { url: "", label: "" },
+																customFields: [],
+															},
+															summary: {
+																title: "Summary",
+																columns: 1,
+																hidden: false,
+																content: `<p>${statement}</p>`,
+															},
+															sections: {
+																experience: {
+																	title: "Experience",
+																	columns: 1,
+																	hidden: !(project || statement),
+																	items: (project || statement)
+																		? [
+																			{
+																				id: "exp-1",
+																				hidden: false,
+																				company: project || "",
+																				position: targetRole || "",
+																				period: "",
+																				location: location || "",
+																				website: { url: "", label: "" },
+																				description: statement ? `<p>• ${statement}</p>` : "",
+																			},
+																		]
+																		: [],
+																},
+																education: {
+																	title: "Education",
+																	columns: 1,
+																	hidden: !school,
+																	items: school
+																		? [
+																			{
+																				id: "edu-1",
+																				hidden: false,
+																				institution: school,
+																				degree: degree || "",
+																				area: "",
+																				period: eduYear || "",
+																				score: eduScore || "",
+																				website: { url: "", label: "" },
+																				description: "",
+																			},
+																		]
+																		: [],
+																},
+																skills: {
+																	title: "Skills",
+																	columns: 1,
+																	hidden: false,
+																	items: skills
+																		? skills.split(",").map((s: string, idx: number) => ({
+																			id: `skill-${idx}`,
+																			hidden: false,
+																			name: s.trim(),
+																			icon: "",
+																			proficiency: "",
+																			level: 1,
+																			keywords: [] as string[],
+																		}))
+																		: [],
+																},
+															} as any,
+															metadata: {
+																...defaultResumeData.metadata,
+																template: (selectedTemplate.toLowerCase() || "azurill") as any,
+															},
+														},
+													});
+													resumeIdToPrint = newResume.id;
+													setSavedResumeId(newResume.id);
+													setSavedToLibrary(true);
+												}
+
+												window.print();
+												toast.success("Print dialog opened for your resume!");
+											} catch (err) {
+												console.error("PDF Export error:", err);
+												toast.error("Failed to prepare PDF. Please try again.");
+											} finally {
+												toast.dismiss(toastId);
+											}
+										}}
 										className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold text-sm transition-colors cursor-pointer"
 									>
 										<Download className="size-4" />
@@ -1250,9 +1351,9 @@ export function ManualBuilderRoute() {
 			</main>
 
 			{/* Right Column: Live Resume Preview (50% screen width on desktop) */}
-			<aside className="w-full lg:w-1/2 border-t lg:border-t-0 lg:border-l border-slate-800/80 bg-[#060b13] p-6 lg:p-8 shrink-0 flex flex-col justify-between overflow-y-auto">
+			<aside className="manual-builder-preview-aside w-full lg:w-1/2 border-t lg:border-t-0 lg:border-l border-slate-800/80 bg-[#060b13] p-6 lg:p-8 shrink-0 flex flex-col justify-between overflow-y-auto">
 				<div className="space-y-6 w-full max-w-2xl mx-auto">
-					<div className="flex items-center justify-between">
+					<div className="flex items-center justify-between print:hidden">
 						<span className="text-sm font-bold text-white">Your resume</span>
 						<span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30">
 							DEMO PREVIEW
@@ -1264,6 +1365,7 @@ export function ManualBuilderRoute() {
 						const currentStyle = TEMPLATE_STYLES[selectedTemplate.toLowerCase()] || TEMPLATE_STYLES.azurill;
 						return (
 							<div
+								id="manual-builder-printable-resume"
 								className={cn(
 									"rounded-xl border border-slate-200 bg-white p-6 sm:p-8 text-slate-900 shadow-xl min-h-[440px] text-xs space-y-4 w-full transition-all relative overflow-hidden",
 									currentStyle.borderTop
@@ -1347,11 +1449,11 @@ export function ManualBuilderRoute() {
 						);
 					})()}
 
-					<p className="text-xs text-slate-500">All updates reflect live right here.</p>
+					<p className="text-xs text-slate-500 print:hidden">All updates reflect live right here.</p>
 					<button
 						type="button"
 						onClick={() => setActiveTab("export")}
-						className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer text-left"
+						className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer text-left print:hidden"
 					>
 						Edit styling & picture settings on this page →
 					</button>
