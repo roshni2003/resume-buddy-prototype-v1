@@ -13,18 +13,51 @@ import {
 	Trash2,
 	ExternalLink,
 	Plus,
+	Pencil,
+	MoreVertical,
+	Copy,
 } from "lucide-react";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useMemo, useState, useEffect, useRef } from "react";
 import z from "zod";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { toast } from "sonner";
 import { api } from "@/utils/api";
 import { isStandaloneMode, localResumeStore } from "@/utils/local-resumes";
 import { cn } from "@/utils/style";
 import { getStoredUserProfile } from "@/utils/auth-token";
 import { useAuth } from "@/hooks/useAuth";
+import { useConfirm } from "@/hooks/use-confirm";
+
+dayjs.extend(relativeTime);
+
+/** Format date and time for resume items (e.g., "Today, 4:15 PM" or "Nov 21, 2026 at 4:15 PM") */
+export function formatResumeLastUpdated(dateInput: string | Date | undefined | null): string {
+	if (!dateInput) return "Recently";
+	const d = dayjs(dateInput);
+	if (!d.isValid()) return "Recently";
+	const now = dayjs();
+	if (d.isSame(now, "day")) {
+		return `Today, ${d.format("h:mm A")}`;
+	}
+	if (d.isSame(now.subtract(1, "day"), "day")) {
+		return `Yesterday, ${d.format("h:mm A")}`;
+	}
+	if (d.isSame(now, "year")) {
+		return d.format("MMM D [at] h:mm A");
+	}
+	return d.format("MMM D, YYYY [at] h:mm A");
+}
 
 const searchSchema = z.object({
 	tags: z.array(z.string()).optional().catch([]),
@@ -40,6 +73,7 @@ export const Route = createFileRoute("/dashboard/resumes/")({
 export function DashboardResumesRoute() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const confirm = useConfirm();
 	const { user, isAuthenticated } = useAuth();
 	const search = Route.useSearch();
 
@@ -127,43 +161,85 @@ export function DashboardResumesRoute() {
 		const combined: any[] = [];
 
 		if (activeStoryDraft || outlineEntries.length > 0) {
+			const draftUpdated = activeStoryDraft?.updatedAt || activeStoryDraft?.lastModified;
 			combined.push({
 				id: activeStoryDraft?.createdResumeId || "active-story-draft",
 				title: activeRoleTitle,
 				status: "In progress",
-				updatedAt: "Last edited",
+				updatedAt: formatResumeLastUpdated(draftUpdated),
+				rawUpdatedAt: draftUpdated ? new Date(draftUpdated).getTime() : 0,
 				isDraft: true,
 			});
 		}
 
 		for (const r of localResumes) {
-			if (!combined.some((item) => item.id === r.id)) {
+			const existingIdx = combined.findIndex((item) => item.id === r.id);
+			const formattedDate = formatResumeLastUpdated(r.updatedAt || r.createdAt);
+			const rawDate = r.updatedAt ? new Date(r.updatedAt).getTime() : (r.createdAt ? new Date(r.createdAt).getTime() : 0);
+
+			if (existingIdx >= 0) {
+				// Update with more accurate metadata from local store
+				combined[existingIdx] = {
+					...combined[existingIdx],
+					title: r.name || combined[existingIdx].title,
+					updatedAt: formattedDate,
+					rawUpdatedAt: rawDate,
+				};
+			} else {
 				combined.push({
 					id: r.id,
 					title: r.name || activeRoleTitle,
 					status: "In progress",
-					updatedAt: "Last edited",
+					updatedAt: formattedDate,
+					rawUpdatedAt: rawDate,
 				});
 			}
 		}
 
 		for (const ar of apiResumes) {
-			if (!combined.some((item) => item.id === ar.id)) {
+			const existingIdx = combined.findIndex((item) => item.id === ar.id);
+			const formattedDate = formatResumeLastUpdated(ar.updatedAt || ar.createdAt);
+			const rawDate = ar.updatedAt ? new Date(ar.updatedAt).getTime() : (ar.createdAt ? new Date(ar.createdAt).getTime() : 0);
+
+			if (existingIdx >= 0) {
+				combined[existingIdx] = {
+					...combined[existingIdx],
+					title: ar.name || combined[existingIdx].title,
+					updatedAt: formattedDate,
+					rawUpdatedAt: rawDate,
+				};
+			} else {
 				combined.push({
 					id: ar.id,
 					title: ar.name || activeRoleTitle,
 					status: "In progress",
-					updatedAt: "Last edited",
+					updatedAt: formattedDate,
+					rawUpdatedAt: rawDate,
 				});
 			}
 		}
 
-		return combined;
+		// Sort resumes so the most recently updated appears first
+		return combined.sort((a, b) => (b.rawUpdatedAt || 0) - (a.rawUpdatedAt || 0));
 	}, [activeStoryDraft, outlineEntries, localResumes, apiResumes, activeRoleTitle]);
 
-	// Handler to delete a resume
+	// Handler to delete a resume with warning/confirmation
 	const handleDeleteResume = async (resumeId: string, e?: React.MouseEvent) => {
 		if (e) e.stopPropagation();
+
+		// Prompt user for confirmation before deletion
+		const resumeItem = resumesList.find((r) => r.id === resumeId) || localResumes.find((r) => r.id === resumeId);
+		const resumeName = resumeItem?.title || resumeItem?.name || "this resume";
+
+		const confirmed = await confirm(`Are you sure you want to delete "${resumeName}"?`, {
+			description: "This will permanently remove this resume and its associated content. This action cannot be undone.",
+			confirmText: "Delete Resume",
+			cancelText: "Cancel",
+		});
+
+		if (!confirmed) return;
+
+		const toastId = toast.loading("Deleting resume...");
 
 		// Delete from local store if exists
 		try {
@@ -195,7 +271,84 @@ export function DashboardResumesRoute() {
 
 		const updatedLocal = localResumeStore.getAll();
 		setLocalResumes(updatedLocal);
-		toast.success("Resume deleted");
+		toast.success("Resume deleted successfully", { id: toastId });
+	};
+
+	// Rename state & handlers
+	const [editingResumeId, setEditingResumeId] = useState<string | null>(null);
+	const [editingResumeName, setEditingResumeName] = useState("");
+
+	const handleStartRename = (id: string, currentTitle: string, e?: React.MouseEvent) => {
+		if (e) e.stopPropagation();
+		setEditingResumeId(id);
+		setEditingResumeName(currentTitle);
+	};
+
+	const handleSaveResumeName = async (resumeId: string, newTitle: string) => {
+		const trimmed = newTitle.trim();
+		if (!trimmed) {
+			setEditingResumeId(null);
+			return;
+		}
+
+		// 1. Update in local store
+		try {
+			localResumeStore.update(resumeId, { name: trimmed });
+		} catch { }
+
+		// 2. Update active draft if matches
+		try {
+			if (
+				resumeId === "active-story-draft" ||
+				resumeId === activeStoryDraft?.createdResumeId
+			) {
+				const draftRaw = localStorage.getItem("resume_buddy_guided_story_draft");
+				if (draftRaw) {
+					const draft = JSON.parse(draftRaw);
+					draft.targetRole = trimmed;
+					draft.resumeName = trimmed;
+					draft.updatedAt = new Date().toISOString();
+					localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(draft));
+					setActiveStoryDraft(draft);
+				}
+			}
+
+			// Update last worked
+			const lastWorkedRaw = localStorage.getItem("resume_buddy_last_worked");
+			if (lastWorkedRaw) {
+				const lw = JSON.parse(lastWorkedRaw);
+				if (lw.resumeId === resumeId) {
+					lw.resumeName = trimmed;
+					lw.title = `Continue editing ${trimmed}`;
+					lw.updatedAt = new Date().toISOString();
+					localStorage.setItem("resume_buddy_last_worked", JSON.stringify(lw));
+				}
+			}
+		} catch { }
+
+		// 3. Update API if applicable
+		try {
+			await api.updateResume(resumeId, { name: trimmed });
+			await queryClient.invalidateQueries({ queryKey: ["resumes"] });
+		} catch { }
+
+		setLocalResumes(localResumeStore.getAll());
+		setEditingResumeId(null);
+		toast.success("Resume renamed");
+	};
+
+	// Duplicate a resume
+	const handleDuplicateResume = (resumeId: string, e?: React.MouseEvent) => {
+		if (e) e.stopPropagation();
+		try {
+			const res = localResumeStore.duplicate(resumeId);
+			setLocalResumes(localResumeStore.getAll());
+			toast.success("Resume duplicated");
+			return res.id;
+		} catch (err) {
+			console.error("Failed to duplicate resume:", err);
+			toast.error("Failed to duplicate resume");
+		}
 	};
 
 	// Candidate name for header: prioritize logged-in user name, email prefix, or user profile
@@ -611,7 +764,20 @@ export function DashboardResumesRoute() {
 								<span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
 								<span>ZOE / PICK UP WHERE YOU LEFT OFF</span>
 							</div>
-							<ExternalLink className="size-3.5 text-emerald-400/60" />
+							<button
+								type="button"
+								onClick={() => {
+									const targetId = activeStoryDraft?.createdResumeId || resumesList[0]?.id || "active-story-draft";
+									navigate({
+										to: "/dashboard/resumes/guided-story" as any,
+										search: { step: "plan", resumeId: targetId } as any,
+									});
+								}}
+								className="p-1 rounded-md text-emerald-400/70 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+								title="Open in Story Builder"
+							>
+								<ExternalLink className="size-3.5" />
+							</button>
 						</div>
 
 						<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -623,13 +789,65 @@ export function DashboardResumesRoute() {
 											In progress
 										</span>
 										<span className="text-xs text-slate-400 font-mono">
-											Edited just now
+											{resumesList[0]?.updatedAt ? `Edited ${resumesList[0].updatedAt}` : "Edited just now"}
 										</span>
 									</div>
 
-									<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-										{activeRoleTitle}
-									</h2>
+									{editingResumeId === (resumesList[0]?.id || "active-story-draft") ? (
+										<div className="flex items-center gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+											<input
+												type="text"
+												value={editingResumeName}
+												onChange={(e) => setEditingResumeName(e.target.value)}
+												onKeyDown={(e) => {
+													if (e.key === "Enter") {
+														handleSaveResumeName(resumesList[0]?.id || "active-story-draft", editingResumeName);
+													} else if (e.key === "Escape") {
+														setEditingResumeId(null);
+													}
+												}}
+												autoFocus
+												className="text-xl sm:text-2xl font-bold text-white bg-slate-900 border border-emerald-500 rounded-lg px-2.5 py-1 focus:outline-none w-full max-w-md"
+												placeholder="Enter resume name..."
+											/>
+											<button
+												type="button"
+												onClick={() => handleSaveResumeName(resumesList[0]?.id || "active-story-draft", editingResumeName)}
+												className="p-2 rounded-lg bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors cursor-pointer shrink-0"
+												title="Save name"
+											>
+												<Check className="size-4 stroke-[3]" />
+											</button>
+											<button
+												type="button"
+												onClick={() => setEditingResumeId(null)}
+												className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+												title="Cancel"
+											>
+												<X className="size-4" />
+											</button>
+										</div>
+									) : (
+										<div className="flex items-center gap-2 group/title">
+											<h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+												{resumesList[0]?.title || activeRoleTitle}
+											</h2>
+											<button
+												type="button"
+												onClick={(e) =>
+													handleStartRename(
+														resumesList[0]?.id || "active-story-draft",
+														resumesList[0]?.title || activeRoleTitle,
+														e
+													)
+												}
+												className="p-1 text-slate-500 hover:text-emerald-400 rounded transition-colors cursor-pointer"
+												title="Edit resume name"
+											>
+												<Pencil className="size-4" />
+											</button>
+										</div>
+									)}
 
 									{/* Progress Bar & steps count */}
 									<div className="flex items-center gap-3 pt-3">
@@ -759,13 +977,126 @@ export function DashboardResumesRoute() {
 										<span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
 											{res.status}
 										</span>
-										<span className="text-xs text-slate-500 font-mono">{res.updatedAt}</span>
+										<div className="flex items-center gap-1.5">
+											<span className="text-xs text-slate-500 font-mono">{res.updatedAt}</span>
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<button
+														type="button"
+														onClick={(e) => e.stopPropagation()}
+														className="p-1 rounded text-slate-500 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+														title="More options"
+													>
+														<MoreVertical className="size-4" />
+													</button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end" className="w-48 bg-slate-900 border border-slate-800 text-slate-200">
+													<DropdownMenuItem
+														onClick={() => {
+															navigate({
+																to: "/dashboard/resumes/guided-story" as any,
+																search: { step: "plan", resumeId: res.id } as any,
+															});
+														}}
+														className="cursor-pointer hover:bg-slate-800 text-xs"
+													>
+														<ArrowRight className="size-3.5 mr-2 text-emerald-400" />
+														<span>Open in Story Builder</span>
+													</DropdownMenuItem>
+
+													<DropdownMenuItem
+														onClick={(e) => handleStartRename(res.id, res.title, e as any)}
+														className="cursor-pointer hover:bg-slate-800 text-xs"
+													>
+														<Pencil className="size-3.5 mr-2 text-amber-400" />
+														<span>Rename resume</span>
+													</DropdownMenuItem>
+
+													<DropdownMenuItem
+														onClick={(e) => handleDuplicateResume(res.id, e as any)}
+														className="cursor-pointer hover:bg-slate-800 text-xs"
+													>
+														<Copy className="size-3.5 mr-2 text-indigo-400" />
+														<span>Duplicate resume</span>
+													</DropdownMenuItem>
+
+													<DropdownMenuItem
+														onClick={() => {
+															navigate({
+																to: "/dashboard/resumes/match" as any,
+																search: { resumeId: res.id } as any,
+															});
+														}}
+														className="cursor-pointer hover:bg-slate-800 text-xs"
+													>
+														<Target className="size-3.5 mr-2 text-emerald-400" />
+														<span>Tailor for a job</span>
+													</DropdownMenuItem>
+
+													<DropdownMenuSeparator className="bg-slate-800" />
+
+													<DropdownMenuItem
+														onClick={(e) => handleDeleteResume(res.id, e as any)}
+														className="cursor-pointer text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 text-xs"
+													>
+														<Trash2 className="size-3.5 mr-2" />
+														<span>Delete resume</span>
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</div>
 									</div>
 
-									<div>
-										<h3 className="text-lg font-bold text-white tracking-tight line-clamp-1">
-											{res.title}
-										</h3>
+									<div className="flex items-center justify-between gap-2">
+										{editingResumeId === res.id ? (
+											<div className="flex items-center gap-1.5 w-full" onClick={(e) => e.stopPropagation()}>
+												<input
+													type="text"
+													value={editingResumeName}
+													onChange={(e) => setEditingResumeName(e.target.value)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") {
+															handleSaveResumeName(res.id, editingResumeName);
+														} else if (e.key === "Escape") {
+															setEditingResumeId(null);
+														}
+													}}
+													autoFocus
+													className="text-sm font-bold text-white bg-slate-900 border border-emerald-500 rounded px-2 py-0.5 focus:outline-none w-full"
+													placeholder="Resume name..."
+												/>
+												<button
+													type="button"
+													onClick={() => handleSaveResumeName(res.id, editingResumeName)}
+													className="p-1 rounded bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors cursor-pointer shrink-0"
+													title="Save name"
+												>
+													<Check className="size-3.5 stroke-[3]" />
+												</button>
+												<button
+													type="button"
+													onClick={() => setEditingResumeId(null)}
+													className="p-1 rounded bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+													title="Cancel"
+												>
+													<X className="size-3.5" />
+												</button>
+											</div>
+										) : (
+											<div className="flex items-center justify-between gap-2 w-full group/name">
+												<h3 className="text-lg font-bold text-white tracking-tight line-clamp-1">
+													{res.title}
+												</h3>
+												<button
+													type="button"
+													onClick={(e) => handleStartRename(res.id, res.title, e)}
+													className="p-1 text-slate-500 hover:text-emerald-400 rounded opacity-70 group-hover/name:opacity-100 transition-all cursor-pointer shrink-0"
+													title="Rename resume"
+												>
+													<Pencil className="size-3.5" />
+												</button>
+											</div>
+										)}
 									</div>
 
 									{/* Progress bar */}
@@ -891,22 +1222,6 @@ export function DashboardResumesRoute() {
 					<span className="font-mono tracking-wider uppercase text-slate-400">
 						YOUR EXPERIENCE, IN YOUR WORDS.
 					</span>
-					<div className="flex items-center gap-6">
-						<button
-							type="button"
-							onClick={() => navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any })}
-							className="hover:text-emerald-400 transition-colors cursor-pointer"
-						>
-							Audition Kokoro voices ↗
-						</button>
-						<button
-							type="button"
-							onClick={() => navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any })}
-							className="hover:text-emerald-400 transition-colors cursor-pointer"
-						>
-							How Zoe helps ↗
-						</button>
-					</div>
 				</div>
 			</footer>
 		</div>
