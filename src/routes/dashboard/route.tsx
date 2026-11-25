@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDropdownMenu } from "@/components/user/dropdown-menu";
 // authClient used in index.tsx for session
 import { clearAuthToken, getAuthToken, getUrlToken, isValidToken, persistAuthToken } from "@/utils/auth-token";
-import { isStandaloneMode } from "@/utils/local-resumes";
+import { isStandaloneMode, localResumeStore } from "@/utils/local-resumes";
+import { templates } from "@/dialogs/resume/template/data";
 import { getInitials } from "@/utils/string";
 import { buildZuvyLoginUrl, redirectToZuvyLogin } from "@/utils/zuvy-redirect";
 import { toast } from "sonner";
@@ -197,6 +198,35 @@ function DashboardHeader({ isFullWidth }: { isFullWidth?: boolean }) {
 			storyParsed.selectedTemplate = tmplName;
 			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(storyParsed));
 
+			// Update any stored resumes in localResumeStore so data renders seamlessly in the new template
+			const allLocal = localResumeStore.getAll();
+			if (allLocal.length > 0) {
+				const latest = allLocal[0];
+				if (latest && latest.data) {
+					const normKey = tmplKey.toLowerCase();
+					latest.data.metadata.template = normKey as any;
+					const templateMeta = (templates as any)[normKey];
+					if (templateMeta) {
+						const isNoSidebar = templateMeta.sidebarPosition === "none";
+						const sidebarSections = ["skills", "certifications", "awards", "languages", "interests", "publications"];
+						const allSecs = [
+							...new Set([...(latest.data.metadata.layout.pages || []).flatMap((p: any) => [...p.main, ...p.sidebar])]),
+						];
+						if (latest.data.metadata.layout.pages && latest.data.metadata.layout.pages[0]) {
+							latest.data.metadata.layout.pages[0].fullWidth = isNoSidebar;
+							if (isNoSidebar) {
+								latest.data.metadata.layout.pages[0].main = allSecs;
+								latest.data.metadata.layout.pages[0].sidebar = [];
+							} else {
+								latest.data.metadata.layout.pages[0].sidebar = allSecs.filter((s: string) => sidebarSections.includes(s));
+								latest.data.metadata.layout.pages[0].main = allSecs.filter((s: string) => !sidebarSections.includes(s));
+							}
+						}
+					}
+					localResumeStore.save(latest);
+				}
+			}
+
 			window.dispatchEvent(new Event("resume_template_changed"));
 		} catch {
 			// ignore
@@ -224,6 +254,7 @@ function DashboardHeader({ isFullWidth }: { isFullWidth?: boolean }) {
 		{ key: "glalie", name: "Glalie", tags: "Minimal · Professional", color: "bg-slate-500", preview: "/templates/jpg/glalie.jpg" },
 		{ key: "kakuna", name: "Kakuna", tags: "Single column · Modern", color: "bg-amber-500", preview: "/templates/jpg/kakuna.jpg" },
 		{ key: "lapras", name: "Lapras", tags: "Creative · Side profile", color: "bg-blue-600", preview: "/templates/jpg/lapras.jpg" },
+		{ key: "leafish", name: "Leafish", tags: "Two-column · Nature · Creative", color: "bg-lime-600", preview: "/templates/jpg/leafish.jpg" },
 		{ key: "onyx", name: "Onyx", tags: "Executive · High contrast", color: "bg-zinc-700", preview: "/templates/jpg/onyx.jpg" },
 		{ key: "pikachu", name: "Pikachu", tags: "Vibrant · Engineering", color: "bg-yellow-500", preview: "/templates/jpg/pikachu.jpg" },
 		{ key: "rhyhorn", name: "Rhyhorn", tags: "Classic · Structured", color: "bg-stone-600", preview: "/templates/jpg/rhyhorn.jpg" },

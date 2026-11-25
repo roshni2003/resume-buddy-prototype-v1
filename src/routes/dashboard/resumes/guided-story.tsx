@@ -42,6 +42,7 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { useState, useEffect, useRef } from "react";
 import z from "zod";
 import { localResumeStore } from "@/utils/local-resumes";
+import { templates } from "@/dialogs/resume/template/data";
 import { defaultResumeData, type ResumeData } from "@/schema/resume/data";
 import { cn } from "@/utils/style";
 import { voiceAssistant, formatAchievementBullet } from "@/utils/voice-assistant";
@@ -114,6 +115,28 @@ export function GuidedStoryRoute() {
 			setWizardStep(search.step);
 		}
 	}, [search?.step]);
+
+	// Listen for template changes across the app
+	useEffect(() => {
+		const handleTemplateChange = () => {
+			try {
+				const draft = localStorage.getItem("resume_buddy_guided_story_draft");
+				if (draft) {
+					const parsed = JSON.parse(draft);
+					if (parsed.selectedTemplate) {
+						setSelectedTemplate(parsed.selectedTemplate);
+					}
+				}
+			} catch {
+				// ignore
+			}
+		};
+
+		window.addEventListener("resume_template_changed", handleTemplateChange);
+		return () => {
+			window.removeEventListener("resume_template_changed", handleTemplateChange);
+		};
+	}, []);
 
 	// Load specific resume when resumeId search parameter is provided
 	useEffect(() => {
@@ -901,7 +924,10 @@ export function GuidedStoryRoute() {
 					hidden: skillsList.length === 0,
 					items: skillsList.map((skill, idx) => ({
 						id: `skill_${idx}`,
+						hidden: false,
+						icon: "",
 						name: skill,
+						proficiency: "",
 						description: "",
 						level: 0,
 						keywords: [],
@@ -1841,19 +1867,55 @@ export function GuidedStoryRoute() {
 			parsedDraft.updatedAt = new Date().toISOString();
 			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(parsedDraft));
 
+			const manualDraft = localStorage.getItem("resume_buddy_manual_draft");
+			const parsedManual = manualDraft ? JSON.parse(manualDraft) : {};
+			parsedManual.selectedTemplate = templateName;
+			localStorage.setItem("resume_buddy_manual_draft", JSON.stringify(parsedManual));
+
 			if (createdResumeId) {
 				const existing = localResumeStore.get(createdResumeId);
 				if (existing) {
+					const tmplKey = templateName.toLowerCase();
+					const templateMeta = (templates as any)[tmplKey];
+					const isNoSidebar = templateMeta ? templateMeta.sidebarPosition === "none" : false;
+					const sidebarSections = ["skills", "certifications", "awards", "languages", "interests", "publications"];
+					const allSecs = [
+						...new Set([...(existing.data.metadata.layout.pages || []).flatMap((p: any) => [...p.main, ...p.sidebar])]),
+					];
+
+					const updatedPages = (existing.data.metadata.layout.pages || []).map((page: any, idx: number) => {
+						if (idx === 0) {
+							return {
+								...page,
+								fullWidth: isNoSidebar,
+								main: isNoSidebar ? allSecs : allSecs.filter((s: string) => !sidebarSections.includes(s)),
+								sidebar: isNoSidebar ? [] : allSecs.filter((s: string) => sidebarSections.includes(s)),
+							};
+						}
+						return {
+							...page,
+							fullWidth: isNoSidebar,
+							main: [],
+							sidebar: [],
+						};
+					});
+
 					const updatedData = {
 						...existing.data,
 						metadata: {
 							...existing.data.metadata,
-							template: templateName.toLowerCase() as any,
+							template: tmplKey as any,
+							layout: {
+								...existing.data.metadata.layout,
+								pages: updatedPages.length > 0 ? updatedPages : [{ fullWidth: isNoSidebar, main: allSecs, sidebar: [] }],
+							},
 						},
 					};
 					localResumeStore.update(createdResumeId, { data: updatedData });
 				}
 			}
+
+			window.dispatchEvent(new Event("resume_template_changed"));
 		} catch (e) {
 			console.error("Failed to save selected template", e);
 		}
@@ -4903,16 +4965,28 @@ export function GuidedStoryRoute() {
 
 							{/* Template Choice */}
 							<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
-								<span className="text-xs font-bold text-slate-300">Choose Template</span>
+								<div className="flex items-center justify-between">
+									<span className="text-xs font-bold text-slate-300">Choose Template</span>
+									<button
+										type="button"
+										onClick={() => setShowTemplateModal(true)}
+										className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+									>
+										Browse all 13 templates →
+									</button>
+								</div>
 								<div className="flex flex-wrap gap-2">
-									{["Azurill", "Bronzor", "Chikorita", "Gengar"].map((tmpl) => (
+									{[
+										"Azurill", "Bronzor", "Chikorita", "Ditgar", "Ditto", "Gengar",
+										"Glalie", "Kakuna", "Lapras", "Leafish", "Onyx", "Pikachu", "Rhyhorn"
+									].map((tmpl) => (
 										<button
 											key={tmpl}
 											type="button"
 											onClick={() => handleSelectTemplate(tmpl)}
 											className={cn(
-												"px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border",
-												selectedTemplate === tmpl
+												"px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border",
+												selectedTemplate.toLowerCase() === tmpl.toLowerCase()
 													? "bg-emerald-500 text-slate-950 border-emerald-500 font-bold"
 													: "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
 											)}
@@ -5208,6 +5282,18 @@ export function GuidedStoryRoute() {
 												headerFont: "font-sans",
 												sectionHeader: "text-yellow-700 tracking-wider font-bold",
 												bulletDot: "text-yellow-600",
+											};
+										case "rhyhorn":
+											return {
+												borderTop: "border-t-[6px] border-t-cyan-700",
+												primaryText: "text-cyan-800",
+												primaryBg: "bg-cyan-800",
+												badgeBg: "bg-cyan-50 text-cyan-800 border-cyan-200",
+												sidebarBg: "bg-stone-50",
+												sidebarBorder: "border-stone-200",
+												headerFont: "font-serif",
+												sectionHeader: "text-cyan-800 tracking-wider font-bold",
+												bulletDot: "text-cyan-600",
 											};
 										default:
 											return {
