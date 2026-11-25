@@ -46,6 +46,7 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { useState, useEffect, useRef } from "react";
 import z from "zod";
 import { localResumeStore } from "@/utils/local-resumes";
+import { templates } from "@/dialogs/resume/template/data";
 import { defaultResumeData, type ResumeData } from "@/schema/resume/data";
 import { cn } from "@/utils/style";
 import {
@@ -129,6 +130,28 @@ export function GuidedStoryRoute() {
 			setWizardStep(search.step);
 		}
 	}, [search?.step]);
+
+	// Listen for template changes across the app
+	useEffect(() => {
+		const handleTemplateChange = () => {
+			try {
+				const draft = localStorage.getItem("resume_buddy_guided_story_draft");
+				if (draft) {
+					const parsed = JSON.parse(draft);
+					if (parsed.selectedTemplate) {
+						setSelectedTemplate(parsed.selectedTemplate);
+					}
+				}
+			} catch {
+				// ignore
+			}
+		};
+
+		window.addEventListener("resume_template_changed", handleTemplateChange);
+		return () => {
+			window.removeEventListener("resume_template_changed", handleTemplateChange);
+		};
+	}, []);
 
 	// Load specific resume when resumeId search parameter is provided
 	useEffect(() => {
@@ -228,7 +251,7 @@ export function GuidedStoryRoute() {
 
 	// Step 1: Direction State
 	const [targetRole, setTargetRole] = useState(() => {
-		if (typeof window === "undefined") return "Frontend Developer";
+		if (typeof window === "undefined") return "";
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
@@ -236,7 +259,7 @@ export function GuidedStoryRoute() {
 				if (p.targetRole) return p.targetRole;
 			}
 		} catch { }
-		return "Frontend Developer";
+		return "";
 	});
 	const [jobDescription, setJobDescription] = useState("");
 	const [showJobDescription, setShowJobDescription] = useState(false);
@@ -358,7 +381,7 @@ export function GuidedStoryRoute() {
 
 	// Resume editor states
 	const [fullName, setFullName] = useState(() => {
-		if (typeof window === "undefined") return "Your Name";
+		if (typeof window === "undefined") return "";
 		try {
 			const savedProfile = getStoredUserProfile();
 			if (savedProfile?.name) return savedProfile.name;
@@ -368,7 +391,7 @@ export function GuidedStoryRoute() {
 				if (p.name) return p.name;
 			}
 		} catch { }
-		return "Your Name";
+		return "";
 	});
 	const [createdResumeId, setCreatedResumeId] = useState<string | null>(null);
 	const [pictureUrl, setPictureUrl] = useState("");
@@ -454,19 +477,63 @@ export function GuidedStoryRoute() {
 	const [tempResumeTitle, setTempResumeTitle] = useState("");
 	// Tab 03: Supporting Details state (matching screenshot media_1795019454591_659f3f35.jpg)
 	const [detailsSubTab, setDetailsSubTab] = useState<"contact" | "skills" | "summary">("contact");
-	const [contactEmail, setContactEmail] = useState("you@example.com");
-	const [contactPhone, setContactPhone] = useState("");
-	const [contactLocation, setContactLocation] = useState("");
-	const [contactLinks, setContactLinks] = useState("");
-	const [skillsList, setSkillsList] = useState<string[]>([
-		"React",
-		"TypeScript",
-		"JavaScript",
-		"HTML/CSS",
-		"Tailwind CSS",
-		"Next.js",
-		"Git",
-	]);
+	const [contactEmail, setContactEmail] = useState(() => {
+		if (typeof window === "undefined") return "";
+		try {
+			const savedProfile = getStoredUserProfile();
+			if (savedProfile?.email) return savedProfile.email;
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (p.contactEmail) return p.contactEmail;
+			}
+		} catch { }
+		return "";
+	});
+	const [contactPhone, setContactPhone] = useState(() => {
+		if (typeof window === "undefined") return "";
+		try {
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (p.contactPhone) return p.contactPhone;
+			}
+		} catch { }
+		return "";
+	});
+	const [contactLocation, setContactLocation] = useState(() => {
+		if (typeof window === "undefined") return "";
+		try {
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (p.contactLocation) return p.contactLocation;
+			}
+		} catch { }
+		return "";
+	});
+	const [contactLinks, setContactLinks] = useState(() => {
+		if (typeof window === "undefined") return "";
+		try {
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (p.contactLinks) return p.contactLinks;
+			}
+		} catch { }
+		return "";
+	});
+	const [skillsList, setSkillsList] = useState<string[]>(() => {
+		if (typeof window === "undefined") return [];
+		try {
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (Array.isArray(p.skillsList)) return p.skillsList;
+			}
+		} catch { }
+		return [];
+	});
 	const [newSkillInput, setNewSkillInput] = useState("");
 
 	const [currentStep, setCurrentStep] = useState<
@@ -768,6 +835,24 @@ export function GuidedStoryRoute() {
 	};
 
 	const handleSaveProgress = () => {
+		try {
+			localStorage.setItem(
+				"resume_buddy_guided_story_draft",
+				JSON.stringify({
+					targetRole,
+					fullName,
+					contactEmail,
+					contactPhone,
+					contactLocation,
+					contactLinks,
+					skillsList,
+					selectedTemplate,
+					createdResumeId,
+					updatedAt: new Date().toISOString(),
+				})
+			);
+		} catch { }
+
 		if (createdResumeId) {
 			const existing = localResumeStore.get(createdResumeId);
 			if (existing) {
@@ -778,10 +863,32 @@ export function GuidedStoryRoute() {
 							...existing.data.basics,
 							name: fullName || existing.data.basics.name,
 							headline: targetRole || existing.data.basics.headline,
+							email: contactEmail || existing.data.basics.email,
+							phone: contactPhone || existing.data.basics.phone,
+							location: contactLocation || existing.data.basics.location,
+							website: { url: contactLinks || existing.data.basics.website?.url || "", label: "" },
 						},
 						summary: {
 							...existing.data.summary,
-							content: `<p>${professionalSummary}</p>`,
+							content: professionalSummary ? `<p>${professionalSummary}</p>` : "",
+						},
+						sections: {
+							...existing.data.sections,
+							skills: {
+								title: "Skills",
+								columns: 1,
+								hidden: skillsList.length === 0,
+								items: skillsList.map((skill, idx) => ({
+									id: `skill_${idx}`,
+									hidden: false,
+									icon: "",
+									name: skill,
+									proficiency: "",
+									description: "",
+									level: 0,
+									keywords: [],
+								})),
+							},
 						},
 					},
 				});
@@ -857,9 +964,12 @@ export function GuidedStoryRoute() {
 			...defaultResumeData,
 			basics: {
 				...defaultResumeData.basics,
-				name: fullName || "Your Name",
-				headline: targetRole || "Frontend Developer",
-				email: "you@example.com",
+				name: fullName || "",
+				headline: targetRole || "",
+				email: contactEmail || "",
+				phone: contactPhone || "",
+				location: contactLocation || "",
+				website: { url: contactLinks || "", label: "" },
 			},
 			summary: {
 				...defaultResumeData.summary,
@@ -871,94 +981,78 @@ export function GuidedStoryRoute() {
 				experience: {
 					title: "Experience",
 					columns: 1,
-					hidden: false,
-					items:
-						workList.length > 0
-							? workList.map((w) => ({
-								id: w.id,
-								hidden: false,
-								company: w.organization || "Company",
-								position: w.title,
-								location: "Remote / Hybrid",
-								period: w.dates || "2023 – Present",
-								website: { url: "", label: "" },
-								description: `<p>Spearheaded features and responsive web development as ${w.title}. Collaborated with cross-functional teams to improve user engagement and deliver key releases.</p>`,
-							}))
-							: [
-								{
-									id: "exp_1",
-									hidden: false,
-									company: "Tech Solutions",
-									position: targetRole || "Frontend Developer",
-									location: "Remote",
-									period: "2023 – Present",
-									website: { url: "", label: "" },
-									description: `<p>Developed modern, high-performance web experiences using React, TypeScript, and Tailwind CSS.</p>`,
-								},
-							],
+					hidden: workList.length === 0,
+					items: workList.map((w) => ({
+						id: w.id,
+						hidden: false,
+						company: w.organization || "",
+						position: w.title,
+						location: "",
+						period: w.dates || "",
+						website: { url: "", label: "" },
+						description: w.description ? `<p>${w.description}</p>` : "",
+					})),
 				},
 				projects: {
 					title: "Projects",
 					columns: 1,
-					hidden: false,
+					hidden: projList.length === 0,
 					items: projList.map((p) => ({
 						id: p.id,
 						hidden: false,
 						name: p.title,
-						role: p.organization || "Lead Developer",
-						period: p.dates || "2024",
+						role: p.organization || "",
+						period: p.dates || "",
 						website: { url: "", label: "" },
-						description: `<p>Engineered ${p.title} delivering intuitive UI and robust performance.</p>`,
+						description: p.description ? `<p>${p.description}</p>` : "",
 					})),
 				},
 				education: {
 					title: "Education",
 					columns: 1,
-					hidden: false,
-					items:
-						eduList.length > 0
-							? eduList.map((e) => ({
-								id: e.id,
-								hidden: false,
-								school: e.organization || "University",
-								degree: e.title || "Bachelor's Degree",
-								area: targetRole || "Computer Science",
-								grade: "",
-								location: "",
-								period: e.dates || "2020 – 2024",
-								website: { url: "", label: "" },
-								description: "<p>Completed relevant coursework and practical software development projects.</p>",
-								currentlyStudyingHere: false,
-							}))
-							: [
-								{
-									id: "edu_1",
-									hidden: false,
-									school: "University of Technology",
-									degree: "Bachelor of Science",
-									area: targetRole || "Computer Science",
-									grade: "",
-									location: "",
-									period: "2020 – 2024",
-									website: { url: "", label: "" },
-									description: "<p>Completed relevant coursework in modern software architecture and systems design.</p>",
-									currentlyStudyingHere: false,
-								},
-							],
+					hidden: eduList.length === 0,
+					items: eduList.map((e) => ({
+						id: e.id,
+						hidden: false,
+						school: e.organization || "",
+						degree: e.title || "",
+						area: "",
+						grade: "",
+						location: "",
+						period: e.dates || "",
+						website: { url: "", label: "" },
+						description: e.description ? `<p>${e.description}</p>` : "",
+						currentlyStudyingHere: false,
+					})),
+				},
+				skills: {
+					title: "Skills",
+					columns: 1,
+					hidden: skillsList.length === 0,
+					items: skillsList.map((skill, idx) => ({
+						id: `skill_${idx}`,
+						hidden: false,
+						icon: "",
+						name: skill,
+						proficiency: "",
+						description: "",
+						level: 0,
+						keywords: [],
+					})),
 				},
 				volunteer: {
 					title: "Volunteering & Activities",
 					columns: 1,
-					hidden: false,
+					hidden: volList.length === 0,
 					items: volList.map((v) => ({
 						id: v.id,
 						hidden: false,
-						organization: v.organization || "Community",
-						position: v.title || "Volunteer",
+						organization: v.organization || "",
+						position: v.title || "",
 						location: "",
-						period: v.dates || "2023",
+						period: v.dates || "",
 						website: { url: "", label: "" },
-						description: "<p>Supported community initiatives and team events.</p>",
+						description: v.description ? `<p>${v.description}</p>` : "",
 					})),
 				},
 			},
@@ -966,7 +1060,7 @@ export function GuidedStoryRoute() {
 
 		// Create in store
 		const created = localResumeStore.create({
-			name: targetRole ? `${targetRole} Resume` : "My Resume",
+			name: targetRole ? `${targetRole} Resume` : (fullName ? `${fullName}'s Resume` : "My Resume"),
 			data: newResumeData,
 		});
 		setCreatedResumeId(created.id);
@@ -977,20 +1071,19 @@ export function GuidedStoryRoute() {
 			companyOrProject: w.organization ? `${w.title} at ${w.organization}` : w.title,
 			type: "work",
 			role: w.title,
-			contribution: w.description || `Led development and delivery as ${w.title}`,
-			problem: "Workflows needed faster execution and clearer interface navigation",
-			approach: "Streamlined architecture and engineered reliable user features",
-			evidenceResult: "Delivered key releases with high responsiveness and robust quality",
-			finalBullets: [
-				w.description || `Built responsive solutions and key features as ${w.title}${w.organization ? ` at ${w.organization}` : ""}.`,
-				`Collaborated across workflows to eliminate bottlenecks and enhance performance.`,
-			],
+			contribution: w.description || `Work as ${w.title}`,
+			problem: "",
+			approach: "",
+			evidenceResult: "",
+			finalBullets: w.points && w.points.length > 0
+				? w.points
+				: (w.description ? [w.description] : []),
 			status: "approved",
 		}));
 
 		setStories(initialStories);
-		setActiveProjectName(workList[0]?.organization || targetRole || "Frontend Project");
-		setActiveContribution(workList[0]?.title || "Frontend development");
+		setActiveProjectName(workList[0]?.organization || targetRole || "");
+		setActiveContribution(workList[0]?.title || "");
 
 		// Save state payload and update last worked
 		try {
@@ -999,6 +1092,11 @@ export function GuidedStoryRoute() {
 				JSON.stringify({
 					targetRole,
 					fullName,
+					contactEmail,
+					contactPhone,
+					contactLocation,
+					contactLinks,
+					skillsList,
 					stories: initialStories,
 					selectedTemplate,
 					createdResumeId: created.id,
@@ -1657,16 +1755,16 @@ export function GuidedStoryRoute() {
 						experience: {
 							title: "Experience",
 							columns: 1,
-							hidden: false,
+							hidden: workList.length === 0,
 							items: workList.map((w) => ({
 								id: w.id,
 								hidden: false,
-								company: w.organization || "Company",
+								company: w.organization || "",
 								position: w.title,
-								location: "Remote / Hybrid",
-								period: w.dates || "2023 – Present",
+								location: "",
+								period: w.dates || "",
 								website: { url: "", label: "" },
-								description: (w.points || [w.description || "Spearheaded feature development."])
+								description: (w.points && w.points.length > 0 ? w.points : (w.description ? [w.description] : []))
 									.map((p) => `<p>• ${p}</p>`)
 									.join(""),
 							})),
@@ -1674,15 +1772,15 @@ export function GuidedStoryRoute() {
 						projects: {
 							title: "Projects",
 							columns: 1,
-							hidden: false,
+							hidden: projList.length === 0,
 							items: projList.map((p) => ({
 								id: p.id,
 								hidden: false,
 								name: p.title,
-								role: p.organization || "Lead Developer",
-								period: p.dates || "2024",
+								role: p.organization || "",
+								period: p.dates || "",
 								website: { url: "", label: "" },
-								description: (p.points || [p.description || "Engineered core modules."])
+								description: (p.points && p.points.length > 0 ? p.points : (p.description ? [p.description] : []))
 									.map((p) => `<p>• ${p}</p>`)
 									.join(""),
 							})),
@@ -1888,19 +1986,55 @@ export function GuidedStoryRoute() {
 			parsedDraft.updatedAt = new Date().toISOString();
 			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(parsedDraft));
 
+			const manualDraft = localStorage.getItem("resume_buddy_manual_draft");
+			const parsedManual = manualDraft ? JSON.parse(manualDraft) : {};
+			parsedManual.selectedTemplate = templateName;
+			localStorage.setItem("resume_buddy_manual_draft", JSON.stringify(parsedManual));
+
 			if (createdResumeId) {
 				const existing = localResumeStore.get(createdResumeId);
 				if (existing) {
+					const tmplKey = templateName.toLowerCase();
+					const templateMeta = (templates as any)[tmplKey];
+					const isNoSidebar = templateMeta ? templateMeta.sidebarPosition === "none" : false;
+					const sidebarSections = ["skills", "certifications", "awards", "languages", "interests", "publications"];
+					const allSecs = [
+						...new Set([...(existing.data.metadata.layout.pages || []).flatMap((p: any) => [...p.main, ...p.sidebar])]),
+					];
+
+					const updatedPages = (existing.data.metadata.layout.pages || []).map((page: any, idx: number) => {
+						if (idx === 0) {
+							return {
+								...page,
+								fullWidth: isNoSidebar,
+								main: isNoSidebar ? allSecs : allSecs.filter((s: string) => !sidebarSections.includes(s)),
+								sidebar: isNoSidebar ? [] : allSecs.filter((s: string) => sidebarSections.includes(s)),
+							};
+						}
+						return {
+							...page,
+							fullWidth: isNoSidebar,
+							main: [],
+							sidebar: [],
+						};
+					});
+
 					const updatedData = {
 						...existing.data,
 						metadata: {
 							...existing.data.metadata,
-							template: templateName.toLowerCase() as any,
+							template: tmplKey as any,
+							layout: {
+								...existing.data.metadata.layout,
+								pages: updatedPages.length > 0 ? updatedPages : [{ fullWidth: isNoSidebar, main: allSecs, sidebar: [] }],
+							},
 						},
 					};
 					localResumeStore.update(createdResumeId, { data: updatedData });
 				}
 			}
+
+			window.dispatchEvent(new Event("resume_template_changed"));
 		} catch (e) {
 			console.error("Failed to save selected template", e);
 		}
@@ -2719,7 +2853,7 @@ export function GuidedStoryRoute() {
 					</span>
 				</div>
 
-				{/* Right: Mute toggle + DeepSeek API status pill + User pill + Logout button */}
+				{/* Right: Mute toggle + User pill + Logout button */}
 				<div className="flex items-center gap-3">
 					<button
 						type="button"
@@ -2753,12 +2887,6 @@ export function GuidedStoryRoute() {
 							</>
 						)}
 					</button>
-
-					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 text-emerald-300 text-xs font-medium">
-						<Key className="size-3 text-emerald-400" />
-						<span>DeepSeek API</span>
-						<span className="size-1.5 rounded-full bg-emerald-400" />
-					</div>
 
 					<div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-700/80 bg-slate-900/90 text-slate-200 text-xs font-semibold">
 						<span className="size-2 rounded-full bg-emerald-400" />
@@ -4204,9 +4332,11 @@ export function GuidedStoryRoute() {
 																<h4 className="text-lg font-bold text-white tracking-tight">
 																	{entry.title}
 																</h4>
-																<p className="text-xs text-slate-400 mt-0.5">
-																	{entry.organization || "NavGurukul"} · {entry.dates || "Jul 2023 – Present"}
-																</p>
+																{(entry.organization || entry.dates) && (
+																	<p className="text-xs text-slate-400 mt-0.5">
+																		{[entry.organization, entry.dates].filter(Boolean).join(" · ")}
+																	</p>
+																)}
 															</div>
 
 															<div className="flex items-center gap-2">
@@ -4501,9 +4631,11 @@ export function GuidedStoryRoute() {
 																	<h4 className="text-lg font-bold text-white tracking-tight">
 																		{entry.title}
 																	</h4>
-																	<p className="text-xs text-slate-400 mt-0.5">
-																		{entry.organization || "XL Bootcamp"} {entry.dates ? `· ${entry.dates}` : ""}
-																	</p>
+																	{(entry.organization || entry.dates) && (
+																		<p className="text-xs text-slate-400 mt-0.5">
+																			{[entry.organization, entry.dates].filter(Boolean).join(" · ")}
+																		</p>
+																	)}
 																</div>
 
 																<div className="flex items-center gap-2">
@@ -5181,16 +5313,28 @@ export function GuidedStoryRoute() {
 
 							{/* Template Choice */}
 							<div className="rounded-2xl border border-slate-800 bg-[#09101d] p-5 space-y-3">
-								<span className="text-xs font-bold text-slate-300">Choose Template</span>
+								<div className="flex items-center justify-between">
+									<span className="text-xs font-bold text-slate-300">Choose Template</span>
+									<button
+										type="button"
+										onClick={() => setShowTemplateModal(true)}
+										className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+									>
+										Browse all 13 templates →
+									</button>
+								</div>
 								<div className="flex flex-wrap gap-2">
-									{["Azurill", "Bronzor", "Chikorita", "Gengar"].map((tmpl) => (
+									{[
+										"Azurill", "Bronzor", "Chikorita", "Ditgar", "Ditto", "Gengar",
+										"Glalie", "Kakuna", "Lapras", "Leafish", "Onyx", "Pikachu", "Rhyhorn"
+									].map((tmpl) => (
 										<button
 											key={tmpl}
 											type="button"
 											onClick={() => handleSelectTemplate(tmpl)}
 											className={cn(
-												"px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border",
-												selectedTemplate === tmpl
+												"px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border",
+												selectedTemplate.toLowerCase() === tmpl.toLowerCase()
 													? "bg-emerald-500 text-slate-950 border-emerald-500 font-bold"
 													: "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
 											)}
@@ -5487,6 +5631,18 @@ export function GuidedStoryRoute() {
 												sectionHeader: "text-yellow-700 tracking-wider font-bold",
 												bulletDot: "text-yellow-600",
 											};
+										case "rhyhorn":
+											return {
+												borderTop: "border-t-[6px] border-t-cyan-700",
+												primaryText: "text-cyan-800",
+												primaryBg: "bg-cyan-800",
+												badgeBg: "bg-cyan-50 text-cyan-800 border-cyan-200",
+												sidebarBg: "bg-stone-50",
+												sidebarBorder: "border-stone-200",
+												headerFont: "font-serif",
+												sectionHeader: "text-cyan-800 tracking-wider font-bold",
+												bulletDot: "text-cyan-600",
+											};
 										default:
 											return {
 												borderTop: "border-t-[6px] border-t-blue-500",
@@ -5503,117 +5659,91 @@ export function GuidedStoryRoute() {
 								})();
 
 								// Shared Sub-renderers
-								const renderExperienceBlock = () => (
-									<div className="space-y-2.5">
-										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
-											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
-												EXPERIENCE
-											</span>
-										</div>
-										{outlineEntries.filter((e) => e.category === "work").length > 0 ? (
-											outlineEntries
-												.filter((e) => e.category === "work")
-												.map((w) => (
-													<div key={w.id} className="space-y-1">
-														<div className="flex items-baseline justify-between gap-2">
-															<div className="text-xs font-bold text-slate-950">
-																{w.title}
-															</div>
+								const renderExperienceBlock = () => {
+									const works = outlineEntries.filter((e) => e.category === "work");
+									if (works.length === 0) return null;
+									return (
+										<div className="space-y-2.5">
+											<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+												<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+													EXPERIENCE
+												</span>
+											</div>
+											{works.map((w) => (
+												<div key={w.id} className="space-y-1">
+													<div className="flex items-baseline justify-between gap-2">
+														<div className="text-xs font-bold text-slate-950">
+															{w.title}
+														</div>
+														{w.dates && (
 															<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
-																{w.dates || "Jul 2023 – Present"}
+																{w.dates}
 															</div>
-														</div>
+														)}
+													</div>
+													{w.organization && (
 														<div className={cn("text-[11px] font-semibold", palette.primaryText)}>
-															{w.organization || "Company"}
+															{w.organization}
 														</div>
-														{w.points && w.points.length > 0 ? (
-															<ul className="space-y-1 pt-0.5">
-																{w.points.map((pt, pIdx) => (
-																	<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
-																		<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
-																		<span>{pt}</span>
-																	</li>
-																))}
-															</ul>
-														) : (
-															<p className="text-[11px] text-slate-400 italic">
-																Your contribution will appear here
-															</p>
-														)}
-													</div>
-												))
-										) : (
-											<div className="space-y-1">
-												<div className="text-xs font-bold text-slate-950">
-													Sr. Frontend Developer
+													)}
+													{w.points && w.points.length > 0 && (
+														<ul className="space-y-1 pt-0.5">
+															{w.points.map((pt, pIdx) => (
+																<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+																	<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
+																	<span>{pt}</span>
+																</li>
+															))}
+														</ul>
+													)}
 												</div>
-												<div className="text-[10px] text-slate-500 font-medium">
-													NavGurukul · Jul 2023 – Present
-												</div>
-												<p className="text-[11px] text-slate-400 italic">
-													Your contribution will appear here
-												</p>
-											</div>
-										)}
-									</div>
-								);
-
-								const renderProjectsBlock = () => (
-									<div className="space-y-2.5">
-										<div className="flex items-center justify-between border-b border-slate-200 pb-1">
-											<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
-												PROJECTS & ACTIVITIES
-											</span>
+											))}
 										</div>
-										{outlineEntries.filter((e) => e.category === "projects" || e.category === "volunteer").length > 0 ? (
-											outlineEntries
-												.filter((e) => e.category === "projects" || e.category === "volunteer")
-												.map((p) => (
-													<div key={p.id} className="space-y-1">
-														<div className="flex items-baseline justify-between gap-2">
-															<div className="text-xs font-bold text-slate-950">
-																{p.title}
+									);
+								};
+
+								const renderProjectsBlock = () => {
+									const projs = outlineEntries.filter((e) => e.category === "projects" || e.category === "volunteer");
+									if (projs.length === 0) return null;
+									return (
+										<div className="space-y-2.5">
+											<div className="flex items-center justify-between border-b border-slate-200 pb-1">
+												<span className={cn("text-[10px] font-mono tracking-widest uppercase", palette.sectionHeader)}>
+													PROJECTS & ACTIVITIES
+												</span>
+											</div>
+											{projs.map((p) => (
+												<div key={p.id} className="space-y-1">
+													<div className="flex items-baseline justify-between gap-2">
+														<div className="text-xs font-bold text-slate-950">
+															{p.title}
+														</div>
+														{p.dates && (
+															<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+																{p.dates}
 															</div>
-															{p.dates && (
-																<div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
-																	{p.dates}
-																</div>
-															)}
-														</div>
-														<div className="text-[10px] text-slate-500 font-medium">
-															{p.organization || "Independent Project"}
-														</div>
-														{p.points && p.points.length > 0 ? (
-															<ul className="space-y-1 pt-0.5">
-																{p.points.map((pt, pIdx) => (
-																	<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
-																		<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
-																		<span>{pt}</span>
-																	</li>
-																))}
-															</ul>
-														) : (
-															<p className="text-[11px] text-slate-400 italic">
-																Your contribution will appear here
-															</p>
 														)}
 													</div>
-												))
-										) : (
-											<div className="space-y-1">
-												<div className="text-xs font-bold text-slate-950">
-													Mentor
+													{p.organization && (
+														<div className="text-[10px] text-slate-500 font-medium">
+															{p.organization}
+														</div>
+													)}
+													{p.points && p.points.length > 0 && (
+														<ul className="space-y-1 pt-0.5">
+															{p.points.map((pt, pIdx) => (
+																<li key={pIdx} className="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+																	<span className={cn("text-xs leading-none shrink-0", palette.bulletDot)}>•</span>
+																	<span>{pt}</span>
+																</li>
+															))}
+														</ul>
+													)}
 												</div>
-												<div className="text-[10px] text-slate-500 font-medium">
-													XL Bootcamp
-												</div>
-												<p className="text-[11px] text-slate-400 italic">
-													Your contribution will appear here
-												</p>
-											</div>
-										)}
-									</div>
-								);
+											))}
+										</div>
+									);
+								};
 
 								const renderEducationBlock = () => {
 									const edus = outlineEntries.filter((e) => e.category === "education");
@@ -5631,9 +5761,11 @@ export function GuidedStoryRoute() {
 														<div className="text-xs font-bold text-slate-950">
 															{edu.title}
 														</div>
-														<div className="text-[10px] text-slate-500 font-medium">
-															{edu.organization || "University"} {edu.dates ? `· ${edu.dates}` : ""}
-														</div>
+														{(edu.organization || edu.dates) && (
+															<div className="text-[10px] text-slate-500 font-medium">
+																{[edu.organization, edu.dates].filter(Boolean).join(" · ")}
+															</div>
+														)}
 													</div>
 												))}
 											</div>
@@ -5666,26 +5798,26 @@ export function GuidedStoryRoute() {
 
 								const renderContactItems = () => {
 									if (!contactEmail && !contactPhone && !contactLocation && !contactLinks) {
-										return <p className="text-[11px] text-slate-400 italic">Contact details will go here</p>;
+										return null;
 									}
 									return (
 										<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-600 font-medium pt-0.5">
 											{contactEmail && <span>{contactEmail}</span>}
 											{contactPhone && (
 												<>
-													<span className="text-slate-300">·</span>
+													{contactEmail && <span className="text-slate-300">·</span>}
 													<span>{contactPhone}</span>
 												</>
 											)}
 											{contactLocation && (
 												<>
-													<span className="text-slate-300">·</span>
+													{(contactEmail || contactPhone) && <span className="text-slate-300">·</span>}
 													<span>{contactLocation}</span>
 												</>
 											)}
 											{contactLinks && (
 												<>
-													<span className="text-slate-300">·</span>
+													{(contactEmail || contactPhone || contactLocation) && <span className="text-slate-300">·</span>}
 													<span>{contactLinks}</span>
 												</>
 											)}
@@ -5716,29 +5848,33 @@ export function GuidedStoryRoute() {
 												<div className={cn("p-6 text-white", palette.primaryBg)}>
 													<div className="flex items-start justify-between gap-4">
 														<div className="space-y-1">
-															<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", palette.headerFont)}>
-																{fullName || "Your name"}
-															</h2>
-															<p className="text-xs font-semibold text-white/90">
-																{targetRole || "Frontend Developer"}
-															</p>
+															{fullName && (
+																<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", palette.headerFont)}>
+																	{fullName}
+																</h2>
+															)}
+															{targetRole && (
+																<p className="text-xs font-semibold text-white/90">
+																	{targetRole}
+																</p>
+															)}
 															<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-white/80 pt-1">
 																{contactEmail && <span>{contactEmail}</span>}
 																{contactPhone && (
 																	<>
-																		<span className="text-white/40">·</span>
+																		{contactEmail && <span className="text-white/40">·</span>}
 																		<span>{contactPhone}</span>
 																	</>
 																)}
 																{contactLocation && (
 																	<>
-																		<span className="text-white/40">·</span>
+																		{(contactEmail || contactPhone) && <span className="text-white/40">·</span>}
 																		<span>{contactLocation}</span>
 																	</>
 																)}
 																{contactLinks && (
 																	<>
-																		<span className="text-white/40">·</span>
+																		{(contactEmail || contactPhone || contactLocation) && <span className="text-white/40">·</span>}
 																		<span>{contactLinks}</span>
 																	</>
 																)}
@@ -5787,39 +5923,44 @@ export function GuidedStoryRoute() {
 															/>
 														</div>
 													)}
-													<div className="space-y-1">
-														<span className={cn("text-[10px] font-mono tracking-widest uppercase block", palette.sectionHeader)}>
-															CONTACT
-														</span>
-														<div className="space-y-1 text-[11px] text-slate-700">
-															{contactEmail && <div className="break-all">{contactEmail}</div>}
-															{contactPhone && <div>{contactPhone}</div>}
-															{contactLocation && <div>{contactLocation}</div>}
-															{contactLinks && <div className="break-all">{contactLinks}</div>}
-															{!contactEmail && !contactPhone && !contactLocation && !contactLinks && (
-																<p className="text-[11px] text-slate-400 italic">No contact details yet</p>
-															)}
+													{(contactEmail || contactPhone || contactLocation || contactLinks) && (
+														<div className="space-y-1">
+															<span className={cn("text-[10px] font-mono tracking-widest uppercase block", palette.sectionHeader)}>
+																CONTACT
+															</span>
+															<div className="space-y-1 text-[11px] text-slate-700">
+																{contactEmail && <div className="break-all">{contactEmail}</div>}
+																{contactPhone && <div>{contactPhone}</div>}
+																{contactLocation && <div>{contactLocation}</div>}
+																{contactLinks && <div className="break-all">{contactLinks}</div>}
+															</div>
 														</div>
-													</div>
+													)}
 													{renderSkillsBlock()}
 													{renderEducationBlock()}
 												</div>
 
 												{/* Main Body */}
 												<div className="sm:w-[64%] p-5 sm:p-6 space-y-4">
-													<div className="space-y-1 pb-2 border-b border-slate-200">
-														<h2 className={cn("text-2xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
-															{fullName || "Your name"}
-														</h2>
-														<p className={cn("text-xs font-semibold", palette.primaryText)}>
-															{targetRole || "Frontend Developer"}
-														</p>
-														{professionalSummary && (
-															<p className="text-[11px] text-slate-700 pt-1.5 leading-relaxed">
-																{professionalSummary}
-															</p>
-														)}
-													</div>
+													{(fullName || targetRole || professionalSummary) && (
+														<div className="space-y-1 pb-2 border-b border-slate-200">
+															{fullName && (
+																<h2 className={cn("text-2xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+																	{fullName}
+																</h2>
+															)}
+															{targetRole && (
+																<p className={cn("text-xs font-semibold", palette.primaryText)}>
+																	{targetRole}
+																</p>
+															)}
+															{professionalSummary && (
+																<p className="text-[11px] text-slate-700 pt-1.5 leading-relaxed">
+																	{professionalSummary}
+																</p>
+															)}
+														</div>
+													)}
 													{renderExperienceBlock()}
 													{renderProjectsBlock()}
 												</div>
@@ -5829,27 +5970,33 @@ export function GuidedStoryRoute() {
 										{/* 3. TWO-COLUMN RIGHT SIDEBAR LAYOUT (Chikorita / Leafish / Pikachu) */}
 										{isRightSidebar && (
 											<div className="p-5 sm:p-6 space-y-4">
-												<div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-200">
-													<div className="space-y-1">
-														<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
-															{fullName || "Your name"}
-														</h2>
-														<p className={cn("text-xs font-bold", palette.primaryText)}>
-															{targetRole || "Frontend Developer"}
-														</p>
-														{renderContactItems()}
-													</div>
-													{showPicture && pictureUrl && (
-														<img
-															src={pictureUrl}
-															alt="Profile"
-															className={cn(
-																"size-14 object-cover border-2 border-slate-300 shadow-sm shrink-0",
-																pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+												{(fullName || targetRole || contactEmail || contactPhone || contactLocation || contactLinks || (showPicture && pictureUrl)) && (
+													<div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-200">
+														<div className="space-y-1">
+															{fullName && (
+																<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+																	{fullName}
+																</h2>
 															)}
-														/>
-													)}
-												</div>
+															{targetRole && (
+																<p className={cn("text-xs font-bold", palette.primaryText)}>
+																	{targetRole}
+																</p>
+															)}
+															{renderContactItems()}
+														</div>
+														{showPicture && pictureUrl && (
+															<img
+																src={pictureUrl}
+																alt="Profile"
+																className={cn(
+																	"size-14 object-cover border-2 border-slate-300 shadow-sm shrink-0",
+																	pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+																)}
+															/>
+														)}
+													</div>
+												)}
 
 												{professionalSummary && (
 													<p className="text-[11px] text-slate-700 leading-relaxed italic">
@@ -5874,34 +6021,40 @@ export function GuidedStoryRoute() {
 										{(isMinimalist || isHighContrast) && (
 											<div className="p-6 sm:p-7 space-y-5">
 												{/* Header */}
-												<div className={cn("space-y-1.5 pb-3 border-b-2", palette.sidebarBorder || "border-slate-300")}>
-													<div className="flex items-start justify-between gap-4">
-														<div className="space-y-1">
-															<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
-																{fullName || "Your name"}
-															</h2>
-															<p className={cn("text-xs font-bold", palette.primaryText)}>
-																{targetRole || "Frontend Developer"}
-															</p>
-														</div>
-														{showPicture && pictureUrl && (
-															<img
-																src={pictureUrl}
-																alt="Profile"
-																className={cn(
-																	"size-14 object-cover border border-slate-300 shadow-sm shrink-0",
-																	pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+												{(fullName || targetRole || (showPicture && pictureUrl) || professionalSummary || contactEmail || contactPhone || contactLocation || contactLinks) && (
+													<div className={cn("space-y-1.5 pb-3 border-b-2", palette.sidebarBorder || "border-slate-300")}>
+														<div className="flex items-start justify-between gap-4">
+															<div className="space-y-1">
+																{fullName && (
+																	<h2 className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950", palette.headerFont)}>
+																		{fullName}
+																	</h2>
 																)}
-															/>
+																{targetRole && (
+																	<p className={cn("text-xs font-bold", palette.primaryText)}>
+																		{targetRole}
+																	</p>
+																)}
+															</div>
+															{showPicture && pictureUrl && (
+																<img
+																	src={pictureUrl}
+																	alt="Profile"
+																	className={cn(
+																		"size-14 object-cover border border-slate-300 shadow-sm shrink-0",
+																		pictureShape === "circle" ? "rounded-full" : pictureShape === "rounded" ? "rounded-xl" : "rounded-none"
+																	)}
+																/>
+															)}
+														</div>
+														{renderContactItems()}
+														{professionalSummary && (
+															<p className="text-[11px] text-slate-700 pt-1 leading-relaxed border-t border-slate-100">
+																{professionalSummary}
+															</p>
 														)}
 													</div>
-													{renderContactItems()}
-													{professionalSummary && (
-														<p className="text-[11px] text-slate-700 pt-1 leading-relaxed border-t border-slate-100">
-															{professionalSummary}
-														</p>
-													)}
-												</div>
+												)}
 
 												{renderExperienceBlock()}
 												{renderProjectsBlock()}

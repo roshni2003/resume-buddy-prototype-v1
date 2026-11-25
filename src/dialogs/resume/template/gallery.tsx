@@ -36,26 +36,77 @@ export function TemplateGalleryDialog(_: DialogProps<"resume.template.gallery">)
 			// Define which sections typically go in sidebar vs main
 			const sidebarSections = ["skills", "certifications", "awards", "languages", "interests", "publications"];
 
-			// Get all current sections
+			// Get all current sections from existing layout
 			const allSections = [
 				...new Set([...draft.metadata.layout.pages.flatMap((page) => [...page.main, ...page.sidebar])]),
 			];
 
-			// Reorganize based on sidebar position
-			draft.metadata.layout.pages.forEach((page) => {
-				if (sidebarPosition === "none") {
-					// No sidebar - move everything to main
-					page.main = allSections;
-					page.sidebar = [];
-					page.fullWidth = true;
-				} else {
-					// Has sidebar (left or right) - organize sections appropriately
-					page.fullWidth = false;
-					page.sidebar = allSections.filter((section) => sidebarSections.includes(section));
-					page.main = allSections.filter((section) => !sidebarSections.includes(section));
+			// Ensure sections with active user data are also preserved
+			if (draft.summary && !allSections.includes("summary")) {
+				allSections.unshift("summary");
+			}
+			const sectionKeys = [
+				"experience",
+				"education",
+				"skills",
+				"projects",
+				"profiles",
+				"volunteer",
+				"certifications",
+				"awards",
+				"languages",
+				"interests",
+				"publications",
+				"references",
+			];
+			sectionKeys.forEach((sec) => {
+				// @ts-expect-error
+				if (draft.sections[sec]?.items?.length > 0 && !allSections.includes(sec)) {
+					allSections.push(sec);
 				}
 			});
+
+			if (!draft.metadata.layout.pages || draft.metadata.layout.pages.length === 0) {
+				draft.metadata.layout.pages = [{ fullWidth: false, main: [], sidebar: [] }];
+			}
+
+			// Reorganize page 0
+			if (sidebarPosition === "none") {
+				// No sidebar - move everything to main
+				draft.metadata.layout.pages[0].main = allSections;
+				draft.metadata.layout.pages[0].sidebar = [];
+				draft.metadata.layout.pages[0].fullWidth = true;
+			} else {
+				// Has sidebar (left or right) - organize sections appropriately
+				draft.metadata.layout.pages[0].fullWidth = false;
+				draft.metadata.layout.pages[0].sidebar = allSections.filter((section) => sidebarSections.includes(section));
+				draft.metadata.layout.pages[0].main = allSections.filter((section) => !sidebarSections.includes(section));
+			}
+
+			// For subsequent pages, leave empty so dynamic pagination can flow without duplicate sections
+			for (let i = 1; i < draft.metadata.layout.pages.length; i++) {
+				draft.metadata.layout.pages[i].fullWidth = sidebarPosition === "none";
+				draft.metadata.layout.pages[i].main = [];
+				draft.metadata.layout.pages[i].sidebar = [];
+			}
 		});
+
+		// Sync with localStorage drafts and dispatch change event
+		try {
+			const manualDraft = localStorage.getItem("resume_buddy_manual_draft");
+			const manualParsed = manualDraft ? JSON.parse(manualDraft) : {};
+			manualParsed.selectedTemplate = templateMetadata.name;
+			localStorage.setItem("resume_buddy_manual_draft", JSON.stringify(manualParsed));
+
+			const storyDraft = localStorage.getItem("resume_buddy_guided_story_draft");
+			const storyParsed = storyDraft ? JSON.parse(storyDraft) : {};
+			storyParsed.selectedTemplate = templateMetadata.name;
+			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(storyParsed));
+
+			window.dispatchEvent(new Event("resume_template_changed"));
+		} catch {
+			// ignore
+		}
 
 		closeDialog();
 	}
