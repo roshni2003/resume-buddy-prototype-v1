@@ -28,7 +28,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { zodValidator } from "@tanstack/zod-adapter";
 import z from "zod";
-import { localResumeStore } from "@/utils/local-resumes";
+import { defaultResumeData } from "@/schema/resume/data";
+import { api } from "@/utils/api";
+import { slugify } from "@/utils/string";
 import { cn } from "@/utils/style";
 
 const searchSchema = z.object({
@@ -108,19 +110,11 @@ export function ManualBuilderRoute() {
 	};
 
 	const getInitialManualState = () => {
-		if (typeof window === "undefined") return defaultManualDraft;
-		try {
-			const saved = localStorage.getItem("resume_buddy_manual_draft");
-			if (saved) {
-				return { ...defaultManualDraft, ...JSON.parse(saved) };
-			}
-		} catch {
-			// ignore fallback
-		}
 		return defaultManualDraft;
 	};
 
 	const initialDraft = getInitialManualState();
+	const [createdResumeId, setCreatedResumeId] = useState<string | null>(null);
 
 	// Form values
 	const [fullName, setFullName] = useState(initialDraft.fullName);
@@ -361,11 +355,9 @@ export function ManualBuilderRoute() {
 		}
 	};
 
-	const handleOpenEditor = () => {
-		// Save to local resume store
-		const newResume = localResumeStore.create({
-			name: `${fullName}'s Resume - ${targetRole || "Manual"}`,
-			data: {
+	const handleOpenEditor = async () => {
+		const resumeName = fullName ? `${fullName}'s Resume - ${targetRole || "Manual"}` : `${targetRole || "My"} Resume`;
+		const resumeDataPayload = {
 				basics: {
 					name: fullName,
 					headline: targetRole,
@@ -456,11 +448,29 @@ export function ManualBuilderRoute() {
 						],
 					},
 				},
-			},
-		});
+		};
 
-		setSavedToLibrary(true);
-		toast.success("Resume saved successfully! You can export or continue tweaking right here.");
+		try {
+			if (createdResumeId) {
+				await api.updateResume(createdResumeId, {
+					name: resumeName,
+					data: resumeDataPayload as any,
+				});
+			} else {
+				const newResume = await api.createResume({
+					name: resumeName,
+					slug: `${slugify(resumeName)}-${Date.now().toString(36)}`,
+					withSampleData: false,
+					data: resumeDataPayload as any,
+				});
+				setCreatedResumeId(newResume.id);
+			}
+			localStorage.removeItem("resume_buddy_manual_draft");
+			setSavedToLibrary(true);
+			toast.success("Resume saved successfully! You can export or continue tweaking right here.");
+		} catch (err: any) {
+			toast.error("Failed to save resume: " + (err.message || "Unknown error"));
+		}
 	};
 
 	const stepTitles: Record<number, { category: string; title: string; subtitle: string }> = {

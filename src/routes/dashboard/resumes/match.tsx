@@ -330,7 +330,7 @@ function MatchToJobRouteComponent() {
 
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				window.history.replaceState(null, "", "/dashboard/resumes");
-				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any });
+				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan", resumeId: newResume.id } as any });
 			} catch (e) {
 				console.error("Failed to tailor resume with onboarding", e);
 				setIsCreating(false);
@@ -369,7 +369,7 @@ function MatchToJobRouteComponent() {
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				// Force the history stack to have Dashboard before Builder so back button works correctly
 				window.history.replaceState(null, "", "/dashboard/resumes");
-				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any });
+				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan", resumeId: newResume.id } as any });
 			} catch(e) {
 				console.error("Failed to create tailored resume", e);
 				setIsCreating(false);
@@ -456,13 +456,13 @@ function MatchToJobRouteComponent() {
 					name: uploadingFile?.name ? `Tailored: ${uploadingFile.name}` : "Tailored Resume",
 					slug: `tailored-${Date.now().toString(36)}`,
 					data: resumeDataPayload,
-					withSampleData: !uploadingFile,
+					withSampleData: false,
 				});
 				
 				await queryClient.invalidateQueries({ queryKey: ["resumes"] });
 				// Force the history stack to have Dashboard before Builder so back button works correctly
 				window.history.replaceState(null, "", "/dashboard/resumes");
-				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan" } as any });
+				navigate({ to: "/dashboard/resumes/guided-story" as any, search: { step: "plan", resumeId: resume.id } as any });
 			} catch (e) {
 				console.error("Failed to create resume", e);
 				setIsCreating(false);

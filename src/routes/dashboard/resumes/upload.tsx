@@ -348,14 +348,6 @@ function UploadRouteComponent() {
 			};
 
 			localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(draftPayload));
-			localStorage.setItem(
-				"resume_buddy_user_profile",
-				JSON.stringify({
-					name: confirmName,
-					email: confirmEmail,
-					headline: confirmHeadline,
-				})
-			);
 
 			// Helper to format points as HTML list for resume sections
 			const toHtmlDescription = (points?: string[], desc?: string) => {
@@ -454,11 +446,12 @@ function UploadRouteComponent() {
 				keywords: [],
 			}));
 
-			// Also create a resume entry in local store / backend so dashboard & builder show all parsed sections
+			// Also create a resume entry via API (triggers POST /resumes and persists to localResumeStore)
 			const resumeTitle = confirmName ? `${confirmName}'s Resume` : "My Resume";
-			const createdResume = localResumeStore.create({
+			const createdResume = await api.createResume({
 				name: resumeTitle,
 				slug: `${slugify(resumeTitle)}-${Date.now().toString(36)}`,
+				withSampleData: false,
 				data: {
 					...defaultResumeData,
 					basics: {
@@ -486,6 +479,15 @@ function UploadRouteComponent() {
 				},
 			});
 
+			try {
+				localStorage.setItem(
+					"resume_buddy_guided_story_draft",
+					JSON.stringify({ ...draftPayload, createdResumeId: createdResume.id })
+				);
+			} catch { }
+
+			await queryClient.invalidateQueries({ queryKey: ["resumes"] });
+
 			localStorage.setItem(
 				"resume_buddy_last_worked",
 				JSON.stringify({
@@ -494,7 +496,7 @@ function UploadRouteComponent() {
 					type: "guided-story",
 					title: `Continue editing ${resumeTitle}`,
 					path: "/dashboard/resumes/guided-story",
-					search: { step: "plan" },
+					search: { step: "plan", resumeId: createdResume.id },
 					updatedAt: new Date().toISOString(),
 				})
 			);
@@ -502,7 +504,7 @@ function UploadRouteComponent() {
 			toast.success("Ready! Bringing your story out...", { id: toastId });
 			navigate({
 				to: "/dashboard/resumes/guided-story" as any,
-				search: { step: "plan" } as any,
+				search: { step: "plan", resumeId: createdResume.id } as any,
 			});
 		} catch (err: any) {
 			isProceedingRef.current = false;
