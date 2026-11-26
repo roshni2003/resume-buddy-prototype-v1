@@ -66,6 +66,7 @@ import {
 	extractTopicsFromStory,
 	generateFollowUpQuestionForTopic,
 	getDeepSeekApiKey,
+	detectExperienceLevel,
 } from "@/utils/deepseek-client";
 import { getStoredUserProfile } from "@/utils/auth-token";
 
@@ -1220,55 +1221,40 @@ export function GuidedStoryRoute() {
 		}
 	};
 
-	// Generate focused, contextual questions tailored to each experience (one by one)
+	// Generate focused, contextual questions tailored strictly to the user's role and experience level
 	const getFocusedQuestionsForExperience = (entry: OutlineEntry) => {
+		const level = detectExperienceLevel(entry.title, targetRole, entry.description);
 		const lowerTitle = entry.title.toLowerCase();
 		const lowerDesc = (entry.description || "").toLowerCase();
 		const org = entry.organization ? ` at ${entry.organization}` : "";
 
-		// AI Resume Builder
-		if (lowerTitle.includes("resume builder") || lowerDesc.includes("resume builder") || (lowerTitle.includes("resume") && lowerTitle.includes("ai"))) {
-			return [
-				{
-					question: `For the ${entry.title}, what parts did you personally build?`,
-					placeholder: "e.g. Built the real-time resume preview, interactive editor, and instant template rendering...",
-					hint: "Implementation details, specific components, or real-time preview features you built.",
-					stepLabel: "Your contribution",
-				},
-				{
-					question: `For the resume preview feature, did you get any feedback or see it used once shipped?`,
-					placeholder: "e.g. Enabled instant sub-second feedback for job seekers and reduced resume crafting time by 40%...",
-					hint: "Results, evidence, user feedback, or speed improvements once live.",
-					stepLabel: "Results & evidence",
-				},
-			];
-		}
+		// Explicit Mentoring / Teaching roles (ONLY for actual tutor/instructor/mentor roles, NEVER inferred from "junior" title!)
+		const isExplicitMentorRole =
+			/\b(mentor|mentoring|teaching assistant|tutor|tutored|instructor|trainer|coach)\b/i.test(entry.title) &&
+			!/\b(junior developer|intern developer|software engineer|frontend|backend)\b/i.test(entry.title);
 
-		// English Learning App / Placement feature
-		if (lowerTitle.includes("english") || lowerDesc.includes("english") || lowerTitle.includes("placement") || lowerDesc.includes("placement")) {
+		if (isExplicitMentorRole) {
+			if (level === "junior") {
+				return [
+					{
+						question: `What concepts or skills did you help peers and students learn in ${entry.title}?`,
+						placeholder: "e.g. Assisted peer learners with coding fundamentals, JavaScript concepts, and debugging coursework...",
+						hint: "Topics taught, study sessions conducted, or learning hurdles you helped overcome.",
+						stepLabel: "Your contribution",
+					},
+					{
+						question: `What was the outcome or progress achieved by the students or peers you assisted?`,
+						placeholder: "e.g. Guided 15 students to successfully complete their web development capstone projects...",
+						hint: "Student completions, progress milestones, or feedback received.",
+						stepLabel: "Results & evidence",
+					},
+				];
+			}
 			return [
 				{
-					question: `What did you work on in the placement feature for ${entry.organization || "the application"}?`,
-					placeholder: "e.g. Ensured speech-to-speech accuracy, eliminated transcription issues, missing words, and duplicate content...",
-					hint: "Feature mechanics, speech-to-speech system, transcription accuracy, or edge case handling.",
-					stepLabel: "The work & challenge",
-				},
-				{
-					question: `How did the placement feature impact learners or the evaluation workflow?`,
-					placeholder: "e.g. Successfully assessed over 2,000 learners with 98% transcription reliability and faster student onboarding...",
-					hint: "Scale, evaluation turnaround time, student numbers, or error reduction.",
-					stepLabel: "Results & evidence",
-				},
-			];
-		}
-
-		// Mentoring / Guiding Juniors
-		if (lowerTitle.includes("mentor") || lowerDesc.includes("mentor") || lowerTitle.includes("junior") || lowerDesc.includes("junior") || lowerTitle.includes("guide")) {
-			return [
-				{
-					question: `What were the juniors working on, and how did you guide them?`,
-					placeholder: "e.g. Guided juniors building the resume builder UI, helped them get past initial struggles with AI tools like Claude and Codex...",
-					hint: "Key topics, UI patterns, AI tooling adoption, or code review practices.",
+					question: `What key technical practices, tools, or workflows did you coach or mentor others on as ${entry.title}?`,
+					placeholder: "e.g. Mentored 3 engineers in clean code and system design, ran pair-programming sessions, and elevated PR review standards...",
+					hint: "Mentorship focus, engineering practices introduced, code review standards, or onboarding.",
 					stepLabel: "Your contribution",
 				},
 				{
@@ -1280,12 +1266,53 @@ export function GuidedStoryRoute() {
 			];
 		}
 
-		// General projects
-		if (entry.category === "projects" || lowerTitle.includes("app") || lowerTitle.includes("system") || lowerTitle.includes("feature")) {
+		// Projects
+		if (entry.category === "projects") {
+			if (level === "junior") {
+				return [
+					{
+						question: `What specific parts of ${entry.title} did you personally build, and what technologies did you use?`,
+						placeholder: "e.g. Built responsive UI components with React and TailwindCSS, managed component state, and connected to REST APIs...",
+						hint: "Specific components you coded, libraries used, and how you structured the project.",
+						stepLabel: "Your implementation",
+					},
+					{
+						question: `What was a challenging technical problem or bug you solved while building ${entry.title}?`,
+						placeholder: "e.g. Handled async API errors and race conditions, debugged using browser dev tools, and implemented clean error boundaries...",
+						hint: "A real technical hurdle you solved, debugging technique, or new skill you learned.",
+						stepLabel: "Problem solving & learning",
+					},
+					{
+						question: `What was the final outcome or user feedback for ${entry.title}?`,
+						placeholder: "e.g. Deployed live with 100+ active users, zero downtime, and fast sub-second page loads...",
+						hint: "Deployment, live demo, user feedback, or performance benchmarks.",
+						stepLabel: "Results & evidence",
+					},
+				];
+			}
+
+			if (level === "senior" || level === "lead") {
+				return [
+					{
+						question: `What was the architectural scope and design pattern you chose for ${entry.title}?`,
+						placeholder: "e.g. Designed distributed microservices with Go and gRPC, structured event-driven messaging, and set up Dockerized CI/CD...",
+						hint: "Architecture patterns, system requirements, scalability choices, and modular design.",
+						stepLabel: "Architecture & scope",
+					},
+					{
+						question: `What performance, scaling, or reliability benchmark did ${entry.title} achieve?`,
+						placeholder: "e.g. Processed 5,000 requests/sec with p99 latency under 80ms, maintaining 99.9% uptime...",
+						hint: "Scalability benchmarks, latency reduction, throughput, or production metrics.",
+						stepLabel: "Performance & scale",
+					},
+				];
+			}
+
+			// Mid-level projects
 			return [
 				{
-					question: `What parts of ${entry.title} did you specifically build or architect?`,
-					placeholder: "e.g. Built responsive UI components, integrated APIs, and handled real-time state...",
+					question: `What key modules and functionality did you build for ${entry.title}?`,
+					placeholder: "e.g. Built responsive UI components, integrated APIs, and handled real-time state management...",
 					hint: "Key modules you owned, stack used, and core technical contributions.",
 					stepLabel: "The work & challenge",
 				},
@@ -1298,29 +1325,116 @@ export function GuidedStoryRoute() {
 			];
 		}
 
-		// General work / internship
+		// Work / Internships
 		if (entry.category === "work") {
+			if (level === "junior") {
+				return [
+					{
+						question: `What specific features, user stories, or tasks were you assigned to build as ${entry.title}${org}?`,
+						placeholder: "e.g. Developed responsive UI components, integrated backend REST endpoints, and fixed bug tickets in sprint cycles...",
+						hint: "Assigned tasks, features you coded, and technologies you worked with daily.",
+						stepLabel: "Your contribution",
+					},
+					{
+						question: `What was a challenging bug or technical problem you solved, and what did you learn in this role?`,
+						placeholder: "e.g. Debugged an asynchronous state update issue, incorporated code review feedback from seniors, and improved test coverage...",
+						hint: "A specific technical blocker you resolved, testing methods, or new skills you gained.",
+						stepLabel: "Problem solving & learning",
+					},
+					{
+						question: `What was the outcome or impact of the work you delivered as ${entry.title}${org}?`,
+						placeholder: "e.g. Successfully shipped 5 sprint deliverables to production on schedule with positive code review feedback...",
+						hint: "Features shipped, test coverage improvements, bug fixes, or deliverables completed.",
+						stepLabel: "Results & deliverables",
+					},
+				];
+			}
+
+			if (level === "senior" || level === "lead") {
+				return [
+					{
+						question: `What technical architecture, system designs, or engineering standards did you lead as ${entry.title}${org}?`,
+						placeholder: "e.g. Architected the event-driven microservices migration, set up CI/CD automation, and established code standards...",
+						hint: "System design decisions, architecture, tech stack evaluation, and engineering roadmaps.",
+						stepLabel: "Architecture & leadership",
+					},
+					{
+						question: `How did you guide engineers, conduct code reviews, or collaborate across teams in this role?`,
+						placeholder: "e.g. Mentored junior and mid-level engineers, instituted rigorous PR reviews, and partnered with product managers...",
+						hint: "Mentorship, code review quality, cross-functional alignment, and unblocking team members.",
+						stepLabel: "Team guidance & collaboration",
+					},
+					{
+						question: `What measurable business outcomes or scaling milestones were achieved under your technical direction?`,
+						placeholder: "e.g. Scaled platform to 500k+ active users, achieved 99.99% uptime, and lowered infrastructure latency by 35%...",
+						hint: "Reliability benchmarks, latency reduction, user scale, efficiency, or cost optimization.",
+						stepLabel: "Scale & business impact",
+					},
+				];
+			}
+
+			// Mid-level work
 			return [
 				{
-					question: `What were your main contributions and responsibilities as ${entry.title}${org}?`,
-					placeholder: "e.g. Led feature development, engineered responsive interfaces, and collaborated across product sprints...",
-					hint: "Key responsibilities, features delivered, and technical decisions made.",
-					stepLabel: "Your contribution",
+					question: `What core features, services, or modules did you own and deliver as ${entry.title}${org}?`,
+					placeholder: "e.g. Owned user onboarding flow, integrated third-party payment APIs, and built reusable service layers...",
+					hint: "Features you owned end-to-end, architectural choices, and tech stack utilized.",
+					stepLabel: "Your contribution & ownership",
 				},
 				{
-					question: `What was a key challenge or measurable impact achieved in this role?`,
-					placeholder: "e.g. Reduced release cycles by 25% and eliminated critical frontend rendering bottlenecks...",
-					hint: "Measurable metrics, latency, efficiency, or team impact.",
+					question: `What complex performance, integration, or reliability challenges did you solve in this role?`,
+					placeholder: "e.g. Optimized database queries, reduced page load times by 40%, and refactored legacy components...",
+					hint: "Performance optimization, edge-case handling, error handling, refactoring, or security.",
+					stepLabel: "Challenges & optimization",
+				},
+				{
+					question: `What was the measurable outcome or team impact of your contributions as ${entry.title}${org}?`,
+					placeholder: "e.g. Decreased API response time by 30%, supported 10,000+ daily transactions, and improved release velocity...",
+					hint: "Performance numbers, latency reduction, user satisfaction, or sprint efficiency.",
 					stepLabel: "Results & evidence",
 				},
 			];
 		}
 
-		// Volunteer / Activities
+		// Volunteer / Community Activities
 		if (entry.category === "volunteer") {
+			if (level === "junior") {
+				return [
+					{
+						question: `What specific activities, workshops, or tasks did you participate in during ${entry.title}${org}?`,
+						placeholder: "e.g. Assisted participants during coding sessions, organized event logistics, and contributed to community docs...",
+						hint: "Specific activities you supported and hands-on contributions you made.",
+						stepLabel: "Your participation",
+					},
+					{
+						question: `What was the outcome or community impact of this initiative?`,
+						placeholder: "e.g. Helped 40+ beginner students write their first programs and fostered an encouraging peer environment...",
+						hint: "People assisted, event outcomes, or community feedback.",
+						stepLabel: "Community impact",
+					},
+				];
+			}
+
+			if (level === "senior" || level === "lead") {
+				return [
+					{
+						question: `What community initiatives, programs, or workshops did you organize and lead for ${entry.title}${org}?`,
+						placeholder: "e.g. Founded a local developer meetup, organized monthly tech talks, and mentored aspiring engineers...",
+						hint: "Initiatives founded or led, curriculum designed, or community partnerships formed.",
+						stepLabel: "Leadership & initiatives",
+					},
+					{
+						question: `What was the reach and measurable outcome of your community leadership?`,
+						placeholder: "e.g. Grew community membership to 500+ participants and placed 15 graduates in tech apprenticeships...",
+						hint: "Community growth, graduate placement, or strategic outcomes.",
+						stepLabel: "Impact & reach",
+					},
+				];
+			}
+
 			return [
 				{
-					question: `What initiatives did you lead or support during ${entry.title}${org}?`,
+					question: `What initiatives did you support during ${entry.title}${org}?`,
 					placeholder: "e.g. Organized workshops, assisted members, and built community documentation...",
 					hint: "Specific activities, workshops, and coaching you provided.",
 					stepLabel: "Your contribution",
@@ -1341,6 +1455,12 @@ export function GuidedStoryRoute() {
 				placeholder: "e.g. Capstone software engineering project, data structures honors coursework...",
 				hint: "Academic highlights, major projects, or notable awards.",
 				stepLabel: "Academic highlights",
+			},
+			{
+				question: `What practical skills or technical concepts did you master through your studies for ${entry.title}?`,
+				placeholder: "e.g. Mastered object-oriented programming, relational databases, and collaborative Git workflows...",
+				hint: "Programming languages, algorithms, database design, or team projects.",
+				stepLabel: "Skills & practical learning",
 			},
 		];
 	};
@@ -1406,6 +1526,77 @@ export function GuidedStoryRoute() {
 		}
 	};
 
+	// Skip ONLY the current question for the active experience without skipping the section or exiting
+	const handleSkipInterviewQuestion = () => {
+		const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+		if (!activeEntry) {
+			setStoriesViewMode("overview");
+			return;
+		}
+
+		setExperienceInputText("");
+		const allQs = getFocusedQuestionsForExperience(activeEntry);
+		const currentIdx = activeExplorationQuestionIndex[activeEntry.id] || 0;
+
+		if (currentIdx + 1 < allQs.length) {
+			// Skip ONLY the current question and advance to the next question for this experience
+			const nextIdx = currentIdx + 1;
+			setActiveExplorationQuestionIndex((prev) => ({
+				...prev,
+				[activeEntry.id]: nextIdx,
+			}));
+			const nextQ = allQs[nextIdx];
+			if (nextQ?.question) {
+				speakText(nextQ.question);
+			}
+			toast.info(`Skipped question (${currentIdx + 1} of ${allQs.length}). Next: ${nextQ.stepLabel}`);
+		} else {
+			// If on the last question of this experience, advance to next experience in the outline
+			const currentEntryIdx = outlineEntries.findIndex((e) => e.id === activeEntry.id);
+			const nextEntry = outlineEntries[currentEntryIdx + 1];
+			if (nextEntry) {
+				setInterviewActiveEntryId(nextEntry.id);
+				setSelectedExperienceId(nextEntry.id);
+				const nextEntryQs = getFocusedQuestionsForExperience(nextEntry);
+				if (nextEntryQs[0]?.question) {
+					speakText(nextEntryQs[0].question);
+				}
+				toast.info(`Completed questions for ${activeEntry.title}. Moving to: ${nextEntry.title}`);
+			} else {
+				// All experiences and questions completed
+				setStoriesViewMode("overview");
+				toast.info("All questions completed for your outline!");
+			}
+		}
+	};
+
+	// Skip ONLY the current topic in drilldown mode without resetting or skipping the section
+	const handleSkipTopicDrilldown = async () => {
+		const selected = extractedTopics.filter((t) => t.selected);
+		const targetEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+		setExperienceInputText("");
+
+		const nextIdx = drilldownTopicIndex + 1;
+		if (nextIdx < selected.length) {
+			setDrilldownTopicIndex(nextIdx);
+			setIsLoadingTopicQuestion(true);
+			const nextTopic = selected[nextIdx];
+			const nextQ = await generateFollowUpQuestionForTopic(
+				nextTopic.text,
+				targetEntry.title,
+				targetEntry.organization,
+				targetRole
+			);
+			setCurrentTopicQuestion(nextQ);
+			setIsLoadingTopicQuestion(false);
+			speakText(nextQ);
+			toast.info(`Skipped point (${nextIdx} of ${selected.length}). Next: ${nextTopic.text}`);
+		} else {
+			toast.info("All points explored! Returning to overview.");
+			setStoriesViewMode("overview");
+		}
+	};
+
 	// Start drilling down into each selected topic one by one
 	const handleStartWithSelectedTopics = async () => {
 		const selected = extractedTopics.filter((t) => t.selected);
@@ -1424,7 +1615,8 @@ export function GuidedStoryRoute() {
 		const q = await generateFollowUpQuestionForTopic(
 			firstTopic.text,
 			targetEntry.title,
-			targetEntry.organization
+			targetEntry.organization,
+			targetRole
 		);
 
 		setCurrentTopicQuestion(q);
@@ -1521,7 +1713,8 @@ export function GuidedStoryRoute() {
 			const nextQ = await generateFollowUpQuestionForTopic(
 				nextTopic.text,
 				targetEntry.title,
-				targetEntry.organization
+				targetEntry.organization,
+				targetRole
 			);
 			setCurrentTopicQuestion(nextQ);
 			setIsLoadingTopicQuestion(false);
@@ -3738,10 +3931,13 @@ export function GuidedStoryRoute() {
 													</div>
 												</div>
 
-												{/* About Tag */}
-												<div>
+												{/* About Tag & Question Counter */}
+												<div className="flex flex-wrap items-center gap-2">
 													<span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
 														About: {activeEntry.title}
+													</span>
+													<span className="text-[11px] font-mono font-medium text-slate-400 px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/60">
+														Question {(activeExplorationQuestionIndex[activeEntry.id] || 0) + 1} of {getFocusedQuestionsForExperience(activeEntry).length} · {focusedQ.stepLabel}
 													</span>
 												</div>
 
@@ -3812,7 +4008,7 @@ export function GuidedStoryRoute() {
 													<div className="flex items-center justify-between pt-1">
 														<button
 															type="button"
-															onClick={() => setStoriesViewMode("overview")}
+															onClick={handleSkipInterviewQuestion}
 															className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
 														>
 															Skip question
@@ -4184,19 +4380,10 @@ export function GuidedStoryRoute() {
 													<div className="flex items-center justify-between pt-1">
 														<button
 															type="button"
-															onClick={() => {
-																// Skip to next topic
-																const nextIdx = drilldownTopicIndex + 1;
-																if (nextIdx < selected.length) {
-																	setDrilldownTopicIndex(nextIdx);
-																	handleStartWithSelectedTopics();
-																} else {
-																	setStoriesViewMode("overview");
-																}
-															}}
+															onClick={handleSkipTopicDrilldown}
 															className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
 														>
-															Skip this point
+															Skip question
 														</button>
 
 														<button
