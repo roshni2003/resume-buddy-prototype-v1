@@ -29,6 +29,7 @@ import { defaultResumeData } from "@/schema/resume/data";
 import { templates } from "@/dialogs/resume/template/data";
 import type { Template } from "@/schema/templates";
 import { localResumeStore } from "@/utils/local-resumes";
+import { parseResumeWithGemini } from "@/utils/gemini-resume-parser";
 
 // ---------------------------------------------------------------------------
 // Route Definition
@@ -194,264 +195,69 @@ function UploadRouteComponent() {
 		setUploadError(null);
 
 		try {
-			let parsedRaw: any = null;
-			try {
-				parsedRaw = await api.resumeUpload({ resume_upload: file });
-			} catch (err: any) {
-				console.warn("api.resumeUpload fallback or error:", err);
-				// Graceful fallback: do not treat filename as candidate name
-				parsedRaw = {
-					data: {
-						basics: {
-							name: "",
-							headline: "Software Engineer",
-							email: "",
-							phone: "",
-							location: "",
-						},
-						sections: {
-							experience: { items: [] },
-							education: { items: [] },
-							projects: { items: [] },
-							skills: { items: [] },
-						},
-					},
-				};
-			}
+			setProgressText("Uploading document to Zoe AI...");
+			setProgressPercent(25);
 
-			// Clean and extract skills
-			if (parsedRaw?.data?.sections?.skills?.items) {
-				const allSkills: { name: string; icon: string }[] = [];
-				const genericCategories = [
-					"skills", "frontend", "backend", "languages", "tools",
-					"frameworks", "technologies", "technical skills", "libraries",
-					"databases", "other", "core skills", "programming languages"
-				];
+			// Use Gemini directly in the browser — parses the actual PDF/DOCX content
+			const geminiResult = await parseResumeWithGemini(file);
 
-				parsedRaw.data.sections.skills.items.forEach((item: any) => {
-					const name = item.name ? item.name.trim() : "";
-					const icon = item.icon || "";
-					const hasKeywords = Array.isArray(item.keywords) && item.keywords.length > 0;
+			setProgressPercent(80);
+			setProgressText("Identifying skills, contact info, and contributions...");
 
-					if (name && genericCategories.includes(name.toLowerCase()) && hasKeywords) {
-						allSkills.push(...item.keywords.map((k: string) => ({ name: k, icon })));
-					} else if (name) {
-						allSkills.push(...name.split(",").map((s: string) => ({ name: s.trim(), icon })));
-					} else if (hasKeywords) {
-						allSkills.push(...item.keywords.map((k: string) => ({ name: k, icon })));
-					} else if (typeof item.keywords === "string" && item.keywords.trim() !== "") {
-						allSkills.push(...item.keywords.split(",").map((s: string) => ({ name: s.trim(), icon })));
-					}
-				});
+			const { contact, skills, entries: parsedEntries } = geminiResult;
 
-				const uniqueSkillsMap = new Map<string, string>();
-				for (const skill of allSkills) {
-					if (skill.name && !uniqueSkillsMap.has(skill.name)) {
-						uniqueSkillsMap.set(skill.name, skill.icon);
-					}
-				}
-				const uniqueSkills = Array.from(uniqueSkillsMap.entries()).slice(0, 25);
-
-				parsedRaw.data.sections.skills.items = uniqueSkills.map(([skillName, icon]) => ({
-					id: crypto.randomUUID(),
-					hidden: false,
-					name: skillName,
-					icon: icon || "",
-					proficiency: "",
-					level: 0,
-					keywords: [],
-				}));
-			}
-
-			setFullResumeData(parsedRaw);
-
-			// Map into structured fields
-			const resumeData = parsedRaw?.data || {};
-			const rawExp = resumeData.sections?.experience?.items || [];
-			const rawEdu = resumeData.sections?.education?.items || [];
-			const rawProjects = resumeData.sections?.projects?.items || [];
-			const rawVolunteer = resumeData.sections?.volunteer?.items || [];
-
-			// Parse extracted links
-			let extractedLinks = "";
-			if (resumeData.basics?.profiles && Array.isArray(resumeData.basics.profiles)) {
-				extractedLinks = resumeData.basics.profiles
-					.map((p: any) => p.url || p.network)
-					.filter(Boolean)
-					.join(", ");
-			} else if (resumeData.basics?.website?.url) {
-				extractedLinks = resumeData.basics.website.url;
-			}
-
-			// Get parsed full name or fallback to empty so user confirms their actual name
-			const parsedFullName = resumeData.basics?.name && !/^resume[-_\s0-9a-z]*$/i.test(resumeData.basics.name.trim())
-				? resumeData.basics.name.trim()
-				: "";
-
+			// Build ParsedResumeData from Gemini output
 			const mappedData: ParsedResumeData = {
-				fullName: parsedFullName || "Candidate Name",
-				professionalTitle: resumeData.basics?.headline || "Software Engineer",
-				email: resumeData.basics?.email || "",
-				phone: resumeData.basics?.phone || "",
-				location: resumeData.basics?.location || "",
-				links: extractedLinks || "Portfolio, LinkedIn, GitHub",
-				summary: stripHtml(resumeData.summary?.content || ""),
-				experience: rawExp.map((item: any) => ({
-					company: item.company || "",
-					role: item.position || "",
-					duration: item.period || "",
-					description: stripHtml(item.description || ""),
-				})),
-				education: rawEdu.map((item: any) => ({
-					institution: item.school || item.institution || "",
-					degree: `${item.degree || ""} ${item.area || ""}`.trim(),
-					year: item.period || "",
-				})),
-				skills: (resumeData.sections?.skills?.items || [])
-					.flatMap((item: any) =>
-						Array.isArray(item.keywords) && item.keywords.length > 0 ? item.keywords : [item.name]
-					)
-					.filter(Boolean),
+				fullName: contact.fullName || "",
+				professionalTitle: contact.professionalTitle || "",
+				email: contact.email || "",
+				phone: contact.phone || "",
+				location: contact.location || "",
+				links: contact.links || "",
+				summary: contact.summary || "",
+				experience: [],
+				education: [],
+				skills,
 			};
 
 			setParsedData(mappedData);
 
+			// Store a synthetic fullResumeData shape for compatibility
+			setFullResumeData({
+				data: {
+					basics: {
+						name: contact.fullName,
+						headline: contact.professionalTitle,
+						email: contact.email,
+						phone: contact.phone,
+						location: contact.location,
+					},
+					sections: {
+						skills: {
+							items: skills.map((s) => ({
+								id: crypto.randomUUID(),
+								hidden: false,
+								name: s,
+								icon: "",
+								proficiency: "",
+								level: 0,
+								keywords: [],
+							})),
+						},
+					},
+				},
+			});
+
 			// Populate verification inputs
-			setConfirmName(mappedData.fullName);
-			setConfirmHeadline(mappedData.professionalTitle);
-			setConfirmEmail(mappedData.email);
-			setConfirmPhone(mappedData.phone);
-			setConfirmLocation(mappedData.location);
-			setConfirmLinks(mappedData.links);
+			setConfirmName(contact.fullName);
+			setConfirmHeadline(contact.professionalTitle);
+			setConfirmEmail(contact.email);
+			setConfirmPhone(contact.phone);
+			setConfirmLocation(contact.location);
+			setConfirmLinks(contact.links);
 
-			// Build entries list (Work, Projects, Leadership/Volunteer, Education)
-			const entries: FoundEntry[] = [];
-
-			rawExp.forEach((item: any, idx: number) => {
-				const title = item.position || item.company || `Experience ${idx + 1}`;
-				const org = item.company || "";
-				const dates = item.period || "";
-				const desc = stripHtml(item.description || "");
-				const pts = desc ? desc.split("\n").map((p: string) => p.replace(/^[-•*]\s*/, "").trim()).filter(Boolean) : [];
-				entries.push({
-					id: item.id || `work_${Date.now()}_${idx}`,
-					title,
-					organization: org,
-					dates,
-					category: "work",
-					points: pts,
-					description: desc,
-				});
-			});
-
-			rawProjects.forEach((item: any, idx: number) => {
-				const title = item.name || `Project ${idx + 1}`;
-				const desc = stripHtml(item.description || "");
-				const pts = desc ? desc.split("\n").map((p: string) => p.replace(/^[-•*]\s*/, "").trim()).filter(Boolean) : [];
-				entries.push({
-					id: item.id || `proj_${Date.now()}_${idx}`,
-					title,
-					organization: item.website?.url || "Independent Project",
-					dates: item.period || "",
-					category: "projects",
-					points: pts,
-					description: desc,
-				});
-			});
-
-			rawVolunteer.forEach((item: any, idx: number) => {
-				const title = item.organization || item.position || `Leadership ${idx + 1}`;
-				const desc = stripHtml(item.description || "");
-				entries.push({
-					id: item.id || `vol_${Date.now()}_${idx}`,
-					title,
-					organization: item.organization || "",
-					dates: item.period || "",
-					category: "volunteer",
-					points: desc ? [desc] : [],
-					description: desc,
-				});
-			});
-
-			rawEdu.forEach((item: any, idx: number) => {
-				const title = item.degree ? `${item.degree} ${item.area || ""}`.trim() : "Degree / Qualification";
-				const org = item.school || item.institution || "University";
-				const dates = item.period || "";
-				entries.push({
-					id: item.id || `edu_${Date.now()}_${idx}`,
-					title,
-					organization: org,
-					dates,
-					category: "education",
-					points: [],
-					description: `${title} at ${org}`,
-				});
-			});
-
-			// If no entries were returned, provide sensible defaults from uploaded document
-			if (entries.length === 0) {
-				entries.push(
-					{
-						id: "entry_1",
-						title: "LinkedIn Student Ambassador",
-						organization: "LinkedIn",
-						dates: "Feb 2026 – Present",
-						category: "work",
-						description: "Organize campus engagement initiatives to help students build strong digital professional profiles. Share career resources, opportunities, and best practices to support the student community.",
-						points: [
-							"Organize campus engagement initiatives to help students build strong digital professional profiles.",
-							"Share career resources, opportunities, and best practices to support the student community.",
-						],
-					},
-					{
-						id: "entry_2",
-						title: "Campus Mantri (Campus Representative)",
-						organization: "GeeksforGeeks",
-						dates: "Jan 2026 – Present",
-						category: "work",
-						description: "Selected as Campus Mantri to represent GeeksforGeeks and strengthen its technical presence on campus.",
-						points: [
-							"Selected as Campus Mantri to represent GeeksforGeeks and strengthen its technical presence on campus.",
-						],
-					},
-					{
-						id: "entry_3",
-						title: "Founder & Club Coordinator",
-						organization: "Born2Code Club",
-						dates: "Nov 2025 – Present",
-						category: "volunteer",
-						description: "Founded and lead the Born2Code student community to promote coding culture and peer learning. Organize technical sessions, collaborative projects, and community engagement initiatives.",
-						points: [
-							"Founded and lead the Born2Code student community to promote coding culture and peer learning.",
-							"Organize technical sessions, collaborative projects, and community engagement initiatives.",
-						],
-					},
-					{
-						id: "entry_4",
-						title: "Book Bhandar – Old Book Marketplace",
-						organization: "Full-Stack Web App",
-						dates: "2025",
-						category: "projects",
-						description: "Built a full-stack platform where sellers retain books until buyers accept orders. Implemented real-time listings, order acceptance workflows, and user authentication using Firebase.",
-						points: [
-							"Built a full-stack platform where sellers retain books until buyers accept orders.",
-							"Designed a meme-based user interface to improve engagement and user interaction.",
-							"Implemented real-time listings, order acceptance workflows, and user authentication using Firebase.",
-						],
-					},
-					{
-						id: "entry_5",
-						title: "Bachelor of Technology in Computer Science (CORE)",
-						organization: "Lingaya's Vidyapeeth, Faridabad",
-						dates: "Expected Graduation: 2029",
-						category: "education",
-						description: "Bachelor of Technology in Computer Science (CORE)",
-						points: [],
-					}
-				);
-			}
-
-			setFoundEntries(entries);
+			// Use Gemini-parsed entries directly
+			setFoundEntries(parsedEntries as FoundEntry[]);
 
 			// Complete progress and navigate to confirmation screen
 			setProgressPercent(100);
@@ -461,7 +267,14 @@ function UploadRouteComponent() {
 				setUploadState("confirm_import");
 			}, 500);
 		} catch (e: any) {
-			setUploadError(e.message || "Failed to parse document. Please check the format and try again.");
+			const msg = e.message || "";
+			if (msg.includes("GEMINI_NO_API_KEY")) {
+				setUploadError(
+					"No AI API key configured. Please add VITE_AI_API_KEY=your_gemini_key to your .env file and restart the dev server."
+				);
+			} else {
+				setUploadError(msg || "Failed to parse document. Please check the format and try again.");
+			}
 			setUploadState("idle");
 		}
 	};
@@ -523,16 +336,13 @@ function UploadRouteComponent() {
 
 			// Save contact and user details
 			const draftPayload = {
-				targetRole: confirmHeadline || parsedData?.professionalTitle || "Software Engineer",
-				fullName: confirmName || "Candidate",
+				targetRole: confirmHeadline || parsedData?.professionalTitle || "",
+				fullName: confirmName || "",
 				contactEmail: confirmEmail,
 				contactPhone: confirmPhone,
 				contactLocation: confirmLocation,
 				contactLinks: confirmLinks,
-				skillsList: parsedData?.skills || [
-					"C", "C++", "Python", "JavaScript", "HTML", "CSS", "Firebase",
-					"Machine Learning", "Computer Vision", "Git", "GitHub", "VS Code"
-				],
+				skillsList: parsedData?.skills || [],
 				selectedTemplate: "azurill",
 				updatedAt: new Date().toISOString(),
 			};
@@ -547,7 +357,104 @@ function UploadRouteComponent() {
 				})
 			);
 
-			// Also create a resume entry in local store / backend so dashboard shows it
+			// Helper to format points as HTML list for resume sections
+			const toHtmlDescription = (points?: string[], desc?: string) => {
+				const cleanPoints = (points || []).map((p) => p.trim()).filter(Boolean);
+				if (cleanPoints.length > 0) {
+					return `<ul>${cleanPoints.map((p) => `<li>${p}</li>`).join("")}</ul>`;
+				}
+				return desc ? `<p>${desc}</p>` : "";
+			};
+
+			// Parse links into profiles & website
+			const parsedLinkUrls = confirmLinks
+				.split(/[\n,]+/)
+				.map((l) => l.trim())
+				.filter(Boolean);
+
+			const profileItems = parsedLinkUrls.map((rawUrl) => {
+				const normalizedUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+				let network = "Website";
+				const lower = rawUrl.toLowerCase();
+				if (lower.includes("linkedin")) network = "LinkedIn";
+				else if (lower.includes("github")) network = "GitHub";
+				else if (lower.includes("twitter") || lower.includes("x.com")) network = "Twitter";
+				else if (lower.includes("behance")) network = "Behance";
+				else if (lower.includes("dribbble")) network = "Dribbble";
+				return {
+					id: crypto.randomUUID(),
+					hidden: false,
+					icon: "",
+					network,
+					username: rawUrl,
+					website: { url: normalizedUrl, label: rawUrl },
+				};
+			});
+
+			const experienceItems = foundEntries
+				.filter((e) => e.category === "work")
+				.map((e) => ({
+					id: e.id || crypto.randomUUID(),
+					hidden: false,
+					company: e.organization || e.title,
+					position: e.title,
+					location: "",
+					period: e.dates || "",
+					website: { url: "", label: "" },
+					description: toHtmlDescription(e.points, e.description),
+				}));
+
+			const projectItems = foundEntries
+				.filter((e) => e.category === "projects")
+				.map((e) => ({
+					id: e.id || crypto.randomUUID(),
+					hidden: false,
+					name: e.title,
+					role: e.organization || "",
+					period: e.dates || "",
+					website: { url: "", label: "" },
+					description: toHtmlDescription(e.points, e.description),
+				}));
+
+			const educationItems = foundEntries
+				.filter((e) => e.category === "education")
+				.map((e) => ({
+					id: e.id || crypto.randomUUID(),
+					hidden: false,
+					school: e.organization || e.title,
+					degree: e.title,
+					area: "",
+					grade: "",
+					location: "",
+					period: e.dates || "",
+					website: { url: "", label: "" },
+					description: e.description || "",
+					currentlyStudyingHere: false,
+				}));
+
+			const volunteerItems = foundEntries
+				.filter((e) => e.category === "volunteer")
+				.map((e) => ({
+					id: e.id || crypto.randomUUID(),
+					hidden: false,
+					organization: e.organization || e.title,
+					location: "",
+					period: e.dates || "",
+					website: { url: "", label: "" },
+					description: toHtmlDescription(e.points, e.description),
+				}));
+
+			const skillItems = (parsedData?.skills || []).map((skillName) => ({
+				id: crypto.randomUUID(),
+				hidden: false,
+				icon: "",
+				name: skillName,
+				proficiency: "",
+				level: 0,
+				keywords: [],
+			}));
+
+			// Also create a resume entry in local store / backend so dashboard & builder show all parsed sections
 			const resumeTitle = confirmName ? `${confirmName}'s Resume` : "My Resume";
 			const createdResume = localResumeStore.create({
 				name: resumeTitle,
@@ -561,6 +468,20 @@ function UploadRouteComponent() {
 						email: confirmEmail,
 						phone: confirmPhone,
 						location: confirmLocation,
+						website: profileItems[0]?.website || { url: "", label: "" },
+					},
+					summary: {
+						...defaultResumeData.summary,
+						content: parsedData?.summary ? `<p>${parsedData.summary}</p>` : "",
+					},
+					sections: {
+						...defaultResumeData.sections,
+						profiles: { ...defaultResumeData.sections.profiles, items: profileItems },
+						experience: { ...defaultResumeData.sections.experience, items: experienceItems },
+						projects: { ...defaultResumeData.sections.projects, items: projectItems },
+						education: { ...defaultResumeData.sections.education, items: educationItems },
+						volunteer: { ...defaultResumeData.sections.volunteer, items: volunteerItems },
+						skills: { ...defaultResumeData.sections.skills, items: skillItems },
 					},
 				},
 			});
@@ -835,7 +756,13 @@ function UploadRouteComponent() {
 							<h3 className="text-sm font-bold text-white">Entries we found</h3>
 
 							<div className="space-y-2">
-								{foundEntries.map((entry) => (
+								{foundEntries.length === 0 ? (
+									<div className="flex flex-col items-center gap-2 py-6 rounded-xl border border-dashed border-slate-700 bg-[#09121d] text-center">
+										<WarningCircleIcon className="size-7 text-amber-400" />
+										<p className="text-xs font-semibold text-slate-300">No entries were detected in this resume.</p>
+										<p className="text-[11px] text-slate-500 max-w-xs">This can happen if the document format is unsupported or the AI could not parse it. Add your entries manually below.</p>
+									</div>
+								) : foundEntries.map((entry) => (
 									<div
 										key={entry.id}
 										className="flex items-center justify-between p-3.5 rounded-xl border border-slate-800/80 bg-[#09121d] hover:border-slate-700 transition-all"
@@ -1093,97 +1020,148 @@ function UploadRouteComponent() {
 							{/* Document sheet representation */}
 							<div className="rounded-xl border border-slate-300 bg-white text-slate-900 p-6 shadow-2xl min-h-[640px] text-[11px] space-y-4">
 								{/* Candidate Header */}
-								<div className="text-center space-y-1 border-b border-slate-200 pb-3">
-									<h2 className="text-xl font-bold tracking-tight text-slate-950">
-										{confirmName || "Candidate Name"}
-									</h2>
-									<p className="text-[11px] text-slate-600 font-medium">
-										{confirmHeadline || "Professional Title"}
-									</p>
-									<div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-[10px] text-slate-600">
-										{confirmPhone && <span>{confirmPhone}</span>}
-										{confirmEmail && <span>· {confirmEmail}</span>}
-										{confirmLinks && <span>· {confirmLinks}</span>}
+								{(confirmName || confirmHeadline || confirmPhone || confirmEmail || confirmLocation || confirmLinks) && (
+									<div className="text-center space-y-1 border-b border-slate-200 pb-3">
+										{confirmName && (
+											<h2 className="text-xl font-bold tracking-tight text-slate-950">
+												{confirmName}
+											</h2>
+										)}
+										{confirmHeadline && (
+											<p className="text-[11px] text-slate-600 font-medium">
+												{confirmHeadline}
+											</p>
+										)}
+										<div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-[10px] text-slate-600">
+											{[confirmPhone, confirmEmail, confirmLocation, confirmLinks]
+												.filter(Boolean)
+												.map((item, idx) => (
+													<span key={idx}>{idx > 0 ? `· ${item}` : item}</span>
+												))}
+										</div>
 									</div>
-								</div>
+								)}
+
+								{/* Summary */}
+								{parsedData?.summary && (
+									<div className="space-y-1">
+										<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
+											Summary
+										</div>
+										<p className="text-[10px] text-slate-700 leading-relaxed">{parsedData.summary}</p>
+									</div>
+								)}
 
 								{/* Education */}
-								<div className="space-y-1.5">
-									<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
-										Education & Achievements
-									</div>
-									{foundEntries.filter((e) => e.category === "education").map((edu) => (
-										<div key={edu.id} className="flex justify-between text-[10px]">
-											<div>
-												<span className="font-bold text-slate-900">{edu.title}</span>
-												<div className="text-slate-600">{edu.organization}</div>
-											</div>
-											<div className="text-slate-500">{edu.dates}</div>
+								{foundEntries.some((e) => e.category === "education") && (
+									<div className="space-y-1.5">
+										<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
+											Education & Achievements
 										</div>
-									))}
-								</div>
+										{foundEntries.filter((e) => e.category === "education").map((edu) => (
+											<div key={edu.id} className="flex justify-between text-[10px]">
+												<div>
+													<span className="font-bold text-slate-900">{edu.title}</span>
+													{edu.organization && <div className="text-slate-600">{edu.organization}</div>}
+												</div>
+												{edu.dates && <div className="text-slate-500">{edu.dates}</div>}
+											</div>
+										))}
+									</div>
+								)}
 
 								{/* Experience */}
-								<div className="space-y-2">
-									<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
-										Experience
-									</div>
-									{foundEntries.filter((e) => e.category === "work").map((exp) => (
-										<div key={exp.id} className="space-y-0.5">
-											<div className="flex justify-between text-[10px]">
-												<span className="font-bold text-slate-900">{exp.title}</span>
-												<span className="text-slate-500">{exp.dates}</span>
-											</div>
-											<div className="text-slate-600 italic text-[10px]">{exp.organization}</div>
-											{exp.points && exp.points.length > 0 ? (
-												<ul className="space-y-0.5 pl-3 list-disc text-slate-700 text-[10px]">
-													{exp.points.map((pt, idx) => (
-														<li key={idx}>{pt}</li>
-													))}
-												</ul>
-											) : (
-												<p className="text-slate-500 text-[10px]">{exp.description}</p>
-											)}
+								{foundEntries.some((e) => e.category === "work") && (
+									<div className="space-y-2">
+										<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
+											Experience
 										</div>
-									))}
-								</div>
+										{foundEntries.filter((e) => e.category === "work").map((exp) => (
+											<div key={exp.id} className="space-y-0.5">
+												<div className="flex justify-between text-[10px]">
+													<span className="font-bold text-slate-900">{exp.title}</span>
+													{exp.dates && <span className="text-slate-500">{exp.dates}</span>}
+												</div>
+												{exp.organization && <div className="text-slate-600 italic text-[10px]">{exp.organization}</div>}
+												{exp.points && exp.points.length > 0 ? (
+													<ul className="space-y-0.5 pl-3 list-disc text-slate-700 text-[10px]">
+														{exp.points.map((pt, idx) => (
+															<li key={idx}>{pt}</li>
+														))}
+													</ul>
+												) : exp.description ? (
+													<p className="text-slate-500 text-[10px]">{exp.description}</p>
+												) : null}
+											</div>
+										))}
+									</div>
+								)}
 
 								{/* Projects */}
-								<div className="space-y-2">
-									<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
-										Technical Projects
-									</div>
-									{foundEntries.filter((e) => e.category === "projects").map((p) => (
-										<div key={p.id} className="space-y-0.5">
-											<div className="flex justify-between text-[10px]">
-												<span className="font-bold text-slate-900">{p.title}</span>
-												<span className="text-slate-500">{p.dates}</span>
-											</div>
-											{p.points && p.points.length > 0 ? (
-												<ul className="space-y-0.5 pl-3 list-disc text-slate-700 text-[10px]">
-													{p.points.map((pt, idx) => (
-														<li key={idx}>{pt}</li>
-													))}
-												</ul>
-											) : (
-												<p className="text-slate-500 text-[10px]">{p.description}</p>
-											)}
+								{foundEntries.some((e) => e.category === "projects") && (
+									<div className="space-y-2">
+										<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
+											Technical Projects
 										</div>
-									))}
-								</div>
+										{foundEntries.filter((e) => e.category === "projects").map((p) => (
+											<div key={p.id} className="space-y-0.5">
+												<div className="flex justify-between text-[10px]">
+													<span className="font-bold text-slate-900">{p.title}</span>
+													{p.dates && <span className="text-slate-500">{p.dates}</span>}
+												</div>
+												{p.organization && <div className="text-slate-600 italic text-[10px]">{p.organization}</div>}
+												{p.points && p.points.length > 0 ? (
+													<ul className="space-y-0.5 pl-3 list-disc text-slate-700 text-[10px]">
+														{p.points.map((pt, idx) => (
+															<li key={idx}>{pt}</li>
+														))}
+													</ul>
+												) : p.description ? (
+													<p className="text-slate-500 text-[10px]">{p.description}</p>
+												) : null}
+											</div>
+										))}
+									</div>
+								)}
+
+								{/* Volunteer / Leadership */}
+								{foundEntries.some((e) => e.category === "volunteer") && (
+									<div className="space-y-2">
+										<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
+											Leadership & Volunteering
+										</div>
+										{foundEntries.filter((e) => e.category === "volunteer").map((v) => (
+											<div key={v.id} className="space-y-0.5">
+												<div className="flex justify-between text-[10px]">
+													<span className="font-bold text-slate-900">{v.title}</span>
+													{v.dates && <span className="text-slate-500">{v.dates}</span>}
+												</div>
+												{v.organization && <div className="text-slate-600 italic text-[10px]">{v.organization}</div>}
+												{v.points && v.points.length > 0 ? (
+													<ul className="space-y-0.5 pl-3 list-disc text-slate-700 text-[10px]">
+														{v.points.map((pt, idx) => (
+															<li key={idx}>{pt}</li>
+														))}
+													</ul>
+												) : v.description ? (
+													<p className="text-slate-500 text-[10px]">{v.description}</p>
+												) : null}
+											</div>
+										))}
+									</div>
+								)}
 
 								{/* Skills */}
-								<div className="space-y-1">
-									<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
-										Technical Skills
+								{parsedData?.skills && parsedData.skills.length > 0 && (
+									<div className="space-y-1">
+										<div className="font-bold text-[10px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
+											Technical Skills
+										</div>
+										<div className="text-[10px] text-slate-700 leading-relaxed">
+											{parsedData.skills.join(", ")}
+										</div>
 									</div>
-									<div className="text-[10px] text-slate-700 leading-relaxed">
-										{(parsedData?.skills || [
-											"Python", "C", "C++", "JavaScript", "HTML", "CSS", "Firebase",
-											"Machine Learning", "Computer Vision", "Git", "GitHub", "VS Code"
-										]).join(", ")}
-									</div>
-								</div>
+								)}
 							</div>
 
 							<p className="text-[10px] text-slate-500 leading-normal">
