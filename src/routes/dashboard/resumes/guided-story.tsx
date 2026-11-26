@@ -1413,6 +1413,77 @@ export function GuidedStoryRoute() {
 		}
 	};
 
+	// Skip ONLY the current question for the active experience without skipping the section or exiting
+	const handleSkipInterviewQuestion = () => {
+		const activeEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+		if (!activeEntry) {
+			setStoriesViewMode("overview");
+			return;
+		}
+
+		setExperienceInputText("");
+		const allQs = getFocusedQuestionsForExperience(activeEntry);
+		const currentIdx = activeExplorationQuestionIndex[activeEntry.id] || 0;
+
+		if (currentIdx + 1 < allQs.length) {
+			// Skip ONLY the current question and advance to the next question for this experience
+			const nextIdx = currentIdx + 1;
+			setActiveExplorationQuestionIndex((prev) => ({
+				...prev,
+				[activeEntry.id]: nextIdx,
+			}));
+			const nextQ = allQs[nextIdx];
+			if (nextQ?.question) {
+				speakText(nextQ.question);
+			}
+			toast.info(`Skipped question (${currentIdx + 1} of ${allQs.length}). Next: ${nextQ.stepLabel}`);
+		} else {
+			// If on the last question of this experience, advance to next experience in the outline
+			const currentEntryIdx = outlineEntries.findIndex((e) => e.id === activeEntry.id);
+			const nextEntry = outlineEntries[currentEntryIdx + 1];
+			if (nextEntry) {
+				setInterviewActiveEntryId(nextEntry.id);
+				setSelectedExperienceId(nextEntry.id);
+				const nextEntryQs = getFocusedQuestionsForExperience(nextEntry);
+				if (nextEntryQs[0]?.question) {
+					speakText(nextEntryQs[0].question);
+				}
+				toast.info(`Completed questions for ${activeEntry.title}. Moving to: ${nextEntry.title}`);
+			} else {
+				// All experiences and questions completed
+				setStoriesViewMode("overview");
+				toast.info("All questions completed for your outline!");
+			}
+		}
+	};
+
+	// Skip ONLY the current topic in drilldown mode without resetting or skipping the section
+	const handleSkipTopicDrilldown = async () => {
+		const selected = extractedTopics.filter((t) => t.selected);
+		const targetEntry = outlineEntries.find((e) => e.id === interviewActiveEntryId) || outlineEntries[0];
+		setExperienceInputText("");
+
+		const nextIdx = drilldownTopicIndex + 1;
+		if (nextIdx < selected.length) {
+			setDrilldownTopicIndex(nextIdx);
+			setIsLoadingTopicQuestion(true);
+			const nextTopic = selected[nextIdx];
+			const nextQ = await generateFollowUpQuestionForTopic(
+				nextTopic.text,
+				targetEntry.title,
+				targetEntry.organization,
+				targetRole
+			);
+			setCurrentTopicQuestion(nextQ);
+			setIsLoadingTopicQuestion(false);
+			speakText(nextQ);
+			toast.info(`Skipped point (${nextIdx} of ${selected.length}). Next: ${nextTopic.text}`);
+		} else {
+			toast.info("All points explored! Returning to overview.");
+			setStoriesViewMode("overview");
+		}
+	};
+
 	// Start drilling down into each selected topic one by one
 	const handleStartWithSelectedTopics = async () => {
 		const selected = extractedTopics.filter((t) => t.selected);
@@ -3557,10 +3628,13 @@ export function GuidedStoryRoute() {
 													</div>
 												</div>
 
-												{/* About Tag */}
-												<div>
+												{/* About Tag & Question Counter */}
+												<div className="flex flex-wrap items-center gap-2">
 													<span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
 														About: {activeEntry.title}
+													</span>
+													<span className="text-[11px] font-mono font-medium text-slate-400 px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/60">
+														Question {(activeExplorationQuestionIndex[activeEntry.id] || 0) + 1} of {getFocusedQuestionsForExperience(activeEntry).length} · {focusedQ.stepLabel}
 													</span>
 												</div>
 
@@ -3631,7 +3705,7 @@ export function GuidedStoryRoute() {
 													<div className="flex items-center justify-between pt-1">
 														<button
 															type="button"
-															onClick={() => setStoriesViewMode("overview")}
+															onClick={handleSkipInterviewQuestion}
 															className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
 														>
 															Skip question
@@ -3997,19 +4071,10 @@ export function GuidedStoryRoute() {
 													<div className="flex items-center justify-between pt-1">
 														<button
 															type="button"
-															onClick={() => {
-																// Skip to next topic
-																const nextIdx = drilldownTopicIndex + 1;
-																if (nextIdx < selected.length) {
-																	setDrilldownTopicIndex(nextIdx);
-																	handleStartWithSelectedTopics();
-																} else {
-																	setStoriesViewMode("overview");
-																}
-															}}
+															onClick={handleSkipTopicDrilldown}
 															className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
 														>
-															Skip this point
+															Skip question
 														</button>
 
 														<button
