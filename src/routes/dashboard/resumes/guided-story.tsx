@@ -36,6 +36,10 @@ import {
 	LogOut,
 	Volume2,
 	VolumeX,
+	Key,
+	Pencil,
+	Undo2,
+	RotateCcw,
 } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
@@ -47,6 +51,17 @@ import { slugify } from "@/utils/string";
 import { templates } from "@/dialogs/resume/template/data";
 import { defaultResumeData, type ResumeData } from "@/schema/resume/data";
 import { cn } from "@/utils/style";
+import {
+	isValidEmail,
+	isValidOptionalPhone,
+	getEmailValidationError,
+	getPhoneValidationError,
+	getTextValidationError,
+	getNameValidationError,
+	getCharacterOnlyValidationError,
+	sanitizeToCharactersOnly,
+	getDatePeriodValidationError,
+} from "@/utils/validation";
 import { voiceAssistant, formatAchievementBullet } from "@/utils/voice-assistant";
 import {
 	generateBulletsWithDeepSeek,
@@ -389,6 +404,43 @@ export function GuidedStoryRoute() {
 		return [];
 	});
 
+	// History stack for Undo in Step 2: "What can we draw from?"
+	const [outlineHistory, setOutlineHistory] = useState<OutlineEntry[][]>([]);
+
+	const pushOutlineSnapshot = (entries: OutlineEntry[]) => {
+		setOutlineHistory((prev) => [...prev.slice(-20), entries]);
+	};
+
+	const handleUndoOutline = () => {
+		if (outlineHistory.length === 0) {
+			toast.info("Nothing to undo");
+			return;
+		}
+		const previousState = outlineHistory[outlineHistory.length - 1];
+		setOutlineHistory((prev) => prev.slice(0, -1));
+		setOutlineEntries(previousState);
+		toast.success("Changes undone");
+	};
+
+	// Keyboard shortcut for Undo (Ctrl+Z / Cmd+Z) during Step 2
+	useEffect(() => {
+		if (wizardStep !== "outline") return;
+
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !e.shiftKey) {
+				const activeTag = (document.activeElement?.tagName || "").toLowerCase();
+				if (activeTag === "input" || activeTag === "textarea") {
+					return; // Allow standard input undo when focused inside an input field
+				}
+				e.preventDefault();
+				handleUndoOutline();
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [wizardStep, outlineHistory]);
+
 	const [showVoiceOption, setShowVoiceOption] = useState(false);
 	const [isSpeakingOutline, setIsSpeakingOutline] = useState(false);
 
@@ -506,6 +558,8 @@ export function GuidedStoryRoute() {
 	const [showZoeSectionPrompt, setShowZoeSectionPrompt] = useState(true);
 	const [activeSectionPromptType, setActiveSectionPromptType] = useState<"projects" | "education" | "volunteer">("projects");
 	const [dismissedPlanSectionPrompt, setDismissedPlanSectionPrompt] = useState(false);
+	const [isEditingResumeTitle, setIsEditingResumeTitle] = useState(false);
+	const [tempResumeTitle, setTempResumeTitle] = useState("");
 	// Tab 03: Supporting Details state (matching screenshot media_1795019454591_659f3f35.jpg)
 	const [detailsSubTab, setDetailsSubTab] = useState<"contact" | "skills" | "summary">("contact");
 	const [contactEmail, setContactEmail] = useState(() => {
@@ -651,8 +705,14 @@ export function GuidedStoryRoute() {
 
 	// Handlers for Step 2: Add Entry
 	const handleAddWorkEntry = () => {
-		if (!workTitle.trim()) {
-			toast.error("Please enter a job title");
+		const titleErr = getTextValidationError(workTitle, "Job title", 2, true);
+		if (titleErr) {
+			toast.error(titleErr);
+			return;
+		}
+		const datesErr = getDatePeriodValidationError(workDates, false);
+		if (datesErr) {
+			toast.error(datesErr);
 			return;
 		}
 		const newEntry: OutlineEntry = {
@@ -662,6 +722,7 @@ export function GuidedStoryRoute() {
 			organization: workCompany.trim() || undefined,
 			dates: workDates.trim() || undefined,
 		};
+		pushOutlineSnapshot(outlineEntries);
 		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
 		setWorkTitle("");
 		setWorkCompany("");
@@ -670,8 +731,14 @@ export function GuidedStoryRoute() {
 	};
 
 	const handleAddProjectEntry = () => {
-		if (!projectTitle.trim()) {
-			toast.error("Please enter a project title");
+		const titleErr = getTextValidationError(projectTitle, "Project title", 2, true);
+		if (titleErr) {
+			toast.error(titleErr);
+			return;
+		}
+		const datesErr = getDatePeriodValidationError(projectDates, false);
+		if (datesErr) {
+			toast.error(datesErr);
 			return;
 		}
 		const newEntry: OutlineEntry = {
@@ -681,6 +748,7 @@ export function GuidedStoryRoute() {
 			organization: projectTech.trim() || undefined,
 			dates: projectDates.trim() || undefined,
 		};
+		pushOutlineSnapshot(outlineEntries);
 		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
 		setProjectTitle("");
 		setProjectTech("");
@@ -689,8 +757,14 @@ export function GuidedStoryRoute() {
 	};
 
 	const handleAddEducationEntry = () => {
-		if (!eduDegree.trim()) {
-			toast.error("Please enter a degree or certificate");
+		const degreeErr = getTextValidationError(eduDegree, "Degree or qualification", 2, true);
+		if (degreeErr) {
+			toast.error(degreeErr);
+			return;
+		}
+		const datesErr = getDatePeriodValidationError(eduDates, false);
+		if (datesErr) {
+			toast.error(datesErr);
 			return;
 		}
 		const newEntry: OutlineEntry = {
@@ -700,6 +774,7 @@ export function GuidedStoryRoute() {
 			organization: eduSchool.trim() || undefined,
 			dates: eduDates.trim() || undefined,
 		};
+		pushOutlineSnapshot(outlineEntries);
 		setOutlineEntries((prev) => [...prev, newEntry]);
 		setEduDegree("");
 		setEduSchool("");
@@ -708,8 +783,14 @@ export function GuidedStoryRoute() {
 	};
 
 	const handleAddVolunteerEntry = () => {
-		if (!volRole.trim()) {
-			toast.error("Please enter a role or activity");
+		const roleErr = getTextValidationError(volRole, "Role or activity", 2, true);
+		if (roleErr) {
+			toast.error(roleErr);
+			return;
+		}
+		const datesErr = getDatePeriodValidationError(volDates, false);
+		if (datesErr) {
+			toast.error(datesErr);
 			return;
 		}
 		const newEntry: OutlineEntry = {
@@ -719,6 +800,7 @@ export function GuidedStoryRoute() {
 			organization: volOrg.trim() || undefined,
 			dates: volDates.trim() || undefined,
 		};
+		pushOutlineSnapshot(outlineEntries);
 		setOutlineEntries((prev) => insertWithPriority(prev, newEntry));
 		setVolRole("");
 		setVolOrg("");
@@ -727,19 +809,44 @@ export function GuidedStoryRoute() {
 	};
 
 	const handleRemoveEntry = (id: string) => {
+		pushOutlineSnapshot(outlineEntries);
 		setOutlineEntries((prev) => prev.filter((item) => item.id !== id));
 		toast.info("Experience removed");
 	};
 
 	const handleUpdateEntry = (id: string, updates: Partial<OutlineEntry>) => {
+		pushOutlineSnapshot(outlineEntries);
 		setOutlineEntries((prev) =>
 			prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
 		);
 	};
 
 	const handleSaveQuickAddSection = (startStoryInterview: boolean = true) => {
-		if (!quickAddTitle.trim()) {
-			toast.error("Please enter a title or role");
+		const titleLabel =
+			quickAddCategory === "work"
+				? "Job title"
+				: quickAddCategory === "projects"
+					? "Project title"
+					: quickAddCategory === "education"
+						? "Degree or qualification"
+						: "Role or activity";
+		const titleErr = getCharacterOnlyValidationError(quickAddTitle, titleLabel, 2, true) || getTextValidationError(quickAddTitle, titleLabel, 2, true);
+		if (titleErr) {
+			toast.error(titleErr);
+			return;
+		}
+
+		if (quickAddOrg.trim()) {
+			const orgErr = getCharacterOnlyValidationError(quickAddOrg, "Organization / School", 2, false);
+			if (orgErr) {
+				toast.error(orgErr);
+				return;
+			}
+		}
+
+		const datesErr = getDatePeriodValidationError(quickAddDates, false);
+		if (datesErr) {
+			toast.error(datesErr);
 			return;
 		}
 
@@ -1649,6 +1756,12 @@ export function GuidedStoryRoute() {
 	// Handler when user submits their initial answer to the experience question:
 	// Extracts key points / topics and transitions to the "Here's what I heard" checklist screen
 	const handleInitialStorySubmit = async (entryId: string, answerText: string) => {
+		// Stop microphone recording if still running
+		if (isSpeakingAnswer) {
+			setIsSpeakingAnswer(false);
+			voiceAssistant.stop();
+		}
+
 		const trimmed = answerText.trim();
 		if (!trimmed) return;
 
@@ -1795,6 +1908,12 @@ export function GuidedStoryRoute() {
 
 	// Save answer for a specific topic in the drilldown sequence
 	const handleSaveTopicDrilldownAnswer = async (answerText: string) => {
+		// Stop microphone recording if still running
+		if (isSpeakingAnswer) {
+			setIsSpeakingAnswer(false);
+			voiceAssistant.stop();
+		}
+
 		const trimmed = answerText.trim();
 		if (!trimmed) return;
 
@@ -2543,28 +2662,60 @@ export function GuidedStoryRoute() {
 				<div className="w-full max-w-4xl mx-auto space-y-10">
 					{/* Header Top Bar */}
 					<div className="flex items-center justify-between pb-6 border-b border-slate-800/80">
-						<button
-							type="button"
-							onClick={() => navigate({ to: "/dashboard/resumes" as any })}
-							className="group inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
-						>
-							<ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
-							<span>Home</span>
-						</button>
-
-						{/* Stepper / Breadcrumbs */}
-						<div className="flex items-center gap-2 text-xs sm:text-sm font-mono tracking-wider">
+						<div className="flex items-center gap-3">
 							<button
 								type="button"
 								onClick={() => setWizardStep("direction")}
-								className="text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+								className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
+								title="Back to Direction (Step 1)"
 							>
-								1 · Direction
+								<ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
+								<span>Back to Direction</span>
 							</button>
-							<span className="text-slate-600">—</span>
-							<span className="text-emerald-400 font-bold">2 · Outline</span>
-							<span className="text-slate-600">—</span>
-							<span className="text-slate-500">3 · Your plan</span>
+
+							<button
+								type="button"
+								onClick={() => navigate({ to: "/dashboard/resumes" as any })}
+								className="text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer px-2 py-1"
+							>
+								Dashboard
+							</button>
+						</div>
+
+						{/* Undo button + Stepper / Breadcrumbs */}
+						<div className="flex items-center gap-4">
+							<button
+								type="button"
+								disabled={outlineHistory.length === 0}
+								onClick={handleUndoOutline}
+								className={cn(
+									"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
+									outlineHistory.length > 0
+										? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 active:scale-95 shadow-sm"
+										: "border-slate-800 bg-slate-900/60 text-slate-600 cursor-not-allowed opacity-50"
+								)}
+								title={outlineHistory.length > 0 ? "Undo last outline action (Ctrl+Z)" : "No changes to undo"}
+							>
+								<Undo2 className="size-3.5" />
+								<span>Undo</span>
+								{outlineHistory.length > 0 && (
+									<span className="size-1.5 rounded-full bg-amber-400" />
+								)}
+							</button>
+
+							<div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm font-mono tracking-wider">
+								<button
+									type="button"
+									onClick={() => setWizardStep("direction")}
+									className="text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+								>
+									1 · Direction
+								</button>
+								<span className="text-slate-600">—</span>
+								<span className="text-emerald-400 font-bold">2 · Outline</span>
+								<span className="text-slate-600">—</span>
+								<span className="text-slate-500">3 · Your plan</span>
+							</div>
 						</div>
 					</div>
 
@@ -2688,16 +2839,19 @@ export function GuidedStoryRoute() {
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Job title
+											Job title <span className="text-emerald-400 font-bold">*</span>
 										</label>
 										<input
 											type="text"
 											value={workTitle}
-											onChange={(e) => setWorkTitle(e.target.value)}
+											onChange={(e) => setWorkTitle(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="e.g. Frontend Developer"
 											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className={`w-full rounded-xl bg-[#0b1322] border ${workTitle && (getCharacterOnlyValidationError(workTitle, "Job title", 2, true) || getTextValidationError(workTitle, "Job title", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-400"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 										/>
+										{workTitle && (getCharacterOnlyValidationError(workTitle, "Job title", 2, true) || getTextValidationError(workTitle, "Job title", 2, true)) && (
+											<p className="text-xs text-rose-400 mt-1">{getCharacterOnlyValidationError(workTitle, "Job title", 2, true) || getTextValidationError(workTitle, "Job title", 2, true)}</p>
+										)}
 									</div>
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -2706,9 +2860,9 @@ export function GuidedStoryRoute() {
 										<input
 											type="text"
 											value={workCompany}
-											onChange={(e) => setWorkCompany(e.target.value)}
+											onChange={(e) => setWorkCompany(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="Organization or context"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors"
 										/>
 									</div>
 								</div>
@@ -2722,8 +2876,11 @@ export function GuidedStoryRoute() {
 										value={workDates}
 										onChange={(e) => setWorkDates(e.target.value)}
 										placeholder="e.g. Jul 2023 – Present"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										className={`w-full rounded-xl bg-[#0b1322] border ${workDates && getDatePeriodValidationError(workDates, false) ? "border-rose-500" : "border-slate-800 focus:border-slate-700"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 									/>
+									{workDates && getDatePeriodValidationError(workDates, false) && (
+										<p className="text-xs text-rose-400 mt-1">{getDatePeriodValidationError(workDates, false)}</p>
+									)}
 								</div>
 
 								<div className="flex items-center justify-between pt-2">
@@ -2748,16 +2905,19 @@ export function GuidedStoryRoute() {
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Project title
+											Project title <span className="text-emerald-400 font-bold">*</span>
 										</label>
 										<input
 											type="text"
 											value={projectTitle}
-											onChange={(e) => setProjectTitle(e.target.value)}
+											onChange={(e) => setProjectTitle(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="e.g. E-Commerce Dashboard"
 											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className={`w-full rounded-xl bg-[#0b1322] border ${projectTitle && (getCharacterOnlyValidationError(projectTitle, "Project title", 2, true) || getTextValidationError(projectTitle, "Project title", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-400"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 										/>
+										{projectTitle && (getCharacterOnlyValidationError(projectTitle, "Project title", 2, true) || getTextValidationError(projectTitle, "Project title", 2, true)) && (
+											<p className="text-xs text-rose-400 mt-1">{getCharacterOnlyValidationError(projectTitle, "Project title", 2, true) || getTextValidationError(projectTitle, "Project title", 2, true)}</p>
+										)}
 									</div>
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -2766,9 +2926,9 @@ export function GuidedStoryRoute() {
 										<input
 											type="text"
 											value={projectTech}
-											onChange={(e) => setProjectTech(e.target.value)}
+											onChange={(e) => setProjectTech(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="e.g. React, Next.js, Stripe"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors"
 										/>
 									</div>
 								</div>
@@ -2782,8 +2942,11 @@ export function GuidedStoryRoute() {
 										value={projectDates}
 										onChange={(e) => setProjectDates(e.target.value)}
 										placeholder="e.g. Jan 2024 – May 2024"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										className={`w-full rounded-xl bg-[#0b1322] border ${projectDates && getDatePeriodValidationError(projectDates, false) ? "border-rose-500" : "border-slate-800 focus:border-slate-700"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 									/>
+									{projectDates && getDatePeriodValidationError(projectDates, false) && (
+										<p className="text-xs text-rose-400 mt-1">{getDatePeriodValidationError(projectDates, false)}</p>
+									)}
 								</div>
 
 								<div className="flex items-center justify-between pt-2">
@@ -2808,16 +2971,19 @@ export function GuidedStoryRoute() {
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Degree or qualification
+											Degree or qualification <span className="text-emerald-400 font-bold">*</span>
 										</label>
 										<input
 											type="text"
 											value={eduDegree}
-											onChange={(e) => setEduDegree(e.target.value)}
+											onChange={(e) => setEduDegree(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="e.g. B.Tech Computer Science"
 											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className={`w-full rounded-xl bg-[#0b1322] border ${eduDegree && (getCharacterOnlyValidationError(eduDegree, "Degree or qualification", 2, true) || getTextValidationError(eduDegree, "Degree or qualification", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-400"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 										/>
+										{eduDegree && (getCharacterOnlyValidationError(eduDegree, "Degree or qualification", 2, true) || getTextValidationError(eduDegree, "Degree or qualification", 2, true)) && (
+											<p className="text-xs text-rose-400 mt-1">{getCharacterOnlyValidationError(eduDegree, "Degree or qualification", 2, true) || getTextValidationError(eduDegree, "Degree or qualification", 2, true)}</p>
+										)}
 									</div>
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -2826,9 +2992,9 @@ export function GuidedStoryRoute() {
 										<input
 											type="text"
 											value={eduSchool}
-											onChange={(e) => setEduSchool(e.target.value)}
+											onChange={(e) => setEduSchool(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="e.g. State University"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors"
 										/>
 									</div>
 								</div>
@@ -2842,8 +3008,11 @@ export function GuidedStoryRoute() {
 										value={eduDates}
 										onChange={(e) => setEduDates(e.target.value)}
 										placeholder="e.g. 2020 – 2024"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										className={`w-full rounded-xl bg-[#0b1322] border ${eduDates && getDatePeriodValidationError(eduDates, false) ? "border-rose-500" : "border-slate-800 focus:border-slate-700"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 									/>
+									{eduDates && getDatePeriodValidationError(eduDates, false) && (
+										<p className="text-xs text-rose-400 mt-1">{getDatePeriodValidationError(eduDates, false)}</p>
+									)}
 								</div>
 
 								<div className="flex items-center justify-between pt-2">
@@ -2868,16 +3037,19 @@ export function GuidedStoryRoute() {
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-											Role or activity
+											Role or activity <span className="text-emerald-400 font-bold">*</span>
 										</label>
 										<input
 											type="text"
 											value={volRole}
-											onChange={(e) => setVolRole(e.target.value)}
+											onChange={(e) => setVolRole(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="e.g. Open Source Contributor"
 											autoFocus
-											className="w-full rounded-xl bg-[#0b1322] border-2 border-emerald-500/60 focus:border-emerald-400 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className={`w-full rounded-xl bg-[#0b1322] border ${volRole && (getCharacterOnlyValidationError(volRole, "Role or activity", 2, true) || getTextValidationError(volRole, "Role or activity", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-400"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 										/>
+										{volRole && (getCharacterOnlyValidationError(volRole, "Role or activity", 2, true) || getTextValidationError(volRole, "Role or activity", 2, true)) && (
+											<p className="text-xs text-rose-400 mt-1">{getCharacterOnlyValidationError(volRole, "Role or activity", 2, true) || getTextValidationError(volRole, "Role or activity", 2, true)}</p>
+										)}
 									</div>
 									<div>
 										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -2886,9 +3058,9 @@ export function GuidedStoryRoute() {
 										<input
 											type="text"
 											value={volOrg}
-											onChange={(e) => setVolOrg(e.target.value)}
+											onChange={(e) => setVolOrg(sanitizeToCharactersOnly(e.target.value, true))}
 											placeholder="Organization or community"
-											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+											className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors"
 										/>
 									</div>
 								</div>
@@ -2902,8 +3074,11 @@ export function GuidedStoryRoute() {
 										value={volDates}
 										onChange={(e) => setVolDates(e.target.value)}
 										placeholder="e.g. 2023"
-										className="w-full rounded-xl bg-[#0b1322] border border-slate-800 focus:border-slate-700 text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none"
+										className={`w-full rounded-xl bg-[#0b1322] border ${volDates && getDatePeriodValidationError(volDates, false) ? "border-rose-500" : "border-slate-800 focus:border-slate-700"} text-white placeholder:text-slate-600 px-4 py-3 text-sm outline-none transition-colors`}
 									/>
+									{volDates && getDatePeriodValidationError(volDates, false) && (
+										<p className="text-xs text-rose-400 mt-1">{getDatePeriodValidationError(volDates, false)}</p>
+									)}
 								</div>
 
 								<div className="flex items-center justify-between pt-2">
@@ -2997,27 +3172,52 @@ export function GuidedStoryRoute() {
 
 						{/* Bottom Actions Bar (Image 2) */}
 						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-slate-800/80">
-							<div>
-								<button
-									type="button"
-									onClick={() => setWizardStep("direction")}
-									className="text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
-								>
-									Back to direction
-								</button>
-								<p className="text-xs text-slate-500 mt-1">
+							<div className="space-y-1">
+								<div className="flex items-center gap-4">
+									<button
+										type="button"
+										onClick={() => setWizardStep("direction")}
+										className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+									>
+										<ArrowLeft className="size-3.5" />
+										<span>Back to direction</span>
+									</button>
+
+									{outlineHistory.length > 0 && (
+										<button
+											type="button"
+											onClick={handleUndoOutline}
+											className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+											title="Undo last change"
+										>
+											<Undo2 className="size-3" />
+											<span>Undo last entry</span>
+										</button>
+									)}
+								</div>
+								<p className="text-xs text-slate-500">
 									Start with one item if you like. There is no need to list everything before seeing your draft.
 								</p>
 							</div>
 
-							<button
-								type="button"
-								onClick={handleSeeMyPlan}
-								className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-sm shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
-							>
-								<span>See my plan</span>
-								<ArrowRight className="size-4" />
-							</button>
+							<div className="flex items-center gap-3">
+								<button
+									type="button"
+									onClick={() => setWizardStep("direction")}
+									className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs transition-all cursor-pointer"
+								>
+									Back
+								</button>
+
+								<button
+									type="button"
+									onClick={handleSeeMyPlan}
+									className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-sm shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+								>
+									<span>See my plan</span>
+									<ArrowRight className="size-4" />
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -3217,11 +3417,92 @@ export function GuidedStoryRoute() {
 					{/* TAB 1: PLAN VIEW */}
 					{activeTab === "plan" && (
 						<div className="space-y-6">
-							{/* Sub-header meta row: Target Role, Saved on this device, Hide resume toggle */}
+							{/* Sub-header meta row: Target Role (Editable), Saved on this device, Hide resume toggle */}
 							<div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-								<span className="font-semibold text-slate-300">
-									{targetRole || "Frontend Developer"}
-								</span>
+								{isEditingResumeTitle ? (
+									<div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+										<input
+											type="text"
+											value={tempResumeTitle}
+											onChange={(e) => setTempResumeTitle(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													const trimmed = tempResumeTitle.trim();
+													if (trimmed) {
+														setTargetRole(trimmed);
+														if (createdResumeId) {
+															localResumeStore.update(createdResumeId, { name: `${trimmed} Resume` });
+														}
+														try {
+															const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+															if (saved) {
+																const p = JSON.parse(saved);
+																p.targetRole = trimmed;
+																localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(p));
+															}
+														} catch { }
+														toast.success("Resume title updated");
+													}
+													setIsEditingResumeTitle(false);
+												} else if (e.key === "Escape") {
+													setIsEditingResumeTitle(false);
+												}
+											}}
+											autoFocus
+											className="text-xs font-semibold text-white bg-slate-900 border border-emerald-500 rounded px-2 py-0.5 focus:outline-none"
+											placeholder="Resume role/title..."
+										/>
+										<button
+											type="button"
+											onClick={() => {
+												const trimmed = tempResumeTitle.trim();
+												if (trimmed) {
+													setTargetRole(trimmed);
+													if (createdResumeId) {
+														localResumeStore.update(createdResumeId, { name: `${trimmed} Resume` });
+													}
+													try {
+														const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+														if (saved) {
+															const p = JSON.parse(saved);
+															p.targetRole = trimmed;
+															localStorage.setItem("resume_buddy_guided_story_draft", JSON.stringify(p));
+														}
+													} catch { }
+													toast.success("Resume title updated");
+												}
+												setIsEditingResumeTitle(false);
+											}}
+											className="p-1 rounded bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors cursor-pointer"
+										>
+											<Check className="size-3 stroke-[3]" />
+										</button>
+										<button
+											type="button"
+											onClick={() => setIsEditingResumeTitle(false)}
+											className="p-1 rounded bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+										>
+											<X className="size-3" />
+										</button>
+									</div>
+								) : (
+									<div className="flex items-center gap-1.5 group/editname">
+										<span className="font-semibold text-slate-300">
+											{targetRole || "Frontend Developer"}
+										</span>
+										<button
+											type="button"
+											onClick={() => {
+												setTempResumeTitle(targetRole || "Frontend Developer");
+												setIsEditingResumeTitle(true);
+											}}
+											className="p-1 text-slate-500 hover:text-emerald-400 transition-colors cursor-pointer rounded"
+											title="Edit resume role / title"
+										>
+											<Pencil className="size-3" />
+										</button>
+									</div>
+								)}
 
 								<div className="flex items-center gap-4">
 									<span className="flex items-center gap-1.5 text-[11px] text-slate-400">
@@ -3282,7 +3563,17 @@ export function GuidedStoryRoute() {
 													<span className="size-2 rounded-full bg-indigo-400" />
 													<span>ZOE / YOUR NEXT SECTION</span>
 												</div>
-												<ExternalLink className="size-3.5 text-indigo-400/60" />
+												<button
+													type="button"
+													onClick={() => {
+														setQuickAddCategory(nextSuggestedCategory);
+														setQuickAddSectionModalOpen(true);
+													}}
+													className="p-1 rounded text-indigo-400/70 hover:text-indigo-300 transition-colors cursor-pointer"
+													title={`Add ${nextSuggestedCategory}`}
+												>
+													<ExternalLink className="size-3.5" />
+												</button>
 											</div>
 
 											<div className="space-y-1">
@@ -3343,7 +3634,19 @@ export function GuidedStoryRoute() {
 													<span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
 													<span>ZOE / YOUR NEXT STEP</span>
 												</div>
-												<ExternalLink className="size-3.5 text-emerald-400/60" />
+												<button
+													type="button"
+													onClick={() => {
+														setActiveTab("stories");
+														setSelectedExperienceId(pendingEntry.id);
+														setInterviewActiveEntryId(pendingEntry.id);
+														setStoriesViewMode("interview");
+													}}
+													className="p-1 rounded text-emerald-400/70 hover:text-emerald-300 transition-colors cursor-pointer"
+													title={`Explore ${pendingEntry.title}`}
+												>
+													<ExternalLink className="size-3.5" />
+												</button>
 											</div>
 
 											<div className="space-y-1.5">
@@ -3923,7 +4226,13 @@ export function GuidedStoryRoute() {
 														<button
 															type="button"
 															disabled={isExtractingTopics || !experienceInputText.trim()}
-															onClick={() => handleInitialStorySubmit(activeEntry.id, experienceInputText)}
+															onClick={() => {
+																if (isSpeakingAnswer) {
+																	setIsSpeakingAnswer(false);
+																	voiceAssistant.stop();
+																}
+																handleInitialStorySubmit(activeEntry.id, experienceInputText);
+															}}
 															className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
 														>
 															<span>{isExtractingTopics ? "Listening & analyzing..." : "Send answer"}</span>
@@ -4289,7 +4598,13 @@ export function GuidedStoryRoute() {
 														<button
 															type="button"
 															disabled={isSubmittingAnswer || !experienceInputText.trim()}
-															onClick={() => handleSaveTopicDrilldownAnswer(experienceInputText)}
+															onClick={() => {
+																if (isSpeakingAnswer) {
+																	setIsSpeakingAnswer(false);
+																	voiceAssistant.stop();
+																}
+																handleSaveTopicDrilldownAnswer(experienceInputText);
+															}}
 															className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
 														>
 															<span>{isSubmittingAnswer ? "Drafting bullet..." : "Send answer"}</span>
@@ -4382,8 +4697,12 @@ export function GuidedStoryRoute() {
 											<button
 												type="button"
 												onClick={() => {
-													setIsAddingManual(true);
-													setNewManualCategory("work");
+													setQuickAddCategory("work");
+													setQuickAddTitle("");
+													setQuickAddOrg("");
+													setQuickAddDates("");
+													setQuickAddDescription("");
+													setQuickAddSectionModalOpen(true);
 												}}
 												className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
 											>
@@ -4537,8 +4856,12 @@ export function GuidedStoryRoute() {
 											<button
 												type="button"
 												onClick={() => {
-													setIsAddingManual(true);
-													setNewManualCategory("projects");
+													setQuickAddCategory("projects");
+													setQuickAddTitle("");
+													setQuickAddOrg("");
+													setQuickAddDates("");
+													setQuickAddDescription("");
+													setQuickAddSectionModalOpen(true);
 												}}
 												className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
 											>
@@ -4673,8 +4996,12 @@ export function GuidedStoryRoute() {
 											<button
 												type="button"
 												onClick={() => {
-													setIsAddingManual(true);
-													setNewManualCategory("volunteer");
+													setQuickAddCategory("volunteer");
+													setQuickAddTitle("");
+													setQuickAddOrg("");
+													setQuickAddDates("");
+													setQuickAddDescription("");
+													setQuickAddSectionModalOpen(true);
 												}}
 												className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
 											>
@@ -5034,10 +5361,17 @@ export function GuidedStoryRoute() {
 											<input
 												type="text"
 												value={fullName}
-												onChange={(e) => setFullName(e.target.value)}
+												onChange={(e) => {
+													// Only allow characters (letters), spaces, hyphens, apostrophes, and dots
+													const filtered = e.target.value.replace(/[^\p{L}\s'.-]/gu, "");
+													setFullName(filtered);
+												}}
 												placeholder="Your name"
-												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+												className={`w-full rounded-xl border ${fullName && getNameValidationError(fullName) ? "border-rose-500 focus:border-rose-500" : "border-slate-800/90 focus:border-emerald-500"} bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors`}
 											/>
+											{fullName && getNameValidationError(fullName) && (
+												<p className="text-xs text-rose-400 mt-1">{getNameValidationError(fullName)}</p>
+											)}
 										</div>
 
 										{/* Professional headline Optional */}
@@ -5048,7 +5382,7 @@ export function GuidedStoryRoute() {
 											<input
 												type="text"
 												value={targetRole}
-												onChange={(e) => setTargetRole(e.target.value)}
+												onChange={(e) => setTargetRole(sanitizeToCharactersOnly(e.target.value, true))}
 												placeholder="Frontend Developer"
 												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
 											/>
@@ -5057,15 +5391,18 @@ export function GuidedStoryRoute() {
 										{/* Email */}
 										<div className="space-y-1.5">
 											<label className="block text-xs font-medium text-slate-300">
-												Email
+												Email <span className="text-emerald-400 font-bold">*</span>
 											</label>
 											<input
 												type="email"
 												value={contactEmail}
 												onChange={(e) => setContactEmail(e.target.value)}
 												placeholder="you@example.com"
-												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+												className={`w-full rounded-xl border ${contactEmail && getEmailValidationError(contactEmail) ? "border-rose-500 focus:border-rose-500" : "border-slate-800/90 focus:border-emerald-500"} bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors`}
 											/>
+											{contactEmail && getEmailValidationError(contactEmail) && (
+												<p className="text-xs text-rose-400 mt-1">{getEmailValidationError(contactEmail)}</p>
+											)}
 										</div>
 
 										{/* Phone Optional */}
@@ -5077,9 +5414,12 @@ export function GuidedStoryRoute() {
 												type="tel"
 												value={contactPhone}
 												onChange={(e) => setContactPhone(e.target.value)}
-												placeholder="Your phone number"
-												className="w-full rounded-xl border border-slate-800/90 bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+												placeholder="e.g. +91 98765 43210"
+												className={`w-full rounded-xl border ${contactPhone && getPhoneValidationError(contactPhone) ? "border-rose-500 focus:border-rose-500" : "border-slate-800/90 focus:border-emerald-500"} bg-[#040810] px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors`}
 											/>
+											{contactPhone && getPhoneValidationError(contactPhone) && (
+												<p className="text-xs text-rose-400 mt-1">{getPhoneValidationError(contactPhone)}</p>
+											)}
 										</div>
 
 										{/* Location Optional */}
@@ -5116,6 +5456,14 @@ export function GuidedStoryRoute() {
 										<button
 											type="button"
 											onClick={() => {
+												if (contactEmail && !isValidEmail(contactEmail)) {
+													toast.error("Please enter a valid email address.");
+													return;
+												}
+												if (contactPhone && !isValidOptionalPhone(contactPhone)) {
+													toast.error("Please enter a valid phone number.");
+													return;
+												}
 												handleSaveProgress();
 												toast.success("Contact details saved!");
 											}}
@@ -6749,6 +7097,7 @@ export function GuidedStoryRoute() {
 										ADD TO YOUR RESUME
 									</span>
 									<h3 className="text-lg font-bold text-white">
+										{quickAddCategory === "work" && "Add work experience / internship"}
 										{quickAddCategory === "projects" && "Add a project"}
 										{quickAddCategory === "education" && "Add education / degree"}
 										{quickAddCategory === "volunteer" && "Add volunteering & activity"}
@@ -6757,7 +7106,8 @@ export function GuidedStoryRoute() {
 								<button
 									type="button"
 									onClick={() => setQuickAddSectionModalOpen(false)}
-									className="text-slate-400 hover:text-white p-1"
+									className="text-slate-400 hover:text-white p-1 cursor-pointer transition-colors"
+									title="Close"
 								>
 									✕
 								</button>
@@ -6766,29 +7116,39 @@ export function GuidedStoryRoute() {
 							<div className="space-y-4 text-xs">
 								<div className="space-y-1.5">
 									<label className="font-semibold text-slate-300">
+										{quickAddCategory === "work" && "Job title"}
 										{quickAddCategory === "projects" && "Project title"}
 										{quickAddCategory === "education" && "Degree / Qualification"}
 										{quickAddCategory === "volunteer" && "Role / Activity"}
+										<span className="text-emerald-400 font-bold ml-1">*</span>
 									</label>
 									<input
 										type="text"
 										value={quickAddTitle}
-										onChange={(e) => setQuickAddTitle(e.target.value)}
+										onChange={(e) => {
+											setQuickAddTitle(sanitizeToCharactersOnly(e.target.value, true));
+										}}
 										placeholder={
-											quickAddCategory === "projects"
-												? "e.g. AI Resume Builder, E-commerce App"
-												: quickAddCategory === "education"
-													? "e.g. B.Tech Computer Science, Web Development Certificate"
-													: "e.g. Open Source Contributor, Mentor"
+											quickAddCategory === "work"
+												? "e.g. Frontend Developer, Software Engineer Intern"
+												: quickAddCategory === "projects"
+													? "e.g. AI Resume Builder, E-commerce App"
+													: quickAddCategory === "education"
+														? "e.g. B.Tech Computer Science, Web Development Certificate"
+														: "e.g. Open Source Contributor, Mentor"
 										}
 										autoFocus
-										className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+										className={`w-full rounded-xl bg-[#0b1424] border ${quickAddTitle && (getCharacterOnlyValidationError(quickAddTitle, "Title", 2, true) || getTextValidationError(quickAddTitle, "Title", 2, true)) ? "border-rose-500" : "border-slate-700 focus:border-emerald-500"} px-3.5 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition-colors`}
 									/>
+									{quickAddTitle && (getCharacterOnlyValidationError(quickAddTitle, "Title", 2, true) || getTextValidationError(quickAddTitle, "Title", 2, true)) && (
+										<p className="text-[11px] text-rose-400 mt-1">{getCharacterOnlyValidationError(quickAddTitle, "Title", 2, true) || getTextValidationError(quickAddTitle, "Title", 2, true)}</p>
+									)}
 								</div>
 
 								<div className="grid grid-cols-2 gap-3">
 									<div className="space-y-1.5">
 										<label className="font-semibold text-slate-300">
+											{quickAddCategory === "work" && "Company / Organization"}
 											{quickAddCategory === "projects" && "Tech stack / tools"}
 											{quickAddCategory === "education" && "School / University"}
 											{quickAddCategory === "volunteer" && "Organization / Community"}
@@ -6796,8 +7156,18 @@ export function GuidedStoryRoute() {
 										<input
 											type="text"
 											value={quickAddOrg}
-											onChange={(e) => setQuickAddOrg(e.target.value)}
-											placeholder="e.g. React, Next.js, Node.js"
+											onChange={(e) => {
+												setQuickAddOrg(sanitizeToCharactersOnly(e.target.value, true));
+											}}
+											placeholder={
+												quickAddCategory === "work"
+													? "e.g. Google, Acme Corp, Startup"
+													: quickAddCategory === "projects"
+														? "e.g. React, Next.js, Node.js"
+														: quickAddCategory === "education"
+															? "e.g. Stanford University, NavGurukul"
+															: "e.g. Local Community Center, Open Source"
+											}
 											className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
 										/>
 									</div>
@@ -6809,8 +7179,11 @@ export function GuidedStoryRoute() {
 											value={quickAddDates}
 											onChange={(e) => setQuickAddDates(e.target.value)}
 											placeholder="e.g. 2023 – 2024"
-											className="w-full rounded-xl bg-[#0b1424] border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+											className={`w-full rounded-xl bg-[#0b1424] border ${quickAddDates && getDatePeriodValidationError(quickAddDates, false) ? "border-rose-500" : "border-slate-700 focus:border-emerald-500"} px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-colors`}
 										/>
+										{quickAddDates && getDatePeriodValidationError(quickAddDates, false) && (
+											<p className="text-[11px] text-rose-400 mt-1">{getDatePeriodValidationError(quickAddDates, false)}</p>
+										)}
 									</div>
 								</div>
 
@@ -6830,7 +7203,7 @@ export function GuidedStoryRoute() {
 								<button
 									type="button"
 									onClick={() => setQuickAddSectionModalOpen(false)}
-									className="text-xs text-slate-400 hover:text-white"
+									className="text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"
 								>
 									Cancel
 								</button>

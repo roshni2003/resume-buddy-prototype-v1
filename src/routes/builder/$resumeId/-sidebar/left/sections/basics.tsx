@@ -15,10 +15,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { basicsSchema } from "@/schema/resume/data";
+import { isValidOptionalEmail, isValidOptionalPhone } from "@/utils/validation";
 import { SectionBase } from "../shared/section-base";
 import { CustomFieldsSection } from "./custom-fields";
 
-const formSchema = basicsSchema;
+const formSchema = basicsSchema.extend({
+	email: basicsSchema.shape.email.refine(
+		(val) => isValidOptionalEmail(val),
+		{ message: "Please enter a valid email address" }
+	),
+	phone: basicsSchema.shape.phone.refine(
+		(val) => isValidOptionalPhone(val),
+		{ message: "Please enter a valid phone number (7-15 digits)" }
+	),
+});
 type FormValues = z.infer<typeof formSchema>;
 
 function FieldLabel({ children }: { children: React.ReactNode }) {

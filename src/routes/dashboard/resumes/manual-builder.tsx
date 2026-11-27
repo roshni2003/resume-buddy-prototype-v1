@@ -32,6 +32,18 @@ import { defaultResumeData } from "@/schema/resume/data";
 import { api } from "@/utils/api";
 import { slugify } from "@/utils/string";
 import { cn } from "@/utils/style";
+import {
+	isValidEmail,
+	isValidOptionalPhone,
+	getEmailValidationError,
+	getPhoneValidationError,
+	getTextValidationError,
+	getNameValidationError,
+	getCharacterOnlyValidationError,
+	sanitizeToCharactersOnly,
+	getDatePeriodValidationError,
+	getScoreValidationError,
+} from "@/utils/validation";
 
 const searchSchema = z.object({
 	step: z.coerce.number().optional().default(1),
@@ -342,10 +354,65 @@ export function ManualBuilderRoute() {
 	};
 
 	const handleContinue = () => {
-		// Mark completed checklist items corresponding to step
-		if (step === 1) markChecklistCompleted("target_role");
-		if (step === 2) markChecklistCompleted("education");
-		if (step === 3) markChecklistCompleted("skills");
+		if (step === 1) {
+			const nameErr = getNameValidationError(fullName, true) || getTextValidationError(fullName, "Full name", 2, true);
+			if (nameErr) {
+				toast.error(nameErr);
+				return;
+			}
+			if (email && !isValidEmail(email)) {
+				toast.error("Please enter a valid email address.");
+				return;
+			}
+			if (phone && !isValidOptionalPhone(phone)) {
+				toast.error("Please enter a valid phone number.");
+				return;
+			}
+			markChecklistCompleted("target_role");
+		}
+		if (step === 2) {
+			const schoolErr = getCharacterOnlyValidationError(school, "School / University", 2, true) || getTextValidationError(school, "School / University", 2, true);
+			if (schoolErr) {
+				toast.error(schoolErr);
+				return;
+			}
+			const degreeErr = getCharacterOnlyValidationError(degree, "Degree & Major", 2, true) || getTextValidationError(degree, "Degree & Major", 2, true);
+			if (degreeErr) {
+				toast.error(degreeErr);
+				return;
+			}
+			const yearErr = getDatePeriodValidationError(eduYear, false);
+			if (yearErr) {
+				toast.error(yearErr);
+				return;
+			}
+			const scoreErr = getScoreValidationError(eduScore);
+			if (scoreErr) {
+				toast.error(scoreErr);
+				return;
+			}
+			markChecklistCompleted("education");
+		}
+		if (step === 3) {
+			const skillsErr = getTextValidationError(skills, "Skills", 2, true);
+			if (skillsErr) {
+				toast.error(skillsErr);
+				return;
+			}
+			markChecklistCompleted("skills");
+		}
+		if (step === 4) {
+			const projErr = getCharacterOnlyValidationError(project, "Project or Company Name", 2, true) || getTextValidationError(project, "Project or Company Name", 2, true);
+			if (projErr) {
+				toast.error(projErr);
+				return;
+			}
+			const statementErr = getTextValidationError(statement, "Description & Key Contributions", 5, true);
+			if (statementErr) {
+				toast.error(statementErr);
+				return;
+			}
+		}
 
 		if (step < 4) {
 			setStep(step + 1);
@@ -802,10 +869,16 @@ export function ManualBuilderRoute() {
 										<input
 											type="text"
 											value={fullName}
-											onChange={(e) => setFullName(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+											onChange={(e) => {
+												const filtered = e.target.value.replace(/[^\p{L}\s'.-]/gu, "");
+												setFullName(filtered);
+											}}
+											className={`w-full rounded-xl border ${fullName && getNameValidationError(fullName) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:outline-none`}
 											placeholder="e.g. Roshni Jha"
 										/>
+										{fullName && getNameValidationError(fullName) && (
+											<p className="text-[11px] text-rose-400 mt-1">{getNameValidationError(fullName)}</p>
+										)}
 									</div>
 
 									<div>
@@ -813,7 +886,7 @@ export function ManualBuilderRoute() {
 										<input
 											type="text"
 											value={targetRole}
-											onChange={(e) => setTargetRole(e.target.value)}
+											onChange={(e) => setTargetRole(sanitizeToCharactersOnly(e.target.value, true))}
 											className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
 											placeholder="e.g. Frontend Developer"
 										/>
@@ -827,9 +900,12 @@ export function ManualBuilderRoute() {
 											type="email"
 											value={email}
 											onChange={(e) => setEmail(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+											className={`w-full rounded-xl border ${email && getEmailValidationError(email) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:outline-none`}
 											placeholder="e.g. roshni@example.com"
 										/>
+										{email && getEmailValidationError(email) && (
+											<p className="text-xs text-rose-400 mt-1">{getEmailValidationError(email)}</p>
+										)}
 									</div>
 
 									<div>
@@ -838,9 +914,12 @@ export function ManualBuilderRoute() {
 											type="text"
 											value={phone}
 											onChange={(e) => setPhone(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+											className={`w-full rounded-xl border ${phone && getPhoneValidationError(phone) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:outline-none`}
 											placeholder="e.g. +91 98765 43210"
 										/>
+										{phone && getPhoneValidationError(phone) && (
+											<p className="text-xs text-rose-400 mt-1">{getPhoneValidationError(phone)}</p>
+										)}
 									</div>
 								</div>
 
@@ -849,7 +928,7 @@ export function ManualBuilderRoute() {
 									<input
 										type="text"
 										value={school}
-										onChange={(e) => setSchool(e.target.value)}
+										onChange={(e) => setSchool(sanitizeToCharactersOnly(e.target.value, true))}
 										className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
 										placeholder="e.g. Indian Institute of Technology"
 									/>
@@ -921,10 +1000,16 @@ export function ManualBuilderRoute() {
 										<input
 											type="text"
 											value={fullName}
-											onChange={(e) => setFullName(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+											onChange={(e) => {
+												const filtered = e.target.value.replace(/[^\p{L}\s'.-]/gu, "");
+												setFullName(filtered);
+											}}
+											className={`w-full rounded-xl border ${fullName && getNameValidationError(fullName) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none`}
 											placeholder="e.g. Roshni Jha"
 										/>
+										{fullName && getNameValidationError(fullName) && (
+											<p className="text-[11px] text-rose-400 mt-1">{getNameValidationError(fullName)}</p>
+										)}
 									</div>
 
 									<div>
@@ -932,7 +1017,7 @@ export function ManualBuilderRoute() {
 										<input
 											type="text"
 											value={targetRole}
-											onChange={(e) => setTargetRole(e.target.value)}
+											onChange={(e) => setTargetRole(sanitizeToCharactersOnly(e.target.value, true))}
 											className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
 											placeholder="e.g. Frontend Developer"
 										/>
@@ -945,9 +1030,12 @@ export function ManualBuilderRoute() {
 												type="email"
 												value={email}
 												onChange={(e) => setEmail(e.target.value)}
-												className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+												className={`w-full rounded-xl border ${email && getEmailValidationError(email) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none`}
 												placeholder="e.g. roshni.jha@example.com"
 											/>
+											{email && getEmailValidationError(email) && (
+												<p className="text-xs text-rose-400 mt-1">{getEmailValidationError(email)}</p>
+											)}
 										</div>
 										<div>
 											<label className="block text-xs font-semibold text-slate-300 mb-1.5">Phone (optional)</label>
@@ -955,9 +1043,12 @@ export function ManualBuilderRoute() {
 												type="tel"
 												value={phone}
 												onChange={(e) => setPhone(e.target.value)}
-												className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+												className={`w-full rounded-xl border ${phone && getPhoneValidationError(phone) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none`}
 												placeholder="e.g. +91 98765 43210"
 											/>
+											{phone && getPhoneValidationError(phone) && (
+												<p className="text-xs text-rose-400 mt-1">{getPhoneValidationError(phone)}</p>
+											)}
 										</div>
 									</div>
 
@@ -996,25 +1087,35 @@ export function ManualBuilderRoute() {
 							{step === 2 && (
 								<div className="space-y-5">
 									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">University / College / School</label>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											University / College / School <span className="text-emerald-400 font-bold">*</span>
+										</label>
 										<input
 											type="text"
 											value={school}
-											onChange={(e) => setSchool(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+											onChange={(e) => setSchool(sanitizeToCharactersOnly(e.target.value, true))}
+											className={`w-full rounded-xl border ${school && (getCharacterOnlyValidationError(school, "School", 2, true) || getTextValidationError(school, "School", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none transition-colors`}
 											placeholder="e.g. Indian Institute of Technology, Bombay"
 										/>
+										{school && (getCharacterOnlyValidationError(school, "School", 2, true) || getTextValidationError(school, "School", 2, true)) && (
+											<p className="text-xs text-rose-400 mt-1">{getCharacterOnlyValidationError(school, "School", 2, true) || getTextValidationError(school, "School", 2, true)}</p>
+										)}
 									</div>
 
 									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">Degree & Major</label>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Degree & Major <span className="text-emerald-400 font-bold">*</span>
+										</label>
 										<input
 											type="text"
 											value={degree}
-											onChange={(e) => setDegree(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+											onChange={(e) => setDegree(sanitizeToCharactersOnly(e.target.value, true))}
+											className={`w-full rounded-xl border ${degree && (getCharacterOnlyValidationError(degree, "Degree", 2, true) || getTextValidationError(degree, "Degree", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none transition-colors`}
 											placeholder="e.g. B.Tech in Computer Science"
 										/>
+										{degree && (getCharacterOnlyValidationError(degree, "Degree", 2, true) || getTextValidationError(degree, "Degree", 2, true)) && (
+											<p className="text-xs text-rose-400 mt-1">{getCharacterOnlyValidationError(degree, "Degree", 2, true) || getTextValidationError(degree, "Degree", 2, true)}</p>
+										)}
 									</div>
 
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1024,9 +1125,12 @@ export function ManualBuilderRoute() {
 												type="text"
 												value={eduYear}
 												onChange={(e) => setEduYear(e.target.value)}
-												className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+												className={`w-full rounded-xl border ${eduYear && getDatePeriodValidationError(eduYear, false) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none transition-colors`}
 												placeholder="e.g. 2020 - 2024"
 											/>
+											{eduYear && getDatePeriodValidationError(eduYear, false) && (
+												<p className="text-xs text-rose-400 mt-1">{getDatePeriodValidationError(eduYear, false)}</p>
+											)}
 										</div>
 										<div>
 											<label className="block text-xs font-semibold text-slate-300 mb-1.5">CGPA or Percentage (optional)</label>
@@ -1034,9 +1138,12 @@ export function ManualBuilderRoute() {
 												type="text"
 												value={eduScore}
 												onChange={(e) => setEduScore(e.target.value)}
-												className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+												className={`w-full rounded-xl border ${eduScore && getScoreValidationError(eduScore) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none transition-colors`}
 												placeholder="e.g. 8.8 CGPA"
 											/>
+											{eduScore && getScoreValidationError(eduScore) && (
+												<p className="text-xs text-rose-400 mt-1">{getScoreValidationError(eduScore)}</p>
+											)}
 										</div>
 									</div>
 
@@ -1064,14 +1171,19 @@ export function ManualBuilderRoute() {
 							{step === 3 && (
 								<div className="space-y-5">
 									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">Core Technical & Professional Skills</label>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Core Technical & Professional Skills <span className="text-emerald-400 font-bold">*</span>
+										</label>
 										<textarea
 											rows={4}
 											value={skills}
 											onChange={(e) => setSkills(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
+											className={`w-full rounded-xl border ${skills && getTextValidationError(skills, "Skills", 2, true) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none resize-none transition-colors`}
 											placeholder="e.g. React, TypeScript, TailwindCSS, Next.js, Redux, Node.js"
 										/>
+										{skills && getTextValidationError(skills, "Skills", 2, true) && (
+											<p className="text-xs text-rose-400 mt-1">{getTextValidationError(skills, "Skills", 2, true)}</p>
+										)}
 										<p className="text-[11px] text-slate-400 mt-1">Separate skills with commas.</p>
 									</div>
 
@@ -1099,25 +1211,35 @@ export function ManualBuilderRoute() {
 							{step === 4 && (
 								<div className="space-y-5">
 									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">Project or Company Name</label>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Project or Company Name <span className="text-emerald-400 font-bold">*</span>
+										</label>
 										<input
 											type="text"
 											value={project}
-											onChange={(e) => setProject(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none"
+											onChange={(e) => setProject(sanitizeToCharactersOnly(e.target.value, true))}
+											className={`w-full rounded-xl border ${project && (getCharacterOnlyValidationError(project, "Project or Company", 2, true) || getTextValidationError(project, "Project or Company", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none transition-colors`}
 											placeholder="e.g. Vipasna Website"
 										/>
+										{project && (getCharacterOnlyValidationError(project, "Project or Company", 2, true) || getTextValidationError(project, "Project or Company", 2, true)) && (
+											<p className="text-xs text-rose-400 mt-1">{getCharacterOnlyValidationError(project, "Project or Company", 2, true) || getTextValidationError(project, "Project or Company", 2, true)}</p>
+										)}
 									</div>
 
 									<div>
-										<label className="block text-xs font-semibold text-slate-300 mb-1.5">Description & Key Contributions</label>
+										<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+											Description & Key Contributions <span className="text-emerald-400 font-bold">*</span>
+										</label>
 										<textarea
 											rows={4}
 											value={statement}
 											onChange={(e) => setStatement(e.target.value)}
-											className="w-full rounded-xl border border-slate-800 bg-[#09101d] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"
+											className={`w-full rounded-xl border ${statement && getTextValidationError(statement, "Description", 5, true) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} bg-[#09101d] px-4 py-3 text-sm text-white focus:outline-none resize-none transition-colors`}
 											placeholder="e.g. Built responsive pages using React, improved UI performance, and worked with cross-functional teams."
 										/>
+										{statement && getTextValidationError(statement, "Description", 5, true) && (
+											<p className="text-xs text-rose-400 mt-1">{getTextValidationError(statement, "Description", 5, true)}</p>
+										)}
 									</div>
 
 									<div className="flex items-center gap-3 pt-2">

@@ -128,8 +128,8 @@ export const certificationItemSchema = baseItemSchema.extend({
 
 export const educationItemSchema = baseItemSchema.extend({
 	college: z.string().optional(),
-	school: z.string().min(1),
-	degree: z.string(),
+	school: z.string().min(1, "School or University name is required"),
+	degree: z.string().min(1, "Degree or Qualification is required"),
 	area: z.string(),
 	grade: z.string(),
 	location: z.string(),
@@ -153,8 +153,8 @@ export const educationItemSchema = baseItemSchema.extend({
 });
 
 export const experienceItemSchema = baseItemSchema.extend({
-	company: z.string().min(1).describe("The name of the company or organization."),
-	position: z.string().describe("The position held at the company or organization."),
+	company: z.string().min(1, "Company or Organization is required").describe("The name of the company or organization."),
+	position: z.string().min(1, "Job title or Position is required").describe("The position held at the company or organization."),
 	location: z.string().describe("The location of the company or organization."),
 	startDate: z.string().optional().describe("The start date of the experience."),
 	endDate: z.string().optional().describe("The end date of the experience."),
@@ -198,7 +198,7 @@ export const profileItemSchema = baseItemSchema.extend({
 });
 
 export const projectItemSchema = baseItemSchema.extend({
-	name: z.string().min(1).describe("The name of the project."),
+	name: z.string().min(1, "Project name is required").describe("The name of the project."),
 	role: z.string().describe("The role of the author in the project."),
 	period: z.string().describe("The period of time the project was worked on."),
 	website: urlSchema.describe("The link to the project, if any."),
@@ -255,7 +255,7 @@ export const skillItemSchema = baseItemSchema.extend({
 // In schema/resume/data.ts
 
 export const volunteerItemSchema = baseItemSchema.extend({
-	organization: z.string().min(1).describe("The name of the organization or company."),
+	organization: z.string().min(1, "Organization name is required").describe("The name of the organization or company."),
 	location: z.string().describe("The location of the organization or company."),
 	period: z.string().describe("The period of time the author was volunteered at the organization or company."),
 	website: urlSchema.describe("The link to the organization or company, if any."),

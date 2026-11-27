@@ -30,6 +30,17 @@ import { templates } from "@/dialogs/resume/template/data";
 import type { Template } from "@/schema/templates";
 import { localResumeStore } from "@/utils/local-resumes";
 import { parseResumeWithGemini } from "@/utils/gemini-resume-parser";
+import {
+	isValidEmail,
+	isValidOptionalPhone,
+	getEmailValidationError,
+	getPhoneValidationError,
+	getTextValidationError,
+	getNameValidationError,
+	getCharacterOnlyValidationError,
+	sanitizeToCharactersOnly,
+	getDatePeriodValidationError,
+} from "@/utils/validation";
 
 // ---------------------------------------------------------------------------
 // Route Definition
@@ -281,13 +292,34 @@ function UploadRouteComponent() {
 
 	// Save contact details confirmation
 	const handleSaveContactDetails = () => {
+		if (confirmEmail && !isValidEmail(confirmEmail)) {
+			toast.error("Please enter a valid email address.");
+			return;
+		}
+		if (confirmPhone && !isValidOptionalPhone(confirmPhone)) {
+			toast.error("Please enter a valid phone number.");
+			return;
+		}
 		toast.success("Contact details updated!");
 	};
 
 	// Add new entry manually
 	const handleAddFoundEntry = () => {
-		if (!newEntryTitle.trim()) {
-			toast.error("Please enter a title for the entry.");
+		const titleErr = getCharacterOnlyValidationError(newEntryTitle, "Title", 2, true) || getTextValidationError(newEntryTitle, "Title", 2, true);
+		if (titleErr) {
+			toast.error(titleErr);
+			return;
+		}
+		if (newEntryOrg.trim()) {
+			const orgErr = getCharacterOnlyValidationError(newEntryOrg, "Company / Organization", 2, false);
+			if (orgErr) {
+				toast.error(orgErr);
+				return;
+			}
+		}
+		const datesErr = getDatePeriodValidationError(newEntryDates, false);
+		if (datesErr) {
+			toast.error(datesErr);
 			return;
 		}
 		const newEntry: FoundEntry = {
@@ -315,6 +347,14 @@ function UploadRouteComponent() {
 	// Transition to Guided Story Route (Plan step)
 	const isProceedingRef = useRef(false);
 	const handleProceedToPlan = async () => {
+		if (confirmEmail && !isValidEmail(confirmEmail)) {
+			toast.error("Please enter a valid email address before proceeding.");
+			return;
+		}
+		if (confirmPhone && !isValidOptionalPhone(confirmPhone)) {
+			toast.error("Please enter a valid phone number before proceeding.");
+			return;
+		}
 		if (isProceedingRef.current) return;
 		isProceedingRef.current = true;
 		const toastId = toast.loading("Preparing your story plan...");
@@ -680,10 +720,16 @@ function UploadRouteComponent() {
 									<input
 										type="text"
 										value={confirmName}
-										onChange={(e) => setConfirmName(e.target.value)}
-										className="w-full rounded-xl bg-[#060c15] border border-slate-800 text-white px-3.5 py-2 text-xs outline-none focus:border-emerald-500 transition-colors"
+										onChange={(e) => {
+											const filtered = e.target.value.replace(/[^\p{L}\s'.-]/gu, "");
+											setConfirmName(filtered);
+										}}
+										className={`w-full rounded-xl bg-[#060c15] border ${confirmName && getNameValidationError(confirmName) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} text-white px-3.5 py-2 text-xs outline-none transition-colors`}
 										placeholder="Full name"
 									/>
+									{confirmName && getNameValidationError(confirmName) && (
+										<p className="text-[11px] text-rose-400 mt-1">{getNameValidationError(confirmName)}</p>
+									)}
 								</div>
 
 								<div className="space-y-1">
@@ -691,7 +737,7 @@ function UploadRouteComponent() {
 									<input
 										type="text"
 										value={confirmHeadline}
-										onChange={(e) => setConfirmHeadline(e.target.value)}
+										onChange={(e) => setConfirmHeadline(sanitizeToCharactersOnly(e.target.value, true))}
 										className="w-full rounded-xl bg-[#060c15] border border-slate-800 text-white px-3.5 py-2 text-xs outline-none focus:border-emerald-500 transition-colors"
 										placeholder="e.g. New Delhi, India or Frontend Developer"
 									/>
@@ -703,9 +749,12 @@ function UploadRouteComponent() {
 										type="email"
 										value={confirmEmail}
 										onChange={(e) => setConfirmEmail(e.target.value)}
-										className="w-full rounded-xl bg-[#060c15] border border-slate-800 text-white px-3.5 py-2 text-xs outline-none focus:border-emerald-500 transition-colors"
+										className={`w-full rounded-xl bg-[#060c15] border ${confirmEmail && getEmailValidationError(confirmEmail) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} text-white px-3.5 py-2 text-xs outline-none transition-colors`}
 										placeholder="Email address"
 									/>
+									{confirmEmail && getEmailValidationError(confirmEmail) && (
+										<p className="text-[11px] text-rose-400 mt-1">{getEmailValidationError(confirmEmail)}</p>
+									)}
 								</div>
 
 								<div className="space-y-1">
@@ -714,9 +763,12 @@ function UploadRouteComponent() {
 										type="text"
 										value={confirmPhone}
 										onChange={(e) => setConfirmPhone(e.target.value)}
-										className="w-full rounded-xl bg-[#060c15] border border-slate-800 text-white px-3.5 py-2 text-xs outline-none focus:border-emerald-500 transition-colors"
+										className={`w-full rounded-xl bg-[#060c15] border ${confirmPhone && getPhoneValidationError(confirmPhone) ? "border-rose-500 focus:border-rose-500" : "border-slate-800 focus:border-emerald-500"} text-white px-3.5 py-2 text-xs outline-none transition-colors`}
 										placeholder="+91 1234567890"
 									/>
+									{confirmPhone && getPhoneValidationError(confirmPhone) && (
+										<p className="text-[11px] text-rose-400 mt-1">{getPhoneValidationError(confirmPhone)}</p>
+									)}
 								</div>
 
 								<div className="space-y-1">
@@ -844,23 +896,28 @@ function UploadRouteComponent() {
 									<div className="mt-3 p-4 rounded-xl border border-emerald-500/30 bg-[#060c15] space-y-3">
 										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 											<div>
-												<label className="text-[10px] font-semibold text-slate-400 block mb-1">Title / Role</label>
+												<label className="text-[10px] font-semibold text-slate-400 block mb-1">
+													Title / Role <span className="text-emerald-400 font-bold">*</span>
+												</label>
 												<input
 													type="text"
 													value={newEntryTitle}
-													onChange={(e) => setNewEntryTitle(e.target.value)}
+													onChange={(e) => setNewEntryTitle(sanitizeToCharactersOnly(e.target.value, true))}
 													placeholder="e.g. Frontend Developer"
-													className="w-full rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-white"
+													className={`w-full rounded-lg bg-slate-900 border ${newEntryTitle && (getCharacterOnlyValidationError(newEntryTitle, "Title", 2, true) || getTextValidationError(newEntryTitle, "Title", 2, true)) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} px-3 py-1.5 text-xs text-white outline-none transition-colors`}
 												/>
+												{newEntryTitle && (getCharacterOnlyValidationError(newEntryTitle, "Title", 2, true) || getTextValidationError(newEntryTitle, "Title", 2, true)) && (
+													<p className="text-[10px] text-rose-400 mt-0.5">{getCharacterOnlyValidationError(newEntryTitle, "Title", 2, true) || getTextValidationError(newEntryTitle, "Title", 2, true)}</p>
+												)}
 											</div>
 											<div>
 												<label className="text-[10px] font-semibold text-slate-400 block mb-1">Company / Organization</label>
 												<input
 													type="text"
 													value={newEntryOrg}
-													onChange={(e) => setNewEntryOrg(e.target.value)}
+													onChange={(e) => setNewEntryOrg(sanitizeToCharactersOnly(e.target.value, true))}
 													placeholder="e.g. Acme Corp"
-													className="w-full rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-white"
+													className="w-full rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500 transition-colors"
 												/>
 											</div>
 											<div>
@@ -870,8 +927,11 @@ function UploadRouteComponent() {
 													value={newEntryDates}
 													onChange={(e) => setNewEntryDates(e.target.value)}
 													placeholder="e.g. 2024 – Present"
-													className="w-full rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-white"
+													className={`w-full rounded-lg bg-slate-900 border ${newEntryDates && getDatePeriodValidationError(newEntryDates, false) ? "border-rose-500" : "border-slate-800 focus:border-emerald-500"} px-3 py-1.5 text-xs text-white outline-none transition-colors`}
 												/>
+												{newEntryDates && getDatePeriodValidationError(newEntryDates, false) && (
+													<p className="text-[10px] text-rose-400 mt-0.5">{getDatePeriodValidationError(newEntryDates, false)}</p>
+												)}
 											</div>
 											<div>
 												<label className="text-[10px] font-semibold text-slate-400 block mb-1">Category</label>
