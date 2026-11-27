@@ -36,6 +36,23 @@ export function downloadWithAnchor(blob: Blob, filename: string) {
 export async function downloadFromUrl(url: string, filename: string) {
 	let downloadUrl = url;
 
+	// Handle internal printer URLs by opening/printing them instead of downloading HTML
+	if (url.startsWith("/printer/") || url.includes("/printer/")) {
+		try {
+			const { printResumeClientSide } = await import("./print-resume");
+			// Extract resumeId
+			const match = url.match(/\/printer\/([^?#/]+)/);
+			if (match && match[1]) {
+				printResumeClientSide(match[1]);
+				return;
+			}
+		} catch (e) {
+			console.warn("Client-side printing helper failed:", e);
+		}
+		window.open(url, "_blank", "noopener,noreferrer");
+		return;
+	}
+
 	// If the URL is a direct S3 URL pointing to an internal upload,
 	// try to use the local proxy to bypass CORS entirely and force download headers.
 	if (url.includes(".amazonaws.com") && url.includes("/uploads/")) {

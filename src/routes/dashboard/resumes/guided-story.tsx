@@ -5829,7 +5829,160 @@ export function GuidedStoryRoute() {
 
 									<button
 										type="button"
-										onClick={() => window.print()}
+										onClick={async () => {
+											const toastId = toast.loading("Preparing your resume PDF...");
+											try {
+												// 1. Compile up-to-date resume data from current state
+												const workList = outlineEntries.filter((e) => e.category === "work");
+												const projList = outlineEntries.filter((e) => e.category === "projects");
+												const eduList = outlineEntries.filter((e) => e.category === "education");
+												const volList = outlineEntries.filter((e) => e.category === "volunteer");
+
+												const updatedData: ResumeData = {
+													...defaultResumeData,
+													basics: {
+														...defaultResumeData.basics,
+														name: fullName || "",
+														headline: targetRole || "",
+														email: contactEmail || "",
+														phone: contactPhone || "",
+														location: contactLocation || "",
+														website: { url: contactLinks || "", label: "" },
+													},
+													summary: {
+														...defaultResumeData.summary,
+														hidden: !professionalSummary,
+														content: professionalSummary ? `<p>${professionalSummary}</p>` : "",
+													},
+													sections: {
+														...defaultResumeData.sections,
+														experience: {
+															title: "Experience",
+															columns: 1,
+															hidden: workList.length === 0,
+															items: workList.map((w) => ({
+																id: w.id,
+																hidden: false,
+																company: w.organization || "",
+																position: w.title,
+																location: "",
+																period: w.dates || "",
+																website: { url: "", label: "" },
+																description: w.points && w.points.length > 0
+																	? w.points.map((pt) => `<p>• ${pt}</p>`).join("")
+																	: (w.description ? `<p>${w.description}</p>` : ""),
+															})),
+														},
+														projects: {
+															title: "Projects",
+															columns: 1,
+															hidden: projList.length === 0,
+															items: projList.map((p) => ({
+																id: p.id,
+																hidden: false,
+																name: p.title,
+																role: p.organization || "",
+																period: p.dates || "",
+																website: { url: "", label: "" },
+																description: p.description ? `<p>${p.description}</p>` : "",
+															})),
+														},
+														education: {
+															title: "Education",
+															columns: 1,
+															hidden: eduList.length === 0,
+															items: eduList.map((e) => ({
+																id: e.id,
+																hidden: false,
+																school: e.organization || "",
+																degree: e.title || "",
+																area: "",
+																grade: "",
+																location: "",
+																period: e.dates || "",
+																website: { url: "", label: "" },
+																description: e.description ? `<p>${e.description}</p>` : "",
+																currentlyStudyingHere: false,
+															})),
+														},
+														skills: {
+															title: "Skills",
+															columns: 1,
+															hidden: skillsList.length === 0,
+															items: skillsList.map((skill, idx) => ({
+																id: `skill_${idx}`,
+																hidden: false,
+																icon: "",
+																name: skill,
+																proficiency: "",
+																description: "",
+																level: 0,
+																keywords: [],
+															})),
+														},
+														volunteer: {
+															title: "Volunteering & Activities",
+															columns: 1,
+															hidden: volList.length === 0,
+															items: volList.map((v) => ({
+																id: v.id,
+																hidden: false,
+																organization: v.organization || "",
+																position: v.title || "",
+																location: "",
+																period: v.dates || "",
+																website: { url: "", label: "" },
+																description: v.description ? `<p>${v.description}</p>` : "",
+															})),
+														},
+													},
+													metadata: {
+														...defaultResumeData.metadata,
+														template: (selectedTemplate?.toLowerCase() || "onyx") as any,
+														layout: {
+															sidebarWidth: 30,
+															pages: [
+																{
+																	fullWidth: ["bronzor", "kakuna", "lapras", "onyx", "rhyhorn"].includes((selectedTemplate || "onyx").toLowerCase()),
+																	main: ["bronzor", "kakuna", "lapras", "onyx", "rhyhorn"].includes((selectedTemplate || "onyx").toLowerCase())
+																		? ["summary", "experience", "education", "projects", "skills", "volunteer"]
+																		: ["summary", "experience", "education", "projects"],
+																	sidebar: ["bronzor", "kakuna", "lapras", "onyx", "rhyhorn"].includes((selectedTemplate || "onyx").toLowerCase())
+																		? []
+																		: ["profiles", "skills", "volunteer"],
+																},
+															],
+														},
+													},
+												};
+
+												// 2. Ensure resume exists in localResumeStore
+												let targetResumeId = createdResumeId;
+												if (targetResumeId) {
+													localResumeStore.update(targetResumeId, {
+														name: targetRole ? `${targetRole} Resume` : (fullName ? `${fullName}'s Resume` : "My Resume"),
+														data: updatedData,
+													});
+												} else {
+													const created = localResumeStore.create({
+														name: targetRole ? `${targetRole} Resume` : (fullName ? `${fullName}'s Resume` : "My Resume"),
+														data: updatedData,
+													});
+													targetResumeId = created.id;
+													setCreatedResumeId(created.id);
+												}
+
+												// 3. Trigger clean resume PDF print
+												// First try triggering print on the active window which is now protected with @media print isolation
+												window.print();
+												toast.success("Print dialog opened for your resume!");
+											} catch (err) {
+												console.error("PDF Export error:", err);
+												toast.error("Failed to prepare PDF. Please try again.");
+											} finally {
+												toast.dismiss(toastId);
+											}
+										}}
 										className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ccf873] hover:bg-[#bdf35a] text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
 									>
 										<Download className="size-4" />
@@ -5843,10 +5996,10 @@ export function GuidedStoryRoute() {
 
 				{/* Right Column: Live Resume Document Preview (matches screenshot) */}
 				{!hideResumePreview && (
-					<aside className="w-full lg:w-[460px] xl:w-[500px] border-t lg:border-t-0 lg:border-l border-slate-900 bg-[#070d14] p-6 shrink-0 flex flex-col justify-between overflow-y-auto relative">
+					<aside className="guided-story-preview-aside w-full lg:w-[460px] xl:w-[500px] border-t lg:border-t-0 lg:border-l border-slate-900 bg-[#070d14] p-6 shrink-0 flex flex-col justify-between overflow-y-auto relative">
 						<div className="space-y-4 w-full">
 							{/* Header row in screenshot: THE OUTPUT & Live draft badge */}
-							<div className="flex items-center justify-between">
+							<div className="flex items-center justify-between print:hidden">
 								<div>
 									<span className="text-[10px] font-mono tracking-widest uppercase text-slate-500 font-bold block">
 										THE OUTPUT
@@ -6223,6 +6376,7 @@ export function GuidedStoryRoute() {
 
 								return (
 									<div
+										id="guided-story-printable-resume"
 										className={cn(
 											"rounded-xl border border-slate-300 bg-[#faf8f5] text-slate-900 shadow-2xl min-h-[560px] text-xs w-full relative transition-all overflow-hidden",
 											palette.borderTop
@@ -6232,7 +6386,7 @@ export function GuidedStoryRoute() {
 										<button
 											type="button"
 											onClick={() => setActiveTab("stories")}
-											className="absolute -right-3.5 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white border border-slate-300 shadow-xl flex items-center justify-center text-slate-900 hover:scale-105 transition-transform cursor-pointer z-10"
+											className="absolute -right-3.5 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white border border-slate-300 shadow-xl flex items-center justify-center text-slate-900 hover:scale-105 transition-transform cursor-pointer z-10 print:hidden"
 											title="Next: Your stories"
 										>
 											<ArrowRight className="size-4" />
@@ -6463,7 +6617,7 @@ export function GuidedStoryRoute() {
 							})()}
 
 							{/* Footer under live draft: Draft wording appears as you talk & Read full resume */}
-							<div className="space-y-2 pt-1 text-xs">
+							<div className="space-y-2 pt-1 text-xs print:hidden">
 								<div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
 									<span className="size-1.5 rounded-full bg-emerald-400" />
 									<span>Draft wording appears as you talk. You choose what makes it into your resume.</span>
@@ -6486,7 +6640,7 @@ export function GuidedStoryRoute() {
 								const currentQIndex = activeEntry ? (activeExplorationQuestionIndex[activeEntry.id] || 0) : 0;
 
 								return (
-									<div className="pt-4 border-t border-slate-800/90 space-y-3.5">
+									<div className="pt-4 border-t border-slate-800/90 space-y-3.5 print:hidden">
 										<div className="flex items-center justify-between">
 											<div>
 												<h4 className="text-sm font-bold text-white tracking-tight">

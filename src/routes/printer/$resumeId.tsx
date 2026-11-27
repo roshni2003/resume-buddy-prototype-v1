@@ -11,18 +11,19 @@ import { verifyPrinterToken } from "@/utils/printer-token";
 
 const searchSchema = z.object({
 	token: z.string().catch(""),
+	print: z.string().optional().catch(""),
 });
 
 export const Route = createFileRoute("/printer/$resumeId")({
 	component: RouteComponent,
 	validateSearch: zodValidator(searchSchema),
 	head: ({ loaderData }) => {
-		if (loaderData?.token === "preview") {
+		if (loaderData?.token === "preview" || loaderData?.token === "print") {
 			return {
 				styles: [
 					{
 						children:
-							"html, body { background-color: white !important; color-scheme: light !important; } .dark { background-color: white !important; }",
+							"html, body { background-color: white !important; color-scheme: light !important; } .dark { background-color: white !important; } @media print { @page { margin: 0; size: auto; } html, body { background: white !important; margin: 0 !important; padding: 0 !important; } .page { content-visibility: visible !important; } }",
 					},
 				],
 			};
@@ -33,8 +34,8 @@ export const Route = createFileRoute("/printer/$resumeId")({
 	beforeLoad: ({ params, search }) => {
 		if (env.VITE_FLAG_DEBUG_PRINTER || isStandaloneMode()) return {};
 
-		// Allow preview token for dashboard cards
-		if (search?.token === "preview") return {};
+		// Allow preview or print token for direct/client-side printing and dashboard cards
+		if (search?.token === "preview" || search?.token === "print") return {};
 
 		try {
 			// Verify the token and ensure it matches the resume ID
@@ -47,28 +48,29 @@ export const Route = createFileRoute("/printer/$resumeId")({
 	},
 	loader: async ({ params, search }: any) => {
 		try {
-			if (search?.token === "preview") {
-				// Preview mode: skip server-side loading, load on client only
+			if (search?.token === "preview" || search?.token === "print") {
+				// Preview or direct print mode: load client-side or fallback if server-side
 				if (typeof window === "undefined") {
 					return {
 						resume: { description: "Graduated with honors. Major in Computer Science.", currentlyStudyingHere: false },
 						token: search?.token,
+						print: search?.print,
 					};
 				}
 				const { api } = await import("@/utils/api");
 				const previewResume = await api.fetchResume(params.resumeId);
-				return { resume: previewResume, token: search?.token };
+				return { resume: previewResume, token: search?.token, print: search?.print };
 			}
 
 			const { api } = await import("@/utils/api");
 			const resume = await api.fetchResume(params.resumeId);
-			return { resume, token: search?.token };
+			return { resume, token: search?.token, print: search?.print };
 		} catch (error) {
 			console.error(`[Printer] Failed to load resume ${params.resumeId}:`, error);
 			if (typeof window !== "undefined") {
 				window.parent.postMessage({ type: "PRINTER_ERROR", resumeId: params.resumeId, message: String(error) }, "*");
 			}
-			return { resume: null, token: search?.token };
+			return { resume: null, token: search?.token, print: search?.print };
 		}
 	},
 });
@@ -76,8 +78,8 @@ export const Route = createFileRoute("/printer/$resumeId")({
 const routeApi = getRouteApi("/printer/$resumeId");
 
 function RouteComponent() {
-	const loaderData = routeApi.useLoaderData() as { resume: any; token: string } | undefined;
-	const { token: searchToken } = routeApi.useSearch();
+	const loaderData = routeApi.useLoaderData() as { resume: any; token: string; print?: string } | undefined;
+	const { token: searchToken, print: searchPrint } = routeApi.useSearch();
 	const { resumeId } = routeApi.useParams();
 
 	const isReady = useResumeStore((state) => state.isReady);
@@ -85,11 +87,12 @@ function RouteComponent() {
 
 	const [clientResume, setClientResume] = useState<any>(loaderData?.resume ?? null);
 	const token = loaderData?.token ?? searchToken;
+	const shouldAutoPrint = (loaderData?.print ?? searchPrint) === "1" || token === "print";
 
 	// Client-side fetch for preview mode when server returned null
 	useEffect(() => {
 		if (clientResume) return;
-		if (token !== "preview" && searchToken !== "preview") return;
+		if (token !== "preview" && searchToken !== "preview" && token !== "print" && searchToken !== "print") return;
 
 		const fetchResume = async () => {
 			try {
@@ -125,8 +128,26 @@ function RouteComponent() {
 		}
 	}, [isReady, token, searchToken, clientResume?.id, resumeId]);
 
+	// Auto-trigger native print dialog when opened in standalone print window
+	useEffect(() => {
+		if (isReady && shouldAutoPrint) {
+			// If inside an iframe, let the parent controller call iframe.contentWindow.print()
+			// to avoid conflicting before rendering finishes
+			const isIframe = window.self !== window.top;
+			if (isIframe) {
+				window.parent.postMessage({ type: "PRINTER_READY", resumeId }, "*");
+				return;
+			}
+
+			const timer = setTimeout(() => {
+				window.print();
+			}, 1000);
+			return () => clearTimeout(timer);
+		}
+	}, [isReady, shouldAutoPrint, resumeId]);
+
 	if (!isReady) {
-		if (token === "preview" || searchToken === "preview") {
+		if (token === "preview" || searchToken === "preview" || token === "print" || searchToken === "print") {
 			return <div className="fixed inset-0 bg-white" />;
 		}
 		return <LoadingScreen />;

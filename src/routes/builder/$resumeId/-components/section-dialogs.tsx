@@ -1778,16 +1778,23 @@ export function ExportDialog() {
 	const handleDownload = useCallback(async () => {
 		const format = selectedFormat;
 		const filename = generateFilename(fileName, format);
-		const toastId = toast.loading(t`Please wait while your ${format.toUpperCase()} is being generated...`, {
-			description: t`This may take a while depending on the server capacity. Please do not close the window or refresh the page.`,
-		});
+		const toastId = toast.loading(t`Preparing ${format.toUpperCase()} export...`);
 
 		try {
 			const { url } = await exportResume({ id: resume.id, format });
 			downloadFromUrl(url, filename);
 
-			toast.success(t`Your ${format.toUpperCase()} has been downloaded successfully!`);
-		} catch {
+			toast.success(t`Your ${format.toUpperCase()} is ready!`);
+		} catch (error) {
+			console.warn("[SectionDialog Export] Error, falling back:", error);
+			if (format === "pdf") {
+				try {
+					const { printResumeClientSide } = await import("@/utils/print-resume");
+					printResumeClientSide(resume.id);
+					toast.info(t`Opening print dialog to save as PDF...`);
+					return;
+				} catch {}
+			}
 			toast.error(t`There was a problem while generating the ${format.toUpperCase()}, please try again in some time.`);
 		} finally {
 			toast.dismiss(toastId);

@@ -121,13 +121,20 @@ export function ResumeBuddyEditor() {
 	const handleExportPDF = async () => {
 		if (!resume) return;
 		const filename = generateFilename(resume.data.basics.name, "pdf");
-		const toastId = toast.loading("Generating PDF, please wait...");
+		const toastId = toast.loading("Preparing PDF export...");
 		try {
 			const { url } = await exportResume({ id: resume.id, format: "pdf" });
 			downloadFromUrl(url, filename);
-			toast.success("PDF downloaded!");
+			toast.success("PDF ready!");
 		} catch (err) {
-			toast.error("Failed to generate PDF.");
+			console.warn("[PDF Export] Error, triggering client-side print:", err);
+			try {
+				const { printResumeClientSide } = await import("@/utils/print-resume");
+				printResumeClientSide(resume.id);
+				toast.info("Opening print dialog to save as PDF...");
+			} catch {
+				toast.error("Failed to generate PDF.");
+			}
 		} finally {
 			toast.dismiss(toastId);
 		}

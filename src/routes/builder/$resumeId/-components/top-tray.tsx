@@ -280,9 +280,7 @@ export function BuilderTopTray() {
 	const onDownloadPDF = async () => {
 		if (!resume?.id) return;
 		const filename = generateFilename(resume.data.basics.name, "pdf");
-		const toastId = toast.loading(t`Please wait while your PDF is being generated...`, {
-			description: t`This may take a while depending on the server capacity. Please do not close the window or refresh the page.`,
-		});
+		const toastId = toast.loading(t`Preparing PDF export...`);
 
 		try {
 			const { url } = await exportResume({ id: resume.id, format: "pdf" });
@@ -294,13 +292,20 @@ export function BuilderTopTray() {
 				timestamp: new Date().toISOString(),
 			});
 		} catch (error: any) {
-			mixpanelService.track("Resume Downloaded", {
-				format: "pdf",
-				status: "error",
-				error_message: error.message,
-				timestamp: new Date().toISOString(),
-			});
-			toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
+			console.warn("[TopTray PDF] Export error, falling back to client-side print:", error);
+			try {
+				const { printResumeClientSide } = await import("@/utils/print-resume");
+				printResumeClientSide(resume.id);
+				toast.info(t`Opening print dialog to save as PDF...`);
+			} catch {
+				mixpanelService.track("Resume Downloaded", {
+					format: "pdf",
+					status: "error",
+					error_message: error.message,
+					timestamp: new Date().toISOString(),
+				});
+				toast.error(t`There was a problem while generating the PDF, please try again in some time.`);
+			}
 		} finally {
 			toast.dismiss(toastId);
 		}
