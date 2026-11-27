@@ -46,6 +46,8 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { useState, useEffect, useRef } from "react";
 import z from "zod";
 import { localResumeStore } from "@/utils/local-resumes";
+import { api } from "@/utils/api";
+import { slugify } from "@/utils/string";
 import { templates } from "@/dialogs/resume/template/data";
 import { defaultResumeData, type ResumeData } from "@/schema/resume/data";
 import { cn } from "@/utils/style";
@@ -154,105 +156,174 @@ export function GuidedStoryRoute() {
 		};
 	}, []);
 
+	const isStartingFresh = !search?.resumeId && (search?.step === "direction" || !search?.step);
+	const isHydratingRef = useRef(false);
+
 	// Load specific resume when resumeId search parameter is provided
 	useEffect(() => {
-		if (search?.resumeId) {
-			const targetId = search.resumeId;
-			setCreatedResumeId(targetId);
+		if (!search?.resumeId) return;
+		let cancelled = false;
+		const targetId = search.resumeId;
+		setCreatedResumeId(targetId);
+		isHydratingRef.current = true;
 
+		(async () => {
 			try {
-				const resumeItem = localResumeStore.get(targetId);
-				if (resumeItem && resumeItem.data) {
-					const data = resumeItem.data;
-					if (data.basics?.name) setFullName(data.basics.name);
-					if (data.basics?.headline) setTargetRole(data.basics.headline);
-					if (data.metadata?.template) setSelectedTemplate(data.metadata.template);
+				const resumeItem = await api.fetchResume(targetId);
+				if (cancelled || !resumeItem?.data) return;
+				const data = resumeItem.data;
 
-					// Parse sections into outline entries
-					const loadedEntries: OutlineEntry[] = [];
+				setFullName(data.basics?.name || "");
+				setTargetRole(data.basics?.headline || "");
+				setContactEmail(data.basics?.email || "");
+				setContactPhone(data.basics?.phone || "");
+				setContactLocation(data.basics?.location || "");
 
-					// 1. Experience (Work)
-					if (data.sections?.experience?.items) {
-						data.sections.experience.items.forEach((exp: any, idx: number) => {
-							const bullets: string[] = [];
-							if (exp.description) {
-								const clean = exp.description.replace(/<[^>]*>/g, "\n");
-								clean.split("\n").map((b: string) => b.trim()).filter(Boolean).forEach((b: string) => bullets.push(b));
-							}
-							loadedEntries.push({
-								id: exp.id || `work_${idx}`,
-								category: "work",
-								title: exp.position || "Role",
-								organization: exp.company || "",
-								dates: exp.period || "",
-								points: bullets,
-							});
+				const profileLinks = (data.sections?.profiles?.items || [])
+					.map((p: any) => p.website?.url || p.username)
+					.filter(Boolean)
+					.join(", ");
+				setContactLinks(profileLinks || data.basics?.website?.url || "");
+
+				const summaryText = data.summary?.content
+					? data.summary.content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
+					: "";
+				setProfessionalSummary(summaryText);
+
+				const loadedSkills = (data.sections?.skills?.items || [])
+					.map((s: any) => s.name)
+					.filter(Boolean);
+				setSkillsList(loadedSkills);
+
+				if (data.metadata?.template) {
+					setSelectedTemplate(data.metadata.template);
+				}
+
+				const parseBullets = (html?: string) => {
+					if (!html) return [];
+					return html
+						.replace(/<\/(li|p|div|br)>/gi, "\n")
+						.replace(/<[^>]*>/g, "")
+						.split("\n")
+						.map((b) => b.replace(/^[•\-*]\s*/, "").trim())
+						.filter(Boolean);
+				};
+
+				// Parse sections into outline entries
+				const loadedEntries: OutlineEntry[] = [];
+
+				// 1. Experience (Work)
+				if (data.sections?.experience?.items) {
+					data.sections.experience.items.forEach((exp: any, idx: number) => {
+						const bullets = parseBullets(exp.description);
+						loadedEntries.push({
+							id: exp.id || `work_${idx}`,
+							category: "work",
+							title: exp.position || exp.company || "Role",
+							organization: exp.company || "",
+							dates: exp.period || "",
+							description: bullets.join(". "),
+							points: bullets,
 						});
-					}
+					});
+				}
 
-					// 2. Projects
-					if (data.sections?.projects?.items) {
-						data.sections.projects.items.forEach((proj: any, idx: number) => {
-							const bullets: string[] = [];
-							if (proj.description) {
-								const clean = proj.description.replace(/<[^>]*>/g, "\n");
-								clean.split("\n").map((b: string) => b.trim()).filter(Boolean).forEach((b: string) => bullets.push(b));
-							}
-							loadedEntries.push({
-								id: proj.id || `proj_${idx}`,
-								category: "projects",
-								title: proj.name || "Project",
-								organization: "",
-								dates: proj.period || "",
-								points: bullets,
-							});
+				// 2. Projects
+				if (data.sections?.projects?.items) {
+					data.sections.projects.items.forEach((proj: any, idx: number) => {
+						const bullets = parseBullets(proj.description);
+						loadedEntries.push({
+							id: proj.id || `proj_${idx}`,
+							category: "projects",
+							title: proj.name || "Project",
+							organization: proj.role || "",
+							dates: proj.period || "",
+							description: bullets.join(". "),
+							points: bullets,
 						});
-					}
+					});
+				}
 
-					// 3. Education
-					if (data.sections?.education?.items) {
-						data.sections.education.items.forEach((edu: any, idx: number) => {
-							loadedEntries.push({
-								id: edu.id || `edu_${idx}`,
-								category: "education",
-								title: edu.degree || edu.area || "Degree",
-								organization: edu.school || "",
-								dates: edu.period || "",
-								points: [],
-							});
+				// 3. Education
+				if (data.sections?.education?.items) {
+					data.sections.education.items.forEach((edu: any, idx: number) => {
+						loadedEntries.push({
+							id: edu.id || `edu_${idx}`,
+							category: "education",
+							title: edu.degree || edu.area || "Degree",
+							organization: edu.school || "",
+							dates: edu.period || "",
+							points: [],
 						});
-					}
+					});
+				}
 
-					// 4. Volunteer
-					if (data.sections?.volunteer?.items) {
-						data.sections.volunteer.items.forEach((vol: any, idx: number) => {
-							loadedEntries.push({
-								id: vol.id || `vol_${idx}`,
-								category: "volunteer",
-								title: vol.position || "Volunteer",
-								organization: vol.organization || "",
-								dates: vol.period || "",
-								points: [],
-							});
+				// 4. Volunteer
+				if (data.sections?.volunteer?.items) {
+					data.sections.volunteer.items.forEach((vol: any, idx: number) => {
+						const bullets = parseBullets(vol.description);
+						loadedEntries.push({
+							id: vol.id || `vol_${idx}`,
+							category: "volunteer",
+							title: vol.position || vol.organization || "Volunteer",
+							organization: vol.organization || "",
+							dates: vol.period || "",
+							description: bullets.join(". "),
+							points: bullets,
 						});
-					}
+					});
+				}
 
-					if (loadedEntries.length > 0) {
-						setOutlineEntries(loadedEntries);
-					}
+				setOutlineEntries(loadedEntries);
+
+				const workEntries = loadedEntries.filter((e) => e.category === "work");
+				if (workEntries.length > 0) {
+					setStories(
+						workEntries.map((w, idx) => ({
+							id: `story_${idx}`,
+							companyOrProject: w.organization ? `${w.title} at ${w.organization}` : w.title,
+							type: "work",
+							role: w.title,
+							contribution: w.description || `Work as ${w.title}`,
+							problem: "",
+							approach: "",
+							evidenceResult: "",
+							finalBullets: w.points && w.points.length > 0 ? w.points : [],
+							status: "approved",
+						}))
+					);
 				}
 			} catch (err) {
 				console.warn("Failed to load specific resume by ID:", err);
+			} finally {
+				setTimeout(() => {
+					isHydratingRef.current = false;
+				}, 100);
 			}
-		}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
 	}, [search?.resumeId]);
+
+	// Clear any residual draft/outline data when starting a brand-new resume from scratch
+	useEffect(() => {
+		if (isStartingFresh && typeof window !== "undefined") {
+			try {
+				localStorage.removeItem("resume_buddy_guided_story_draft");
+				localStorage.removeItem("resume_buddy_outline_entries");
+			} catch { }
+		}
+	}, [isStartingFresh]);
 
 	// Navigation Tabs inside Workspace (Step 3)
 	const [activeTab, setActiveTab] = useState<WorkspaceTab>("plan");
 
 	// Step 1: Direction State
 	const [targetRole, setTargetRole] = useState(() => {
-		if (typeof window === "undefined") return "";
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return "";
+		if (search?.step !== "plan") return "";
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
@@ -321,7 +392,8 @@ export function GuidedStoryRoute() {
 	const [volDates, setVolDates] = useState("");
 
 	const [outlineEntries, setOutlineEntries] = useState<OutlineEntry[]>(() => {
-		if (typeof window === "undefined") return [];
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return [];
+		if (search?.step !== "plan") return [];
 		try {
 			const saved = localStorage.getItem("resume_buddy_outline_entries");
 			if (saved) {
@@ -382,24 +454,36 @@ export function GuidedStoryRoute() {
 
 	// Resume editor states
 	const [fullName, setFullName] = useState(() => {
-		if (typeof window === "undefined") return "";
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return "";
+		if (search?.step !== "plan") return "";
 		try {
-			const savedProfile = getStoredUserProfile();
-			if (savedProfile?.name) return savedProfile.name;
-			const localRaw = localStorage.getItem("resume_buddy_user_profile");
-			if (localRaw) {
-				const p = JSON.parse(localRaw);
-				if (p.name) return p.name;
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (p.fullName) return p.fullName;
 			}
 		} catch { }
 		return "";
 	});
-	const [createdResumeId, setCreatedResumeId] = useState<string | null>(null);
+	const [createdResumeId, setCreatedResumeId] = useState<string | null>(() => {
+		if (search?.resumeId) return search.resumeId;
+		if (typeof window === "undefined" || isStartingFresh) return null;
+		if (search?.step !== "plan") return null;
+		try {
+			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
+			if (saved) {
+				const p = JSON.parse(saved);
+				if (p.createdResumeId) return p.createdResumeId;
+			}
+		} catch { }
+		return null;
+	});
 	const [pictureUrl, setPictureUrl] = useState("");
 	const [showPicture, setShowPicture] = useState(true);
 	const [pictureShape, setPictureShape] = useState<"circle" | "rounded" | "square">("circle");
 	const [selectedTemplate, setSelectedTemplate] = useState(() => {
-		if (typeof window === "undefined") return "Azurill";
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return "Azurill";
+		if (search?.step !== "plan") return "Azurill";
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
@@ -479,10 +563,9 @@ export function GuidedStoryRoute() {
 	// Tab 03: Supporting Details state (matching screenshot media_1795019454591_659f3f35.jpg)
 	const [detailsSubTab, setDetailsSubTab] = useState<"contact" | "skills" | "summary">("contact");
 	const [contactEmail, setContactEmail] = useState(() => {
-		if (typeof window === "undefined") return "";
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return "";
+		if (search?.step !== "plan") return "";
 		try {
-			const savedProfile = getStoredUserProfile();
-			if (savedProfile?.email) return savedProfile.email;
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
 				const p = JSON.parse(saved);
@@ -492,7 +575,8 @@ export function GuidedStoryRoute() {
 		return "";
 	});
 	const [contactPhone, setContactPhone] = useState(() => {
-		if (typeof window === "undefined") return "";
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return "";
+		if (search?.step !== "plan") return "";
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
@@ -503,7 +587,8 @@ export function GuidedStoryRoute() {
 		return "";
 	});
 	const [contactLocation, setContactLocation] = useState(() => {
-		if (typeof window === "undefined") return "";
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return "";
+		if (search?.step !== "plan") return "";
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
@@ -514,7 +599,8 @@ export function GuidedStoryRoute() {
 		return "";
 	});
 	const [contactLinks, setContactLinks] = useState(() => {
-		if (typeof window === "undefined") return "";
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return "";
+		if (search?.step !== "plan") return "";
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
@@ -525,7 +611,8 @@ export function GuidedStoryRoute() {
 		return "";
 	});
 	const [skillsList, setSkillsList] = useState<string[]>(() => {
-		if (typeof window === "undefined") return [];
+		if (typeof window === "undefined" || isStartingFresh || search?.resumeId) return [];
+		if (search?.step !== "plan") return [];
 		try {
 			const saved = localStorage.getItem("resume_buddy_guided_story_draft");
 			if (saved) {
@@ -835,7 +922,176 @@ export function GuidedStoryRoute() {
 		return autoSummary;
 	};
 
-	const handleSaveProgress = () => {
+	// Build complete ResumeData from current Guided Story state
+	const buildResumeDataFromState = (
+		entriesOverride: OutlineEntry[] = outlineEntries,
+		templateOverride: string = selectedTemplate,
+		baseData?: ResumeData
+	): ResumeData => {
+		const base = baseData || defaultResumeData;
+		const workList = entriesOverride.filter((e) => e.category === "work");
+		const projList = entriesOverride.filter((e) => e.category === "projects");
+		const eduList = entriesOverride.filter((e) => e.category === "education");
+		const volList = entriesOverride.filter((e) => e.category === "volunteer");
+
+		const toHtml = (entry: OutlineEntry) => {
+			if (entry.points && entry.points.length > 0) {
+				return `<ul>${entry.points.map((p) => `<li>${p}</li>`).join("")}</ul>`;
+			}
+			return entry.description ? `<p>${entry.description}</p>` : "";
+		};
+
+		const parsedLinkUrls = contactLinks
+			.split(/[\n,]+/)
+			.map((l: string) => l.trim())
+			.filter(Boolean);
+
+		const profileItems = parsedLinkUrls.map((rawUrl: string) => {
+			const normalizedUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+			const lower = rawUrl.toLowerCase();
+			let network = "Website";
+			if (lower.includes("linkedin")) network = "LinkedIn";
+			else if (lower.includes("github")) network = "GitHub";
+			else if (lower.includes("twitter") || lower.includes("x.com")) network = "Twitter";
+			return {
+				id: crypto.randomUUID(),
+				hidden: false,
+				icon: "",
+				network,
+				username: rawUrl,
+				website: { url: normalizedUrl, label: rawUrl },
+			};
+		});
+
+		const tmplKey = (templateOverride || "azurill").toLowerCase();
+		const templateMeta = (templates as any)[tmplKey];
+		const isNoSidebar = templateMeta ? templateMeta.sidebarPosition === "none" : false;
+		const sidebarSections = ["skills", "certifications", "awards", "languages", "interests", "publications"];
+		const existingPages = base.metadata?.layout?.pages || defaultResumeData.metadata.layout.pages;
+		const allSecs = [...new Set(existingPages.flatMap((p: any) => [...(p.main || []), ...(p.sidebar || [])]))];
+		const updatedPages = existingPages.map((page: any, idx: number) =>
+			idx === 0
+				? {
+						...page,
+						fullWidth: isNoSidebar,
+						main: isNoSidebar ? allSecs : allSecs.filter((s: string) => !sidebarSections.includes(s)),
+						sidebar: isNoSidebar ? [] : allSecs.filter((s: string) => sidebarSections.includes(s)),
+					}
+				: { ...page, fullWidth: isNoSidebar, main: [], sidebar: [] }
+		);
+
+		return {
+			...base,
+			basics: {
+				...base.basics,
+				name: fullName || "",
+				headline: targetRole || "",
+				email: contactEmail || "",
+				phone: contactPhone || "",
+				location: contactLocation || "",
+				website: profileItems[0]?.website || { url: contactLinks || "", label: "" },
+			},
+			summary: {
+				...base.summary,
+				hidden: !professionalSummary,
+				content: professionalSummary ? `<p>${professionalSummary}</p>` : "",
+			},
+			sections: {
+				...base.sections,
+				profiles: {
+					...(base.sections?.profiles || defaultResumeData.sections.profiles),
+					hidden: profileItems.length === 0,
+					items: profileItems,
+				},
+				experience: {
+					title: "Experience",
+					columns: 1,
+					hidden: workList.length === 0,
+					items: workList.map((w) => ({
+						id: w.id,
+						hidden: false,
+						company: w.organization || "",
+						position: w.title,
+						location: "",
+						period: w.dates || "",
+						website: { url: "", label: "" },
+						description: toHtml(w),
+					})),
+				},
+				projects: {
+					title: "Projects",
+					columns: 1,
+					hidden: projList.length === 0,
+					items: projList.map((p) => ({
+						id: p.id,
+						hidden: false,
+						name: p.title,
+						role: p.organization || "",
+						period: p.dates || "",
+						website: { url: "", label: "" },
+						description: toHtml(p),
+					})),
+				},
+				education: {
+					title: "Education",
+					columns: 1,
+					hidden: eduList.length === 0,
+					items: eduList.map((e) => ({
+						id: e.id,
+						hidden: false,
+						school: e.organization || "",
+						degree: e.title || "",
+						area: "",
+						grade: "",
+						location: "",
+						period: e.dates || "",
+						website: { url: "", label: "" },
+						description: e.description ? `<p>${e.description}</p>` : "",
+						currentlyStudyingHere: false,
+					})),
+				},
+				volunteer: {
+					title: "Volunteering & Activities",
+					columns: 1,
+					hidden: volList.length === 0,
+					items: volList.map((v) => ({
+						id: v.id,
+						hidden: false,
+						organization: v.organization || v.title || "",
+						position: v.title || "",
+						location: "",
+						period: v.dates || "",
+						website: { url: "", label: "" },
+						description: toHtml(v),
+					})),
+				},
+				skills: {
+					title: "Skills",
+					columns: 1,
+					hidden: skillsList.length === 0,
+					items: skillsList.map((skill, idx) => ({
+						id: `skill_${idx}`,
+						hidden: false,
+						icon: "",
+						name: skill,
+						proficiency: "",
+						level: 0,
+						keywords: [],
+					})),
+				},
+			},
+			metadata: {
+				...base.metadata,
+				template: tmplKey as any,
+				layout: {
+					...(base.metadata?.layout || defaultResumeData.metadata.layout),
+					pages: updatedPages.length > 0 ? updatedPages : [{ fullWidth: isNoSidebar, main: allSecs, sidebar: [] }],
+				},
+			},
+		};
+	};
+
+	const handleSaveProgress = async () => {
 		try {
 			localStorage.setItem(
 				"resume_buddy_guided_story_draft",
@@ -854,48 +1110,66 @@ export function GuidedStoryRoute() {
 			);
 		} catch { }
 
+		const resumePayload = buildResumeDataFromState();
 		if (createdResumeId) {
-			const existing = localResumeStore.get(createdResumeId);
-			if (existing) {
-				localResumeStore.update(createdResumeId, {
-					data: {
-						...existing.data,
-						basics: {
-							...existing.data.basics,
-							name: fullName || existing.data.basics.name,
-							headline: targetRole || existing.data.basics.headline,
-							email: contactEmail || existing.data.basics.email,
-							phone: contactPhone || existing.data.basics.phone,
-							location: contactLocation || existing.data.basics.location,
-							website: { url: contactLinks || existing.data.basics.website?.url || "", label: "" },
-						},
-						summary: {
-							...existing.data.summary,
-							content: professionalSummary ? `<p>${professionalSummary}</p>` : "",
-						},
-						sections: {
-							...existing.data.sections,
-							skills: {
-								title: "Skills",
-								columns: 1,
-								hidden: skillsList.length === 0,
-								items: skillsList.map((skill, idx) => ({
-									id: `skill_${idx}`,
-									hidden: false,
-									icon: "",
-									name: skill,
-									proficiency: "",
-									description: "",
-									level: 0,
-									keywords: [],
-								})),
-							},
-						},
-					},
+			try {
+				await api.updateResume(createdResumeId, { data: resumePayload });
+			} catch (err) {
+				console.warn("Failed to update resume via API:", err);
+			}
+		} else {
+			try {
+				const resumeName = targetRole ? `${targetRole} Resume` : fullName ? `${fullName}'s Resume` : "My Resume";
+				const created = await api.createResume({
+					name: resumeName,
+					slug: `${slugify(resumeName)}-${Date.now().toString(36)}`,
+					withSampleData: false,
+					data: resumePayload,
 				});
+				setCreatedResumeId(created.id);
+				try {
+					localStorage.setItem(
+						"resume_buddy_last_worked",
+						JSON.stringify({
+							resumeId: created.id,
+							resumeName,
+							type: "guided-story",
+							title: `Continue editing ${resumeName}`,
+							path: "/dashboard/resumes/guided-story",
+							search: { step: "plan", resumeId: created.id },
+							updatedAt: new Date().toISOString(),
+						})
+					);
+				} catch { }
+			} catch (err) {
+				console.warn("Failed to create resume via API:", err);
 			}
 		}
 	};
+
+	// Automatically persist changes to API/store whenever entries or details are modified
+	useEffect(() => {
+		if (!createdResumeId || isHydratingRef.current) return;
+		const timer = setTimeout(() => {
+			const resumePayload = buildResumeDataFromState();
+			api.updateResume(createdResumeId, { data: resumePayload }).catch((err) => {
+				console.warn("Auto-sync updateResume failed:", err);
+			});
+		}, 600);
+		return () => clearTimeout(timer);
+	}, [
+		createdResumeId,
+		outlineEntries,
+		fullName,
+		targetRole,
+		contactEmail,
+		contactPhone,
+		contactLocation,
+		contactLinks,
+		skillsList,
+		professionalSummary,
+		selectedTemplate,
+	]);
 
 	// Automatically generate and update professional summary using verified experiences and target role
 	useEffect(() => {
@@ -913,7 +1187,7 @@ export function GuidedStoryRoute() {
 	}, [outlineEntries]);
 
 	// Create or update resume when user clicks "See my plan →"
-	const handleSeeMyPlan = () => {
+	const handleSeeMyPlan = async () => {
 		// Include any un-submitted field currently in inputs
 		let currentEntries = [...outlineEntries];
 		if (workTitle.trim()) {
@@ -1059,12 +1333,20 @@ export function GuidedStoryRoute() {
 			},
 		};
 
-		// Create in store
-		const created = localResumeStore.create({
-			name: targetRole ? `${targetRole} Resume` : (fullName ? `${fullName}'s Resume` : "My Resume"),
-			data: newResumeData,
-		});
-		setCreatedResumeId(created.id);
+		const resumeName = targetRole ? `${targetRole} Resume` : fullName ? `${fullName}'s Resume` : "My Resume";
+		let activeId = createdResumeId;
+		if (activeId) {
+			await api.updateResume(activeId, { data: newResumeData });
+		} else {
+			const created = await api.createResume({
+				name: resumeName,
+				slug: `${slugify(resumeName)}-${Date.now().toString(36)}`,
+				withSampleData: false,
+				data: newResumeData,
+			});
+			activeId = created.id;
+			setCreatedResumeId(created.id);
+		}
 
 		// Initialize stories for Achievement Studio
 		const initialStories: StoryItem[] = workList.map((w, idx) => ({
@@ -1100,19 +1382,19 @@ export function GuidedStoryRoute() {
 					skillsList,
 					stories: initialStories,
 					selectedTemplate,
-					createdResumeId: created.id,
+					createdResumeId: activeId,
 					updatedAt: new Date().toISOString(),
 				})
 			);
 			localStorage.setItem(
 				"resume_buddy_last_worked",
 				JSON.stringify({
-					resumeId: created.id,
+					resumeId: activeId,
 					resumeName: targetRole ? `${targetRole} Resume` : "My Resume",
 					type: "guided-story",
 					title: `Continue editing ${targetRole ? `${targetRole} Resume` : "resume"}`,
 					path: "/dashboard/resumes/guided-story",
-					search: { step: "plan" },
+					search: { step: "plan", resumeId: activeId },
 					updatedAt: new Date().toISOString(),
 				})
 			);
@@ -1123,7 +1405,7 @@ export function GuidedStoryRoute() {
 		toast.success("Your plan is ready!");
 		navigate({
 			to: "/dashboard/resumes/guided-story",
-			search: { step: "plan" },
+			search: { step: "plan", resumeId: activeId },
 		});
 	};
 
@@ -1937,51 +2219,13 @@ export function GuidedStoryRoute() {
 
 		setStories(updatedStories);
 
-		// Update resume in store
+		// Update resume in API & store
 		if (createdResumeId) {
 			const existing = localResumeStore.get(createdResumeId);
-			if (existing) {
-				const updatedData: ResumeData = {
-					...existing.data,
-					sections: {
-						...existing.data.sections,
-						experience: {
-							title: "Experience",
-							columns: 1,
-							hidden: workList.length === 0,
-							items: workList.map((w) => ({
-								id: w.id,
-								hidden: false,
-								company: w.organization || "",
-								position: w.title,
-								location: "",
-								period: w.dates || "",
-								website: { url: "", label: "" },
-								description: (w.points && w.points.length > 0 ? w.points : (w.description ? [w.description] : []))
-									.map((p) => `<p>• ${p}</p>`)
-									.join(""),
-							})),
-						},
-						projects: {
-							title: "Projects",
-							columns: 1,
-							hidden: projList.length === 0,
-							items: projList.map((p) => ({
-								id: p.id,
-								hidden: false,
-								name: p.title,
-								role: p.organization || "",
-								period: p.dates || "",
-								website: { url: "", label: "" },
-								description: (p.points && p.points.length > 0 ? p.points : (p.description ? [p.description] : []))
-									.map((p) => `<p>• ${p}</p>`)
-									.join(""),
-							})),
-						},
-					},
-				};
-				localResumeStore.update(createdResumeId, { data: updatedData });
-			}
+			const updatedData = buildResumeDataFromState(outlineEntries, selectedTemplate, existing?.data);
+			api.updateResume(createdResumeId, { data: updatedData }).catch((err) => {
+				console.warn("Failed to update resume on final review:", err);
+			});
 		}
 
 		toast.success("Final experience content confirmed and saved!");
@@ -2186,45 +2430,10 @@ export function GuidedStoryRoute() {
 
 			if (createdResumeId) {
 				const existing = localResumeStore.get(createdResumeId);
-				if (existing) {
-					const tmplKey = templateName.toLowerCase();
-					const templateMeta = (templates as any)[tmplKey];
-					const isNoSidebar = templateMeta ? templateMeta.sidebarPosition === "none" : false;
-					const sidebarSections = ["skills", "certifications", "awards", "languages", "interests", "publications"];
-					const allSecs = [
-						...new Set([...(existing.data.metadata.layout.pages || []).flatMap((p: any) => [...p.main, ...p.sidebar])]),
-					];
-
-					const updatedPages = (existing.data.metadata.layout.pages || []).map((page: any, idx: number) => {
-						if (idx === 0) {
-							return {
-								...page,
-								fullWidth: isNoSidebar,
-								main: isNoSidebar ? allSecs : allSecs.filter((s: string) => !sidebarSections.includes(s)),
-								sidebar: isNoSidebar ? [] : allSecs.filter((s: string) => sidebarSections.includes(s)),
-							};
-						}
-						return {
-							...page,
-							fullWidth: isNoSidebar,
-							main: [],
-							sidebar: [],
-						};
-					});
-
-					const updatedData = {
-						...existing.data,
-						metadata: {
-							...existing.data.metadata,
-							template: tmplKey as any,
-							layout: {
-								...existing.data.metadata.layout,
-								pages: updatedPages.length > 0 ? updatedPages : [{ fullWidth: isNoSidebar, main: allSecs, sidebar: [] }],
-							},
-						},
-					};
-					localResumeStore.update(createdResumeId, { data: updatedData });
-				}
+				const updatedData = buildResumeDataFromState(outlineEntries, templateName, existing?.data);
+				api.updateResume(createdResumeId, { data: updatedData }).catch((err) => {
+					console.warn("Failed to update template via API:", err);
+				});
 			}
 
 			window.dispatchEvent(new Event("resume_template_changed"));
